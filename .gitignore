@@ -1,8 +1,19 @@
 .env
 venv
 env
-data
 __pycache__
+
+# Data directories (large files, symlinks to external storage)
+data
+db/data/drug_perturbation
+db/data/gene_perturbation
+db/data/metadata
+db/data/metadata/original
+db/data/cache
+db/data/old
+db/data/tahoe_processing_output
+db/data/backup
+db/data/*.json
 src/graphql/index.ts
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
@@ -45,3 +56,13 @@ next-env.d.ts
 *Mammalia
 
 benchmarking
+
+docs/
+ARCHITECTURE.md
+
+# Local development
+notes/
+startup_log*.txt
+startup_log*.md
+.python-version
+scratch/

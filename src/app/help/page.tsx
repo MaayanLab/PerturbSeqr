@@ -9,6 +9,10 @@ export default function UserManual() {
     <div className="prose">
       <div className="flex">
         <div className="flex-col mx-auto max-w-5xl">
+          <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 mt-3" role="alert">
+            <p className="font-bold">TODO: PerturbSeek Documentation</p>
+            <p>PerturbSeek-specific documentation is pending. The L2S2 documentation below is provided for reference.</p>
+          </div>
           <h2 className="title text-2xl font-medium mb-3 mt-3 text-center">
             L2S2 Documentation
           </h2>

@@ -33,6 +33,7 @@ export default function GeneSetModal({
   geneset,
   geneset2,
   term,
+  dataset,
   showModal,
   setShowModal,
 }: {
@@ -41,7 +42,7 @@ export default function GeneSetModal({
         | {
             gene?: string | null;
             symbol?: string | null;
-            ncbi_gene_id?: number | null;
+            ncbiGeneId?: number | null;
             description?: string | null;
             summary?: string | null;
           }
@@ -54,7 +55,7 @@ export default function GeneSetModal({
         | {
             gene?: string | null;
             symbol?: string | null;
-            ncbi_gene_id?: number | null;
+            ncbiGeneId?: number | null;
             description?: string | null;
             summary?: string | null;
           }
@@ -63,6 +64,7 @@ export default function GeneSetModal({
       )[]
     | undefined;
   term: string | null | undefined;
+  dataset?: string | null | undefined;
   showModal?: boolean;
   setShowModal: (show: boolean) => void;
 }) {
@@ -117,6 +119,11 @@ export default function GeneSetModal({
           <p className="text-md text-center text-gray-900 dark:text-white flex-shrink-0 py-2">
             Gene Set ({geneset ? geneset?.length : "n"})
           </p>
+          {dataset && (
+            <p className="text-sm text-center text-gray-500 dark:text-gray-400">
+              {dataset}
+            </p>
+          )}
           <p className="text-md text-center text-gray-600 dark:text-white">
             {term}
           </p>
@@ -140,8 +147,21 @@ export default function GeneSetModal({
                       .map((gene) => (
                         <tr key={gene?.symbol ?? gene?.gene}>
                           <td>{gene?.gene}</td>
-                          <td className="font-bold">{gene?.symbol ?? gene?.gene}</td>
-                          <td>{gene?.description ?? "Gene not contained in L2S2 background"} </td>
+                          <td className="font-bold">
+                            {gene?.symbol ?? gene?.gene}
+                            {/* Link to NCBI Gene page */}
+                            {gene?.ncbiGeneId && (
+                              <a
+                                href={`https://www.ncbi.nlm.nih.gov/gene/${gene.ncbiGeneId}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-500 ml-1 font-normal"
+                              >
+                                (NCBI)
+                              </a>
+                            )}
+                          </td>
+                          <td>{gene?.description ?? ""}</td>
                           <td>
                             <ExpandableText text={gene?.summary ?? ""} />
                           </td>
@@ -231,7 +251,20 @@ export default function GeneSetModal({
                       .map((gene) => (
                         <tr key={gene.symbol}>
                           <td>{gene.gene}</td>
-                          <td className="font-bold">{gene.symbol}</td>
+                          <td className="font-bold">
+                            {gene.symbol}
+                            {/* Link to NCBI Gene page */}
+                            {gene.ncbiGeneId && (
+                              <a
+                                href={`https://www.ncbi.nlm.nih.gov/gene/${gene.ncbiGeneId}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-500 ml-1 font-normal"
+                              >
+                                (NCBI)
+                              </a>
+                            )}
+                          </td>
                           <td>{gene.description}</td>
                           <td>
                             <ExpandableText text={gene.summary ?? ""} />

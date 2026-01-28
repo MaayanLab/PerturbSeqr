@@ -39,15 +39,6 @@ export default function Footer() {
               Contact Us
             </Link>
           </li>
-          <li>
-            <Link
-              href="https://github.com/MaayanLab/L2S2"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Source Code
-            </Link>
-          </li>
         </ul>
       </div>
       <div className="text-center">
@@ -91,14 +82,6 @@ export default function Footer() {
               target="_blank"
             >
               License
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkaf373/8123452"
-              target="_blank"
-            >
-              Publication
             </Link>
           </li>
         </ul>

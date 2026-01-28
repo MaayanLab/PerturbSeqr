@@ -6,7 +6,7 @@ import {
   useFetchGeneInfoQuery,
   useFetchUserGeneSetQuery,
   useOverlapQueryQuery,
-  useViewGeneSetQuery,
+  useGeneSetGenesByIdQuery,
 } from "@/graphql";
 import ensureArray from "@/utils/ensureArray";
 import Loading from "@/components/loading";
@@ -18,6 +18,8 @@ import Image from "next/image";
 import GeneSetModal from "@/components/geneSetModal";
 import { FaFilter, FaSortUp } from "react-icons/fa6";
 import { IoMdInformationCircleOutline } from "react-icons/io";
+import { parseTerm } from "@/utils/parseTerm";
+import { preloadMetadata, enrichWithMetadataSync, preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, getDrugMoaSource, isGenePerturbationLibrary } from "@/utils/metadataLookup";
 
 const pageSize = 12;
 
@@ -30,24 +32,27 @@ type GeneSetModalT =
     }
   | {
       type: "GeneSetOverlapMimicker";
-      idUp: string; 
+      idUp: string;
       idDown: string;
       description: string;
       genesUp: string[];
       genesDown: string[];
+      library?: string;
     }
     | {
       type: "GeneSetOverlapReverser";
-      idUp: string; 
+      idUp: string;
       idDown: string;
       description: string;
       genesUp: string[];
       genesDown: string[];
+      library?: string;
     }
   | {
       type: "GeneSet";
       id: string;
       description: string;
+      library?: string;
     }
   | undefined;
 
@@ -56,7 +61,7 @@ function EnrichmentResults({
   userGeneSetDown,
   setModalGeneSet,
   datasetUp,
-  datasetDown
+  datasetDown,
 }: {
   userGeneSetUp?: FetchUserGeneSetQuery;
   userGeneSetDown?: FetchUserGeneSetQuery;
@@ -97,6 +102,8 @@ function EnrichmentResults({
   const [rawTerm, setRawTerm] = React.useState("");
   const [topNSlider, setTopNSlider] = React.useState(10000);
   const [pvalueLeSlider, setPvalueLeSlider] = React.useState(0.05);
+  const [metadataLoaded, setMetadataLoaded] = React.useState(false);
+  const [drugLookupLoaded, setDrugLookupLoaded] = React.useState(false);
 
   const { page, term, fda, consensus, moas, sort, ko, topN, pvalueLe } =
     React.useMemo(
@@ -113,6 +120,7 @@ function EnrichmentResults({
       }),
       [queryString]
     );
+  // Query enrichment results
   const { data: enrichmentResults, error } = usePairEnrichmentQueryQuery({
     skip: genesUp.length === 0 || genesDown.length === 0,
     variables: {
@@ -134,6 +142,12 @@ function EnrichmentResults({
     setRawTerm(term);
   }, [term]);
 
+  // Preload drug lookup at component mount
+  React.useEffect(() => {
+    preloadDrugLookup().then(() => setDrugLookupLoaded(true));
+    setMetadataLoaded(true);
+  }, []);
+
   return (
     <div className="flex flex-col gap-2 my-2">
       <h2 className="text-md font-bold">
@@ -148,10 +162,10 @@ function EnrichmentResults({
                         After rummaging through <Stats show_gene_sets />.{" "}
                         <Image
                           className="inline-block rounded"
-                          src="/images/LINCSearch_logo.png"
+                          src="/images/DR-logo-cropped.png"
                           width={50}
                           height={100}
-                          alt="LINCSearch"
+                          alt="PerturbSeek"
                         ></Image>{" "}
                         computed significance for{" "}
                         {Intl.NumberFormat("en-US", {}).format(
@@ -164,10 +178,10 @@ function EnrichmentResults({
                     After rummaging through <Stats show_gene_sets />.{" "}
                         <Image
                           className="inline-block rounded"
-                          src="/images/LINCSearch_logo.png"
+                          src="/images/DR-logo-cropped.png"
                           width={50}
                           height={100}
-                          alt="LINCSearch"
+                          alt="PerturbSeek"
                         ></Image>{" "}
                         computed significance for{" "}
                         {Intl.NumberFormat("en-US", {}).format(
@@ -180,10 +194,10 @@ function EnrichmentResults({
                         After rummaging through <Stats show_gene_sets />.{" "}
                         <Image
                           className="inline-block rounded"
-                          src="/images/LINCSearch_logo.png"
+                          src="/images/DR-logo-cropped.png"
                           width={50}
                           height={100}
-                          alt="L2S2"
+                          alt="PerturbSeek"
                         ></Image>{" "}
                         found{" "}
                         {Intl.NumberFormat("en-US", {}).format(
@@ -269,43 +283,14 @@ function EnrichmentResults({
         >
           Consensus Perturbations
         </button>
-        <button
-          onClick={() => {
-            if (queryString.moas === "false")
-              setQueryString({
-                page: "1",
-                q: rawTerm,
-                fda: queryString.fda,
-                consensus: "false",
-                moas: "true",
-                dir: queryString.dir,
-                sort: queryString.sort,
-                ko: "false",
-                topn: queryString.topn,
-                pvaluele: queryString.pvaluele,
-              });
-            else
-              setQueryString({
-                page: "1",
-                q: rawTerm,
-                fda: queryString.fda,
-                consensus: "false",
-                moas: "false",
-                dir: queryString.dir,
-                sort: queryString.sort,
-                ko: "false",
-                topn: queryString.topn,
-                pvaluele: queryString.pvaluele,
-              });
-          }}
-          className={
-            queryString.moas === "true"
-              ? "button btn btn-sm float-left mr-4 bg-purple-400 hover:bg-purple-600"
-              : "button btn btn-sm float-left mr-4"
-          }
-        >
-          Consensus MoAs
-        </button>
+        <div className="tooltip" data-tip="MOAs coming soon">
+          <button
+            disabled
+            className="button btn btn-sm float-left mr-4 btn-disabled opacity-50 cursor-not-allowed"
+          >
+            Consensus MoAs
+          </button>
+        </div>
 
         <button
           onClick={() => {
@@ -782,34 +767,45 @@ function EnrichmentResults({
                     </td>
                   </tr>
                 ) : null}
-                {(moas 
-                    ? enrichmentResults?.currentBackground?.pairedEnrich?.moas 
+                {(moas
+                    ? enrichmentResults?.currentBackground?.pairedEnrich?.moas
                     : enrichmentResults?.currentBackground?.pairedEnrich?.consensus
                   )?.flatMap(
                   (enrichmentResult, genesetIndex) => {
                     var perturbation = enrichmentResult?.drug;
-                    if (perturbation?.includes(" ") && !moas)
+                    const isKO = perturbation?.includes(" ");
+                    if (isKO && !moas)
                       perturbation = perturbation + " KO";
+                    // Get drug info for CID display (only for non-KO perturbations)
+                    const consensusDrugInfo = !isKO && !moas && drugLookupLoaded ? getDrugInfo(perturbation || '') : null;
                     return (
                       <tr key={genesetIndex}>
                         <td>
                         {moas ? <span style={{textTransform: 'capitalize'}}>{perturbation}</span> : !perturbation?.includes("KO") ? (
-                            <>
-                              {perturbation}
-                              <a
-                                className="underline cursor-pointer mx-2"
-                                href={`https://pubchem.ncbi.nlm.nih.gov/#query=${perturbation}`}
-                                target="_blank"
-                              >
-                                <Image
-                                  className="inline-block rounded"
-                                  src="/images/drug_vector_art.png"
-                                  width={20}
-                                  height={20}
-                                  alt="PubChem"
-                                />
-                              </a>
-                            </>
+                            <div>
+                              <div>
+                                {perturbation}
+                                <a
+                                  className="underline cursor-pointer mx-2"
+                                  href={`https://pubchem.ncbi.nlm.nih.gov/#query=${perturbation}`}
+                                  target="_blank"
+                                >
+                                  <Image
+                                    className="inline-block rounded"
+                                    src="/images/drug_vector_art.png"
+                                    width={20}
+                                    height={20}
+                                    alt="PubChem"
+                                  />
+                                </a>
+                              </div>
+                              {/* Show CID for drug perturbations */}
+                              {consensusDrugInfo?.cid && (
+                                <div className="text-xs text-gray-500">
+                                  PubChem CID: {consensusDrugInfo.cid}
+                                </div>
+                              )}
+                            </div>
                           ) : (
                             <>
                               {perturbation}
@@ -1125,96 +1121,64 @@ function EnrichmentResults({
               {enrichmentResults?.currentBackground?.pairedEnrich?.nodes?.flatMap(
                 (enrichmentResult, genesetIndex) => {
                   const term = enrichmentResult?.geneSet?.nodes[0]?.term;
-                  const batch =
-                    enrichmentResult?.geneSet?.nodes[0].term.split("_")[0];
-                  const cellLine =
-                    enrichmentResult?.geneSet?.nodes[0].term.split("_")[1];
-                  const timepoint =
-                    enrichmentResult?.geneSet?.nodes[0].term.split("_")[2];
-                  const batch2 =
-                    enrichmentResult?.geneSet?.nodes[0].term.split("_")[3];
-                  var perturbation =
-                    enrichmentResult?.geneSet?.nodes[0].term.split("_")[4];
-                  if (perturbation?.split(" ").length == 2)
-                    perturbation = perturbation?.split(" ")[0] + " KO";
-
-                  const count =
-                    enrichmentResult?.geneSet?.nodes[0].geneSetFdaCountsById
-                      .nodes[0]?.count || 1;
-                  const approved =
-                    enrichmentResult?.geneSet?.nodes[0].geneSetFdaCountsById
-                      .nodes[0]?.approved || false;
-
-                  const moa = enrichmentResult?.geneSet?.nodes[0].geneSetFdaCountsById
-                    .nodes[0]?.moa || "unknown";
-
-                  const concentration =
-                    enrichmentResult?.geneSet?.nodes[0].term
-                      .split("_")[5]
-                      ?.split(" ")[0] ?? "N/A";
-
                   const geneSetUp =  enrichmentResult?.geneSet?.nodes.filter((x) => x.term.includes(" up"))[0]
                   const geneSetDown =  enrichmentResult?.geneSet?.nodes.filter((x) => x.term.includes(" down"))[0]
+                  const libraryName = geneSetUp?.library?.name || geneSetDown?.library?.name || '';
+
+                  // Parse term using the parseTerm utility for library-agnostic parsing
+                  const baseParsed = term ? parseTerm(term, libraryName) : {};
+                  const parsed = metadataLoaded ? enrichWithMetadataSync(baseParsed, libraryName) : baseParsed;
+
+                  const cellLine = parsed.cellLine || '';
+                  const timepoint = parsed.timepoint || '';
+                  const concentration = parsed.concentration || '';
+                  let perturbation = parsed.perturbation || parsed.raw || '';
+                  // Mark KO perturbations
+                  if (perturbation?.split(" ").length == 2 && !perturbation.includes("KO"))
+                    perturbation = perturbation?.split(" ")[0] + " KO";
+
+                  // Check if this is a gene or drug perturbation library
+                  const isGenePert = isGenePerturbationLibrary(libraryName);
+
+                  // Get FDA data from database
+                  const fdaData = enrichmentResult?.geneSet?.nodes[0].geneSetFdaCountsById?.nodes[0];
+                  const count = fdaData?.count || 1;
+                  const approved = fdaData?.approved || false;
+                  const dbMoa = fdaData?.moa || '';
+
+                  // Get additional drug info from JSON lookup (only for drug perturbations)
+                  const drugInfo = !isGenePert && drugLookupLoaded
+                    ? (getDrugInfo(perturbation) || getDrugInfo(parsed.nsn || ''))
+                    : null;
+                  const perturbationUrl = getPerturbationUrl(perturbation, libraryName);
+                  const perturbationLinkTitle = getPerturbationLinkTitle(libraryName);
+                  // Use database MOA first, fallback to JSON lookup (only for drugs)
+                  const moa = isGenePert ? '' : (dbMoa || drugInfo?.moa || '');
+                  const moaSource = moa ? (getDrugMoaSource(perturbation) || getDrugMoaSource(parsed.nsn || '')) : null;
 
                   if (!enrichmentResult?.geneSet) return null;
                   return (
                     <tr key={genesetIndex} className="text-left">
                       <td className={"hidden"}>{term}</td>
                       <td>
-                        {!perturbation?.includes("KO") ? (
-                          <>
+                        {/* Perturbation with appropriate link (PubChem for drugs, NCBI Gene for genes) */}
+                        <div>
+                          <a
+                            href={perturbationUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="link link-primary hover:link-hover"
+                            title={perturbationLinkTitle}
+                          >
                             {perturbation}
-                            <a
-                              className="underline cursor-pointer mx-2"
-                              href={`https://pubchem.ncbi.nlm.nih.gov/#query=${perturbation}`}
-                              target="_blank"
-                            >
-                              <Image
-                                className="inline-block rounded"
-                                src="/images/drug_vector_art.png"
-                                width={20}
-                                height={20}
-                                alt="PubChem"
-                              />
-                            </a>
-                          </>
-                        ) : (
-                          <>
-                            {perturbation}
-                            <a
-                              className="underline cursor-pointer mx-2"
-                              href={`https://maayanlab.cloud/Harmonizome/gene/${perturbation.replace(
-                                " KO",
-                                ""
-                              )}`}
-                              target="_blank"
-                            >
-                              <Image
-                                className="inline-block rounded"
-                                src="/images/harmonizome_logo_30x26.png"
-                                width={20}
-                                height={20}
-                                alt="Harmonizome"
-                              />
-                            </a>
-                            <a
-                              className="underline cursor-pointer"
-                              href={`https://maayanlab.cloud/prismexp/g/${perturbation.replace(
-                                " KO",
-                                ""
-                              )}`}
-                              target="_blank"
-                            >
-                              <Image
-                                className="inline-block rounded"
-                                src="/images/prismexp.png"
-                                width={20}
-                                height={20}
-                                alt="PrismEXP"
-                              />
-                            </a>
-                          </>
-                        )}
+                          </a>
+                          {/* Show CID for drug perturbations */}
+                          {!isGenePert && drugInfo?.cid && (
+                            <div className="text-xs text-gray-500">
+                              PubChem CID: {drugInfo.cid}
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td>
                         <a
@@ -1247,7 +1211,28 @@ function EnrichmentResults({
                       <td>{timepoint}</td>
                       <td>{concentration}</td>
                       <td>{count}</td>
-                      <td>{moa}</td>
+                      <td className="max-w-[200px]">
+                        {/* MOA with source attribution */}
+                        {moa ? (
+                          <div className="text-sm">
+                            <span className="line-clamp-2" title={moa}>
+                              {moa}
+                            </span>
+                            {moaSource && (
+                              <a
+                                href={moaSource.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-gray-500 hover:text-gray-700 block mt-0.5"
+                              >
+                                Source: {moaSource.name}
+                              </a>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
                       <td>{approved ? "Yes" : "No"}</td>
                       <td>
                         <label
@@ -1258,6 +1243,7 @@ function EnrichmentResults({
                               type: "GeneSet",
                               id: geneSetUp?.id,
                               description: geneSetUp?.term ?? "",
+                              library: libraryName,
                             });
                           }}
                         >
@@ -1273,6 +1259,7 @@ function EnrichmentResults({
                               type: "GeneSet",
                               id: geneSetDown?.id,
                               description: geneSetDown?.term ?? "",
+                              library: libraryName,
                             });
                           }}
                         >
@@ -1291,12 +1278,13 @@ function EnrichmentResults({
                               description: `${
                                 userGeneSetUp?.userGeneSet?.description ||
                                 "User up gs"
-                              } ∩ ${term || "L2S2 up gs"} + ${
+                              } ∩ ${term || "PerturbSeek up gs"} + ${
                                 userGeneSetDown?.userGeneSet?.description ||
                                 "User down gs"
-                              } ∩ ${term || "L2S2 down gs"}`,
+                              } ∩ ${term || "PerturbSeek down gs"}`,
                               genesUp:  genesUp,
                               genesDown:  genesDown,
+                              library: libraryName,
                             });
                           }}
                         >
@@ -1318,12 +1306,13 @@ function EnrichmentResults({
                               description: `${
                                 userGeneSetUp?.userGeneSet?.description ||
                                 "User up gs"
-                              } ∩ ${term || "L2S2 down gs"} + ${
+                              } ∩ ${term || "PerturbSeek down gs"} + ${
                                 userGeneSetDown?.userGeneSet?.description ||
                                 "User down gs"
-                              } ∩ ${term || "L2S2 up gs"}`,
+                              } ∩ ${term || "PerturbSeek up gs"}`,
                               genesUp:  genesUp,
                               genesDown:  genesDown,
+                              library: libraryName,
                             });
                           }}
                         >
@@ -1398,7 +1387,7 @@ function GeneSetModalWrapper(props: {
   modalGeneSet: GeneSetModalT;
   setModalGeneSet: React.Dispatch<React.SetStateAction<GeneSetModalT>>;
 }) {
-  const { data: geneSet } = useViewGeneSetQuery({
+  const { data: geneSet } = useGeneSetGenesByIdQuery({
     skip: props.modalGeneSet?.type !== "GeneSet",
     variables:
       props.modalGeneSet?.type === "GeneSet"
@@ -1469,6 +1458,7 @@ function GeneSetModalWrapper(props: {
     <GeneSetModal
       showModal={props.modalGeneSet !== undefined}
       term={props.modalGeneSet?.description}
+      dataset={props.modalGeneSet?.type !== "UserGeneSets" ? props.modalGeneSet?.library : undefined}
       geneset={
         props.modalGeneSet?.type === "GeneSet"
           ? geneSet?.geneSet?.genes.nodes
@@ -1486,7 +1476,7 @@ function GeneSetModalWrapper(props: {
           : undefined
       }
       geneset2={
-        props.modalGeneSet?.type === "UserGeneSets" 
+        props.modalGeneSet?.type === "UserGeneSets"
           ? userGeneSetDown?.geneMap2?.nodes
             ? userGeneSetDown.geneMap2.nodes.map(({ gene, geneInfo }) => ({
                 gene,
@@ -1533,10 +1523,10 @@ export default function EnrichClientPage({
     });
 
     console.log(userGeneSetInfo)
-  
+
     const nGenesIncluded = userGeneSetInfo?.geneMap2?.nodes.filter(g => g.geneInfo?.symbol).length
   return (
-    <>
+    <div className="flex flex-col gap-4">
       <div className="flex flex-row gap-2 alert">
         <span className="prose">Input:</span>
         <label
@@ -1557,7 +1547,7 @@ export default function EnrichClientPage({
         >
           {(userGeneSetUp && userGeneSetDown) ? (userGeneSetUp?.userGeneSet?.description + " & " + userGeneSetDown?.userGeneSet?.description) : "Up & Down Gene Sets"}
           {userGeneSetUp ? (
-            <> ({nGenesIncluded} of {(userGeneSetUp?.userGeneSet?.genes?.length || 0) + (userGeneSetDown?.userGeneSet?.genes?.length || 0)} submitted genes were mapped to genes in the L2S2 background)</>
+            <> ({nGenesIncluded} of {(userGeneSetUp?.userGeneSet?.genes?.length || 0) + (userGeneSetDown?.userGeneSet?.genes?.length || 0)} submitted genes were mapped to genes in the PerturbSeek background)</>
           ) : null}
         </label>
       </div>
@@ -1572,6 +1562,6 @@ export default function EnrichClientPage({
         modalGeneSet={modalGeneSet}
         setModalGeneSet={setModalGeneSet}
       />
-    </>
+    </div>
   );
 }

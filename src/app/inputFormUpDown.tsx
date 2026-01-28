@@ -7,7 +7,14 @@ import classNames from 'classnames'
 import { useRouter } from 'next/navigation'
 
 
-export default function InputFormUpDown({setInputSingle} : {setInputSingle:  React.Dispatch<React.SetStateAction<boolean>>}) {
+/**
+ * InputFormUpDown component - Gene set input form for up/down gene set enrichment
+ * Input props:
+ *   - setInputSingle: Function to toggle between single and up/down input modes
+ *   - selectedLibraries: Array of selected library names for filtering (passed to enrichpair page)
+ * Output: Renders two gene input textareas (up and down), file uploads, and submit button
+ */
+export default function InputFormUpDown({setInputSingle, selectedLibraries = []} : {setInputSingle:  React.Dispatch<React.SetStateAction<boolean>>, selectedLibraries?: string[]}) {
   const router = useRouter()
   const [rawGenesUp, setRawGenesUp] = React.useState('')
   const [rawGenesDown, setRawGenesDown] = React.useState('')
@@ -78,7 +85,15 @@ export default function InputFormUpDown({setInputSingle} : {setInputSingle:  Rea
           const idUp = resultUp.data?.addUserGeneSet?.userGeneSet?.id
           const idDown = resultDown.data?.addUserGeneSet?.userGeneSet?.id
           if (idUp && idDown) {
-            router.push(`/enrichpair?dataset=${idUp}&dataset=${idDown}`)
+            // Build URL with dataset IDs and optional library filter
+            const params = new URLSearchParams()
+            params.append('dataset', idUp)
+            params.append('dataset', idDown)
+            // Pass selected libraries as comma-separated list if any are selected
+            if (selectedLibraries.length > 0) {
+              params.set('libraries', selectedLibraries.join(','))
+            }
+            router.push(`/enrichpair?${params.toString()}`)
           }
         }}
       >

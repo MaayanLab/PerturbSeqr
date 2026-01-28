@@ -5,12 +5,6 @@ query Stats {
   geneSets {
     totalCount
   }
-  pmcs {
-    totalCount
-  }
-  pmcStats {
-    nPublicationsProcessed
-  }
 }
 
 query FetchUserGeneSet($id: UUID!) {
@@ -20,11 +14,23 @@ query FetchUserGeneSet($id: UUID!) {
   }
 }
 
-query EnrichmentQuery($genes: [String]!, $filterTerm: String = "", $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
+# EnrichmentQuery: Main enrichment analysis query
+# Input:
+#   - genes: Array of gene symbols to analyze
+#   - filterTerm: Optional term filter for results
+#   - libraryNames: Optional array of library names to filter results (null = all libraries)
+#   - offset, first: Pagination parameters
+#   - filterFda, filterKo: Boolean filters
+#   - sortBy: Sort field
+#   - topN: Top N results for consensus
+#   - pvalueLe: P-value threshold
+# Output: Enrichment results with gene sets, consensus, and MoAs
+query EnrichmentQuery($genes: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
   currentBackground {
     enrich(
       genes: $genes
       filterTerm: $filterTerm
+      libraryNames: $libraryNames
       offset: $offset
       first: $first
       filterFda: $filterFda
@@ -45,6 +51,9 @@ query EnrichmentQuery($genes: [String]!, $filterTerm: String = "", $offset: Int 
             term
             description
             nGeneIds
+            library {
+              name
+            }
             geneSetFdaCountsById {
               nodes {
                 approved
@@ -59,8 +68,10 @@ query EnrichmentQuery($genes: [String]!, $filterTerm: String = "", $offset: Int 
       totalCount
       consensusCount
       moasCount
+      geneSetCount
       consensus {
         drug
+        cid
         oddsRatio
         pvalue
         adjPvalue
@@ -95,11 +106,12 @@ query EnrichmentQuery($genes: [String]!, $filterTerm: String = "", $offset: Int 
   }
 }
 
-query EnrichmentQuerySingle($genes: [String]!, $filterTerm: String = "", $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
+query EnrichmentQuerySingle($genes: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
   currentBackground {
     enrich(
       genes: $genes
       filterTerm: $filterTerm
+      libraryNames: $libraryNames
       offset: $offset
       first: $first
       filterFda: $filterFda
@@ -120,6 +132,9 @@ query EnrichmentQuerySingle($genes: [String]!, $filterTerm: String = "", $offset
             term
             description
             nGeneIds
+            library {
+              name
+            }
             geneSetFdaCountsById {
               nodes {
                 approved
@@ -135,11 +150,12 @@ query EnrichmentQuerySingle($genes: [String]!, $filterTerm: String = "", $offset
   }
 }
 
-query EnrichmentQueryConsensus($genes: [String]!, $filterTerm: String = "", $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
+query EnrichmentQueryConsensus($genes: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
   currentBackground {
     enrich(
       genes: $genes
       filterTerm: $filterTerm
+      libraryNames: $libraryNames
       offset: $offset
       first: $first
       filterFda: $filterFda
@@ -150,6 +166,7 @@ query EnrichmentQueryConsensus($genes: [String]!, $filterTerm: String = "", $off
     ) {
       consensus {
           drug
+          cid
           oddsRatio
           pvalue
           adjPvalue
@@ -169,11 +186,12 @@ query EnrichmentQueryConsensus($genes: [String]!, $filterTerm: String = "", $off
   }
 }
 
-query EnrichmentQueryMoAs($genes: [String]!, $filterTerm: String = "", $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
+query EnrichmentQueryMoAs($genes: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
   currentBackground {
     enrich(
       genes: $genes
       filterTerm: $filterTerm
+      libraryNames: $libraryNames
       offset: $offset
       first: $first
       filterFda: $filterFda
@@ -204,10 +222,11 @@ query EnrichmentQueryMoAs($genes: [String]!, $filterTerm: String = "", $offset: 
 }
 
 
-query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTerm: String = "", $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
+query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
   currentBackground {
     pairedEnrich(
       filterTerm: $filterTerm
+      libraryNames: $libraryNames
       offset: $offset
       first: $first
       filterFda: $filterFda
@@ -221,8 +240,10 @@ query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTer
       totalCount
       consensusCount
       moasCount
+      geneSetCount
       consensus {
         drug
+        cid
         oddsRatio
         pvalue
         adjPvalue
@@ -271,6 +292,9 @@ query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTer
             id
             nGeneIds
             term
+            library {
+              name
+            }
             geneSetFdaCountsById {
               nodes {
                 count
@@ -285,10 +309,11 @@ query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTer
   }
 }
 
-query PairEnrichmentQuerySingle($genesUp: [String]!, $genesDown: [String]!, $filterTerm: String = "", $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
+query PairEnrichmentQuerySingle($genesUp: [String]!, $genesDown: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
   currentBackground {
     pairedEnrich(
       filterTerm: $filterTerm
+      libraryNames: $libraryNames
       offset: $offset
       first: $first
       filterFda: $filterFda
@@ -318,6 +343,9 @@ query PairEnrichmentQuerySingle($genesUp: [String]!, $genesDown: [String]!, $fil
             id
             nGeneIds
             term
+            library {
+              name
+            }
             geneSetFdaCountsById {
               nodes {
                 count
@@ -332,10 +360,11 @@ query PairEnrichmentQuerySingle($genesUp: [String]!, $genesDown: [String]!, $fil
   }
 }
 
-query PairEnrichmentQueryConsensus($genesUp: [String]!, $genesDown: [String]!, $filterTerm: String = "", $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
+query PairEnrichmentQueryConsensus($genesUp: [String]!, $genesDown: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
   currentBackground {
     pairedEnrich(
       filterTerm: $filterTerm
+      libraryNames: $libraryNames
       offset: $offset
       first: $first
       filterFda: $filterFda
@@ -367,10 +396,11 @@ query PairEnrichmentQueryConsensus($genesUp: [String]!, $genesDown: [String]!, $
   }
 }
 
-query PairEnrichmentQueryMoAs($genesUp: [String]!, $genesDown: [String]!, $filterTerm: String = "", $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
+query PairEnrichmentQueryMoAs($genesUp: [String]!, $genesDown: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
   currentBackground {
     pairedEnrich(
       filterTerm: $filterTerm
+      libraryNames: $libraryNames
       offset: $offset
       first: $first
       filterFda: $filterFda
@@ -402,10 +432,28 @@ query PairEnrichmentQueryMoAs($genesUp: [String]!, $genesDown: [String]!, $filte
   }
 }
 
+
+# AllLibraries: Fetch all available gene set libraries for filtering
+# Input: None
+# Output: List of library nodes with id and name
+query AllLibraries {
+  geneSetLibraries {
+    nodes {
+      id
+      name
+    }
+  }
+}
 
 # Gene search: find all genesets containing certain gene(s)
-query GeneSearch($genes: [String]!, $offset: Int = 0, $first: Int = 10) {
-  geneSetGeneSearch(genes: $genes, offset: $offset, first: $first) {
+# Input:
+#   - genes: Array of gene symbols to search for
+#   - libraryNames: Optional array of library names to filter results (null = all libraries)
+#   - offset: Pagination offset (default 0)
+#   - first: Number of results to return (default 10)
+# Output: Gene set nodes with term, and total count
+query GeneSearch($genes: [String]!, $libraryNames: [String], $offset: Int = 0, $first: Int = 10) {
+  geneSetGeneSearch(genes: $genes, libraryNames: $libraryNames, offset: $offset, first: $first) {
     nodes {
       term
     }
@@ -414,12 +462,21 @@ query GeneSearch($genes: [String]!, $offset: Int = 0, $first: Int = 10) {
 }
 
 # Term search: find all genesets containing certain term(s)
-query TermSearch($terms: [String]!, $offset: Int = 0, $first: Int = 10) {
-  geneSetTermSearch(terms: $terms, offset: $offset, first: $first) {
+# Input:
+#   - terms: Array of search terms to match against gene set terms
+#   - libraryNames: Optional array of library names to filter results (null = all libraries)
+#   - offset: Pagination offset (default 0)
+#   - first: Number of results to return (default 10)
+# Output: Gene set nodes with id, term, nGeneIds, and total count
+query TermSearch($terms: [String]!, $libraryNames: [String], $offset: Int = 0, $first: Int = 10) {
+  geneSetTermSearch(terms: $terms, libraryNames: $libraryNames, offset: $offset, first: $first) {
     nodes {
       id
       term
       nGeneIds
+      library {
+        name
+      }
     }
     totalCount
   }
@@ -433,30 +490,12 @@ mutation AddUserGeneSet($genes: [String], $description: String = "") {
   }
 }
 
-
-query GetPmcInfoByIds($pmcids: [String]!){
-  getPmcInfoByIds(pmcids: $pmcids) {
-    nodes {
-      pmcid
-      title
-      yr
-      doi
-    }
-  }
-}
-
-query TermsPmcs($pmcids: [String]!) {
-  termsPmcsCount(pmcids: $pmcids) {
-    nodes {
-      pmc
-      id
-      term
-      count
-    }
-  }
-}
-
-query ViewGeneSet($id: UUID!) {
+# GeneSetGenesById (previously ViewGeneSet)
+# Lookup: by UUID
+# Input: id (UUID) - the unique identifier of the gene set
+# Output: genes only - list of gene symbols, NCBI IDs, descriptions, summaries
+# Use case: When you only need the gene list, not the gene set metadata
+query GeneSetGenesById($id: UUID!) {
   geneSet(id: $id) {
     genes {
       nodes {
@@ -469,7 +508,12 @@ query ViewGeneSet($id: UUID!) {
   }
 }
 
-query ViewGeneSet2($id: UUID!) {
+# GeneSetDetailsById (previously ViewGeneSet2)
+# Lookup: by UUID
+# Input: id (UUID) - the unique identifier of the gene set
+# Output: term, description, and full gene list with details
+# Use case: When you need complete gene set info including metadata
+query GeneSetDetailsById($id: UUID!) {
   geneSet(id: $id) {
     term
     description
@@ -484,7 +528,12 @@ query ViewGeneSet2($id: UUID!) {
   }
 }
 
-query ViewGeneSet3($term: String!) {
+# GeneSetDetailsByTerm (previously ViewGeneSet3)
+# Lookup: by term string (requires UNIQUE constraint on term column)
+# Input: term (String) - the human-readable term like "VCAP-vorinostat-10uM-24h-up"
+# Output: term, description, and full gene list with details
+# Use case: URL-friendly lookups, external service submissions (Enrichr, PWB, etc.)
+query GeneSetDetailsByTerm($term: String!) {
   geneSetByTerm(term: $term) {
     term
     description
@@ -534,8 +583,13 @@ query LatestRelease {
   }
 }
 
-query TermSearchGeneSets($filterTerm: [String]!) {
-  geneSetTermSearch(terms: $filterTerm) {
+# TermSearchGeneSets: Search gene sets by term with full gene data
+# Input:
+#   - filterTerm: Array of search terms to match against gene set terms
+#   - libraryNames: Optional array of library names to filter results (null = all libraries)
+# Output: Gene set nodes with term and nested genes, total count, and pagination info
+query TermSearchGeneSets($filterTerm: [String]!, $libraryNames: [String]) {
+  geneSetTermSearch(terms: $filterTerm, libraryNames: $libraryNames) {
     nodes {
       term
       genes {
@@ -552,5 +606,5 @@ query TermSearchGeneSets($filterTerm: [String]!) {
           startCursor
         }
   }
-  
+
 }

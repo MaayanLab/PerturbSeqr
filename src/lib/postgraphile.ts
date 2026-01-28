@@ -5,7 +5,7 @@ const AUTHORIZATION_HEADER = process.env.AUTHORIZATION_HEADER || `Token ${uuidv4
 
 export default postgraphile(
   process.env.DATABASE_URL,
-  "app_public_v2",
+  "app_public",
   {
     enableCors: true,
     retryOnInitFail: process.env.NODE_ENV === 'production' ? true : false,

@@ -1,6 +1,0 @@
-click
-psycopg2-binary
-python-dotenv
-tqdm
-pandas
-requests

@@ -6,7 +6,7 @@ import {
   useFetchGeneInfoQuery,
   useFetchUserGeneSetQuery,
   useOverlapQueryQuery,
-  useViewGeneSetQuery,
+  useGeneSetGenesByIdQuery,
 } from "@/graphql";
 import ensureArray from "@/utils/ensureArray";
 import Loading from "@/components/loading";
@@ -18,6 +18,8 @@ import Image from "next/image";
 import GeneSetModal from "@/components/geneSetModal";
 import { FaFilter, FaSortUp } from "react-icons/fa6";
 import { IoMdInformationCircleOutline } from "react-icons/io";
+import { parseTerm } from "@/utils/parseTerm";
+import { preloadMetadata, enrichWithMetadataSync, preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, getDrugMoaSource, isGenePerturbationLibrary } from "@/utils/metadataLookup";
 
 const pageSize = 12;
 
@@ -32,20 +34,32 @@ type GeneSetModalT =
       id: string;
       description: string;
       genes: string[];
+      library?: string;
     }
   | {
       type: "GeneSet";
       id: string;
       description: string;
+      library?: string;
     }
   | undefined;
 
+/**
+ * EnrichmentResults component - Displays enrichment analysis results
+ * Input props:
+ *   - userGeneSet: The user's uploaded gene set data
+ *   - setModalGeneSet: Function to set the modal gene set for viewing details
+ *   - libraryNames: Optional array of library names to filter enrichment (null = all libraries)
+ * Output: Renders enrichment results table with pagination and filtering
+ */
 function EnrichmentResults({
   userGeneSet,
   setModalGeneSet,
+  libraryNames,
 }: {
   userGeneSet?: FetchUserGeneSetQuery;
   setModalGeneSet: React.Dispatch<React.SetStateAction<GeneSetModalT>>;
+  libraryNames: string[] | null;
 }) {
   const genes = React.useMemo(
     () =>
@@ -69,6 +83,8 @@ function EnrichmentResults({
   const [rawTerm, setRawTerm] = React.useState("");
   const [topNSlider, setTopNSlider] = React.useState(10000);
   const [pvalueLeSlider, setPvalueLeSlider] = React.useState(0.05);
+  const [metadataLoaded, setMetadataLoaded] = React.useState(false);
+  const [drugLookupLoaded, setDrugLookupLoaded] = React.useState(false);
 
   const { page, term, fda, consensus, moas, sort, ko, topN, pvalueLe } =
     React.useMemo(
@@ -85,11 +101,13 @@ function EnrichmentResults({
       }),
       [queryString]
     );
+  // Query enrichment results
   const { data: enrichmentResults, error } = useEnrichmentQueryQuery({
     skip: genes.length === 0,
     variables: {
       genes,
       filterTerm: term + " " + queryString.dir,
+      libraryNames: libraryNames,
       offset: (page - 1) * pageSize,
       first: pageSize,
       filterFda: fda,
@@ -107,6 +125,19 @@ function EnrichmentResults({
     setRawTerm(term);
   }, [term]);
 
+  // Preload metadata and drug lookup for libraries in the filter (if any)
+  React.useEffect(() => {
+    const loadData = async () => {
+      await preloadDrugLookup();
+      setDrugLookupLoaded(true);
+      if (libraryNames && libraryNames.length > 0) {
+        await preloadMetadata(libraryNames);
+      }
+      setMetadataLoaded(true);
+    };
+    loadData();
+  }, [libraryNames]);
+
   return (
     <div className="flex flex-col gap-2 my-2">
       <h2 className="text-md font-bold">
@@ -119,12 +150,13 @@ function EnrichmentResults({
             {consensus ? (
               <>
                 After rummaging through <Stats show_gene_sets />.{" "}
+                PerturbSeek{" "}
                 <Image
                   className="inline-block rounded"
-                  src="/images/LINCSearch_logo.png"
+                  src="/images/DR_logo.png"
                   width={50}
-                  height={100}
-                  alt="LINCSearch"
+                  height={50}
+                  alt="PerturbSeek"
                 ></Image>{" "}
                 computed significance for{" "}
                 {Intl.NumberFormat("en-US", {}).format(
@@ -135,12 +167,13 @@ function EnrichmentResults({
               </>
             ) : moas ? <>
             After rummaging through <Stats show_gene_sets />.{" "}
+                PerturbSeek{" "}
                 <Image
                   className="inline-block rounded"
-                  src="/images/LINCSearch_logo.png"
+                  src="/images/DR_logo.png"
                   width={50}
-                  height={100}
-                  alt="LINCSearch"
+                  height={50}
+                  alt="PerturbSeek"
                 ></Image>{" "}
                 computed significance for{" "}
                 {Intl.NumberFormat("en-US", {}).format(
@@ -151,12 +184,13 @@ function EnrichmentResults({
             : (
               <>
                 After rummaging through <Stats show_gene_sets />.{" "}
+                PerturbSeek{" "}
                 <Image
                   className="inline-block rounded"
-                  src="/images/LINCSearch_logo.png"
+                  src="/images/DR_logo.png"
                   width={50}
-                  height={100}
-                  alt="L2S2"
+                  height={50}
+                  alt="PerturbSeek"
                 ></Image>{" "}
                 found{" "}
                 {Intl.NumberFormat("en-US", {}).format(
@@ -177,6 +211,7 @@ function EnrichmentResults({
                 q: rawTerm,
                 fda: "true",
                 consensus: queryString.consensus,
+                moas: queryString.moas,
                 dir: queryString.dir,
                 ko: "false",
                 sort: queryString.sort,
@@ -190,6 +225,7 @@ function EnrichmentResults({
                 fda: "false",
                 dir: queryString.dir,
                 consensus: queryString.consensus,
+                moas: queryString.moas,
                 ko: queryString.ko,
                 sort: queryString.sort,
                 topn: queryString.topn,
@@ -253,7 +289,7 @@ function EnrichmentResults({
                 moas: "true",
                 dir: queryString.dir,
                 sort: queryString.sort,
-                ko: "false",
+                ko: queryString.ko,
                 topn: queryString.topn,
                 pvaluele: queryString.pvaluele,
               });
@@ -262,11 +298,11 @@ function EnrichmentResults({
                 page: "1",
                 q: rawTerm,
                 fda: queryString.fda,
-                consensus: queryString.consensus,
+                consensus: "false",
                 moas: "false",
                 dir: queryString.dir,
                 sort: queryString.sort,
-                ko: "false",
+                ko: queryString.ko,
                 topn: queryString.topn,
                 pvaluele: queryString.pvaluele,
               });
@@ -280,43 +316,25 @@ function EnrichmentResults({
           Consensus MoAs
         </button>
 
-        <button
-          onClick={() => {
-            if (queryString.ko === "false")
-              setQueryString({
-                page: "1",
-                q: rawTerm,
-                fda: "false",
-                consensus: queryString.consensus,
-                moas: "false",
-                dir: queryString.dir,
-                ko: "true",
-                sort: queryString.sort,
-                topn: queryString.topn,
-                pvaluele: queryString.pvaluele,
-              });
-            else
-              setQueryString({
-                page: "1",
-                q: rawTerm,
-                fda: queryString.fda,
-                consensus: queryString.consensus,
-                moas: "false",
-                dir: queryString.dir,
-                ko: "false",
-                sort: queryString.sort,
-                topn: queryString.topn,
-                pvaluele: queryString.pvaluele,
-              });
-          }}
-          className={
-            queryString.ko === "true"
-              ? "button btn btn-sm float-left mr-4 bg-purple-400 hover:bg-purple-600"
-              : "button btn btn-sm float-left mr-4"
-          }
+        {/* TODO: Implement perturbation type filter by library prefix
+            Drug libraries: l1000-cp, l1000-sigs, tahoe-100m, drugseqr, cmap-build02, ginkgo, sciplex, deepcovermoa, geo-chem
+            Gene libraries: l1000crispr, perturbatlas, perturbatlasmouse, reploglek562*, reploglerpe1*, geogene
+        */}
+        <div
+          id="ptype-select"
+          className="join place-content-start place-items-center mr-4 opacity-50"
         >
-          CRISPR KOs
-        </button>
+          <div
+            className="join-item px-3 py-1.5 bg-gray-100 font-bold text-sm dark:bg-gray-900 cursor-not-allowed"
+          >
+            DRUG
+          </div>
+          <div
+            className="join-item px-3 py-1.5 bg-gray-100 font-bold text-sm dark:bg-gray-900 cursor-not-allowed"
+          >
+            GENE
+          </div>
+        </div>
 
         <div
           id="dir-select"
@@ -762,18 +780,24 @@ function EnrichmentResults({
                   )?.flatMap(
                   (enrichmentResult, genesetIndex) => {
                     var perturbation = enrichmentResult?.drug;
+                    const cid = enrichmentResult?.cid;
                     if (perturbation?.includes(" ") && !moas)
                       perturbation = perturbation + " KO";
+                    // Use direct PubChem link if CID available, otherwise search
+                    const pubchemUrl = cid
+                      ? `https://pubchem.ncbi.nlm.nih.gov/compound/${cid}`
+                      : `https://pubchem.ncbi.nlm.nih.gov/#query=${perturbation}`;
                     return (
                       <tr key={genesetIndex}>
                         <td>
                           {moas ? <span style={{textTransform: 'capitalize'}}>{perturbation}</span> : !perturbation?.includes("KO") ? (
-                            <>
+                            <div>
                               {perturbation}
                               <a
                                 className="underline cursor-pointer mx-2"
-                                href={`https://pubchem.ncbi.nlm.nih.gov/#query=${perturbation}`}
+                                href={pubchemUrl}
                                 target="_blank"
+                                title={cid ? `PubChem CID: ${cid}` : 'Search PubChem'}
                               >
                                 <Image
                                   className="inline-block rounded"
@@ -783,7 +807,12 @@ function EnrichmentResults({
                                   alt="PubChem"
                                 />
                               </a>
-                            </>
+                              {cid && (
+                                <div className="text-xs text-gray-500">
+                                  PubChem CID: {cid}
+                                </div>
+                              )}
+                            </div>
                           ) : (
                             <>
                               {perturbation}
@@ -889,6 +918,7 @@ function EnrichmentResults({
             <thead>
               <tr className="text-left align-text-bottom overflow-visible">
                 <th className={"hidden"}>Term</th>
+                <th>Dataset</th>
                 <th className="relative group">
                   <div className="absolute z-10 left-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
                     Preclinical compound, drug, or gene targeted by CRISPR KO
@@ -1036,147 +1066,145 @@ function EnrichmentResults({
               {enrichmentResults?.currentBackground?.enrich?.nodes?.flatMap(
                 (enrichmentResult, genesetIndex) => {
                   const term = enrichmentResult?.geneSets.nodes[0].term;
-                  const batch =
-                    enrichmentResult?.geneSets.nodes[0].term.split("_")[0];
-                  const cellLine =
-                    enrichmentResult?.geneSets.nodes[0].term.split("_")[1];
-                  const timepoint =
-                    enrichmentResult?.geneSets.nodes[0].term.split("_")[2];
-                  const batch2 =
-                    enrichmentResult?.geneSets.nodes[0].term.split("_")[3];
-                  var perturbation =
-                    enrichmentResult?.geneSets.nodes[0].term.split("_")[4];
-                  if (perturbation?.split(" ").length == 2)
-                    perturbation = perturbation?.split(" ")[0] + " KO";
+                  const libraryName = enrichmentResult?.geneSets.nodes[0].library?.name || '';
 
-                  const count =
-                    enrichmentResult?.geneSets.nodes[0].geneSetFdaCountsById
-                      .nodes[0]?.count || 1;
-                  const approved =
-                    enrichmentResult?.geneSets.nodes[0].geneSetFdaCountsById
-                      .nodes[0]?.approved || false;
+                  // Parse term using the parseTerm utility
+                  const baseParsed = term ? parseTerm(term, libraryName) : {};
+                  // Enrich with external metadata (e.g., RummaGEO cell line/timepoint)
+                  const parsed = metadataLoaded ? enrichWithMetadataSync(baseParsed, libraryName) : baseParsed;
+                  const dataset = libraryName || parsed.library || '';
+                  const direction = parsed.direction || '';
+                  const perturbation = parsed.perturbation || parsed.raw || '';
+                  const cellLine = parsed.cellLine || '';
+                  const timepoint = parsed.timepoint || '';
+                  const concentration = parsed.concentration || '';
 
-                  const moa =
-                      enrichmentResult?.geneSets.nodes[0].geneSetFdaCountsById
-                        .nodes[0]?.moa || "unknown";
+                  // Check if this is a gene or drug perturbation library
+                  const isGenePert = isGenePerturbationLibrary(libraryName);
 
-                  const concentration =
-                    enrichmentResult?.geneSets.nodes[0].term
-                      .split("_")[5]
-                      ?.split(" ")[0] ?? "N/A";
-                  const direction =
-                    enrichmentResult?.geneSets.nodes[0].term.split(" ")[1];
+                  // Get FDA data from database (via GraphQL)
+                  const fdaData = enrichmentResult?.geneSets.nodes[0].geneSetFdaCountsById?.nodes[0];
+                  const sigCount = fdaData?.count || 1;
+                  const dbMoa = fdaData?.moa || '';
+                  const approved = fdaData?.approved || false;
+
+                  // Get additional drug info from JSON lookup (only for drug perturbations)
+                  const drugInfo = !isGenePert && drugLookupLoaded
+                    ? (getDrugInfo(perturbation) || getDrugInfo(parsed.nsn || ''))
+                    : null;
+                  const perturbationUrl = getPerturbationUrl(perturbation, libraryName);
+                  const perturbationLinkTitle = getPerturbationLinkTitle(libraryName);
+                  // Use database MOA first, fallback to JSON lookup (only for drugs)
+                  const moa = isGenePert ? '' : (dbMoa || drugInfo?.moa || '');
+                  const moaSource = moa ? (getDrugMoaSource(perturbation) || getDrugMoaSource(parsed.nsn || '')) : null;
 
                   if (!enrichmentResult?.geneSets) return null;
                   return (
                     <tr key={genesetIndex} className="text-left">
                       <td className={"hidden"}>{term}</td>
+                      <td>{dataset}</td>
                       <td>
-                        {!perturbation?.includes("KO") ? (
-                          <>
+                        {/* Perturbation with appropriate link (PubChem for drugs, NCBI Gene for genes) */}
+                        <div>
+                          <a
+                            href={perturbationUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="link link-primary hover:link-hover"
+                            title={perturbationLinkTitle}
+                          >
                             {perturbation}
-                            <a
-                              className="underline cursor-pointer mx-2"
-                              href={`https://pubchem.ncbi.nlm.nih.gov/#query=${perturbation}`}
-                              target="_blank"
-                            >
-                              <Image
-                                className="inline-block rounded"
-                                src="/images/drug_vector_art.png"
-                                width={20}
-                                height={20}
-                                alt="PubChem"
-                              />
-                            </a>
-                          </>
-                        ) : (
-                          <>
-                            {perturbation}
-                            <a
-                              className="underline cursor-pointer mx-2"
-                              href={`https://maayanlab.cloud/Harmonizome/gene/${perturbation.replace(
-                                " KO",
-                                ""
-                              )}`}
-                              target="_blank"
-                            >
-                              <Image
-                                className="inline-block rounded"
-                                src="/images/harmonizome_logo_30x26.png"
-                                width={20}
-                                height={20}
-                                alt="Harmonizome"
-                              />
-                            </a>
-                            <a
-                              className="underline cursor-pointer"
-                              href={`https://maayanlab.cloud/prismexp/g/${perturbation.replace(
-                                " KO",
-                                ""
-                              )}`}
-                              target="_blank"
-                            >
-                              <Image
-                                className="inline-block rounded"
-                                src="/images/prismexp.png"
-                                width={20}
-                                height={20}
-                                alt="PrismEXP"
-                              />
-                            </a>
-                          </>
-                        )}
+                          </a>
+                          {/* Show CID for drug perturbations */}
+                          {!isGenePert && drugInfo?.cid && (
+                            <div className="text-xs text-gray-500">
+                              PubChem CID: {drugInfo.cid}
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td>
-                        <a
-                          className="underline cursor-pointer"
-                          onClick={async (evt) => {
-                            evt.preventDefault();
-                            const res = await fetch("enrich/depmapcl", {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({
-                                cellLine: cellLine,
-                              }),
-                            });
-
-                            const resJson = await res.json();
-                            const suggestedCellLines = resJson.filter((entry: any) => entry.type == 'cell_line')
-                            if (suggestedCellLines.length > 0) {
-                              window.open(
-                                `https://depmap.org${suggestedCellLines[0].url}`,
-                                "_blank"
+                        {cellLine ? (
+                          <a
+                            className="link link-primary hover:link-hover cursor-pointer"
+                            title="View on DepMap"
+                            onClick={async (evt) => {
+                              evt.preventDefault();
+                              const res = await fetch("enrich/depmapcl", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ cellLine }),
+                              });
+                              const resJson = await res.json();
+                              const suggestedCellLines = resJson.filter(
+                                (entry: any) => entry.type === "cell_line"
                               );
-                            }
-                          }}
-                        >
-                          {cellLine}
-                        </a>
+                              if (suggestedCellLines.length > 0) {
+                                window.open(
+                                  `https://depmap.org${suggestedCellLines[0].url}`,
+                                  "_blank"
+                                );
+                              }
+                            }}
+                          >
+                            {cellLine}
+                          </a>
+                        ) : (
+                          "-"
+                        )}
                       </td>
                       <td>{timepoint}</td>
                       <td>{concentration}</td>
                       <td>
-                        {direction}
-                        {direction == "up" ? (
+                        {direction === "up" ? (
                           <Image
-                            className="inline-block rounded ml-5"
+                            className="inline-block rounded"
                             src="/images/up.png"
                             width={15}
                             height={15}
                             alt="Up"
                           />
-                        ) : (
+                        ) : direction === "down" || direction === "dn" ? (
                           <Image
-                            className="inline-block rounded ml-1"
+                            className="inline-block rounded"
                             src="/images/down.png"
                             width={15}
                             height={15}
                             alt="Down"
                           />
+                        ) : (
+                          <Image
+                            className="inline-block rounded"
+                            src="/images/minus.png"
+                            width={15}
+                            height={15}
+                            alt="Unknown"
+                          />
                         )}
                       </td>
-                      <td>{count}</td>
-                      <td>{moa}</td>
+                      <td>{sigCount}</td>
+                      <td className="max-w-[200px]">
+                        {/* MOA with source attribution */}
+                        {moa ? (
+                          <div className="text-sm">
+                            <span className="line-clamp-2" title={moa}>
+                              {moa}
+                            </span>
+                            {moaSource && (
+                              <a
+                                href={moaSource.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-gray-500 hover:text-gray-700 block mt-0.5"
+                              >
+                                Source: {moaSource.name}
+                              </a>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
                       <td>{approved ? "Yes" : "No"}</td>
                       <td>
                         <label
@@ -1187,6 +1215,7 @@ function EnrichmentResults({
                               type: "GeneSet",
                               id: enrichmentResult?.geneSets.nodes[0].id,
                               description: term ?? "",
+                              library: libraryName,
                             });
                           }}
                         >
@@ -1204,8 +1233,9 @@ function EnrichmentResults({
                               description: `${
                                 userGeneSet?.userGeneSet?.description ||
                                 "User gene set"
-                              } & ${term || "L2S2 gene set"}`,
+                              } & ${term || "PerturbSeek gene set"}`,
                               genes,
+                              library: libraryName,
                             });
                           }}
                         >
@@ -1305,7 +1335,7 @@ function GeneSetModalWrapper(props: {
 }) {
 
   
-  const { data: geneSet } = useViewGeneSetQuery({
+  const { data: geneSet } = useGeneSetGenesByIdQuery({
     skip: props.modalGeneSet?.type !== "GeneSet",
     variables:
       props.modalGeneSet?.type === "GeneSet"
@@ -1339,6 +1369,7 @@ function GeneSetModalWrapper(props: {
     <GeneSetModal
       showModal={props.modalGeneSet !== undefined}
       term={props.modalGeneSet?.description}
+      dataset={props.modalGeneSet?.type === "GeneSet" || props.modalGeneSet?.type === "GeneSetOverlap" ? props.modalGeneSet.library : undefined}
       geneset={
         props.modalGeneSet?.type === "GeneSet"
           ? geneSet?.geneSet?.genes.nodes
@@ -1360,14 +1391,32 @@ function GeneSetModalWrapper(props: {
   );
 }
 
+/**
+ * EnrichClientPage - Main enrichment analysis page component
+ * Input props:
+ *   - searchParams: URL query params containing dataset ID and optional libraries filter
+ * Output: Renders enrichment analysis interface
+ * State:
+ *   - modalGeneSet: Gene set currently shown in modal
+ */
 export default function EnrichClientPage({
   searchParams,
 }: {
   searchParams: {
     dataset: string | string[] | undefined;
+    libraries?: string;
   };
 }) {
   const dataset = ensureArray(searchParams.dataset)[0];
+  // Parse libraries from URL params (comma-separated)
+  // null means no filter (use all libraries), array means filter to those libraries
+  const libraryNames = React.useMemo(() => {
+    if (searchParams.libraries) {
+      const libs = searchParams.libraries.split(',').filter(Boolean);
+      return libs.length > 0 ? libs : null;
+    }
+    return null;
+  }, [searchParams.libraries]);
   const { data: userGeneSet } = useFetchUserGeneSetQuery({
     skip: !dataset,
     variables: { id: dataset },
@@ -1384,7 +1433,8 @@ export default function EnrichClientPage({
 
   const nGenesIncluded = userGeneSetInfo?.geneMap2?.nodes.filter(g => g.geneInfo?.symbol).length
   return (
-    <>
+    <div className="flex flex-col gap-4">
+      {/* Input info */}
       <div className="flex flex-row gap-2 alert">
         <span className="prose">Input:</span>
         <label
@@ -1402,18 +1452,24 @@ export default function EnrichClientPage({
         >
           {userGeneSet?.userGeneSet?.description || "Gene set"}
           {userGeneSet ? (
-            <> ({nGenesIncluded} of {userGeneSet?.userGeneSet?.genes?.length ?? "?"} submitted genes were mapped to genes in the L2S2 background)</>
+            <> ({nGenesIncluded} of {userGeneSet?.userGeneSet?.genes?.length ?? "?"} submitted genes were mapped to genes in the PerturbSeek background)</>
           ) : null}
         </label>
+        {libraryNames && libraryNames.length > 0 && (
+          <span className="text-sm text-base-content/70 ml-2">
+            | Filtering: {libraryNames.length} dataset{libraryNames.length > 1 ? 's' : ''}
+          </span>
+        )}
       </div>
       <EnrichmentResults
         userGeneSet={userGeneSet}
         setModalGeneSet={setModalGeneSet}
+        libraryNames={libraryNames}
       />
       <GeneSetModalWrapper
         modalGeneSet={modalGeneSet}
         setModalGeneSet={setModalGeneSet}
       />
-    </>
+    </div>
   );
 }

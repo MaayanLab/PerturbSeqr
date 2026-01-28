@@ -7,15 +7,22 @@ import classNames from 'classnames'
 import { useRouter } from 'next/navigation'
 
 
-export default function InputForm({setInputSingle} : {setInputSingle:  React.Dispatch<React.SetStateAction<boolean>>}) {
+/**
+ * InputForm component - Gene set input form for single gene set enrichment
+ * Input props:
+ *   - setInputSingle: Function to toggle between single and up/down input modes
+ *   - selectedLibraries: Array of selected library names for filtering (passed to enrich page)
+ * Output: Renders gene input textarea, file upload, and submit button
+ */
+export default function InputForm({setInputSingle, selectedLibraries = []} : {setInputSingle:  React.Dispatch<React.SetStateAction<boolean>>, selectedLibraries?: string[]}) {
   const router = useRouter()
   const [rawGenes, setRawGenes] = React.useState('')
-  const genes = React.useMemo(() => 
+  const genes = React.useMemo(() =>
     uniqueArray(
       rawGenes
         .split(/[;,\t\r\n\s]+/) // Split on common delimiters
-        .filter(v => /^[A-Z0-9]+$/.test(v) && v.length > 2) // Ensure only uppercase letters/numbers
-    ), 
+        .filter(v => /^[A-Za-z0-9-]+$/.test(v) && v.length > 1) // Allow letters, numbers, and hyphens (e.g. MT-ATP6 has hyphen, C7orf50 has lowercase 'orf' - both appear in ginkgo-cd dataset)
+    ),
     [rawGenes]
   );
   
@@ -26,7 +33,7 @@ export default function InputForm({setInputSingle} : {setInputSingle:  React.Dis
   const handleFileRead = React.useCallback(() => {
       const content = fileReader!.current!.result as string;
       setRawGenes(content!.split(/[;,\t\r\n\s]+/) // Split on common delimiters
-      .filter(v => /^[A-Z0-9]+$/.test(v) && v.length > 2).join('\n'));
+      .filter(v => /^[A-Za-z0-9-]+$/.test(v) && v.length > 1).join('\n')); // Must match the genes useMemo filter on line 17
   }, [setRawGenes])
 
 
@@ -64,7 +71,13 @@ export default function InputForm({setInputSingle} : {setInputSingle:  React.Dis
           })
           const id = result.data?.addUserGeneSet?.userGeneSet?.id
           if (id) {
-            router.push(`/enrich?dataset=${id}`)
+            // Build URL with dataset ID and optional library filter
+            const params = new URLSearchParams({ dataset: id })
+            // Pass selected libraries as comma-separated list if any are selected
+            if (selectedLibraries.length > 0) {
+              params.set('libraries', selectedLibraries.join(','))
+            }
+            router.push(`/enrich?${params.toString()}`)
           }
         }}
       >
