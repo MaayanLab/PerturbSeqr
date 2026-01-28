@@ -5,7 +5,7 @@ import useQsState from '@/utils/useQsState';
 import Pagination from '@/components/pagination';
 import TermDownloadButton from '@/components/termDownloadButton';
 import { parseTerm } from '@/utils/parseTerm';
-import { preloadMetadata, enrichWithMetadataSync, preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, getDrugMoaSource, isGenePerturbationLibrary } from '@/utils/metadataLookup';
+import { preloadMetadata, enrichWithMetadataSync, preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, getDrugMoaSource, isGenePerturbationLibrary, getDatasetUrl } from '@/utils/metadataLookup';
 import Image from 'next/image';
 
 
@@ -124,9 +124,21 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
 
               return (
                   <tr key={el?.term}>
-                    {/* Dataset column - shows library/dataset name */}
+                    {/* Dataset column - shows library/dataset name with link to source */}
                     <td className="font-medium">
-                      {dataset}
+                      {getDatasetUrl(dataset) ? (
+                        <a
+                          href={getDatasetUrl(dataset)!}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="link link-primary hover:link-hover"
+                          title={`View ${dataset} source`}
+                        >
+                          {dataset}
+                        </a>
+                      ) : (
+                        dataset
+                      )}
                     </td>
                     <td>
                     {term}

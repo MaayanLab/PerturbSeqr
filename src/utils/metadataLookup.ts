@@ -237,6 +237,7 @@ export type DrugInfo = {
   clinical_phase?: string
   name?: string  // Resolved name for BRD/NSN codes
   source: 'drug_repurposing_hub' | 'tahoe' | 'drugseqr' | 'lincs' | 'pubchem'
+  moa_source?: 'drug_repurposing_hub' | 'tahoe' | 'drugseqr' | 'lincs'  // Where the MOA came from (may differ from source)
   source_url: string
 }
 
@@ -367,6 +368,8 @@ export function isDrugFdaApproved(drugName: string): boolean {
 /**
  * Get source information for MOA attribution.
  * Returns the source name and URL for displaying "Source: [Link]"
+ * Uses moa_source if available (tracks where MOA actually came from),
+ * otherwise falls back to source for backwards compatibility.
  */
 export function getDrugMoaSource(drugName: string): { name: string; url: string } | null {
   const info = getDrugInfo(drugName)
@@ -374,7 +377,9 @@ export function getDrugMoaSource(drugName: string): { name: string; url: string 
     return null  // No MOA, no source to show
   }
 
-  const sourceKey = info.source
+  // Use moa_source if available (new field that tracks where MOA came from)
+  // Fall back to source for backwards compatibility with old drug_lookup.json
+  const sourceKey = info.moa_source || info.source
   return SOURCE_INFO[sourceKey] || null
 }
 
@@ -448,4 +453,42 @@ export function getPerturbationLinkTitle(libraryName: string): string {
   return isGenePerturbationLibrary(libraryName)
     ? 'View on NCBI Gene'
     : 'View on PubChem'
+}
+
+
+// ============================================================================
+// Dataset URL Lookup
+// ============================================================================
+
+/**
+ * Primary URLs for each dataset, matching the links on the About page.
+ * Keys are display names from libraries.json (case-insensitive lookup).
+ */
+export const DATASET_URLS: Record<string, string> = {
+  'tahoe-100m': 'https://huggingface.co/datasets/tahoebio/Tahoe-100M',
+  'l1000-cp': 'https://l2s2.maayanlab.cloud/download',
+  'l1000-xpr': 'https://l2s2.maayanlab.cloud/download',
+  'cmap-build02': 'https://www.broadinstitute.org/connectivity-map-cmap',
+  'drugseqr': 'https://drugseqr.maayanlab.cloud/download',
+  'sciplex': 'https://github.com/cole-trapnell-lab/sci-plex',
+  'deepcovermoa': 'https://wren.hms.harvard.edu/DeepCoverMOA/',
+  'geo-chem': 'https://www.ncbi.nlm.nih.gov/geo/',
+  'geo-gene': 'https://www.ncbi.nlm.nih.gov/geo/',
+  'ginkgo': 'https://www.ginkgobioworks.com/',
+  'perturbatlas': 'https://perturbatlas.kratoss.site/#/',
+  'perturbatlas-mouse': 'https://perturbatlas.kratoss.site/#/',
+  'replogle et al.-k562-essential': 'https://pubmed.ncbi.nlm.nih.gov/35688146/',
+  'replogle et al.-k562-genomewide': 'https://pubmed.ncbi.nlm.nih.gov/35688146/',
+  'replogle et al.-rpe1-essential': 'https://pubmed.ncbi.nlm.nih.gov/35688146/',
+}
+
+/**
+ * Get the primary URL for a dataset.
+ * Returns the URL if found, or null if not.
+ *
+ * @param datasetName - The dataset display name (case-insensitive)
+ */
+export function getDatasetUrl(datasetName: string): string | null {
+  if (!datasetName) return null
+  return DATASET_URLS[datasetName.toLowerCase()] || null
 }

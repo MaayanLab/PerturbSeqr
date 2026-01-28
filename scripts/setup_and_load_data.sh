@@ -182,9 +182,12 @@ if [ "$REBUILD" = true ]; then
     if [ "$CLEAN" = true ]; then
         echo "Pruning Docker build cache (--clean mode)..."
         docker builder prune -af
+        # Reset buildx builder to clear context cache
+        docker buildx rm default 2>/dev/null || true
+        docker buildx create --use --name default 2>/dev/null || true
     fi
     docker compose down -v
-    docker compose build --no-cache
+    DOCKER_BUILDKIT=1 docker compose build --no-cache --pull
     step_time $STEP_START
     echo ""
 fi

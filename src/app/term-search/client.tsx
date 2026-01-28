@@ -72,12 +72,22 @@ export default function TermSearchClientPage(props: { searchParams?: { page?: st
   )
   React.useEffect(() => {setRawTerms(queryString.q ?? '')}, [queryString.q])
   if (!queryString.q) {
-    // Initial state: Input card, Library filter, Dataset icons, Info section
+    // Initial state: Header, DatasetIcons, Input card, Library filter
     return (
-      <div className="flex justify-center">
-        <div className="flex flex-row gap-4 items-start">
+      <div className="flex flex-col items-center">
+        {/* Header with stats */}
+        <h1 className="text-2xl font-bold mb-4">
+          PerturbSeek: Search through <Stats bold show_gene_sets />
+        </h1>
+        {/* Dataset icons filter - centered below header */}
+        <DatasetIcons
+          selectedLibraries={selectedLibraries}
+          onSelectionChange={setSelectedLibraries}
+        />
+        {/* Input and filter sections in horizontal row */}
+        <div className="flex flex-row gap-6 items-stretch justify-center">
           {/* Input card */}
-          <div className="card max-w-xs shadow-2xl bg-base-100 flex-shrink-0">
+          <div className="card w-[480px] shadow-2xl bg-base-100">
             <div className="card-body">
               <h1 className="text-xl">Query extracted gene set table titles to find relevant gene sets</h1>
               <form
@@ -94,7 +104,7 @@ export default function TermSearchClientPage(props: { searchParams?: { page?: st
                 <span className="label-text text-lg">Search Term(s)</span>
                 <input
                   type="text"
-                  className="input input-bordered"
+                  className="input input-bordered w-full"
                   placeholder="U2OS"
                   value={rawTerms}
                   onChange={evt => {
@@ -124,29 +134,11 @@ export default function TermSearchClientPage(props: { searchParams?: { page?: st
             </div>
           </div>
           {/* Library filter */}
-          <LibraryFilter
-            selectedLibraries={selectedLibraries}
-            onSelectionChange={setSelectedLibraries}
-          />
-          {/* Dataset icons */}
-          <DatasetIcons />
-          {/* Info section */}
-          <div className="text-center p-10">
-            <h3 className="text-xl font-bold p-2 pt-0">
-              Signatures Search
-            </h3>
-            <div className='inline-flex'>
-              <Image className={'rounded'} src={'/images/DR.gif'} width={225} height={225} alt={'PerturbSeek'} unoptimized></Image>
-            </div>
-            <React.Suspense fallback={<div className="text-center p-5"><Image className={'rounded mx-auto'} src={'/images/loading.gif'} width={125} height={250} alt={'Loading...'}/> </div>}>
-            <h1 className="text-2xl font-bold">
-              <span className="whitespace-nowrap"> Search through <Stats bold show_gene_sets /></span>
-            </h1>
-            <div className="mt-3">
-              <p className="font-semibold">Datasets:</p>
-              <p className="text-sm max-w-xs">L1000-Sigs, Tahoe-100M, L1000-CP, DRUGseqr, PerturbAtlas, CMAP, PerturbAtlas-Mouse, L1000-CRISPR, Ginkgo, SciPlex, Replogle-K562, DeepCoverMOA, GEO-Gene, GEO-Chem</p>
-            </div>
-            </React.Suspense>
+          <div className="w-[400px]">
+            <LibraryFilter
+              selectedLibraries={selectedLibraries}
+              onSelectionChange={setSelectedLibraries}
+            />
           </div>
         </div>
       </div>

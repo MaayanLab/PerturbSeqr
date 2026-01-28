@@ -10,6 +10,7 @@ This uses a bulk FTP download instead.
 Usage: uv run db/ingest_gene_info.py
 """
 
+import gzip
 import urllib.request
 from pathlib import Path
 
@@ -17,6 +18,23 @@ import polars as pl
 import psycopg2.extras
 
 from db_utils import get_conn, query
+
+
+def load_gene_summary(path: Path) -> dict[int, str]:
+    """Load gene_summary.gz manually since it has malformed CSV (embedded newlines/quotes)."""
+    summaries = {}
+    with gzip.open(path, 'rt', encoding='utf-8', errors='replace') as f:
+        for line in f:
+            if line.startswith('#'):
+                continue
+            parts = line.rstrip('\n').split('\t', 2)  # Split into at most 3 parts
+            if len(parts) >= 3:
+                try:
+                    gene_id = int(parts[1])
+                    summaries[gene_id] = parts[2] if parts[2] != '-' else None
+                except ValueError:
+                    continue
+    return summaries
 
 
 DATA_DIR = Path(__file__).parent / 'data'
@@ -41,14 +59,14 @@ def ensure_gene_summary() -> Path:
 def load_gene_data(gene_info_path: Path, summary_path: Path) -> dict[str, dict]:
     """Load and merge gene_info and gene_summary. Returns genes dict keyed by symbol and synonyms."""
     df_info = pl.read_csv(gene_info_path, separator='\t', null_values='-')
-    df_summary = pl.read_csv(summary_path, separator='\t', null_values='-').select(['GeneID', 'Summary'])
-    df = df_info.join(df_summary, on='GeneID', how='left')
+    summaries = load_gene_summary(summary_path)
 
     # Index by both symbol and synonyms since NCBI only has primary symbols as rows
     # (e.g. P53 only appears as a synonym attribute in TP53's row, not its own row)
     genes = {}
-    for row in df.iter_rows(named=True):
-        info = {'description': row['description'], 'ncbi_gene_id': row['GeneID'], 'summary': row['Summary']}
+    for row in df_info.iter_rows(named=True):
+        gene_id = row['GeneID']
+        info = {'description': row['description'], 'ncbi_gene_id': gene_id, 'summary': summaries.get(gene_id)}
         genes[row['Symbol'].upper()] = info
         if row['Synonyms']:
             for syn in row['Synonyms'].split('|'):

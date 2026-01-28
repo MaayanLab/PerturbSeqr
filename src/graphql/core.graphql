@@ -88,6 +88,7 @@ query EnrichmentQuery($genes: [String]!, $filterTerm: String = "", $libraryNames
       }
       moas {
         drug
+        cid
         oddsRatio
         pvalue
         adjPvalue
@@ -202,6 +203,7 @@ query EnrichmentQueryMoAs($genes: [String]!, $filterTerm: String = "", $libraryN
     ) {
       moas {
           drug
+          cid
           oddsRatio
           pvalue
           adjPvalue
@@ -260,6 +262,7 @@ query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTer
       }
       moas {
         drug
+        cid
         oddsRatio
         pvalue
         adjPvalue
@@ -414,6 +417,7 @@ query PairEnrichmentQueryMoAs($genesUp: [String]!, $genesDown: [String]!, $filte
       moasCount
       moas {
         drug
+        cid
         oddsRatio
         pvalue
         adjPvalue

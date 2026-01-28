@@ -161,7 +161,7 @@
       "parsedExample": { "perturbation": "NIX", "perturbationType": "Deficiency", "dataset": "GDS2630", "batch": "160", "organism": "mouse", "tissue": "spleen", "direction": "up" }
     },
     "reploglek562essential": {
-      "displayName": "Replogle-K562-Essential",
+      "displayName": "Replogle et al.-K562-Essential",
       "category": "gene",
       "termFormat": {
         "delimiter": "_",
@@ -172,7 +172,7 @@
       "parsedExample": { "id": "10023", "perturbation": "ZC3H18", "batch": "P1P2", "direction": "up" }
     },
     "reploglek562genomewide": {
-      "displayName": "Replogle-K562-GenomeWide",
+      "displayName": "Replogle et al.-K562-GenomeWide",
       "category": "gene",
       "termFormat": {
         "delimiter": "_",
@@ -183,7 +183,7 @@
       "parsedExample": { "id": "10005", "perturbation": "ZBTB4", "batch": "P1", "direction": "up" }
     },
     "reploglerpe1essential": {
-      "displayName": "Replogle-RPE1-Essential",
+      "displayName": "Replogle et al.-RPE1-Essential",
       "category": "gene",
       "termFormat": {
         "delimiter": "_",

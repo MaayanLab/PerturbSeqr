@@ -39,6 +39,15 @@ export default function Footer() {
               Contact Us
             </Link>
           </li>
+          <li>
+            <Link
+              href="https://github.com/MaayanLab/PerturbSeek"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Source Code
+            </Link>
+          </li>
         </ul>
       </div>
       <div className="text-center">

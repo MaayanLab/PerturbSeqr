@@ -74,8 +74,9 @@ def add_to_lookup(lookup: dict, entries: dict, source: str, cid_fn=None) -> int:
 
 
 def apply_hub_info(info: dict, hub_info: dict):
-    """Apply Hub MOA/target/FDA to entry."""
+    """Apply Hub MOA/target/FDA to entry and update source for attribution."""
     info["moa"] = hub_info["moa"]
+    info["moa_source"] = "drug_repurposing_hub"  # Track where MOA came from
     info["fda_approved"] = hub_info.get("fda_approved", False)
     if hub_info.get("target") and not info.get("target"): info["target"] = hub_info["target"]
 
@@ -226,7 +227,9 @@ def build_unified_lookup(skip_pubchem: bool = False) -> dict[str, dict]:
         elif cid and (hub := hub_by_cid.get(cid)) and hub.get("moa"):
             apply_hub_info(info, hub); stats["hub_cid"] += 1
         elif dataset_moa and info.get("source") in ("tahoe", "drugseqr", "lincs"):
-            info["moa"] = dataset_moa; stats["dataset_fallback"] += 1
+            info["moa"] = dataset_moa
+            info["moa_source"] = info["source"]  # MOA came from the dataset itself
+            stats["dataset_fallback"] += 1
         else:
             stats["unknown"] += 1
 

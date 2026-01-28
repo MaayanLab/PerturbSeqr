@@ -19,7 +19,7 @@ import GeneSetModal from "@/components/geneSetModal";
 import { FaFilter, FaSortUp } from "react-icons/fa6";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { parseTerm } from "@/utils/parseTerm";
-import { preloadMetadata, enrichWithMetadataSync, preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, getDrugMoaSource, isGenePerturbationLibrary } from "@/utils/metadataLookup";
+import { preloadMetadata, enrichWithMetadataSync, preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, getDrugMoaSource, isGenePerturbationLibrary, getDatasetUrl } from "@/utils/metadataLookup";
 
 const pageSize = 12;
 
@@ -1102,7 +1102,21 @@ function EnrichmentResults({
                   return (
                     <tr key={genesetIndex} className="text-left">
                       <td className={"hidden"}>{term}</td>
-                      <td>{dataset}</td>
+                      <td>
+                        {getDatasetUrl(dataset) ? (
+                          <a
+                            href={getDatasetUrl(dataset)!}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="link link-primary hover:link-hover"
+                            title={`View ${dataset} source`}
+                          >
+                            {dataset}
+                          </a>
+                        ) : (
+                          dataset
+                        )}
+                      </td>
                       <td>
                         {/* Perturbation with appropriate link (PubChem for drugs, NCBI Gene for genes) */}
                         <div>

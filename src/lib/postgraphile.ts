@@ -1,9 +1,16 @@
-import { postgraphile } from 'postgraphile'
+import { postgraphile, HttpRequestHandler } from 'postgraphile'
 import { v4 as uuidv4 } from 'uuid'
 
 const AUTHORIZATION_HEADER = process.env.AUTHORIZATION_HEADER || `Token ${uuidv4()}`
 
-export default postgraphile(
+// Cache postgraphile instance on globalThis to survive HMR reloads in dev mode.
+// Without this, each HMR reload creates a new connection pool, leaking connections
+// until Postgres hits max_connections (100) and crashes.
+const globalForPostgraphile = globalThis as unknown as {
+  postgraphile: HttpRequestHandler | undefined
+}
+
+const middleware = globalForPostgraphile.postgraphile ?? postgraphile(
   process.env.DATABASE_URL,
   "app_public",
   {
@@ -35,3 +42,9 @@ export default postgraphile(
     }
   }
 )
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForPostgraphile.postgraphile = middleware
+}
+
+export default middleware

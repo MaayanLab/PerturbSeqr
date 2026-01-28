@@ -62,6 +62,7 @@ ARCHITECTURE.md
 
 # Local development
 notes/
+notebooks/
 startup_log*.txt
 startup_log*.md
 .python-version
