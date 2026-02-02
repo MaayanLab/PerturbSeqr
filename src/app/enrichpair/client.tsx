@@ -165,7 +165,7 @@ function EnrichmentResults({
                           src="/images/DR-logo-cropped.png"
                           width={50}
                           height={100}
-                          alt="PerturbSeek"
+                          alt="PerturbSeqr"
                         ></Image>{" "}
                         computed significance for{" "}
                         {Intl.NumberFormat("en-US", {}).format(
@@ -181,7 +181,7 @@ function EnrichmentResults({
                           src="/images/DR-logo-cropped.png"
                           width={50}
                           height={100}
-                          alt="PerturbSeek"
+                          alt="PerturbSeqr"
                         ></Image>{" "}
                         computed significance for{" "}
                         {Intl.NumberFormat("en-US", {}).format(
@@ -197,7 +197,7 @@ function EnrichmentResults({
                           src="/images/DR-logo-cropped.png"
                           width={50}
                           height={100}
-                          alt="PerturbSeek"
+                          alt="PerturbSeqr"
                         ></Image>{" "}
                         found{" "}
                         {Intl.NumberFormat("en-US", {}).format(
@@ -1278,10 +1278,10 @@ function EnrichmentResults({
                               description: `${
                                 userGeneSetUp?.userGeneSet?.description ||
                                 "User up gs"
-                              } ∩ ${term || "PerturbSeek up gs"} + ${
+                              } ∩ ${term || "PerturbSeqr up gs"} + ${
                                 userGeneSetDown?.userGeneSet?.description ||
                                 "User down gs"
-                              } ∩ ${term || "PerturbSeek down gs"}`,
+                              } ∩ ${term || "PerturbSeqr down gs"}`,
                               genesUp:  genesUp,
                               genesDown:  genesDown,
                               library: libraryName,
@@ -1306,10 +1306,10 @@ function EnrichmentResults({
                               description: `${
                                 userGeneSetUp?.userGeneSet?.description ||
                                 "User up gs"
-                              } ∩ ${term || "PerturbSeek down gs"} + ${
+                              } ∩ ${term || "PerturbSeqr down gs"} + ${
                                 userGeneSetDown?.userGeneSet?.description ||
                                 "User down gs"
-                              } ∩ ${term || "PerturbSeek up gs"}`,
+                              } ∩ ${term || "PerturbSeqr up gs"}`,
                               genesUp:  genesUp,
                               genesDown:  genesDown,
                               library: libraryName,
@@ -1547,7 +1547,7 @@ export default function EnrichClientPage({
         >
           {(userGeneSetUp && userGeneSetDown) ? (userGeneSetUp?.userGeneSet?.description + " & " + userGeneSetDown?.userGeneSet?.description) : "Up & Down Gene Sets"}
           {userGeneSetUp ? (
-            <> ({nGenesIncluded} of {(userGeneSetUp?.userGeneSet?.genes?.length || 0) + (userGeneSetDown?.userGeneSet?.genes?.length || 0)} submitted genes were mapped to genes in the PerturbSeek background)</>
+            <> ({nGenesIncluded} of {(userGeneSetUp?.userGeneSet?.genes?.length || 0) + (userGeneSetDown?.userGeneSet?.genes?.length || 0)} submitted genes were mapped to genes in the PerturbSeqr background)</>
           ) : null}
         </label>
       </div>

@@ -12,11 +12,11 @@ export async function generateMetadata(props: {}, parent: ResolvingMetadata): Pr
 export default async function About() {
   return (
     <div className="prose">
-      <h2 className="title text-xl font-medium mb-3">About PerturbSeek</h2>
+      <h2 className="title text-xl font-medium mb-3">About PerturbSeqr</h2>
       <div className="flex">
         <div className="flex-col">
           <p className="mt-4">
-            PerturbSeek is a fork of <a className="underline" href="https://l2s2.maayanlab.cloud" target="_blank">L2S2</a> (LINCS L1000 Signature Search) for Signature Search across drug/chemical and gene perturbation datasets.
+            PerturbSeqr is a fork of <a className="underline" href="https://l2s2.maayanlab.cloud" target="_blank">L2S2</a> (LINCS L1000 Signature Search) for Signature Search across drug/chemical and gene perturbation datasets.
           </p>
           <p className="mt-4">
             <strong>Drug/Chemical Perturbation Datasets:</strong>
@@ -48,8 +48,8 @@ export default async function About() {
           </p>
           <ul className="list-disc ml-4">
             <li>
-              <a className="underline" href="https://github.com/MaayanLab/PerturbSeek" target="_blank">
-                PerturbSeek Source Code
+              <a className="underline" href="https://github.com/MaayanLab/PerturbSeqr" target="_blank">
+                PerturbSeqr Source Code
               </a>
             </li>
             <li>

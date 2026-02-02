@@ -22,7 +22,7 @@ export default function Home() {
     <div className="flex flex-col items-center">
       {/* Header with stats */}
       <h1 className="text-2xl font-bold mb-4">
-        PerturbSeek: Search through <Stats bold show_gene_sets />
+        PerturbSeqr: Search through <Stats bold show_gene_sets />
       </h1>
       {/* Dataset icons filter - centered below header */}
       <DatasetIcons

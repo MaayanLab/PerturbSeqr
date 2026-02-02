@@ -2,53 +2,52 @@
 # Restore them for production deployment:
 #   platform: linux/amd64
 services:
-  perturbseek-app:
+  perturbseqr-app:
     build: .
-    image: maayanlab/perturbseek:0.2.28
+    image: ghcr.io/maayanlab/perturbseqr-app:${IMAGE_TAG:-0.0.1}
     x-kubernetes:
       imagePullPolicy: IfNotPresent
       annotations:
-        maayanlab.cloud/ingress: https://perturbseek.maayanlab.cloud
+        maayanlab.cloud/ingress: https://perturbseqr.dev.maayanlab.cloud
     environment:
-      - PUBLIC_URL=https://perturbseek.maayanlab.cloud
-      - DATABASE_URL=postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@perturbseek-postgres/$POSTGRES_DB
+      - PUBLIC_URL=https://perturbseqr.dev.maayanlab.cloud
+      - DATABASE_URL=postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@perturbseqr-postgres/$POSTGRES_DB
       - AUTHORIZATION_HEADER=$AUTHORIZATION_HEADER
       - NODE_ENV=production
-      - ENRICH_URL=http://perturbseek-enrich:8000
+      - ENRICH_URL=http://perturbseqr-enrich:8000
       - NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
     ports:
       - 3000:3000
-  perturbseek-enrich:
+  perturbseqr-enrich:
     build: enrich
-    image: maayanlab/perturbseek-enrich:0.2.09
+    image: ghcr.io/maayanlab/perturbseqr-enrich:${IMAGE_TAG:-0.0.1}
     deploy:
       resources:
         reservations:
           memory: 5Gb
     environment:
-      - 'ROCKET_DATABASES={postgres={url="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@perturbseek-postgres/${POSTGRES_DB}"}}'
+      - 'ROCKET_DATABASES={postgres={url="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@perturbseqr-postgres/${POSTGRES_DB}"}}'
     ports:
       - 8000:8000
-  perturbseek-postgres:
+  perturbseqr-postgres:
     build: db
-    image: maayanlab/perturbseek-postgres:0.0.1
+    image: ghcr.io/maayanlab/perturbseqr-postgres:${IMAGE_TAG:-0.0.1}
     shm_size: 1Gb
     environment:
       - POSTGRES_DB
       - POSTGRES_USER
       - POSTGRES_PASSWORD
-      - ENRICH_URL=http://perturbseek-enrich:8000
+      - ENRICH_URL=http://perturbseqr-enrich:8000
     ports:
       - 5432:5432
     volumes:
-      - perturbseek-data:/var/lib/postgresql/data
+      - perturbseqr-data:/var/lib/postgresql/data
 
 volumes:
-  perturbseek-data:
+  perturbseqr-data:
     x-kubernetes:
-      size: 50Gi
-      class: gp2
+      size: 10Gi
 
 x-kubernetes:
-  name: perturbseek
-  namespace: perturbseek
+  name: perturbseqr
+  namespace: johnkgardner

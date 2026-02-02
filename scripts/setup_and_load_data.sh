@@ -1,6 +1,6 @@
 #!/bin/bash
-# PerturbSeek Setup and Data Loading Script
-# This script sets up PerturbSeek and loads all signature data from individual GMT files
+# PerturbSeqr Setup and Data Loading Script
+# This script sets up PerturbSeqr and loads all signature data from individual GMT files
 #
 # Prerequisites:
 #   - Docker and docker-compose installed
@@ -65,7 +65,7 @@ step_time() {
     echo "  ⏱️  Step took $((step_end - step_start)) seconds"
 }
 
-echo "=== PerturbSeek Setup Script ==="
+echo "=== PerturbSeqr Setup Script ==="
 echo "Working directory: $PROJECT_DIR"
 echo "Start time: $(date)"
 if [ "$DEV_MODE" = true ]; then
@@ -353,7 +353,7 @@ echo "Total time: $((SCRIPT_END - SCRIPT_START)) seconds"
 echo "End time: $(date)"
 echo "=========================================="
 echo ""
-echo "PerturbSeek backend services are running:"
+echo "PerturbSeqr backend services are running:"
 echo "  - Postgres:  localhost:5432 (user: postgres, password: postgres)"
 echo "  - Enrich:    http://localhost:8000"
 echo ""

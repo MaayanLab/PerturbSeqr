@@ -34,7 +34,7 @@ export function TermSearchResults({ terms, libraryNames }: { terms: string, libr
   return (
     <div className="flex flex-col gap-2 my-2">
       <h2 className="text-md font-bold">
-        After rummaging through <Stats show_gene_sets />. PerturbSeek <Image className="inline-block rounded" src="/images/DR_logo.png" width={50} height={50} alt="PerturbSeek"></Image> found your search term in {data.geneSetTermSearch?.totalCount} gene sets.
+        After rummaging through <Stats show_gene_sets />. PerturbSeqr <Image className="inline-block rounded" src="/images/DR_logo.png" width={50} height={50} alt="PerturbSeqr"></Image> found your search term in {data.geneSetTermSearch?.totalCount} gene sets.
       </h2>
       {data.geneSetTermSearch?.nodes && data.geneSetTermSearch?.nodes.length > 0 ? <TermTable terms={data.geneSetTermSearch?.nodes}></TermTable> : null}
     </div>
@@ -77,7 +77,7 @@ export default function TermSearchClientPage(props: { searchParams?: { page?: st
       <div className="flex flex-col items-center">
         {/* Header with stats */}
         <h1 className="text-2xl font-bold mb-4">
-          PerturbSeek: Search through <Stats bold show_gene_sets />
+          PerturbSeqr: Search through <Stats bold show_gene_sets />
         </h1>
         {/* Dataset icons filter - centered below header */}
         <DatasetIcons

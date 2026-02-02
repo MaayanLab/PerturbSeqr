@@ -7,8 +7,8 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 
 export const metadata: Metadata = {
-  title: "PerturbSeek",
-  description: "PerturbSeek",
+  title: "PerturbSeqr",
+  description: "PerturbSeqr",
   keywords: [
     "big data",
     "bioinformatics",

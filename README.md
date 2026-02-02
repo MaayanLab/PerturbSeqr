@@ -1,4 +1,4 @@
-# PerturbSeek
+# PerturbSeqr
 
 ## Quick Start
 

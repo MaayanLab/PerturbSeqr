@@ -41,7 +41,7 @@ export default function Footer() {
           </li>
           <li>
             <Link
-              href="https://github.com/MaayanLab/PerturbSeek"
+              href="https://github.com/MaayanLab/PerturbSeqr"
               target="_blank"
               rel="noopener noreferrer"
             >

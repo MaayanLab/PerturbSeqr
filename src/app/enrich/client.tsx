@@ -150,13 +150,13 @@ function EnrichmentResults({
             {consensus ? (
               <>
                 After rummaging through <Stats show_gene_sets />.{" "}
-                PerturbSeek{" "}
+                PerturbSeqr{" "}
                 <Image
                   className="inline-block rounded"
                   src="/images/DR_logo.png"
                   width={50}
                   height={50}
-                  alt="PerturbSeek"
+                  alt="PerturbSeqr"
                 ></Image>{" "}
                 computed significance for{" "}
                 {Intl.NumberFormat("en-US", {}).format(
@@ -167,13 +167,13 @@ function EnrichmentResults({
               </>
             ) : moas ? <>
             After rummaging through <Stats show_gene_sets />.{" "}
-                PerturbSeek{" "}
+                PerturbSeqr{" "}
                 <Image
                   className="inline-block rounded"
                   src="/images/DR_logo.png"
                   width={50}
                   height={50}
-                  alt="PerturbSeek"
+                  alt="PerturbSeqr"
                 ></Image>{" "}
                 computed significance for{" "}
                 {Intl.NumberFormat("en-US", {}).format(
@@ -184,13 +184,13 @@ function EnrichmentResults({
             : (
               <>
                 After rummaging through <Stats show_gene_sets />.{" "}
-                PerturbSeek{" "}
+                PerturbSeqr{" "}
                 <Image
                   className="inline-block rounded"
                   src="/images/DR_logo.png"
                   width={50}
                   height={50}
-                  alt="PerturbSeek"
+                  alt="PerturbSeqr"
                 ></Image>{" "}
                 found{" "}
                 {Intl.NumberFormat("en-US", {}).format(
@@ -1247,7 +1247,7 @@ function EnrichmentResults({
                               description: `${
                                 userGeneSet?.userGeneSet?.description ||
                                 "User gene set"
-                              } & ${term || "PerturbSeek gene set"}`,
+                              } & ${term || "PerturbSeqr gene set"}`,
                               genes,
                               library: libraryName,
                             });
@@ -1466,7 +1466,7 @@ export default function EnrichClientPage({
         >
           {userGeneSet?.userGeneSet?.description || "Gene set"}
           {userGeneSet ? (
-            <> ({nGenesIncluded} of {userGeneSet?.userGeneSet?.genes?.length ?? "?"} submitted genes were mapped to genes in the PerturbSeek background)</>
+            <> ({nGenesIncluded} of {userGeneSet?.userGeneSet?.genes?.length ?? "?"} submitted genes were mapped to genes in the PerturbSeqr background)</>
           ) : null}
         </label>
         {libraryNames && libraryNames.length > 0 && (

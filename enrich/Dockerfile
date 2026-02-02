@@ -1,6 +1,7 @@
-FROM rust as builder
+FROM rust AS builder
 WORKDIR /usr/src/enrich
 COPY . .
+ENV RUST_MIN_STACK=16777216
 RUN cargo install --path .
 
 FROM debian:bookworm-slim
