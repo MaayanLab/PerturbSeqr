@@ -2,6 +2,8 @@ import React from 'react'
 import { Metadata, ResolvingMetadata } from 'next'
 import EnrichClientPage from './client'
 
+export const dynamic = 'force-dynamic'
+
 /**
  * Generate metadata for the enrichment page
  * Input: searchParams with dataset ID

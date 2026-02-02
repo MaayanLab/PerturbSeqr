@@ -2,6 +2,8 @@ import React from 'react'
 import { Metadata, ResolvingMetadata } from 'next'
 import EnrichClientPage from './client'
 
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata(props: { searchParams: { dataset: string | string[] | undefined, libraries?: string } }, parent: ResolvingMetadata): Promise<Metadata> {
   const parentMetadata = await parent
   return {

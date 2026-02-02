@@ -2,6 +2,8 @@ import Link from "next/link";
 import getItem from "./item";
 import { Metadata, ResolvingMetadata } from "next";
 
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata(props: { params: { id: string } }, parent: ResolvingMetadata): Promise<Metadata> {
   const parentMetadata = await parent
   const { data } = await getItem(props.params.id)
