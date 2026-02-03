@@ -12,9 +12,11 @@
 # Usage:
 #   ./scripts/setup_and_load_data.sh                   # Production mode (default) - Docker container frontend
 #   ./scripts/setup_and_load_data.sh --dev             # Dev mode - Next.js dev server with hot reloading
+#   ./scripts/setup_and_load_data.sh --dev --local     # Dev mode with native ARM64/AMD64 images (faster on Mac)
 #   ./scripts/setup_and_load_data.sh --rebuild         # Rebuild Docker images before starting
 #   ./scripts/setup_and_load_data.sh --rebuild --dev   # Rebuild and run in dev mode
 #   ./scripts/setup_and_load_data.sh --clean           # Clean rebuild: prune build cache, remove volumes, rebuild images
+#   ./scripts/setup_and_load_data.sh --minio           # Load GMT files from MinIO instead of local files
 
 set -e  # Exit on error
 
@@ -22,6 +24,8 @@ set -e  # Exit on error
 DEV_MODE=false
 REBUILD=false
 CLEAN=false
+LOCAL=false
+USE_MINIO=false
 for arg in "$@"; do
     case $arg in
         --dev)
@@ -37,6 +41,14 @@ for arg in "$@"; do
             REBUILD=true  # --clean implies --rebuild
             shift
             ;;
+        --local)
+            LOCAL=true
+            shift
+            ;;
+        --minio)
+            USE_MINIO=true
+            shift
+            ;;
     esac
 done
 
@@ -45,9 +57,9 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 cd "$PROJECT_DIR"
 
 # Container names (docker compose uses: {project}-{service}-{instance})
-# Project name comes from COMPOSE_PROJECT_NAME in .env (perturbseek)
-POSTGRES_CONTAINER="perturbseek-perturbseek-postgres-1"
-ENRICH_CONTAINER="perturbseek-perturbseek-enrich-1"
+# Project name comes from COMPOSE_PROJECT_NAME in .env (perturbseqr)
+POSTGRES_CONTAINER="perturbseqr-perturbseqr-postgres-1"
+ENRICH_CONTAINER="perturbseqr-perturbseqr-enrich-1"
 
 # Database connection
 DB_HOST="${DB_HOST:-127.0.0.1}"
@@ -73,8 +85,14 @@ if [ "$DEV_MODE" = true ]; then
 else
     echo "Mode: Production (Docker container frontend)"
 fi
+if [ "$LOCAL" = true ]; then
+    echo "Local build: Enabled (native platform images)"
+fi
 if [ "$CLEAN" = true ]; then
     echo "Clean mode: Enabled (will prune build cache)"
+fi
+if [ "$USE_MINIO" = true ]; then
+    echo "MinIO mode: Enabled (will load GMT files from MinIO)"
 fi
 echo ""
 
@@ -112,6 +130,36 @@ step_time $STEP_START
 echo ""
 
 # ------------------------------------------------------------------------------
+# Local build setup: Determine architecture-specific image tag
+# ------------------------------------------------------------------------------
+if [ "$LOCAL" = true ]; then
+    ARCH=$(uname -m)
+    case $ARCH in
+        arm64|aarch64) IMAGE_TAG="local-arm64" ;;
+        x86_64|amd64)  IMAGE_TAG="local-amd64" ;;
+        *)             IMAGE_TAG="local-$ARCH" ;;
+    esac
+    export IMAGE_TAG
+    echo "=== Local Build Mode ==="
+    echo "Architecture: $ARCH"
+    echo "Image tag: $IMAGE_TAG"
+
+    # Check if images already exist (skip build if they do, unless --rebuild)
+    ENRICH_EXISTS=$(docker images -q "johnkgardner/perturbseqr-enrich:$IMAGE_TAG" 2>/dev/null)
+    POSTGRES_EXISTS=$(docker images -q "johnkgardner/perturbseqr-postgres:$IMAGE_TAG" 2>/dev/null)
+
+    if [ "$REBUILD" = true ] || [ -z "$ENRICH_EXISTS" ] || [ -z "$POSTGRES_EXISTS" ]; then
+        echo "Building local $ARCH images (tag: $IMAGE_TAG)..."
+        STEP_START=$(date +%s)
+        docker compose build perturbseqr-enrich perturbseqr-postgres
+        step_time $STEP_START
+    else
+        echo "Using existing local images (tag: $IMAGE_TAG)"
+    fi
+    echo ""
+fi
+
+# ------------------------------------------------------------------------------
 # Step 2: Regenerate GraphQL types (if rebuilding)
 # The Next.js app requires pre-generated types matching the current schema.
 # This step starts postgres temporarily, runs migrations, generates types, then stops.
@@ -124,7 +172,7 @@ if [ "$REBUILD" = true ]; then
     docker compose down -v 2>/dev/null || true
 
     # Start postgres temporarily for type generation
-    docker compose up -d perturbseek-postgres
+    docker compose up -d perturbseqr-postgres
     echo "Waiting for PostgreSQL..."
     WAIT_COUNT=0
     until docker exec $POSTGRES_CONTAINER pg_isready -U postgres &> /dev/null; do
@@ -197,7 +245,7 @@ fi
 # ------------------------------------------------------------------------------
 STEP_START=$(date +%s)
 echo "=== Step 4: Starting PostgreSQL container ==="
-docker compose up -d perturbseek-postgres
+docker compose up -d perturbseqr-postgres
 
 echo "Waiting for PostgreSQL to be ready..."
 
@@ -229,16 +277,61 @@ step_time $STEP_START
 echo ""
 
 # ------------------------------------------------------------------------------
+# Step 5b: Start MinIO and upload GMT files (if --minio mode)
+# ------------------------------------------------------------------------------
+if [ "$USE_MINIO" = true ]; then
+    STEP_START=$(date +%s)
+    echo "=== Step 5b: Starting MinIO and uploading GMT files ==="
+
+    # Check for MINIO_ROOT_PASSWORD
+    if [ -z "$MINIO_ROOT_PASSWORD" ]; then
+        echo "ERROR: MINIO_ROOT_PASSWORD environment variable is required for --minio mode"
+        echo "  Set it with: export MINIO_ROOT_PASSWORD=<password>"
+        exit 1
+    fi
+
+    # Start MinIO container
+    MINIO_CONTAINER="perturbseqr-perturbseqr-minio-1"
+    docker compose up -d perturbseqr-minio
+
+    echo "Waiting for MinIO to be ready..."
+    WAIT_COUNT=0
+    MAX_WAIT=30
+    until curl -s http://localhost:9000/minio/health/live > /dev/null 2>&1; do
+        WAIT_COUNT=$((WAIT_COUNT + 1))
+        if [ $WAIT_COUNT -ge $MAX_WAIT ]; then
+            echo "ERROR: MinIO failed to start after ${MAX_WAIT} seconds"
+            exit 1
+        fi
+        echo "  Waiting for MinIO... ($WAIT_COUNT/$MAX_WAIT)"
+        sleep 1
+    done
+    echo "MinIO is ready."
+
+    # Upload GMT files to MinIO
+    echo "Uploading GMT files to MinIO..."
+    uv run scripts/upload_gmts_to_minio.py
+    step_time $STEP_START
+    echo ""
+fi
+
+# ------------------------------------------------------------------------------
 # Step 6: Load all signature data from GMT files
 # ------------------------------------------------------------------------------
 STEP_START=$(date +%s)
 echo "=== Step 6: Loading signatures from GMT files ==="
 echo ""
 
-# Batch ingest all GMT files from db/data/drug_perturbation and db/data/gene_perturbation
+# Batch ingest all GMT files
 # Library names and directions are automatically parsed from filenames
 # Note: Large files like l1000-cp (718K gene sets) require ~4GB RAM on host machine
-uv run db/ingest.py --batch
+if [ "$USE_MINIO" = true ]; then
+    echo "Loading from MinIO..."
+    uv run db/ingest.py --batch --minio
+else
+    echo "Loading from local files..."
+    uv run db/ingest.py --batch
+fi
 step_time $STEP_START
 echo ""
 
@@ -278,7 +371,7 @@ echo ""
 # ------------------------------------------------------------------------------
 STEP_START=$(date +%s)
 echo "=== Step 10: Starting enrich service ==="
-docker compose up -d perturbseek-enrich
+docker compose up -d perturbseqr-enrich
 
 echo "Waiting for enrich service to be ready..."
 sleep 5

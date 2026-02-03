@@ -20,6 +20,11 @@ export default function Nav() {
           shallow>Term Search</Link></li>
       <li>
         <Link
+          href="/explore"
+          className={classNames({ 'active': pathname === '/explore' })}
+          shallow>Explore</Link></li>
+      <li>
+        <Link
           href="/download"
           className={classNames({ 'active': pathname === '/download' })}
           shallow>Download</Link></li>

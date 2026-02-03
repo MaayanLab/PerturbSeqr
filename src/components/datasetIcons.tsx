@@ -10,7 +10,7 @@ const logoMap: Record<string, { src: string; type: 'image' | 'svg' }> = {
   'L1000-CP': { src: '/images/lincs-logo.png', type: 'image' },
   'L1000-XPR': { src: '/images/lincs-logo.png', type: 'image' },
   'CMAP-Build02': { src: '/images/cmap-logo.svg', type: 'svg' },
-  'DRUGseqr': { src: '/images/novartis-logo.png', type: 'image' },
+  'Novartis DRUG-seq': { src: '/images/novartis-logo.png', type: 'image' },
   'SciPlex': { src: '/images/sciplex-logo.png', type: 'image' },
   'DeepCoverMoA': { src: '/images/deepcovermoa-logo.png', type: 'image' },
   'GEO-Chem': { src: '/images/geo-logo.svg', type: 'svg' },

@@ -4,23 +4,26 @@
 services:
   perturbseqr-app:
     build: .
-    image: ghcr.io/maayanlab/perturbseqr-app:${IMAGE_TAG:-0.0.1}
+    image: johnkgardner/perturbseqr-app:${IMAGE_TAG:-0.0.1}
     x-kubernetes:
       imagePullPolicy: IfNotPresent
-      annotations:
-        maayanlab.cloud/ingress: https://perturbseqr.dev.maayanlab.cloud
     environment:
-      - PUBLIC_URL=https://perturbseqr.dev.maayanlab.cloud
+      - PUBLIC_URL=https://perturbseqr.k8s.dev.maayanlab.cloud
       - DATABASE_URL=postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@perturbseqr-postgres/$POSTGRES_DB
       - AUTHORIZATION_HEADER=$AUTHORIZATION_HEADER
       - NODE_ENV=production
       - ENRICH_URL=http://perturbseqr-enrich:8000
       - NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
+      - NEXT_PUBLIC_MINIO_URL=${NEXT_PUBLIC_MINIO_URL:-https://s3.perturbseqr.k8s.dev.maayanlab.cloud}
     ports:
-      - 3000:3000
+      - target: 3000
+        published: 3000
+        x-kubernetes:
+          annotations:
+            maayanlab.cloud/ingress: perturbseqr.k8s.dev.maayanlab.cloud
   perturbseqr-enrich:
     build: enrich
-    image: ghcr.io/maayanlab/perturbseqr-enrich:${IMAGE_TAG:-0.0.1}
+    image: johnkgardner/perturbseqr-enrich:${IMAGE_TAG:-0.0.1}
     deploy:
       resources:
         reservations:
@@ -29,9 +32,11 @@ services:
       - 'ROCKET_DATABASES={postgres={url="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@perturbseqr-postgres/${POSTGRES_DB}"}}'
     ports:
       - 8000:8000
+    volumes:
+      - enrich-data:/data
   perturbseqr-postgres:
     build: db
-    image: ghcr.io/maayanlab/perturbseqr-postgres:${IMAGE_TAG:-0.0.1}
+    image: johnkgardner/perturbseqr-postgres:${IMAGE_TAG:-0.0.1}
     shm_size: 1Gb
     environment:
       - POSTGRES_DB
@@ -42,11 +47,39 @@ services:
       - 5432:5432
     volumes:
       - perturbseqr-data:/var/lib/postgresql/data
+  perturbseqr-minio:
+    image: quay.io/minio/minio
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minio}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    ports:
+      - target: 9000
+        published: 9000
+        x-kubernetes:
+          annotations:
+            maayanlab.cloud/ingress: s3.perturbseqr.k8s.dev.maayanlab.cloud
+      - target: 9001
+        published: 9001
+        x-kubernetes:
+          annotations:
+            maayanlab.cloud/ingress: minio.perturbseqr.k8s.dev.maayanlab.cloud
+    volumes:
+      - minio-data:/data
 
 volumes:
   perturbseqr-data:
     x-kubernetes:
+      size: 50Gi
+      class: local-path
+  enrich-data:
+    x-kubernetes:
       size: 10Gi
+      class: local-path
+  minio-data:
+    x-kubernetes:
+      size: 5Gi
+      class: local-path
 
 x-kubernetes:
   name: perturbseqr

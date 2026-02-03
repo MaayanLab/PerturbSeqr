@@ -1,0 +1,44 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: perturbseqr-app
+  namespace: johnkgardner
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`perturbseqr.k8s.dev.maayanlab.cloud`)
+      kind: Rule
+      services:
+        - name: perturbseqr-app
+          port: 3000
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: perturbseqr-minio-s3
+  namespace: johnkgardner
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`s3.perturbseqr.k8s.dev.maayanlab.cloud`)
+      kind: Rule
+      services:
+        - name: perturbseqr-minio
+          port: 9000
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: perturbseqr-minio-console
+  namespace: johnkgardner
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`minio.perturbseqr.k8s.dev.maayanlab.cloud`)
+      kind: Rule
+      services:
+        - name: perturbseqr-minio
+          port: 9001

@@ -252,8 +252,8 @@ export const SOURCE_INFO: Record<string, { name: string; url: string }> = {
     url: 'https://huggingface.co/datasets/tahoebio/Tahoe-100M#drug-metadata',
   },
   drugseqr: {
-    name: 'DRUGseqr',
-    url: 'https://github.com/Novartis/DRUG-seq/tree/main/data',
+    name: 'Novartis DRUG-seq',
+    url: 'https://zenodo.org/records/14291446',
   },
   lincs: {
     name: 'LINCS',

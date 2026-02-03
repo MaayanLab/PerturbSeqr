@@ -4,6 +4,7 @@
 #   "psycopg2-binary",
 #   "tqdm",
 #   "polars",
+#   "minio",
 # ]
 # ///
 """
@@ -11,8 +12,15 @@ Ingest GMT files into PerturbSeek database.
 
 Usage:
   uv run db/ingest.py --batch              # Ingest all GMT files from data directories
+  uv run db/ingest.py --batch --minio      # Ingest all GMT files from MinIO
   uv run db/ingest.py --batch --dry-run    # Preview without ingesting
   uv run db/ingest.py -i FILE -l LIB -d up # Single file mode
+
+Environment variables for MinIO mode:
+  MINIO_ENDPOINT: MinIO server endpoint (default: localhost:9000)
+  MINIO_ROOT_USER: MinIO access key (default: minio)
+  MINIO_ROOT_PASSWORD: MinIO secret key (required)
+  MINIO_SECURE: Use HTTPS (default: false)
 """
 
 import json
@@ -26,7 +34,7 @@ import polars as pl
 from tqdm import tqdm
 from gmt_parser import read_gmt
 from perturbation_parser import extract_perturbation
-from db_utils import get_conn, get_cid, get_or_create_library, query, discover_gmt_files
+from db_utils import get_conn, get_cid, get_or_create_library, query, discover_gmt_files, discover_minio_gmt_files, download_minio_gmt_file
 
 # Helper lambdas
 extract_fallback_id = lambda term, lib: term.rsplit(" ", 1)[0].split("_")[1] if lib == "drugseqr" else None
@@ -105,22 +113,38 @@ def ingest_gmt(conn, gmt_path: Path, library_name: str, direction: str):
 def main():
     parser = argparse.ArgumentParser(description='Ingest GMT files into PerturbSeek')
     parser.add_argument('--batch', action='store_true', help='Ingest all GMT files from data directories')
+    parser.add_argument('--minio', action='store_true', help='Use MinIO instead of local files (requires --batch)')
     parser.add_argument('--dry-run', action='store_true', help='Preview what would be ingested')
     parser.add_argument('-i', '--input', type=Path, help='GMT file to ingest')
     parser.add_argument('-l', '--library', type=str, help='Library/dataset name')
     parser.add_argument('-d', '--direction', type=str, choices=['up', 'down'], help='Direction suffix')
     args = parser.parse_args()
 
+    use_minio = args.minio
+
     if args.batch:
         if args.input or args.library or args.direction:
             parser.error('--batch cannot be used with -i, -l, or -d')
-        files = discover_gmt_files()
-        if not files:
-            return print("No GMT files found in data directories")
-        print(f"Found {len(files)} GMT files to ingest:\n")
-        for f, lib, d in files:
-            print(f"  {f.name:<50} -> library={lib}, direction={d}")
+
+        if use_minio:
+            print("Discovering GMT files from MinIO...")
+            minio_files = discover_minio_gmt_files()
+            if not minio_files:
+                return print("No GMT files found in MinIO bucket 'gmts'")
+            print(f"Found {len(minio_files)} GMT files in MinIO:\n")
+            for obj_name, lib, d in minio_files:
+                print(f"  {obj_name:<45} -> library={lib}, direction={d}")
+            files = minio_files  # [(object_name, library, direction), ...]
+        else:
+            files = discover_gmt_files()
+            if not files:
+                return print("No GMT files found in data directories")
+            print(f"Found {len(files)} GMT files to ingest:\n")
+            for f, lib, d in files:
+                print(f"  {f.name:<50} -> library={lib}, direction={d}")
     else:
+        if args.minio:
+            parser.error('--minio requires --batch')
         if not all([args.input, args.library, args.direction]):
             parser.error('-i, -l, and -d are required when not using --batch')
         files = [(args.input, args.library, args.direction)]
@@ -130,10 +154,24 @@ def main():
 
     conn = get_conn()
     try:
-        for i, (filepath, library, direction) in enumerate(files, 1):
-            if args.batch:
-                print(f"\n[{i}/{len(files)}] Processing {filepath.name}\n" + "=" * 60)
-            ingest_gmt(conn, filepath, library, direction)
+        for i, (file_ref, library, direction) in enumerate(files, 1):
+            if use_minio:
+                object_name = file_ref
+                print(f"\n[{i}/{len(files)}] Downloading {object_name} from MinIO...")
+                filepath = download_minio_gmt_file(object_name)
+                print(f"  Downloaded to {filepath}")
+            else:
+                filepath = file_ref
+                if args.batch:
+                    print(f"\n[{i}/{len(files)}] Processing {filepath.name}\n" + "=" * 60)
+
+            try:
+                ingest_gmt(conn, filepath, library, direction)
+            finally:
+                # Clean up temp file if downloaded from MinIO
+                if use_minio:
+                    filepath.unlink(missing_ok=True)
+
         conn.commit()
         print(f"\nDone! Ingested {len(files)} file(s).")
     except Exception:

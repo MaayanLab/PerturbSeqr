@@ -22,3 +22,16 @@ yarn-debug.log*
 yarn-error.log*
 benchmarkingdb/data
 *.dump
+
+# GMT files served from MinIO, not app container
+public/gmts
+
+# Database files - only needed by postgres container, not app
+db/
+
+# Scripts and utilities not needed at runtime
+scripts/
+notebooks/
+scratch/
+k8s/
+benchmarking/
