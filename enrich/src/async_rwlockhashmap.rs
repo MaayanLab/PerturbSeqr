@@ -42,4 +42,9 @@ where K: Eq + PartialEq + Hash {
     writer.insert(k, v.clone());
     v.write_arc().await
   }
+
+  pub async fn insert(&self, k: K, v: V) {
+    let mut writer = self.0.write().await;
+    writer.insert(k, Arc::new(RwLock::new(v)));
+  }
 }

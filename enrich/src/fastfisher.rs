@@ -1,3 +1,6 @@
+use serde::{Serialize, Deserialize};
+
+#[derive(Serialize, Deserialize)]
 pub struct FastFisher{f: Vec<f64>}
 
 impl FastFisher {

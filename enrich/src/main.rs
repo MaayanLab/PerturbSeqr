@@ -25,7 +25,10 @@ use uuid::Uuid;
 use adjustp::{adjust, Procedure};
 use rocket::{State, response::status::Custom, http::Status};
 use rocket::serde::{json::{json, Json, Value}, Serialize, Deserialize};
+use serde::{Serialize as SerdeSerialize, Deserialize as SerdeDeserialize};
 use std::sync::Arc;
+use std::fs::File;
+use std::io::{BufReader, BufWriter};
 use retainer::Cache;
 use std::time::Instant;
 
@@ -77,6 +80,7 @@ struct InputGeneSets {
 ///
 /// - Before: O(1.8M) iterations + O(1.8M) HashMap lookups = ~370 seconds
 /// - After: O(700K) direct iterations = ~900ms (400x faster)
+#[derive(SerdeSerialize, SerdeDeserialize, Clone)]
 struct Bitmap {
     columns: HashMap<Uuid, u32>,
     columns_str: Vec<String>,
@@ -93,6 +97,7 @@ struct Bitmap {
     full_background: DenseBitVec,                          // all genes (for no-filter case)
 }
 
+#[derive(SerdeSerialize, SerdeDeserialize, Clone)]
 struct SignaturePairs {
     pairs: Vec<(usize, usize)>, // Stores index pairs for "up" and "down" signatures
 }
@@ -297,13 +302,71 @@ impl<'r> Responder<'r, 'static> for PairedQueryResponse {
 }
 
 
+/// Index persistence: serialize bitmap to disk using bincode for fast startup.
+/// Building the index from the database takes ~10 minutes; loading from disk takes ~1 second.
+#[derive(SerdeSerialize, SerdeDeserialize)]
+struct SerializableIndex {
+    background_id: Uuid,
+    bitmap: Bitmap,
+}
+
+/// Returns the path where the index file is stored for a given background_id.
+fn get_index_path(background_id: &Uuid) -> String {
+    format!("/data/index_{}.bin", background_id)
+}
+
+/// Saves the bitmap index to disk using bincode serialization.
+/// Called after building the index from the database to enable fast subsequent startups.
+fn save_index(background_id: &Uuid, bitmap: &Bitmap) -> Result<(), String> {
+    let path = get_index_path(background_id);
+    let file = File::create(&path).map_err(|e| e.to_string())?;
+    let writer = BufWriter::new(file);
+    let index = SerializableIndex {
+        background_id: *background_id,
+        bitmap: bitmap.clone(),
+    };
+    bincode::serialize_into(writer, &index).map_err(|e| e.to_string())?;
+    println!("[{}] saved index to {}", background_id, path);
+    Ok(())
+}
+
+/// Loads the bitmap index from disk using bincode deserialization.
+/// Returns an error if the file doesn't exist or the background_id doesn't match.
+fn load_index(background_id: &Uuid) -> Result<Bitmap, String> {
+    let path = get_index_path(background_id);
+    let file = File::open(&path).map_err(|e| e.to_string())?;
+    let reader = BufReader::new(file);
+    let index: SerializableIndex = bincode::deserialize_from(reader).map_err(|e| e.to_string())?;
+    if index.background_id != *background_id {
+        return Err(format!("Index file background_id mismatch: expected {}, got {}", background_id, index.background_id));
+    }
+    println!("[{}] loaded index from {}", background_id, path);
+    Ok(index.bitmap)
+}
+
 // Ensure the specific background_id exists in state, resolving it if necessary
 async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentState>, background_id: Uuid) -> Result<(), String> {
+    // Check if already in memory
     if state.bitmaps.contains_key(&background_id).await {
         return Ok(())
     }
 
-    println!("[{}] initializing", background_id);
+    // Try to load from disk
+    if let Ok(bitmap) = load_index(&background_id) {
+        let start = Instant::now();
+        // Extend fisher table to handle this background
+        {
+            let mut fisher = state.fisher.write().await;
+            fisher.extend_to(bitmap.columns.len() * 4);
+        }
+        state.bitmaps.insert(background_id, bitmap).await;
+        *state.latest.write().await = Some(background_id);
+        let duration = start.elapsed();
+        println!("[{}] loaded from disk in {:?}", background_id, duration);
+        return Ok(());
+    }
+
+    println!("[{}] initializing from database", background_id);
     let start = Instant::now();
     {
         // this lets us write a new bitmap by only blocking the whole hashmap for a short period to register the new bitmap
@@ -403,10 +466,15 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
 
         // compute and store pairs
         bitmap.finalize();
+
+        // Save to disk for faster subsequent startups
+        if let Err(e) = save_index(&background_id, &bitmap) {
+            println!("[{}] warning: failed to save index to disk: {}", background_id, e);
+        }
     }
-    
+
     let duration = start.elapsed();
-    println!("[{}] initialized in {:?}", background_id, duration);
+    println!("[{}] initialized from database in {:?}", background_id, duration);
     {
         let mut latest = state.latest.write().await;
         latest.replace(background_id);

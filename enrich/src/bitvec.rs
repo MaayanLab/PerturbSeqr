@@ -1,7 +1,9 @@
 use uuid::Uuid;
 use std::collections::HashMap;
+use serde::{Serialize, Deserialize};
 
 // Representing indexes in a larger vector (background)
+#[derive(Serialize, Deserialize, Clone)]
 pub struct SparseBitVec{pub v:Vec<u32>}
 impl SparseBitVec {
     pub fn new(background: &HashMap<Uuid, u32>, gene_set: &Vec<Uuid>) -> Self {
@@ -10,7 +12,7 @@ impl SparseBitVec {
 }
 
 // Storing a multi-hot encoded vector for the gene set
-#[derive(Eq, PartialEq, PartialOrd, Ord, Clone)]
+#[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Serialize, Deserialize)]
 pub struct DenseBitVec{pub v:Vec<u8>, pub n:usize}
 impl DenseBitVec {
     pub fn new(background: &HashMap<Uuid, u32>, gene_set: &Vec<Uuid>) -> Self {
