@@ -1,0 +1,115 @@
+name: Build All Images
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Image tag'
+        required: true
+        default: '0.0.1'
+
+jobs:
+  build-app:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push app image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ghcr.io/maayanlab/perturbseqr-app:${{ github.event.inputs.tag }}
+            johnkgardner/perturbseqr-app:${{ github.event.inputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-enrich:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push enrich image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./enrich
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ghcr.io/maayanlab/perturbseqr-enrich:${{ github.event.inputs.tag }}
+            johnkgardner/perturbseqr-enrich:${{ github.event.inputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-db:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push db image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./db
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ghcr.io/maayanlab/perturbseqr-postgres:${{ github.event.inputs.tag }}
+            johnkgardner/perturbseqr-postgres:${{ github.event.inputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
