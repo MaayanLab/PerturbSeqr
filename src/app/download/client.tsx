@@ -10,6 +10,8 @@ type Dataset = {
   value: string
   info: string  // Size, last updated, etc.
   sourceUrl: string
+  sourceUrl2?: string  // Second citation if needed
+  sourceLabel?: string  // Default "Citation(s)", can be "Link" for metadata
   secondaryUrl?: string  // Harmonizome or Hugging Face
   secondaryLabel?: string  // "Harmonizome" or "Hugging Face"
   note?: string
@@ -31,10 +33,10 @@ const drugPerturbationDatasets: Dataset[] = [
     title: 'L1000-CP (Chemical Perturbations)',
     value: '1,436,110 signatures',
     info: 'Up: 1.1 GB, Down: 1.1 GB, Last Updated Jul 1 2021',
-    sourceUrl: 'https://l2s2.maayanlab.cloud/download',
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/35524556/',
     upUrl: `${MINIO_BASE}/gmts/l1000-cp-up.gmt.gz`,
     downUrl: `${MINIO_BASE}/gmts/l1000-cp-down.gmt.gz`,
-    note: 'Processed by ',
+    note: 'See also ',
     noteLinkText: 'L2S2',
     noteUrl: 'https://l2s2.maayanlab.cloud/download',
   },
@@ -47,18 +49,17 @@ const drugPerturbationDatasets: Dataset[] = [
     secondaryLabel: 'Hugging Face',
     upUrl: `${MINIO_BASE}/gmts/tahoe-100m-up.gmt.gz`,
     downUrl: `${MINIO_BASE}/gmts/tahoe-100m-down.gmt.gz`,
-    metadataUrl: 'https://huggingface.co/datasets/tahoebio/Tahoe-100M#drug-metadata',
   },
   {
     title: 'Novartis/DRUG-seq U2OS MoABox Dataset',
     value: '26,316 signatures',
     info: 'Up: 3.2 MB, Down: 3.2 MB',
-    sourceUrl: 'https://zenodo.org/records/14291446',
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/35508359/',
     secondaryUrl: 'https://maayanlab.cloud/Harmonizome/dataset/NIBR+DRUG-seq+U2OS+MoA+Box+Gene+Expression+Profiles',
     secondaryLabel: 'Harmonizome',
     upUrl: `${MINIO_BASE}/gmts/drugseqr-up.gmt.gz`,
     downUrl: `${MINIO_BASE}/gmts/drugseqr-down.gmt.gz`,
-    note: 'Processed by ',
+    note: 'See also ',
     noteLinkText: 'DRUGseqr',
     noteUrl: 'https://drugseqr.maayanlab.cloud/download',
   },
@@ -66,7 +67,7 @@ const drugPerturbationDatasets: Dataset[] = [
     title: 'CMAP Build 02',
     value: '12,200 signatures',
     info: 'Up: 3.7 MB, Down: 3.8 MB',
-    sourceUrl: 'https://www.broadinstitute.org/connectivity-map-cmap',
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/17008526/',
     secondaryUrl: 'https://maayanlab.cloud/Harmonizome/dataset/CMAP+Signatures+of+Differentially+Expressed+Genes+for+Small+Molecules',
     secondaryLabel: 'Harmonizome',
     upUrl: `${MINIO_BASE}/gmts/cmap-build02-up.gmt.gz`,
@@ -86,7 +87,7 @@ const drugPerturbationDatasets: Dataset[] = [
     title: 'Sci-Plex Drug Perturbations',
     value: '4,604 signatures',
     info: 'Up: 6.9 MB, Down: 6.9 MB',
-    sourceUrl: 'https://github.com/cole-trapnell-lab/sci-plex',
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/31806696/',
     secondaryUrl: 'https://maayanlab.cloud/Harmonizome/dataset/Sci-Plex+Drug+Perturbation+Signatures',
     secondaryLabel: 'Harmonizome',
     upUrl: `${MINIO_BASE}/gmts/sciplex-up.gmt.gz`,
@@ -96,7 +97,7 @@ const drugPerturbationDatasets: Dataset[] = [
     title: 'DeepCoverMOA',
     value: '1,748 signatures',
     info: 'Up: 0.5 MB, Down: 0.5 MB',
-    sourceUrl: 'https://wren.hms.harvard.edu/DeepCoverMOA/',
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/36593396/',
     secondaryUrl: 'https://maayanlab.cloud/Harmonizome/dataset/DeepCoverMOA+Drug+Mechanisms+of+Action',
     secondaryLabel: 'Harmonizome',
     upUrl: `${MINIO_BASE}/gmts/deepcovermoa-up.gmt.gz`,
@@ -106,7 +107,8 @@ const drugPerturbationDatasets: Dataset[] = [
     title: 'GEO Small Molecules',
     value: '810 signatures',
     info: 'Up: 1.5 MB, Down: 0.3 MB',
-    sourceUrl: 'https://www.ncbi.nlm.nih.gov/geo/',
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/23193258/',
+    sourceUrl2: 'https://pubmed.ncbi.nlm.nih.gov/11752295/',
     secondaryUrl: 'https://maayanlab.cloud/Harmonizome/dataset/GEO+Signatures+of+Differentially+Expressed+Genes+for+Small+Molecules',
     secondaryLabel: 'Harmonizome',
     upUrl: `${MINIO_BASE}/gmts/geo-chem-up.gmt.gz`,
@@ -120,7 +122,7 @@ const genePerturbationDatasets: Dataset[] = [
     title: 'PerturbAtlas Gene Perturbations',
     value: '12,852 signatures',
     info: 'Up: 3.1 MB, Down: 3.1 MB',
-    sourceUrl: 'https://perturbatlas.kratoss.site/#/',
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/39351872/',
     secondaryUrl: 'https://maayanlab.cloud/Harmonizome/dataset/PerturbAtlas+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations',
     secondaryLabel: 'Harmonizome',
     upUrl: `${MINIO_BASE}/gmts/perturbatlas-up.gmt.gz`,
@@ -130,7 +132,7 @@ const genePerturbationDatasets: Dataset[] = [
     title: 'PerturbAtlas Mouse Gene Perturbations',
     value: '10,743 signatures',
     info: 'Up: 2.3 MB, Down: 2.3 MB',
-    sourceUrl: 'https://perturbatlas.kratoss.site/#/',
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/39351872/',
     secondaryUrl: 'https://maayanlab.cloud/Harmonizome/dataset/PerturbAtlas+Signatures+of+Differentially+Expressed+Genes+for+Mouse+Gene+Perturbations',
     secondaryLabel: 'Harmonizome',
     upUrl: `${MINIO_BASE}/gmts/perturbatlas-mouse-up.gmt.gz`,
@@ -140,10 +142,10 @@ const genePerturbationDatasets: Dataset[] = [
     title: 'L1000-XPR (Gene Knockouts)',
     value: '281,890 signatures',
     info: 'Up: 219 MB, Down: 219 MB, Last Updated Jul 1 2021',
-    sourceUrl: 'https://l2s2.maayanlab.cloud/download',
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/35524556/',
     upUrl: `${MINIO_BASE}/gmts/l1000-xpr-up.gmt.gz`,
     downUrl: `${MINIO_BASE}/gmts/l1000-xpr-down.gmt.gz`,
-    note: 'Processed by ',
+    note: 'See also ',
     noteLinkText: 'L2S2',
     noteUrl: 'https://l2s2.maayanlab.cloud/download',
   },
@@ -181,11 +183,20 @@ const genePerturbationDatasets: Dataset[] = [
     title: 'GEO Gene Perturbations',
     value: '1,477 signatures',
     info: 'Up: 1.1 MB, Down: 1.1 MB',
-    sourceUrl: 'https://www.ncbi.nlm.nih.gov/geo/',
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/23193258/',
+    sourceUrl2: 'https://pubmed.ncbi.nlm.nih.gov/11752295/',
     secondaryUrl: 'https://maayanlab.cloud/Harmonizome/dataset/GEO+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations',
     secondaryLabel: 'Harmonizome',
     upUrl: `${MINIO_BASE}/gmts/geo-gene-up.gmt.gz`,
     downUrl: `${MINIO_BASE}/gmts/geo-gene-down.gmt.gz`,
+  },
+  {
+    title: 'CM4A1',
+    value: '11,739 perturbed genes',
+    info: '',
+    sourceUrl: 'https://figshare.com/s/ee85bb1880921326249b',
+    sourceLabel: 'Download Link',
+    externalOnly: true,
   },
 ]
 
@@ -196,13 +207,31 @@ const metadataDatasets: Dataset[] = [
     value: 'Drug metadata',
     info: 'Broad Institute drug annotations',
     sourceUrl: 'https://repo-hub.broadinstitute.org/repurposing#download-data',
+    sourceLabel: 'Link',
     externalOnly: true,
   },
   {
-    title: 'L2S2/LINCS Metadata',
+    title: 'LINCS Metadata',
     value: 'Signature metadata',
     info: 'L1000 experiment annotations',
     sourceUrl: 'https://maayanlab.cloud/sigcom-lincs/#/Download',
+    sourceLabel: 'Link',
+    externalOnly: true,
+  },
+  {
+    title: 'Tahoe 100M Metadata',
+    value: 'Drug metadata',
+    info: 'Tahoe drug annotations',
+    sourceUrl: 'https://huggingface.co/datasets/tahoebio/Tahoe-100M#drug-metadata',
+    sourceLabel: 'Link',
+    externalOnly: true,
+  },
+  {
+    title: 'Novartis DRUG-seq Metadata',
+    value: 'Drug metadata',
+    info: 'DRUG-seq drug annotations',
+    sourceUrl: 'https://drugseqr.maayanlab.cloud/download',
+    sourceLabel: 'Link',
     externalOnly: true,
   },
 ]
@@ -216,7 +245,14 @@ function DatasetCard({ dataset }: { dataset: Dataset }) {
       <h3 className="font-medium text-sm leading-tight">{dataset.title}</h3>
       <p className="text-xs text-gray-500 leading-tight">{dataset.value} · {dataset.info}</p>
       <div className="text-xs leading-tight mt-1">
-        <a href={dataset.sourceUrl} target="_blank" rel="noopener noreferrer" className="link link-primary">Data Source</a>
+        {dataset.sourceUrl2 ? (
+          <>
+            Citation(s): <a href={dataset.sourceUrl} target="_blank" rel="noopener noreferrer" className="link link-primary">[1]</a>
+            {' '}<a href={dataset.sourceUrl2} target="_blank" rel="noopener noreferrer" className="link link-primary">[2]</a>
+          </>
+        ) : (
+          <a href={dataset.sourceUrl} target="_blank" rel="noopener noreferrer" className="link link-primary">{dataset.sourceLabel || 'Citation(s)'}</a>
+        )}
         {dataset.secondaryUrl && (
           <> · <a href={dataset.secondaryUrl} target="_blank" rel="noopener noreferrer" className="link link-primary">{dataset.secondaryLabel}</a></>
         )}
