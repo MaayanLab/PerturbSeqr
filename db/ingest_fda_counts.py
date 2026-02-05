@@ -5,16 +5,23 @@
 """Populate fda_counts table from drug_lookup.json.
 
 Usage: uv run db/ingest_fda_counts.py
+       uv run db/ingest_fda_counts.py --update-counts
 """
 
+import argparse
 import json
+import os
 from pathlib import Path
 
 from tqdm import tqdm
 
 from db_utils import get_conn
 
-DRUG_LOOKUP_PATH = Path(__file__).parent.parent / "public" / "metadata" / "drug_lookup.json"
+# Support configurable path via INGEST_METADATA_DIR for container deployment
+if metadata_dir := os.environ.get('INGEST_METADATA_DIR'):
+    DRUG_LOOKUP_PATH = Path(metadata_dir) / "drug_lookup.json"
+else:
+    DRUG_LOOKUP_PATH = Path(__file__).parent.parent / "public" / "metadata" / "drug_lookup.json"
 
 
 def ingest_fda_counts(conn, drug_lookup: dict):
@@ -46,16 +53,17 @@ def update_counts_from_gene_sets(conn):
 
     with conn.cursor() as cur:
         # Group by CID when available, fall back to perturbation name
+        # Use NULLIF to treat empty strings as NULL so COALESCE falls through to perturbation
         cur.execute("""
             UPDATE app_public.fda_counts fc
             SET count = gs_counts.cnt
             FROM (
-                SELECT COALESCE(cid, LOWER(perturbation)) as group_key, COUNT(*) as cnt
+                SELECT COALESCE(NULLIF(cid, ''), LOWER(perturbation)) as group_key, COUNT(*) as cnt
                 FROM app_public.gene_set
                 WHERE perturbation IS NOT NULL AND perturbation != ''
-                GROUP BY COALESCE(cid, LOWER(perturbation))
+                GROUP BY COALESCE(NULLIF(cid, ''), LOWER(perturbation))
             ) gs_counts
-            WHERE COALESCE(fc.cid, LOWER(fc.perturbation)) = gs_counts.group_key
+            WHERE COALESCE(NULLIF(fc.cid, ''), LOWER(fc.perturbation)) = gs_counts.group_key
         """)
         print(f"Updated counts for {cur.rowcount} perturbations")
 
@@ -65,14 +73,19 @@ def update_counts_from_gene_sets(conn):
 
 
 def main():
-    with open(DRUG_LOOKUP_PATH) as f:
-        drug_lookup = json.load(f)
-    print(f"Loaded {len(drug_lookup)} drugs from drug_lookup.json")
+    parser = argparse.ArgumentParser(description='Ingest FDA counts')
+    parser.add_argument('--update-counts', action='store_true', help='Only update counts from gene_set table')
+    args = parser.parse_args()
 
     conn = get_conn()
     try:
-        ingest_fda_counts(conn, drug_lookup)
-        update_counts_from_gene_sets(conn)
+        if args.update_counts:
+            update_counts_from_gene_sets(conn)
+        else:
+            with open(DRUG_LOOKUP_PATH) as f:
+                drug_lookup = json.load(f)
+            print(f"Loaded {len(drug_lookup)} drugs from drug_lookup.json")
+            ingest_fda_counts(conn, drug_lookup)
     finally:
         conn.close()
 

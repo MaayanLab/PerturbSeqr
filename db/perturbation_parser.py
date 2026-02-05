@@ -5,10 +5,16 @@ Used by ingest.py and build_drug_lookup.py.
 """
 
 import json
+import os
 from pathlib import Path
 
 # Load libraries config once at module level
-LIBRARIES_JSON = Path(__file__).parent.parent / "src" / "config" / "libraries.json"
+# Support configurable path via INGEST_CONFIG_DIR for container deployment
+if config_dir := os.environ.get('INGEST_CONFIG_DIR'):
+    LIBRARIES_JSON = Path(config_dir) / "libraries.json"
+else:
+    LIBRARIES_JSON = Path(__file__).parent.parent / "src" / "config" / "libraries.json"
+
 LIBRARIES_CONFIG = json.load(open(LIBRARIES_JSON)).get("libraries", {}) if LIBRARIES_JSON.exists() else {}
 
 get_lib_config = lambda name: LIBRARIES_CONFIG.get(name, {})

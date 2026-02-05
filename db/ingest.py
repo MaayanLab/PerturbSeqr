@@ -37,7 +37,7 @@ from perturbation_parser import extract_perturbation
 from db_utils import get_conn, get_cid, get_or_create_library, query, discover_gmt_files, discover_minio_gmt_files, download_minio_gmt_file
 
 # Helper lambdas
-extract_fallback_id = lambda term, lib: term.rsplit(" ", 1)[0].split("_")[1] if lib == "drugseqr" else None
+extract_fallback_id = lambda term, lib: term.rsplit(" ", 1)[0].split("_")[1] if lib == "Novartis DRUG-seq" else None
 lookup_cid = lambda pert, fallback=None: (get_cid(fallback) or get_cid(pert)) if fallback else get_cid(pert)
 compute_hash = lambda genes: str(uuid.uuid5(uuid.UUID(int=0), '\t'.join(sorted(set(genes)))))
 genes_to_json = lambda genes, gmap: json.dumps({gmap[g]: i for i, g in enumerate(genes) if g in gmap})
@@ -45,30 +45,24 @@ genes_to_json = lambda genes, gmap: json.dumps({gmap[g]: i for i, g in enumerate
 GENE_SET_COLUMNS = ['term', 'description', 'hash', 'gene_ids', 'n_gene_ids', 'library_id', 'perturbation', 'cid']
 
 
-# Main Ingestion
-# Note: Large files (e.g., l1000-cp with 718K gene sets) require ~4GB RAM.
-# If memory becomes an issue, add chunked processing to handle GMT in batches.
-def ingest_gmt(conn, gmt_path: Path, library_name: str, direction: str):
-    """Ingest a GMT file into the database using polars for vectorized operations."""
-    library_id = get_or_create_library(conn, library_name)
-    print(f"Library: {library_name} ({library_id}), direction: {direction}")
+# Main Ingestion - Chunked for memory efficiency
+import gc
+CHUNK_SIZE = 5000  # Process 5K gene sets at a time
 
-    # Read GMT file into lists
-    terms, descriptions, gene_lists, all_genes = [], [], [], set()
-    for (term, desc), genes in tqdm(read_gmt(gmt_path), desc='Reading GMT'):
-        genes = [g.upper() for g in genes]
-        terms.append(f"{term} {direction}")
-        descriptions.append(desc)
-        gene_lists.append(genes)
-        all_genes.update(genes)
-    print(f"Loaded {len(terms)} gene sets with {len(all_genes)} unique genes")
+def _process_chunk(conn, chunk_data, all_genes, library_id, library_name, direction):
+    """Process a single chunk of gene sets. Returns (inserted, skipped) counts."""
+    if not chunk_data:
+        return 0, 0
 
-    # Build gene map from database
+    terms = [f"{t} {direction}" for t, _, _ in chunk_data]
+    descriptions = [d for _, d, _ in chunk_data]
+    gene_lists = [g for _, _, g in chunk_data]
+
+    # Build gene map for this chunk
     gene_map = query(conn, "SELECT coalesce(jsonb_object_agg(g.gene, g.gene_id), '{}') as gene_map FROM app_public.gene_map(%s) as g", [list(all_genes)])[0]['gene_map']
 
     # Insert new genes if needed
     if new_genes := all_genes - gene_map.keys():
-        print(f"Inserting {len(new_genes)} new genes...")
         new_gene_df = pl.DataFrame({'id': [str(uuid.uuid4()) for _ in new_genes], 'symbol': list(new_genes)})
         buffer = StringIO()
         new_gene_df.write_csv(buffer, separator='\t')
@@ -76,38 +70,101 @@ def ingest_gmt(conn, gmt_path: Path, library_name: str, direction: str):
         with conn.cursor() as cur:
             cur.copy_expert("COPY app_public.gene (id, symbol) FROM STDIN WITH CSV HEADER DELIMITER E'\\t'", buffer)
         gene_map.update(dict(zip(new_gene_df['symbol'], new_gene_df['id'])))
+        del new_gene_df, buffer
 
-    # Build DataFrame and compute hashes
-    df = pl.DataFrame({'term': terms, 'description': descriptions, 'genes': gene_lists, 'library_id': [library_id] * len(terms)})
+    # Compute hashes first to check against DB
+    hashes = [compute_hash(g) for g in gene_lists]
+
+    # Check which hashes already exist in DB (query per chunk, not cached)
+    existing = {str(r['hash']) for r in query(conn, 'SELECT hash FROM app_public.gene_set WHERE hash = ANY(%s::uuid[])', [hashes])}
+
+    # Filter to new gene sets only
+    new_indices = [i for i, h in enumerate(hashes) if h not in existing]
+    n_skipped = len(hashes) - len(new_indices)
+
+    if not new_indices:
+        del terms, descriptions, gene_lists, hashes, existing, gene_map
+        gc.collect()
+        return 0, n_skipped
+
+    # Build DataFrame with only new gene sets
+    df = pl.DataFrame({
+        'term': [terms[i] for i in new_indices],
+        'description': [descriptions[i] for i in new_indices],
+        'genes': [gene_lists[i] for i in new_indices],
+        'hash': [hashes[i] for i in new_indices],
+        'library_id': [library_id] * len(new_indices),
+    })
+    del terms, descriptions, hashes, existing, new_indices
+
     df = df.with_columns([
-        pl.col('genes').map_elements(compute_hash, return_dtype=pl.String).alias('hash'),
         pl.col('genes').map_elements(len, return_dtype=pl.Int64).alias('n_gene_ids'),
     ])
 
-    # Filter to new gene sets only (hash-based dedup is faster than full row comparison)
-    existing_hashes = {r['hash'] for r in query(conn, 'SELECT DISTINCT hash FROM app_public.gene_set')}
-    df = df.filter(~pl.col('hash').is_in(existing_hashes))
-    n_new, n_skipped = len(df), len(terms) - len(df)
-
-    if n_new == 0:
-        return print(f"No new gene sets to insert (skipped {n_skipped} existing)")
-
-    print(f"Processing {n_new} new gene sets (skipping {n_skipped} existing)...")
+    # Process perturbations and CIDs
     terms_list, genes_list = df['term'].to_list(), df['genes'].to_list()
-    perts = [extract_perturbation(t, library_name) for t in tqdm(terms_list, desc='Extracting perturbations')]
+    perts = [extract_perturbation(t, library_name) for t in terms_list]
     cids = [lookup_cid(p, extract_fallback_id(t, library_name)) for t, p in zip(terms_list, perts)]
-    gene_ids = [genes_to_json(g, gene_map) for g in tqdm(genes_list, desc='Building gene_ids')]
+    gene_ids = [genes_to_json(g, gene_map) for g in genes_list]
+    del gene_map, gene_lists
 
-    df = df.with_columns([pl.Series('perturbation', perts), pl.Series('cid', cids), pl.Series('gene_ids', gene_ids)])
+    df = df.drop('genes').with_columns([
+        pl.Series('perturbation', perts),
+        pl.Series('cid', cids),
+        pl.Series('gene_ids', gene_ids)
+    ])
+    del perts, cids, gene_ids, terms_list, genes_list
 
     # Write to DB via COPY
-    print(f"Inserting {n_new} gene sets...")
+    n_new = len(df)
     buffer = StringIO()
     df.select(GENE_SET_COLUMNS).write_csv(buffer, separator='\t')
+    del df
     buffer.seek(0)
     with conn.cursor() as cur:
         cur.copy_expert(f"COPY app_public.gene_set ({','.join(GENE_SET_COLUMNS)}) FROM STDIN WITH CSV HEADER DELIMITER E'\\t'", buffer)
-    print(f"Inserted {n_new} new gene sets (skipped {n_skipped} existing)")
+    del buffer
+
+    gc.collect()
+    return n_new, n_skipped
+
+
+def ingest_gmt(conn, gmt_path: Path, library_name: str, direction: str):
+    """Ingest a GMT file into the database using chunked processing for memory efficiency."""
+    library_id = get_or_create_library(conn, library_name)
+    print(f"Library: {library_name} ({library_id}), direction: {direction}")
+
+    # Process GMT in chunks
+    chunk, all_genes_chunk = [], set()
+    total_inserted, total_skipped = 0, 0
+    chunk_num = 0
+
+    for (term, desc), genes in tqdm(read_gmt(gmt_path), desc='Reading GMT'):
+        genes = [g.upper() for g in genes]
+        chunk.append((term, desc, genes))
+        all_genes_chunk.update(genes)
+
+        if len(chunk) >= CHUNK_SIZE:
+            chunk_num += 1
+            tqdm.write(f"  Processing chunk {chunk_num} ({len(chunk)} gene sets)...")
+            inserted, skipped = _process_chunk(conn, chunk, all_genes_chunk, library_id, library_name, direction)
+            total_inserted += inserted
+            total_skipped += skipped
+            conn.commit()
+            chunk, all_genes_chunk = [], set()
+            gc.collect()
+
+    # Process final chunk
+    if chunk:
+        chunk_num += 1
+        tqdm.write(f"  Processing final chunk {chunk_num} ({len(chunk)} gene sets)...")
+        inserted, skipped = _process_chunk(conn, chunk, all_genes_chunk, library_id, library_name, direction)
+        total_inserted += inserted
+        total_skipped += skipped
+        conn.commit()
+        gc.collect()
+
+    print(f"Inserted {total_inserted} new gene sets (skipped {total_skipped} existing)")
 
 
 def main():

@@ -26,15 +26,32 @@ try:
 except ImportError:
     pass
 
-# Paths
+# Paths - can be overridden via environment variables for container deployment
+# INGEST_CONFIG_DIR: path to config directory (default: project_root/src/config)
+# INGEST_METADATA_DIR: path to metadata directory (default: project_root/public/metadata)
+# INGEST_DATA_DIR: path to GMT data directory (default: db/data)
 PROJECT_ROOT = Path(__file__).parent.parent
 DB_DIR = Path(__file__).parent
-DATA_DIR = DB_DIR / 'data'
+
+# Support configurable paths for container deployment
+if config_dir := os.environ.get('INGEST_CONFIG_DIR'):
+    LIBRARY_CONFIG_PATH = Path(config_dir) / 'libraries.json'
+else:
+    LIBRARY_CONFIG_PATH = PROJECT_ROOT / 'src' / 'config' / 'libraries.json'
+
+if metadata_dir := os.environ.get('INGEST_METADATA_DIR'):
+    DRUG_LOOKUP_PATH = Path(metadata_dir) / 'drug_lookup.json'
+else:
+    DRUG_LOOKUP_PATH = PROJECT_ROOT / 'public' / 'metadata' / 'drug_lookup.json'
+
+if data_dir := os.environ.get('INGEST_DATA_DIR'):
+    DATA_DIR = Path(data_dir)
+else:
+    DATA_DIR = DB_DIR / 'data'
+
 DRUG_DIR = DATA_DIR / 'drug_perturbation'
 GENE_DIR = DATA_DIR / 'gene_perturbation'
 METADATA_DIR = DATA_DIR / 'metadata'
-LIBRARY_CONFIG_PATH = PROJECT_ROOT / 'src' / 'config' / 'libraries.json'
-DRUG_LOOKUP_PATH = PROJECT_ROOT / 'public' / 'metadata' / 'drug_lookup.json'
 
 # Load configs
 assert LIBRARY_CONFIG_PATH.exists(), f"Missing {LIBRARY_CONFIG_PATH}"
@@ -95,31 +112,33 @@ MINIO_FILE_MAPPING = {
     "l1000-cp-down.gmt.gz": ("l1000-cp", "down"),
     "tahoe-100m-up.gmt.gz": ("tahoe-100m", "up"),
     "tahoe-100m-down.gmt.gz": ("tahoe-100m", "down"),
-    "drugseqr-up.gmt.gz": ("drugseqr", "up"),
-    "drugseqr-down.gmt.gz": ("drugseqr", "down"),
-    "cmap-build02-up.gmt.gz": ("cmap-build02-meta", "up"),
-    "cmap-build02-down.gmt.gz": ("cmap-build02-meta", "down"),
+    "drugseqr-up.gmt.gz": ("Novartis DRUG-seq", "up"),
+    "drugseqr-down.gmt.gz": ("Novartis DRUG-seq", "down"),
+    "cmap-build02-up.gmt.gz": ("cmap-build02", "up"),
+    "cmap-build02-down.gmt.gz": ("cmap-build02", "down"),
     "sciplex-up.gmt.gz": ("sciplex", "up"),
     "sciplex-down.gmt.gz": ("sciplex", "down"),
     "deepcovermoa-up.gmt.gz": ("deepcovermoa", "up"),
     "deepcovermoa-down.gmt.gz": ("deepcovermoa", "down"),
     "geo-chem-up.gmt.gz": ("geo-chem", "up"),
     "geo-chem-down.gmt.gz": ("geo-chem", "down"),
+    "ginkgo-up_lv_081925.gmt.gz": ("ginkgo", "up"),
+    "ginkgo-dn_lv_081925.gmt.gz": ("ginkgo", "down"),
     # Gene Perturbation
     "l1000-xpr-up.gmt.gz": ("l1000-xpr", "up"),
     "l1000-xpr-down.gmt.gz": ("l1000-xpr", "down"),
     "perturbatlas-up.gmt.gz": ("perturbatlas", "up"),
     "perturbatlas-down.gmt.gz": ("perturbatlas", "down"),
-    "perturbatlas-mouse-up.gmt.gz": ("perturbatlasmouse", "up"),
-    "perturbatlas-mouse-down.gmt.gz": ("perturbatlasmouse", "down"),
+    "perturbatlas-mouse-up.gmt.gz": ("perturbatlas-mouse", "up"),
+    "perturbatlas-mouse-down.gmt.gz": ("perturbatlas-mouse", "down"),
     "replogle-k562-genomewide-up.gmt.gz": ("reploglek562genomewide", "up"),
     "replogle-k562-genomewide-down.gmt.gz": ("reploglek562genomewide", "down"),
     "replogle-rpe1-essential-up.gmt.gz": ("reploglerpe1essential", "up"),
     "replogle-rpe1-essential-down.gmt.gz": ("reploglerpe1essential", "down"),
     "replogle-k562-essential-up.gmt.gz": ("reploglek562essential", "up"),
     "replogle-k562-essential-down.gmt.gz": ("reploglek562essential", "down"),
-    "geo-gene-up.gmt.gz": ("geogene", "up"),
-    "geo-gene-down.gmt.gz": ("geogene", "down"),
+    "geo-gene-up.gmt.gz": ("geo-gene", "up"),
+    "geo-gene-down.gmt.gz": ("geo-gene", "down"),
 }
 
 

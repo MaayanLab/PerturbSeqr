@@ -772,7 +772,7 @@ async fn query(
 
     for (group_key, (count_significant, count_insignificant, _sig_up, approved)) in &mut drug_significance_counts {
         if let Some(&(total_count, is_approved)) = drug_counts.get(group_key) {
-            *count_insignificant = total_count - *count_significant;
+            *count_insignificant = total_count.saturating_sub(*count_significant);
             *approved = is_approved;
         }
     }
@@ -1506,7 +1506,7 @@ async fn query_pairs(
 
     for (group_key, (count_significant, count_insignificant, _sig_up, approved)) in &mut drug_significance_counts {
         if let Some(&(total_count, is_approved)) = drug_counts.get(group_key) {
-            *count_insignificant = total_count - *count_significant;
+            *count_insignificant = total_count.saturating_sub(*count_significant);
             *approved = is_approved;
         }
     }
