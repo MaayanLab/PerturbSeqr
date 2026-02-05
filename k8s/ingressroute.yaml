@@ -37,7 +37,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`minio.perturbseqr.k8s.dev.maayanlab.cloud`)
+    - match: Host(`console.s3.perturbseqr.k8s.dev.maayanlab.cloud`)
       kind: Rule
       services:
         - name: perturbseqr-minio
