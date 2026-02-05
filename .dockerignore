@@ -26,11 +26,12 @@ benchmarkingdb/data
 # GMT files served from MinIO, not app container
 public/gmts
 
-# Database files - only needed by postgres container, not app
-db/
+# Database data files (GMT files are large, served from MinIO)
+db/data/
 
-# Scripts and utilities not needed at runtime
-scripts/
+# Scripts not needed by app (but upload_gmts_to_minio.py needed by ingest)
+scripts/*.sh
+scripts/generate_umap.py
 notebooks/
 scratch/
 k8s/
