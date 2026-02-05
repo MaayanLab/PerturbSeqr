@@ -16,8 +16,8 @@ const logoMap: Record<string, { src: string; type: 'image' | 'svg' }> = {
   'GEO-Chem': { src: '/images/geo-logo.svg', type: 'svg' },
   'GEO-Gene': { src: '/images/geo-logo.svg', type: 'svg' },
   'Ginkgo': { src: '/images/ginkgo-logo.png', type: 'image' },
-  'PerturbAtlas': { src: '/images/perturbatlas-logo.svg', type: 'svg' },
-  'PerturbAtlas-Mouse': { src: '/images/perturbatlas-logo.svg', type: 'svg' },
+  'PerturbAtlas': { src: '/images/perturbatlas-logo.png', type: 'image' },
+  'PerturbAtlas-Mouse': { src: '/images/perturbatlas-logo.png', type: 'image' },
   'Replogle et al.-K562-Essential': { src: '/images/replogle-logo.svg', type: 'svg' },
   'Replogle et al.-K562-GenomeWide': { src: '/images/replogle-logo.svg', type: 'svg' },
   'Replogle et al.-RPE1-Essential': { src: '/images/replogle-logo.svg', type: 'svg' },
@@ -27,8 +27,10 @@ const logoMap: Record<string, { src: string; type: 'image' | 'svg' }> = {
 const groupSubtitles: Record<string, string> = {
   '/images/lincs-logo.png': 'L1000',
   '/images/geo-logo.svg': 'GEO',
-  '/images/perturbatlas-logo.svg': 'PerturbAtlas',
+  '/images/perturbatlas-logo.png': 'PerturbAtlas',
   '/images/replogle-logo.svg': 'Replogle et al.',
+  '/images/novartis-logo.png': 'DRUG-seq',
+  '/images/cmap-logo.svg': 'CMAP',
 }
 
 // Get all library display names
@@ -111,7 +113,7 @@ export default function DatasetIcons({
             key={logo}
             type="button"
             onClick={() => handleToggleGroup(libraries)}
-            className={`btn btn-ghost p-2 h-auto min-h-0 flex flex-col items-center justify-center transition-all rounded-lg mx-1 ${getButtonStyle(libraries)}`}
+            className={`btn btn-ghost p-2 h-auto min-h-0 w-28 flex flex-col items-center justify-center transition-all rounded-lg mx-1 ${getButtonStyle(libraries)}`}
             title={libraries.join(', ')}
           >
             <div className="w-20 h-20 relative flex items-center justify-center">
