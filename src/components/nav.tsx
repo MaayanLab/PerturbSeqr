@@ -22,7 +22,7 @@ export default function Nav() {
         <Link
           href="/explore"
           className={classNames({ 'active': pathname === '/explore' })}
-          shallow>Explore</Link></li>
+          shallow>Visualization</Link></li>
       <li>
         <Link
           href="/download"
