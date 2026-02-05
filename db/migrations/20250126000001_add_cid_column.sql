@@ -50,8 +50,7 @@ SELECT
   fda.moa
 FROM app_public.gene_set gs
 LEFT JOIN fda_dedup fda
-  ON COALESCE(gs.cid, LOWER(gs.perturbation)) = COALESCE(fda.cid, fda.perturbation_lower)
-WITH NO DATA;
+  ON COALESCE(gs.cid, LOWER(gs.perturbation)) = COALESCE(fda.cid, fda.perturbation_lower);
 
 CREATE INDEX gene_set_fda_counts_id_idx ON app_public.gene_set_fda_counts USING BTREE (id);
 CREATE INDEX gene_set_fda_counts_cid_idx ON app_public.gene_set_fda_counts USING BTREE (cid) WHERE cid IS NOT NULL;

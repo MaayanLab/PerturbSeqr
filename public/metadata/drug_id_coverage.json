@@ -1,0 +1,36 @@
+{
+  "total_entities": 40931,
+  "with_cid": 8936,
+  "with_moa": 8466,
+  "with_target": 6934,
+  "fda_approved": 2523,
+  "namespace_coverage": {
+    "hub_name": 6751,
+    "pubchem_cid": 8936,
+    "lincs_brd": 33582,
+    "drugseqr_nsn": 3665,
+    "tahoe_code": 378,
+    "drug_name": 1723
+  },
+  "namespace_overlap": {
+    "hub_name+lincs_brd+pubchem_cid": 2345,
+    "drugseqr_nsn+hub_name+lincs_brd+pubchem_cid": 888,
+    "hub_name+pubchem_cid": 2649,
+    "drugseqr_nsn+hub_name+pubchem_cid": 289,
+    "hub_name": 199,
+    "hub_name+lincs_brd+pubchem_cid+tahoe_code": 103,
+    "drugseqr_nsn+hub_name+lincs_brd+pubchem_cid+tahoe_code": 85,
+    "hub_name+pubchem_cid+tahoe_code": 45,
+    "hub_name+lincs_brd": 138,
+    "drugseqr_nsn+hub_name+pubchem_cid+tahoe_code": 9,
+    "hub_name+lincs_brd+tahoe_code": 1,
+    "pubchem_cid+tahoe_code": 126,
+    "lincs_brd+pubchem_cid+tahoe_code": 3,
+    "drugseqr_nsn+pubchem_cid+tahoe_code": 5,
+    "tahoe_code": 1,
+    "drugseqr_nsn+pubchem_cid": 2303,
+    "drugseqr_nsn+lincs_brd+pubchem_cid": 86,
+    "lincs_brd": 29933,
+    "drug_name": 1723
+  }
+}

@@ -1,0 +1,3969 @@
+{
+  "summary": {
+    "hub_name": 46,
+    "pubchem_cid": 246,
+    "tahoe_code": 1,
+    "drugseqr_nsn": 7,
+    "lincs_brd": 778
+  },
+  "top_conflicts": [
+    {
+      "synonym": "dexamethasone",
+      "namespace": "lincs_brd",
+      "count": 7
+    },
+    {
+      "synonym": "etoposide",
+      "namespace": "lincs_brd",
+      "count": 5
+    },
+    {
+      "synonym": "pregnenolone",
+      "namespace": "lincs_brd",
+      "count": 4
+    },
+    {
+      "synonym": "tetracycline",
+      "namespace": "lincs_brd",
+      "count": 4
+    },
+    {
+      "synonym": "bucladesine",
+      "namespace": "lincs_brd",
+      "count": 4
+    },
+    {
+      "synonym": "sirolimus",
+      "namespace": "lincs_brd",
+      "count": 4
+    },
+    {
+      "synonym": "docetaxel",
+      "namespace": "lincs_brd",
+      "count": 4
+    },
+    {
+      "synonym": "paclitaxel",
+      "namespace": "lincs_brd",
+      "count": 4
+    },
+    {
+      "synonym": "vinblastine",
+      "namespace": "lincs_brd",
+      "count": 4
+    },
+    {
+      "synonym": "vincristine",
+      "namespace": "lincs_brd",
+      "count": 4
+    },
+    {
+      "synonym": "cyclosporin-a",
+      "namespace": "lincs_brd",
+      "count": 4
+    },
+    {
+      "synonym": "tacrolimus",
+      "namespace": "lincs_brd",
+      "count": 4
+    },
+    {
+      "synonym": "daunorubicin",
+      "namespace": "lincs_brd",
+      "count": 4
+    },
+    {
+      "synonym": "bromocriptine",
+      "namespace": "lincs_brd",
+      "count": 4
+    },
+    {
+      "synonym": "dopamine",
+      "namespace": "lincs_brd",
+      "count": 4
+    },
+    {
+      "synonym": "estriol",
+      "namespace": "lincs_brd",
+      "count": 4
+    },
+    {
+      "synonym": "forskolin",
+      "namespace": "lincs_brd",
+      "count": 4
+    },
+    {
+      "synonym": "fulvestrant",
+      "namespace": "lincs_brd",
+      "count": 4
+    },
+    {
+      "synonym": "yohimbine",
+      "namespace": "lincs_brd",
+      "count": 4
+    },
+    {
+      "synonym": "triamcinolone",
+      "namespace": "lincs_brd",
+      "count": 4
+    },
+    {
+      "synonym": "ipratropium",
+      "namespace": "lincs_brd",
+      "count": 4
+    },
+    {
+      "synonym": "clindamycin",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "brefeldin-a",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "cefuroxime",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "parthenolide",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "testosterone",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "pravastatin",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "digoxin",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "ouabain",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "noscapine",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "vinorelbine",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "norethindrone",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "carbenoxolone",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "estrone",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "mestranol",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "naloxone",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "alfacalcidol",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "danazol",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "huperzine-a",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "reboxetine",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "budesonide",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "clobetasol",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "hydrocortisone",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "scopolamine",
+      "namespace": "lincs_brd",
+      "count": 3
+    },
+    {
+      "synonym": "IXHBTMCLRNMKHZ-GFCCVEGCSA-N",
+      "namespace": "hub_name",
+      "count": 2
+    },
+    {
+      "synonym": "artesunate",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "atovaquone",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "cefdinir",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "cefotaxime",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "cortisone",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "demeclocycline",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "gsk-1059615",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "hesperidin",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "hyoscyamine",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "norgestrel",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "oxiconazole",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "pancuronium",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "prednisolone",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "rifabutin",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "roxithromycin",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "saquinavir",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "streptozotocin",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "triptolide",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "wz-4-145",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "ribavirin",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "rutin",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "triciribine",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "alvespimycin",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "u-0126",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "QFJCIRLUMZQUOT-HPLJOQBZSA-N",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "atorvastatin",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "lovastatin",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "mevastatin",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "simvastatin",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "linsitinib",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "nvp-aew541",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "oligomycin-a",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "formestane",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "IVVNZDGDKPTYHK-UHFFFAOYSA-N",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "acarbose",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "aprepitant",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "antimycin-a",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "fluocinolone-acetonide",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "curcumin",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "cinnarizine",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "diltiazem",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "lacidipine",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "capecitabine",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "fludarabine",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "nalbuphine",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "doxorubicin",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "epirubicin",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "etodolac",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "naproxen",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "sulindac",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "picrotoxin",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "rifapentine",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "tretinoin",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "flunisolide",
+      "namespace": "lincs_brd",
+      "count": 2
+    },
+    {
+      "synonym": "metergoline",
+      "namespace": "lincs_brd",
+      "count": 2
+    }
+  ],
+  "details": {
+    "hub_name": {
+      "WQTKNBPCJKRYPA-OAQYLSRUSA-N": {
+        "amg-487-(+/-)": "amg-487"
+      },
+      "METKIMKYRPQLGS-GFCCVEGCSA-N": {
+        "atenolol-(+/-)": "atenolol-(+)"
+      },
+      "LZAXPYOBKSJSEX-GOSISDBHSA-N": {
+        "blebbistatin-(-)": "blebbistatin-(+/-)"
+      },
+      "SOYKEARSMXGVTM-HNNXBMFYSA-N": {
+        "dexchlorpheniramine": "chlorphenamine"
+      },
+      "MVMQESMQSYOVGV-OAHLLOKOSA-N": {
+        "dimetindene": "dimethindene-(s)-(+)"
+      },
+      "WSEQXVZVJXJVFP-FQEVSTJZSA-N": {
+        "escitalopram": "citalopram"
+      },
+      "SYTBZMRGLBWNTM-SNVBAGLBSA-N": {
+        "flurizan": "flurbiprofen-(+/-)"
+      },
+      "OHCQJHSOBUTRHG-KGGHGJDLSA-N": {
+        "forskolin": "colforsin"
+      },
+      "MJIHNNLFOKEZEW-RUZDIDTESA-N": {
+        "lansoprazole": "dexlansoprazole"
+      },
+      "VVIAGPKUTFNRDU-STQMWFEESA-N": {
+        "leucovorin": "calcium-levofolinate"
+      },
+      "IXHBTMCLRNMKHZ-GFCCVEGCSA-N": {
+        "levobunolol-(+/-)": "levobunolol-(+)",
+        "levobunolol": "levobunolol-(+)"
+      },
+      "PTVWPYVOOKLBCG-ZDUSSCGKSA-N": {
+        "levodropropizine": "dropropizine"
+      },
+      "OPQNCARIZFLNLF-HSBZPDDFSA-N": {
+        "maytansinol-isobutyrate": "ansamitocin-p-3"
+      },
+      "LYPCGXKCQDYTFV-SSDOTTSWSA-N": {
+        "methyl-5-hydroxytryptamine": "alpha-methylserotonin"
+      },
+      "SVJMLYUFVDMUHP-MGBGTMOVSA-N": {
+        "niguldipine-(r)-(-)": "dexniguldipine"
+      },
+      "WWYNJERNGUHSAO-XUDSTZEESA-N": {
+        "norgestrel": "levonorgestrel"
+      },
+      "GSDSWSVVBLHKDQ-JTQLQIEISA-N": {
+        "ofloxacin": "levofloxacin"
+      },
+      "SUBDBMMJDZJVOS-DEOSSOPVSA-N": {
+        "omeprazole": "esomeprazole"
+      },
+      "VVNCNSJFMMFHPL-VKHMYHEASA-N": {
+        "penicillamine-(racemic)": "penicillamine-(d)"
+      },
+      "IIXWYSCJSQVBQM-UHFFFAOYSA-N": {
+        "pf-06463922": "lorlatinib"
+      },
+      "INDBQLZJXZLFIT-NSHDSACASA-N": {
+        "procyclidine": "primaquine"
+      },
+      "GSKQMLGAUOTSKT-LBPRGKRZSA-N": {
+        "px-478": "melphalan-n-oxide"
+      },
+      "HJYYPODYNSCCOU-WURVRSKISA-N": {
+        "rifamycin-sv": "rifamycin"
+      },
+      "HJORMJIFDVBMOB-GFCCVEGCSA-N": {
+        "rolipram": "(s)-(+)-rolipram"
+      },
+      "URWAJWIAIPFPJE-YFMIWBNJSA-N": {
+        "sisomicin-sulfate": "sisomicin"
+      },
+      "HLFSDGLLUJUHTE-SNVBAGLBSA-N": {
+        "tetramisole": "levamisole"
+      },
+      "UUIYULWYHDSXHL-NSHDSACASA-N": {
+        "ubp-302": "ubp-296"
+      },
+      "RMRCNWBMXRMIRW-WZHZPDAFSA-M": {
+        "vitamin-b12": "cyanocobalamin"
+      },
+      "IJVMOGKBEVRBPP-SSDOTTSWSA-N": {
+        "3,4-dcpg-(r)": "3,4-dcpg-(+/-)"
+      },
+      "cloperastine": {
+        "cloperastine-fendizoate": "cloperastine"
+      },
+      "atracurium": {
+        "cisatracurium": "atracurium"
+      },
+      "FBPFZTCFMRRESA-JGWLITMVSA-N": {
+        "mannitol-d": "sorbitol"
+      },
+      "picolinic-acid": {
+        "chromium-picolinate": "picolinic-acid"
+      },
+      "resorcinol": {
+        "resorcinol-monoacetate": "resorcinol"
+      },
+      "fostamatinib": {
+        "r406": "fostamatinib"
+      },
+      "sirolimus": {
+        "ascomycin": "sirolimus"
+      },
+      "norethindrone": {
+        "norethindrone-acetate": "norethindrone"
+      },
+      "levcromakalim": {
+        "cromakalim": "levcromakalim"
+      },
+      "TXUZVZSFRXZGTL-QPLCGJKRSA-N": {
+        "tamoxifen": "afimoxifene"
+      },
+      "ym-298198": {
+        "ym-298198-desmethyl": "ym-298198"
+      },
+      "BLGXFZZNTVWLAY-DIRVCLHFSA-N": {
+        "yohimbine": "rauwolscine"
+      },
+      "AKUJBENLRBOFTD-RPRRAYFGSA-N": {
+        "dexamethasone": "dexamethasone-acetate"
+      },
+      "mometasone": {
+        "mometasone-furoate": "mometasone"
+      },
+      "triamcinolone": {
+        "triamcinolone-acetonide": "triamcinolone"
+      },
+      "atropine": {
+        "hyoscyamine": "atropine"
+      },
+      "cytarabine": {
+        "cytidine": "cytarabine"
+      }
+    },
+    "pubchem_cid": {
+      "allantoin": {
+        "204": "439714"
+      },
+      "vilanterol": {
+        "10184665": "44482554"
+      },
+      "econazole": {
+        "3198": "6604378"
+      },
+      "4egi-1": {
+        "5717952": "2831024"
+      },
+      "oxaliplatin": {
+        "9887053": "43805"
+      },
+      "terfenadine": {
+        "5405": "6604035"
+      },
+      "zileuton": {
+        "60490": "10681296"
+      },
+      "darolutamide": {
+        "67171867": "121489720"
+      },
+      "ranolazine": {
+        "56959": "13560750"
+      },
+      "mozavaptan": {
+        "119369": "11441742"
+      },
+      "omeprazole": {
+        "4594": "9568614"
+      },
+      "ornidazole": {
+        "28061": "688540"
+      },
+      "fulvestrant": {
+        "104741": "57300161"
+      },
+      "plicamycin": {
+        "163659": "457831"
+      },
+      "rifaximin": {
+        "6436173": "46783403"
+      },
+      "temsirolimus": {
+        "6918289": "134812825"
+      },
+      "vincristine": {
+        "249332": "5388993"
+      },
+      "pioglitazone": {
+        "4829": "29010894"
+      },
+      "budesonide": {
+        "5281004": "63006"
+      },
+      "proglumide": {
+        "4922": "6603906"
+      },
+      "auranofin": {
+        "24199313": "6918453"
+      },
+      "rosiglitazone": {
+        "77999": "10021239"
+      },
+      "lb-100": {
+        "3578572": "11923097"
+      },
+      "ab-05-jr93": {
+        "3825": "180540"
+      },
+      "ae-73-kx58": {
+        "157920": "9800568"
+      },
+      "aa-68-mw92": {
+        "5092": "158758"
+      },
+      "gb-90-ug49": {
+        "108046": "10020651"
+      },
+      "ab-33-vm36": {
+        "104762": "11949547"
+      },
+      "be-48-tm93": {
+        "2449": "73346713"
+      },
+      "dc-93-wc67": {
+        "2910": "101691640"
+      },
+      "ac-98-uw57": {
+        "71774": "9957601"
+      },
+      "60490": {
+        "60490": "10681296"
+      },
+      "gc-61-bd64": {
+        "4768": "657233"
+      },
+      "cb-92-vc05": {
+        "49868481": "97182196"
+      },
+      "ce-19-pd79": {
+        "5593": "688595"
+      },
+      "be-07-ni91": {
+        "3784": "13773524"
+      },
+      "ac-95-tk81": {
+        "37907": "25734913"
+      },
+      "cd-18-rm48": {
+        "5029": "9906855"
+      },
+      "ad-54-fg24": {
+        "4746": "38988177"
+      },
+      "cc-15-tx17": {
+        "4032": "46912050"
+      },
+      "cc-04-wk34": {
+        "6834": "16960"
+      },
+      "ac-43-yw30": {
+        "4828": "155030"
+      },
+      "aa-67-tf79": {
+        "54678486": "54688261"
+      },
+      "cc-14-wk34": {
+        "4528": "55993"
+      },
+      "be-17-cs60": {
+        "6505803": "59996479"
+      },
+      "ca-56-ve74": {
+        "2764": "4011971"
+      },
+      "dd-77-oi11": {
+        "71227201": "136237316"
+      },
+      "eb-34-kw22": {
+        "60910": "76958126"
+      },
+      "119369": {
+        "119369": "11441742"
+      },
+      "aa-46-gl76": {
+        "2719": "444810"
+      },
+      "mf-62-jr25": {
+        "4634": "6098167"
+      },
+      "ab-68-sc09": {
+        "47953": "11715257"
+      },
+      "ae-03-bm76": {
+        "119": "6992099"
+      },
+      "ge-25-yq75": {
+        "5591": "9824580"
+      },
+      "bd-50-hu68": {
+        "4034": "6604289"
+      },
+      "ec-42-we14": {
+        "128878": "135678104"
+      },
+      "ba-64-px65": {
+        "439224": "6992100"
+      },
+      "df-37-av77": {
+        "2732": "688424"
+      },
+      "ab-85-yk41": {
+        "107751": "60561"
+      },
+      "jd-04-ut85": {
+        "216326": "12044976"
+      },
+      "fc-98-aj86": {
+        "5573": "13248159"
+      },
+      "ca-25-lr28": {
+        "5362129": "6992028"
+      },
+      "fc-96-wr45": {
+        "44537807": "72199860"
+      },
+      "ca-26-bi29": {
+        "3960": "13605417"
+      },
+      "ab-11-vi02": {
+        "2162": "9801597"
+      },
+      "ac-35-ja42": {
+        "5403": "11354816"
+      },
+      "ac-95-mu00": {
+        "56959": "13560750"
+      },
+      "ea-25-vd74": {
+        "1646": "6991996"
+      },
+      "cb-86-me74": {
+        "1548887": "16046677"
+      },
+      "fb-12-ul66": {
+        "2381": "12147323"
+      },
+      "nd-85-oj63": {
+        "25109292": "886736"
+      },
+      "bf-63-ng22": {
+        "2726824": "135418940"
+      },
+      "ab-22-ai49": {
+        "44602": "6918881"
+      },
+      "ic-07-vy79": {
+        "3410": "3034756"
+      },
+      "eb-90-br21": {
+        "3475": "931837"
+      },
+      "wd-65-pa90": {
+        "5282136": "40490609"
+      },
+      "cc-84-qj26": {
+        "3386": "657320"
+      },
+      "ab-71-vz28": {
+        "2083": "182176"
+      },
+      "ab-73-sw45": {
+        "2771": "146570"
+      },
+      "kc-15-hm70": {
+        "9799888": "76958553"
+      },
+      "aa-59-hg56": {
+        "4170": "28125490"
+      },
+      "5717952": {
+        "5717952": "2831024"
+      },
+      "bd-18-xc74": {
+        "4507": "157702"
+      },
+      "gb-48-yf11": {
+        "71234": "1598447"
+      },
+      "be-29-ha72": {
+        "3690": "9588020"
+      },
+      "db-33-hz87": {
+        "10798271": "92981775"
+      },
+      "ad-11-fz23": {
+        "2092": "37888195"
+      },
+      "af-31-rv78": {
+        "44257": "135398654"
+      },
+      "aa-98-mw52": {
+        "3672": "114864"
+      },
+      "ce-36-kr60": {
+        "3652": "12947"
+      },
+      "ab-08-ht45": {
+        "3341": "30026875"
+      },
+      "ab-01-nb05": {
+        "77999": "10021239"
+      },
+      "df-32-mm89": {
+        "3472": "54679224"
+      },
+      "bf-52-hf07": {
+        "24871506": "135564749"
+      },
+      "ad-16-oe34": {
+        "4581": "657354"
+      },
+      "ob-61-xz91": {
+        "132123": "135409548"
+      },
+      "s0-ee-ylu9": {
+        "122187564": "137125241"
+      },
+      "cf-97-av07": {
+        "68870": "37888263"
+      },
+      "qb-07-yt91": {
+        "71571526": "135566764"
+      },
+      "ab-02-cf97": {
+        "2898877": "747218"
+      },
+      "bf-41-mv83": {
+        "4021": "70335"
+      },
+      "hb-16-no83": {
+        "65948": "9873077"
+      },
+      "6436173": {
+        "6436173": "46783403"
+      },
+      "cc-47-vs90": {
+        "9907093": "51601993"
+      },
+      "je-27-xk20": {
+        "135403821": "136238508"
+      },
+      "ac-67-pz77": {
+        "71731823": "78162481"
+      },
+      "af-10-qk79": {
+        "2284": "6923772"
+      },
+      "af-72-pp21": {
+        "3152": "1150567"
+      },
+      "ca-66-yb17": {
+        "3356": "46864232"
+      },
+      "lf-50-iz49": {
+        "2088": "44400013"
+      },
+      "ka-54-qw27": {
+        "5722": "135399235"
+      },
+      "bb-45-nh69": {
+        "119584": "9979608"
+      },
+      "fb-56-ir20": {
+        "11381449": "71311876"
+      },
+      "da-15-pu65": {
+        "4595": "667538"
+      },
+      "db-33-tm61": {
+        "3290": "667534"
+      },
+      "gb-50-pk29": {
+        "26098": "6604340"
+      },
+      "ve-33-mt21": {
+        "25234918": "25234917"
+      },
+      "fe-64-kc49": {
+        "2585": "185394"
+      },
+      "gb-45-yg91": {
+        "5720": "13306545"
+      },
+      "ae-09-in08": {
+        "11493598": "53338808"
+      },
+      "bc-48-wt15": {
+        "5287953": "6323266"
+      },
+      "aa-62-xs38": {
+        "5452": "66062"
+      },
+      "cc-25-qn53": {
+        "68602": "60612"
+      },
+      "ke-89-dv96": {
+        "2549": "2733484"
+      },
+      "se-21-nb93": {
+        "5311454": "25271730"
+      },
+      "ad-51-ze47": {
+        "5355": "643497"
+      },
+      "aa-74-og49": {
+        "2145": "1548995"
+      },
+      "bb-89-gd49": {
+        "5212": "135398744"
+      },
+      "ba-87-nf64": {
+        "4418": "6603939"
+      },
+      "de-17-iz77": {
+        "2474": "92253"
+      },
+      "ac-40-kv26": {
+        "3333": "941699"
+      },
+      "dd-95-ty80": {
+        "216237": "443894"
+      },
+      "ba-85-za57": {
+        "6509979": "133659920"
+      },
+      "qa-50-yo37": {
+        "5745214": "492132"
+      },
+      "da-80-iy83": {
+        "3157": "6604102"
+      },
+      "ce-73-xc72": {
+        "4950": "657298"
+      },
+      "ae-65-lv28": {
+        "3827": "57392700"
+      },
+      "fd-72-ce19": {
+        "65909": "92460626"
+      },
+      "df-11-il69": {
+        "446556": "135410875"
+      },
+      "ab-12-is33": {
+        "460612": "6918992"
+      },
+      "be-49-aq65": {
+        "5950212": "6604869"
+      },
+      "bf-59-or93": {
+        "5920": "7048703"
+      },
+      "da-45-pu65": {
+        "41781": "51371498"
+      },
+      "bc-57-kz72": {
+        "11360391": "54708532"
+      },
+      "sb-29-zh97": {
+        "29243": "9543506"
+      },
+      "cc-62-xm29": {
+        "1218": "11957706"
+      },
+      "ee-08-ff71": {
+        "149096": "6956357"
+      },
+      "yf-64-pq11": {
+        "115355": "5289053"
+      },
+      "be-47-ip08": {
+        "51576": "76969700"
+      },
+      "aa-13-dn24": {
+        "60703": "9798372"
+      },
+      "ib-30-kn41": {
+        "213023": "9578572"
+      },
+      "ed-79-ew79": {
+        "162834": "135659063"
+      },
+      "id-70-sm63": {
+        "71398": "688035"
+      },
+      "db-01-br68": {
+        "3516": "6950715"
+      },
+      "ac-60-eu98": {
+        "2165": "3647519"
+      },
+      "ad-72-mj27": {
+        "5426": "92142"
+      },
+      "ba-44-wg29": {
+        "4631": "94423"
+      },
+      "ad-86-xl96": {
+        "3883": "9578005"
+      },
+      "ed-02-cl76": {
+        "4071": "667490"
+      },
+      "af-20-mk39": {
+        "3446": "6919078"
+      },
+      "bb-52-up66": {
+        "44112": "13302097"
+      },
+      "fa-43-tp28": {
+        "3156": "28248394"
+      },
+      "ea-98-nw07": {
+        "447905": "72199895"
+      },
+      "df-57-fi46": {
+        "4497": "157132"
+      },
+      "mc-40-ip75": {
+        "65833": "6917779"
+      },
+      "aa-82-rm29": {
+        "5282071": "134129697"
+      },
+      "ec-08-ks82": {
+        "2182": "135409400"
+      },
+      "bc-38-uw37": {
+        "6057": "6942100"
+      },
+      "kd-30-sm33": {
+        "1052": "11205997"
+      },
+      "vf-19-ka00": {
+        "4633677": "5288525"
+      },
+      "cloperastine": {
+        "2805": "688420"
+      },
+      "bb-04-tn61": {
+        "2805": "688420"
+      },
+      "cf-92-qs83": {
+        "48229": "25273599"
+      },
+      "db-51-uo66": {
+        "4829": "29010894"
+      },
+      "dd-15-vh74": {
+        "5401": "1398859"
+      },
+      "ac-73-dw50": {
+        "3348": "6603853"
+      },
+      "ab-15-fb25": {
+        "3869": "134043"
+      },
+      "ae-06-fy47": {
+        "155774": "6917710"
+      },
+      "fc-03-pm86": {
+        "439302": "133698923"
+      },
+      "ac-67-zf49": {
+        "4205": "3085219"
+      },
+      "bc-26-le04": {
+        "5656": "11846746"
+      },
+      "ac-19-th24": {
+        "5665": "40466946"
+      },
+      "fd-15-hd09": {
+        "9830667": "9852201"
+      },
+      "aa-98-pm63": {
+        "6047": "6971033"
+      },
+      "ac-63-dm46": {
+        "3287": "2761171"
+      },
+      "ib-06-yd91": {
+        "104758": "135400182"
+      },
+      "4922": {
+        "4922": "6603906"
+      },
+      "aa-50-hr61": {
+        "135398735": "135925261"
+      },
+      "ib-56-br35": {
+        "448812": "134812820"
+      },
+      "ra-42-cm42": {
+        "126565": "9932888"
+      },
+      "htmt": {
+        "124846": "6604743"
+      },
+      "ZWKJWVSEDISQIS-UHFFFAOYSA-N": {
+        "60156291": "44246499"
+      },
+      "atracurium": {
+        "62887": "73416109"
+      },
+      "FBPFZTCFMRRESA-JGWLITMVSA-N": {
+        "6251": "5780"
+      },
+      "GHCCBWMZKJQGLS-UHFFFAOYSA-N": {
+        "14810948": "5244802"
+      },
+      "LMQBMWHHGVZWMR-UHFFFAOYSA-N": {
+        "92460042": "105007"
+      },
+      "JTLXCMOFVBXEKD-FOWTUZBSSA-N": {
+        "38988761": "3002119"
+      },
+      "mr-16728": {
+        "378811": "92211530"
+      },
+      "picolinic-acid": {
+        "56840998": "1018"
+      },
+      "resorcinol": {
+        "5055": "5054"
+      },
+      "XBJWOGLKABXFJE-UHFFFAOYSA-N": {
+        "25271872": "11615393"
+      },
+      "DFBIRQPKNDILPW-KTGKZQHOSA-N": {
+        "107985": "16220015"
+      },
+      "RLJFTICUTYVZDG-UHFFFAOYSA-N": {
+        "969502": "4106"
+      },
+      "YKPUWZUDDOIDPM-VURMDHGXSA-N": {
+        "1548943": "1548942"
+      },
+      "ibrutinib": {
+        "16126651": "24821094"
+      },
+      "u-0126": {
+        "3006531": "54539763"
+      },
+      "fostamatinib": {
+        "11213558": "11671467"
+      },
+      "sirolimus": {
+        "134129697": "134812764"
+      },
+      "ex-527": {
+        "5113032": "707029"
+      },
+      "mepacrine": {
+        "237": "446536"
+      },
+      "CDMGBJANTYXAIV-UHFFFAOYSA-N": {
+        "40467016": "176155"
+      },
+      "zd-7288": {
+        "3938007": "123984"
+      },
+      "norethindrone": {
+        "5832": "6230"
+      },
+      "NHFIAAAMCYVRIW-UHFFFAOYSA-N": {
+        "135565372": "135400439"
+      },
+      "skf-89976a": {
+        "92409": "6604015"
+      },
+      "BPBPYQWMFCTCNG-UHFFFAOYSA-N": {
+        "86308851": "219104"
+      },
+      "DSEIKQVUTKGLGT-UHFFFAOYSA-N": {
+        "9803475": "3906780"
+      },
+      "BCEHBSKCWLPMDN-QFYYESIMSA-N": {
+        "71616": "42052020"
+      },
+      "sq-22536": {
+        "5270": "22879197"
+      },
+      "bw-723c86": {
+        "4284720": "40418385"
+      },
+      "cgp-12177": {
+        "2687": "76962943"
+      },
+      "JWZZKOKVBUJMES-UHFFFAOYSA-N": {
+        "5808": "3779"
+      },
+      "IOVGROKTTNBUGK-SJCJKPOMSA-N": {
+        "688570": "33572"
+      },
+      "levcromakalim": {
+        "76968376": "93504"
+      },
+      "iloprost": {
+        "9931891": "51397006"
+      },
+      "TXUZVZSFRXZGTL-QPLCGJKRSA-N": {
+        "2733526": "449459"
+      },
+      "ketoconazole": {
+        "456201": "47576"
+      },
+      "ym-298198": {
+        "11716890": "9819432"
+      },
+      "VMXUWOKSQNHOCA-UKTHLTGXSA-N": {
+        "9883333": "3001055"
+      },
+      "QKDDJDBFONZGBW-UHFFFAOYSA-N": {
+        "6604452": "5450"
+      },
+      "metrifonate": {
+        "5853": "6604183"
+      },
+      "METKIMKYRPQLGS-LBPRGKRZSA-N": {
+        "2249": "175540"
+      },
+      "IXHBTMCLRNMKHZ-GFCCVEGCSA-N": {
+        "39468": "5460339"
+      },
+      "BLGXFZZNTVWLAY-DIRVCLHFSA-N": {
+        "8969": "643606"
+      },
+      "be-2254": {
+        "34772": "86308637"
+      },
+      "wb-4101": {
+        "5685": "13305910"
+      },
+      "cgp-37157": {
+        "2688": "6604821"
+      },
+      "GKTWGGQPFAXNFI-UHFFFAOYSA-N": {
+        "60606": "2806"
+      },
+      "AKUJBENLRBOFTD-RPRRAYFGSA-N": {
+        "5743": "236702"
+      },
+      "mometasone": {
+        "441336": "441335"
+      },
+      "triamcinolone": {
+        "6436": "31307"
+      },
+      "KWMBIIQCLUIHDI-UHFFFAOYSA-N": {
+        "2149494": "4076092"
+      },
+      "ANGKOCUUWGHLCE-UHFFFAOYSA-N": {
+        "9933193": "3494"
+      },
+      "pk-11195": {
+        "1345": "24839733"
+      },
+      "cytarabine": {
+        "6175": "6253"
+      },
+      "LLIFMNUXGDHTRO-UHFFFAOYSA-N": {
+        "40467027": "10367662"
+      }
+    },
+    "tahoe_code": {
+      "11707110": {
+        "trametinib (dmso_tf solvate)": "trametinib"
+      }
+    },
+    "drugseqr_nsn": {
+      "NDAUXUAQIAJITI-GFCCVEGCSA-N": {
+        "lb-90-dc89": "ab-71-vz28"
+      },
+      "deoxypodophyllotoxin": {
+        "cb-02-xl81": "ab-71-ci37"
+      },
+      "YKPUWZUDDOIDPM-VURMDHGXSA-N": {
+        "ab-98-ht45": "vc-30-qh05"
+      },
+      "DSEIKQVUTKGLGT-UHFFFAOYSA-N": {
+        "pe-39-hl72": "ge-84-sm43"
+      },
+      "ketoconazole": {
+        "ab-39-ed84": "af-81-jb15"
+      },
+      "BLGXFZZNTVWLAY-DIRVCLHFSA-N": {
+        "ed-98-ui13": "jf-45-jm50"
+      },
+      "GKTWGGQPFAXNFI-UHFFFAOYSA-N": {
+        "ff-07-fl63": "ae-39-sg01"
+      }
+    },
+    "lincs_brd": {
+      "clindamycin": {
+        "brd-a43673346": "brd-k23586533",
+        "brd-a52252998": "brd-k23586533",
+        "brd-a23034328": "brd-k23586533"
+      },
+      "at-csc-18": {
+        "brd-k83778500": "brd-k01121114"
+      },
+      "VIJIVCXRKDRGGA-UHFFFAOYSA-N": {
+        "brd-u22633929": "brd-k46805185"
+      },
+      "YVELSDDXFCIBLA-UHFFFAOYSA-N": {
+        "brd-k63915987": "brd-k12906962"
+      },
+      "CAISHCQFVSGCPA-CAOOACKPSA-N": {
+        "brd-k24564544": "brd-k33720404"
+      },
+      "a-23187": {
+        "brd-k41431477": "brd-a19134330"
+      },
+      "a-443654": {
+        "brd-k88573743": "brd-k38615104"
+      },
+      "acadesine": {
+        "brd-a81585303": "brd-a95696820"
+      },
+      "amantadine": {
+        "brd-k70330367": "brd-m94527406"
+      },
+      "amikacin": {
+        "brd-k88043978": "brd-a30051119"
+      },
+      "YXBQLONCIPUQKO-UJPOAAIJSA-N": {
+        "brd-k97643133": "brd-k11700078"
+      },
+      "ampicillin": {
+        "brd-a16754160": "brd-k68432770"
+      },
+      "anabasine": {
+        "brd-a24284985": "brd-k36638830"
+      },
+      "androstanol": {
+        "brd-u66370498": "brd-k45834949"
+      },
+      "QGXBDMJGAMFCBF-HLUDHZFRSA-N": {
+        "brd-k12329651": "brd-k39168746"
+      },
+      "YKJYKKNCCRKFSL-RDBSUJKOSA-N": {
+        "brd-k91370081": "brd-k82261406"
+      },
+      "apigenin": {
+        "brd-k01493881": "brd-k12057390"
+      },
+      "artesunate": {
+        "brd-k17944737": "brd-k79759031",
+        "brd-a47829399": "brd-k79759031"
+      },
+      "asiatic-acid": {
+        "brd-a72758037": "brd-k35079116"
+      },
+      "atovaquone": {
+        "brd-a38161572": "brd-a19795905",
+        "brd-a84493640": "brd-a19795905"
+      },
+      "atracurium": {
+        "brd-a75935363": "brd-k17498618"
+      },
+      "auranofin": {
+        "brd-a79465854": "brd-k45995181"
+      },
+      "austricine": {
+        "brd-k64236792": "brd-k78838262"
+      },
+      "azd-7545": {
+        "brd-a87435144": "brd-k52836380"
+      },
+      "azithromycin": {
+        "brd-k74501079": "brd-k73794685"
+      },
+      "aztreonam": {
+        "brd-k12437696": "brd-k62607865"
+      },
+      "XFILPEOLDIKJHX-QYZOEREBSA-N": {
+        "brd-k82818427": "brd-k25361343"
+      },
+      "benzydamine": {
+        "brd-k76133116": "brd-k28542495"
+      },
+      "biotin": {
+        "brd-k63899271": "brd-k89210380"
+      },
+      "bix-02188": {
+        "brd-k20290250": "brd-k92817986"
+      },
+      "bms-509744": {
+        "brd-k12811596": "brd-a13021932"
+      },
+      "brefeldin-a": {
+        "brd-a84228258": "brd-k77841042",
+        "brd-a31107743": "brd-k77841042",
+        "brd-a17065207": "brd-k77841042"
+      },
+      "brucine": {
+        "brd-a41995253": "brd-k68077509"
+      },
+      "calpeptin": {
+        "brd-a84045418": "brd-k26134695"
+      },
+      "carbadox": {
+        "brd-k77317635": "brd-k56735750"
+      },
+      "catechin": {
+        "brd-a61899133": "brd-k03600606"
+      },
+      "cefazolin": {
+        "brd-a65282128": "brd-k52237148"
+      },
+      "cefdinir": {
+        "brd-k15766189": "brd-k52735702",
+        "brd-k03012696": "brd-k52735702"
+      },
+      "cefepime": {
+        "brd-k58662656": "brd-a12077521"
+      },
+      "OKBVVJOGVLARMR-QSWIMTSFSA-N": {
+        "brd-k71059170": "brd-k04993501"
+      },
+      "cefixime": {
+        "brd-k54283240": "brd-k04993501"
+      },
+      "SLAYUXIURFNXPG-CRAIPNDOSA-N": {
+        "brd-k37848908": "brd-k06319591"
+      },
+      "cefotaxime": {
+        "brd-a67981824": "brd-k78364995",
+        "brd-k76018977": "brd-k78364995"
+      },
+      "cefotetan": {
+        "brd-a78723049": "brd-k91289464"
+      },
+      "QYQDKDWGWDOFFU-IUODEOHRSA-N": {
+        "brd-k02275692": "brd-k21815137"
+      },
+      "cefuroxime": {
+        "brd-a76746748": "brd-k63641886",
+        "brd-k37187815": "brd-k63641886",
+        "brd-k02733959": "brd-k63641886"
+      },
+      "celastrol": {
+        "brd-a24396574": "brd-a80960055"
+      },
+      "ceramide": {
+        "brd-a53416814": "brd-k41707108"
+      },
+      "AQGNHMOJWBZFQQ-UHFFFAOYSA-N": {
+        "brd-k16189898": "brd-k76894938"
+      },
+      "chlortetracycline": {
+        "brd-a41555725": "brd-a39210489"
+      },
+      "cinanserin": {
+        "brd-k15522385": "brd-k40901640"
+      },
+      "LQOLIRLGBULYKD-JKIFEVAISA-N": {
+        "brd-k01244426": "brd-k23933163"
+      },
+      "co-102862": {
+        "brd-k08890269": "brd-k70912147"
+      },
+      "cortisone": {
+        "brd-k80110068": "brd-k43736954",
+        "brd-a62731508": "brd-k43736954"
+      },
+      "crotamiton": {
+        "brd-k13240564": "brd-k57179821"
+      },
+      "demeclocycline": {
+        "brd-a72130500": "brd-a34145622",
+        "brd-a75368507": "brd-a34145622"
+      },
+      "deoxycorticosterone-acetate": {
+        "brd-a75402480": "brd-k24556098"
+      },
+      "VPGRYOFKCNULNK-CLIPTZFXSA-N": {
+        "brd-a75402480": "brd-k24556098"
+      },
+      "digitoxigenin": {
+        "brd-k92923799": "brd-k18518344"
+      },
+      "digoxigenin": {
+        "brd-k55113501": "brd-k18619710"
+      },
+      "dnqx": {
+        "brd-k85266041": "brd-k64400208"
+      },
+      "ephedrine": {
+        "brd-a98431941": "brd-a13982089"
+      },
+      "esculin": {
+        "brd-a99411506": "brd-k36270037"
+      },
+      "estropipate": {
+        "brd-a22143024": "brd-k70515009"
+      },
+      "JKKFKPJIXZFSSB-CBZIJGRNSA-N": {
+        "brd-k51095933": "brd-k70515009"
+      },
+      "ethambutol": {
+        "brd-a74500471": "brd-k54556307"
+      },
+      "ethisterone": {
+        "brd-k03981224": "brd-k37208476"
+      },
+      "ODKNJVUHOIMIIZ-RRKCRQDMSA-N": {
+        "brd-k47832606": "brd-k73088654"
+      },
+      "floxuridine": {
+        "brd-a80638690": "brd-k73088654"
+      },
+      "flucloxacillin": {
+        "brd-a13650332": "brd-a60052764"
+      },
+      "fluocinolone": {
+        "brd-k34817515": "brd-k94353609"
+      },
+      "fluocinonide": {
+        "brd-k47036706": "brd-k57886322"
+      },
+      "furaltadone": {
+        "brd-a35713041": "brd-a67514145"
+      },
+      "garcinol": {
+        "brd-a01645196": "brd-a47268303"
+      },
+      "WZBNEZWCNKUOSM-VOTSOKGWSA-N": {
+        "brd-k49890030": "brd-k81981783"
+      },
+      "gbr-12783": {
+        "brd-k34034388": "brd-k92015269"
+      },
+      "genipin": {
+        "brd-a04308630": "brd-k28824103"
+      },
+      "griseofulvin": {
+        "brd-k12423485": "brd-k08273968"
+      },
+      "gsk-1059615": {
+        "brd-k02708799": "brd-u24835547",
+        "brd-k06750613": "brd-u24835547"
+      },
+      "guanethidine": {
+        "brd-m18219129": "brd-k62676709"
+      },
+      "hesperidin": {
+        "brd-k93633846": "brd-k53229386",
+        "brd-k38903228": "brd-k53229386"
+      },
+      "hg-5-113-01": {
+        "brd-u82589721": "brd-k93747373"
+      },
+      "hg-5-88-01": {
+        "brd-u44700465": "brd-k06569345"
+      },
+      "UMBFDGUGXMOMHX-BQYQJAHWSA-N": {
+        "brd-k98762074": "brd-u51024685"
+      },
+      "hg-6-64-01": {
+        "brd-u37049823": "brd-u51024685"
+      },
+      "hydralazine": {
+        "brd-a37444045": "brd-a77722753"
+      },
+      "hyoscyamine": {
+        "brd-k40530731": "brd-k39330046",
+        "brd-a78303415": "brd-k39330046"
+      },
+      "icariin": {
+        "brd-k65639003": "brd-a06210771"
+      },
+      "isosorbide": {
+        "brd-k47178855": "brd-k31616564"
+      },
+      "itraconazole": {
+        "brd-a34817987": "brd-a23067620"
+      },
+      "ivermectin": {
+        "brd-a48570745": "brd-k24652731"
+      },
+      "josamycin": {
+        "brd-k52431530": "brd-k25837718"
+      },
+      "jw-7-24-1": {
+        "brd-u68942961": "brd-k57282030"
+      },
+      "l-689560": {
+        "brd-a28422058": "brd-k74284736"
+      },
+      "l-744832": {
+        "brd-a66794241": "brd-a50934474"
+      },
+      "lanatoside-c": {
+        "brd-a64242993": "brd-k36760124"
+      },
+      "lasalocid": {
+        "brd-a72711497": "brd-k10207760"
+      },
+      "limonin": {
+        "brd-k05906022": "brd-k64094723"
+      },
+      "lonidamine": {
+        "brd-k78513633": "brd-k96670504"
+      },
+      "mefloquine": {
+        "brd-a89585551": "brd-k40645748"
+      },
+      "megestrol": {
+        "brd-k60132694": "brd-k12002134"
+      },
+      "melphalan": {
+        "brd-a08200164": "brd-k87827419"
+      },
+      "mephentermine": {
+        "brd-m61872305": "brd-k18194590"
+      },
+      "meropenem": {
+        "brd-k74615293": "brd-k01612348"
+      },
+      "minocycline": {
+        "brd-a69651145": "brd-a41020680"
+      },
+      "mitomycin-c": {
+        "brd-k51418664": "brd-a48237631"
+      },
+      "mk-801": {
+        "brd-k34722304": "brd-k29064493"
+      },
+      "NBLBCGUCPBXKOV-UHFFFAOYSA-N": {
+        "brd-k56077740": "brd-k53878242"
+      },
+      "naftifine": {
+        "brd-k43813806": "brd-k74141488"
+      },
+      "nifuroxazide": {
+        "brd-k26104851": "brd-k68188368"
+      },
+      "nitrofural": {
+        "brd-k53815609": "brd-k79092138"
+      },
+      "norgestrel": {
+        "brd-a14886633": "brd-k74741811",
+        "brd-a50928468": "brd-k74741811"
+      },
+      "ofloxacin": {
+        "brd-a24228527": "brd-k09471561"
+      },
+      "omdm-2": {
+        "brd-a39522003": "brd-k48830578"
+      },
+      "oxantel": {
+        "brd-m41106164": "brd-k66019333"
+      },
+      "oxiconazole": {
+        "brd-k23369905": "brd-k56104152",
+        "brd-k88538023": "brd-k56104152"
+      },
+      "oxytetracycline": {
+        "brd-a22740840": "brd-a56621826"
+      },
+      "pancuronium": {
+        "brd-k87210992": "brd-k50817623",
+        "brd-a84134924": "brd-k50817623"
+      },
+      "parthenolide": {
+        "brd-k98548675": "brd-a66395008",
+        "brd-k81651477": "brd-a66395008",
+        "brd-k04949373": "brd-a66395008"
+      },
+      "penicillin": {
+        "brd-a84702196": "brd-k48519456"
+      },
+      "phenothiazine": {
+        "brd-k01160827": "brd-k59597909"
+      },
+      "piceatannol": {
+        "brd-k91509126": "brd-k26241953"
+      },
+      "piperacillin": {
+        "brd-k86873305": "brd-k39397585"
+      },
+      "pivmecillinam": {
+        "brd-k67100011": "brd-k54978501"
+      },
+      "prednisolone": {
+        "brd-a27887842": "brd-k70504303",
+        "brd-k82481048": "brd-k70504303"
+      },
+      "pregnenolone": {
+        "brd-k39356024": "brd-k52183142",
+        "brd-k43880410": "brd-k52183142",
+        "brd-k35862502": "brd-k52183142",
+        "brd-a35054627": "brd-k52183142"
+      },
+      "procyclidine": {
+        "brd-a31800922": "brd-a55913614"
+      },
+      "prothionamide": {
+        "brd-k97863768": "brd-k75360161"
+      },
+      "RXWNCPJZOCPEPQ-NVWDDTSBSA-N": {
+        "brd-k36007650": "brd-a28970875"
+      },
+      "ql-x-138": {
+        "brd-u33728988": "brd-k72636697"
+      },
+      "ql-xi-92": {
+        "brd-u73238814": "brd-k24515980"
+      },
+      "ql-xii-47": {
+        "brd-u86922168": "brd-k99252563"
+      },
+      "radicicol": {
+        "brd-a39996500": "brd-k33551950"
+      },
+      "brd-a39996500": {
+        "brd-a39996500": "brd-k33551950"
+      },
+      "GHMLBKRAJCXXBS-UHFFFAOYSA-N": {
+        "brd-k74190368": "brd-k85603128"
+      },
+      "AUNGANRZJHBGPY-SCRDCRAPSA-N": {
+        "brd-k92760278": "brd-k70246307"
+      },
+      "rifabutin": {
+        "brd-k30563334": "brd-a23801136",
+        "brd-k31484631": "brd-a23801136"
+      },
+      "rimantadine": {
+        "brd-a75479906": "brd-a84282119"
+      },
+      "rottlerin": {
+        "brd-k39256324": "brd-k03816923"
+      },
+      "roxithromycin": {
+        "brd-k14036801": "brd-k38684403",
+        "brd-k58211978": "brd-k38684403"
+      },
+      "salsolinol": {
+        "brd-a26112980": "brd-k99595596"
+      },
+      "saquinavir": {
+        "brd-k70158168": "brd-k09963420",
+        "brd-a26690767": "brd-k09963420"
+      },
+      "sericetin": {
+        "brd-k08714182": "brd-k05433219"
+      },
+      "silibinin": {
+        "brd-a83815268": "brd-k80353138"
+      },
+      "sparfloxacin": {
+        "brd-a26423207": "brd-k07612980"
+      },
+      "stanozolol": {
+        "brd-k46791647": "brd-k79199004"
+      },
+      "streptozotocin": {
+        "brd-a25576662": "brd-k34411947",
+        "brd-a12832192": "brd-k34411947"
+      },
+      "sulbactam": {
+        "brd-k85679373": "brd-k44133266"
+      },
+      "sulmazole": {
+        "brd-a41722204": "brd-a22081593"
+      },
+      "suloctidil": {
+        "brd-a34205397": "brd-k42635745"
+      },
+      "talampicillin": {
+        "brd-a10606614": "brd-a10303790"
+      },
+      "targinine": {
+        "brd-k59506194": "brd-k22227508"
+      },
+      "tazobactam": {
+        "brd-a18611368": "brd-k14312455"
+      },
+      "testosterone": {
+        "brd-a55393291": "brd-k84036904",
+        "brd-a79479878": "brd-k84036904",
+        "brd-k90553655": "brd-k84036904"
+      },
+      "tetracycline": {
+        "brd-a52997285": "brd-a15493168",
+        "brd-a34788695": "brd-a15493168",
+        "brd-a88208128": "brd-a15493168",
+        "brd-a78253580": "brd-a15493168"
+      },
+      "tetramisole": {
+        "brd-a46393198": "brd-k73107279"
+      },
+      "thz-2-98-01": {
+        "brd-u41416256": "brd-k49327517"
+      },
+      "tipifarnib": {
+        "brd-k63195589": "brd-k62965247"
+      },
+      "NLVFBUXFDBBNBW-PBSUHMDJSA-N": {
+        "brd-k05619559": "brd-k96342952"
+      },
+      "tranilast": {
+        "brd-k19533706": "brd-k17849083"
+      },
+      "tribenoside": {
+        "brd-a60294240": "brd-a51233382"
+      },
+      "triptolide": {
+        "brd-k39484304": "brd-k81258678",
+        "brd-a13122391": "brd-k81258678"
+      },
+      "tryptophan": {
+        "brd-a07106394": "brd-k83776863"
+      },
+      "tubaic-acid": {
+        "brd-k96362535": "brd-a02176148"
+      },
+      "verteporfin": {
+        "brd-a35782587": "brd-m45964048"
+      },
+      "vincamine": {
+        "brd-k89704198": "brd-k40902647"
+      },
+      "vx-222": {
+        "brd-k81783531": "brd-k70610771"
+      },
+      "wh-4023": {
+        "brd-u44618005": "brd-k50199947"
+      },
+      "wz-4-145": {
+        "brd-u61997977": "brd-k43568579",
+        "brd-u25771771": "brd-k43568579"
+      },
+      "XGICKGXGLUYWDW-MDWZMJQESA-N": {
+        "brd-u64521890": "brd-k38113518"
+      },
+      "zg-10": {
+        "brd-u51951544": "brd-k61860715"
+      },
+      "zidovudine": {
+        "brd-a33692381": "brd-k72903603"
+      },
+      "azlocillin": {
+        "brd-k60663764": "brd-k73437736"
+      },
+      "FIHJKUPKCHIPAT-AHIGJZGOSA-N": {
+        "brd-k54634444": "brd-k79759031"
+      },
+      "dehydroepiandrosterone": {
+        "brd-k41256143": "brd-k85833139"
+      },
+      "edoxudine": {
+        "brd-a62505706": "brd-k86892782"
+      },
+      "bromebric-acid": {
+        "brd-k21915746": "brd-k17874929"
+      },
+      "ribavirin": {
+        "brd-k94397152": "brd-k60369935",
+        "brd-a96255180": "brd-k60369935"
+      },
+      "cyanocobalamin": {
+        "brd-a31836915": "brd-a97502381"
+      },
+      "niacin": {
+        "brd-k61993165": "brd-k60237333"
+      },
+      "brd-k61993165": {
+        "brd-k61993165": "brd-k60237333"
+      },
+      "ascorbic-acid": {
+        "brd-a10386413": "brd-a79237180"
+      },
+      "rutin": {
+        "brd-a76747559": "brd-k20482099",
+        "brd-a34907681": "brd-k20482099"
+      },
+      "gw-4064": {
+        "brd-k64245000": "brd-k88186167"
+      },
+      "minoxidil": {
+        "brd-k14888893": "brd-k06902185"
+      },
+      "brd-k14888893": {
+        "brd-k14888893": "brd-k06902185"
+      },
+      "capsaicin": {
+        "brd-k50590187": "brd-k16336526"
+      },
+      "JSZNAPGSRFTCQR-UHFFFAOYSA-N": {
+        "brd-m86331534": "brd-k07103434"
+      },
+      "gdc-0068": {
+        "brd-k71480163": "brd-k43002773"
+      },
+      "GRZXWCHAXNAUHY-AHRSYUTCSA-N": {
+        "brd-k71480163": "brd-k43002773"
+      },
+      "gsk-690693": {
+        "brd-a87137733": "brd-k25325018"
+      },
+      "KGPGFQWBCSZGEL-UHFFFAOYSA-N": {
+        "brd-a87137733": "brd-k25325018"
+      },
+      "triciribine": {
+        "brd-a11706664": "brd-k80431395",
+        "brd-a42649439": "brd-k80431395"
+      },
+      "HOGVTUZUJGHKPL-XVCUJNKASA-N": {
+        "brd-a11706664": "brd-k80431395"
+      },
+      "HOGVTUZUJGHKPL-UHFFFAOYSA-N": {
+        "brd-a42649439": "brd-k80431395"
+      },
+      "bh3i-1": {
+        "brd-a71799696": "brd-a38913120"
+      },
+      "ha-14-1": {
+        "brd-a13807286": "brd-k18163608"
+      },
+      "ibrutinib": {
+        "brd-a35869383": "brd-k70301465"
+      },
+      "aloisine": {
+        "brd-k51276371": "brd-k93658967"
+      },
+      "indirubin": {
+        "brd-k53959060": "brd-k17894950"
+      },
+      "HBDSHCUSXQATPO-UHFFFAOYSA-N": {
+        "brd-k53959060": "brd-k17894950"
+      },
+      "nsc-693868": {
+        "brd-k31268420": "brd-k87932577"
+      },
+      "brd-k31268420": {
+        "brd-k31268420": "brd-k87932577"
+      },
+      "IAYGCINLNONXHY-GFCCVEGCSA-N": {
+        "brd-k46056750": "brd-u86686840"
+      },
+      "azd-7762": {
+        "brd-k86525559": "brd-u86686840"
+      },
+      "megestrol-acetate": {
+        "brd-a35989968": "brd-k19507340"
+      },
+      "alvespimycin": {
+        "brd-k83988098": "brd-k23499943",
+        "brd-a06304526": "brd-k23499943"
+      },
+      "geldanamycin": {
+        "brd-a19500257": "brd-k11528507"
+      },
+      "NDAZATDQFDPQBD-UHFFFAOYSA-N": {
+        "brd-k41859756": "brd-k65182930"
+      },
+      "tanespimycin": {
+        "brd-a61304759": "brd-k81473043"
+      },
+      "guggulsterone": {
+        "brd-a86109770": "brd-a59808129"
+      },
+      "withaferin-a": {
+        "brd-a52193669": "brd-k88378636"
+      },
+      "DBRXOUCRJQVYJQ-MZNHJNIISA-N": {
+        "brd-a52193669": "brd-k88378636"
+      },
+      "TUCIOBMMDDOEMM-RIYZIHGNSA-N": {
+        "brd-k47105409": "brd-k12357156"
+      },
+      "brd-k47105409": {
+        "brd-k47105409": "brd-k12357156"
+      },
+      "azd-1480": {
+        "brd-a29009894": "brd-k65928735"
+      },
+      "brd-a29009894": {
+        "brd-a29009894": "brd-k65928735"
+      },
+      "UIARLYUEJFELEN-DMVVYWCZSA-N": {
+        "brd-a27376179": "brd-k23192422"
+      },
+      "tofacitinib": {
+        "brd-k36280065": "brd-k31283835"
+      },
+      "tozasertib": {
+        "brd-k87947369": "brd-k59369769"
+      },
+      "brd-k87947369": {
+        "brd-k87947369": "brd-k59369769"
+      },
+      "CBIAKDAYHRWZCU-UHFFFAOYSA-N": {
+        "brd-k07487750": "brd-k52850071"
+      },
+      "cg-930": {
+        "brd-k84085265": "brd-k76969307"
+      },
+      "sorafenib": {
+        "brd-k49810818": "brd-k23984367"
+      },
+      "brd-k49810818": {
+        "brd-k49810818": "brd-k23984367"
+      },
+      "WINHZLLDWRZWRT-ATVHPVEESA-N": {
+        "brd-m64432851": "brd-k42828737"
+      },
+      "serdemetan": {
+        "brd-k60219430": "brd-k65924316"
+      },
+      "nutlin-3": {
+        "brd-k73255294": "brd-a12230535"
+      },
+      "pd-0325901": {
+        "brd-a50454580": "brd-k49865102"
+      },
+      "u-0126": {
+        "brd-k18787491": "brd-k91701654",
+        "brd-k46419649": "brd-k91701654"
+      },
+      "brd-k18787491": {
+        "brd-k18787491": "brd-k91701654"
+      },
+      "brd-k46419649": {
+        "brd-k46419649": "brd-k91701654"
+      },
+      "h-9": {
+        "brd-k70577657": "brd-k09790412"
+      },
+      "staurosporine": {
+        "brd-k17953061": "brd-k70549064"
+      },
+      "bi-2536": {
+        "brd-k64890080": "brd-u70626184"
+      },
+      "gw-5074": {
+        "brd-k07859598": "brd-k39520573"
+      },
+      "sb-590885": {
+        "brd-k01253243": "brd-k24496482"
+      },
+      "OUKYUETWWIPKQR-UHFFFAOYSA-N": {
+        "brd-k19540840": "brd-u07805514"
+      },
+      "bucladesine": {
+        "brd-a14652656": "brd-a94624445",
+        "brd-a15070535": "brd-a94624445",
+        "brd-a15931911": "brd-a94624445",
+        "brd-a04706586": "brd-a94624445"
+      },
+      "afatinib": {
+        "brd-a58767537": "brd-k66175015"
+      },
+      "ULXXDDBFHOBEHA-ONEGZZNKSA-N": {
+        "brd-a58767537": "brd-k66175015"
+      },
+      "lapatinib": {
+        "brd-k19687926": "brd-m07438658"
+      },
+      "am-404": {
+        "brd-k21667562": "brd-k55462201"
+      },
+      "brivanib": {
+        "brd-a21584801": "brd-k28428262"
+      },
+      "orantinib": {
+        "brd-k91696562": "brd-k55966568"
+      },
+      "NHFDRBXTEDBWCZ-NTEUORMPSA-N": {
+        "brd-k91696562": "brd-k55966568"
+      },
+      "apicidin": {
+        "brd-a63989068": "brd-k64606589"
+      },
+      "deforolimus": {
+        "brd-k09078998": "brd-k29733039"
+      },
+      "HKVAMNSJSFKALM-GKUWKFKPSA-N": {
+        "brd-k13514097": "brd-a25736793"
+      },
+      "everolimus": {
+        "brd-k13154216": "brd-a25736793"
+      },
+      "gdc-0980": {
+        "brd-a18328003": "brd-k23228615"
+      },
+      "brd-a18328003": {
+        "brd-a18328003": "brd-k23228615"
+      },
+      "osi-027": {
+        "brd-k94294671": "brd-k94012289"
+      },
+      "JROFGZPOBKIAEW-HAQNSBGRSA-N": {
+        "brd-k87124298": "brd-k94012289"
+      },
+      "sirolimus": {
+        "brd-k89626439": "brd-k99369265",
+        "brd-a50287119": "brd-k99369265",
+        "brd-a23770159": "brd-k99369265",
+        "brd-a79768653": "brd-k99369265"
+      },
+      "QFJCIRLUMZQUOT-HPLJOQBZSA-N": {
+        "brd-k89626439": "brd-k99369265",
+        "brd-k84937637": "brd-k99369265"
+      },
+      "QFJCIRLUMZQUOT-DENUVPQMSA-N": {
+        "brd-a50287119": "brd-k99369265"
+      },
+      "QFJCIRLUMZQUOT-GWUMUYGYSA-N": {
+        "brd-a23770159": "brd-k99369265"
+      },
+      "brd-a79768653": {
+        "brd-a79768653": "brd-k99369265"
+      },
+      "temsirolimus": {
+        "brd-a62025033": "brd-k42898655"
+      },
+      "JNAHVYVRKWKWKQ-CYBMUJFWSA-N": {
+        "brd-k87142802": "brd-k12737986"
+      },
+      "brd-k87142802": {
+        "brd-k87142802": "brd-k12737986"
+      },
+      "veliparib": {
+        "brd-a50364343": "brd-k12737986"
+      },
+      "JNAHVYVRKWKWKQ-UHFFFAOYSA-N": {
+        "brd-a50364343": "brd-k12737986"
+      },
+      "as-605240": {
+        "brd-k76773351": "brd-k41895714"
+      },
+      "pik-75": {
+        "brd-k49371609": "brd-m16762496"
+      },
+      "QDLHCMPXEPAAMD-QAIWCSMKSA-N": {
+        "brd-k87343924": "brd-a11678676"
+      },
+      "wortmannin": {
+        "brd-a75409952": "brd-a11678676"
+      },
+      "QDLHCMPXEPAAMD-UHFFFAOYSA-N": {
+        "brd-a75409952": "brd-a11678676"
+      },
+      "ginkgolide-b": {
+        "brd-a82395837": "brd-a59001851"
+      },
+      "resveratrol": {
+        "brd-k80738081": "brd-k25591257"
+      },
+      "brd-k80738081": {
+        "brd-k80738081": "brd-k25591257"
+      },
+      "ex-527": {
+        "brd-a73908300": "brd-k76964878"
+      },
+      "WCGUUGGRBIKTOS-GPOJBZKASA-N": {
+        "brd-k68185022": "brd-a61767428"
+      },
+      "securinine": {
+        "brd-a25775766": "brd-k49071277"
+      },
+      "epz-5676": {
+        "brd-k63457253": "brd-k26531771"
+      },
+      "thiostrepton": {
+        "brd-a20697603": "brd-a52627843"
+      },
+      "atorvastatin": {
+        "brd-u88459701": "brd-k69726342",
+        "brd-a82307304": "brd-k69726342"
+      },
+      "fluvastatin": {
+        "brd-k39716612": "brd-k66296774"
+      },
+      "lovastatin": {
+        "brd-k17113870": "brd-k09416995",
+        "brd-a70155556": "brd-k09416995"
+      },
+      "mevastatin": {
+        "brd-k32403583": "brd-k94441233",
+        "brd-k08229828": "brd-k94441233"
+      },
+      "pitavastatin": {
+        "brd-k75958547": "brd-k30097969"
+      },
+      "TUZYXOIXSAXUGO-PZAWKZKUSA-N": {
+        "brd-k60511616": "brd-k31447894"
+      },
+      "pravastatin": {
+        "brd-k25841245": "brd-k31447894",
+        "brd-a71816415": "brd-k31447894",
+        "brd-a11170096": "brd-k31447894"
+      },
+      "simvastatin": {
+        "brd-k22134346": "brd-k28026280",
+        "brd-a81772229": "brd-k28026280"
+      },
+      "linsitinib": {
+        "brd-k07667918": "brd-k86118762",
+        "brd-k08589866": "brd-k86118762"
+      },
+      "RGLPLEBXLNEXKU-UHFFFAOYSA-N": {
+        "brd-k08589866": "brd-k86118762"
+      },
+      "nvp-aew541": {
+        "brd-k98333955": "brd-k20696416",
+        "brd-k24696047": "brd-k20696416"
+      },
+      "su-4312": {
+        "brd-k20287671": "brd-k60487568"
+      },
+      "amg-9810": {
+        "brd-k01995783": "brd-k43068349"
+      },
+      "naringenin": {
+        "brd-a94669766": "brd-k08832567"
+      },
+      "FTVWIRXFELQLPI-UHFFFAOYSA-N": {
+        "brd-a94669766": "brd-k08832567"
+      },
+      "sb-366791": {
+        "brd-k59331372": "brd-k61536336"
+      },
+      "cyclopiazonic-acid": {
+        "brd-a26787626": "brd-a10420615"
+      },
+      "cymarin": {
+        "brd-a71459254": "brd-k08486545"
+      },
+      "digitoxin": {
+        "brd-a93236127": "brd-k59873006"
+      },
+      "digoxin": {
+        "brd-k40476324": "brd-k23478508",
+        "brd-a75144621": "brd-k23478508",
+        "brd-a94756469": "brd-k23478508"
+      },
+      "omeprazole": {
+        "brd-a55962179": "brd-a56892734"
+      },
+      "oligomycin-a": {
+        "brd-k70555272": "brd-k74133369",
+        "brd-a81541225": "brd-k74133369"
+      },
+      "ouabain": {
+        "brd-k35708212": "brd-k33277808",
+        "brd-a68930007": "brd-k33277808",
+        "brd-a46747628": "brd-k33277808"
+      },
+      "thapsigargin": {
+        "brd-a62809825": "brd-k69023402"
+      },
+      "GOTYRUGSSMKFNF-UHFFFAOYSA-N": {
+        "brd-a17883755": "brd-k05926469"
+      },
+      "betulinic-acid": {
+        "brd-k38744518": "brd-k45401373"
+      },
+      "pac-1": {
+        "brd-k50841342": "brd-k92991072"
+      },
+      "beclomethasone-dipropionate": {
+        "brd-a11319535": "brd-k97810537"
+      },
+      "docetaxel": {
+        "brd-k42125900": "brd-k30577245",
+        "brd-k63265447": "brd-k30577245",
+        "brd-a05821830": "brd-k30577245",
+        "brd-k30618791": "brd-k30577245"
+      },
+      "noscapine": {
+        "brd-k66043364": "brd-k91301684",
+        "brd-k89237706": "brd-k91301684",
+        "brd-a51393488": "brd-k91301684"
+      },
+      "paclitaxel": {
+        "brd-a63610676": "brd-k86858124",
+        "brd-a28746609": "brd-k86858124",
+        "brd-a23723433": "brd-k86858124",
+        "brd-k62008436": "brd-k86858124"
+      },
+      "vinblastine": {
+        "brd-k12515392": "brd-k01188359",
+        "brd-a55594068": "brd-k01188359",
+        "brd-a85648045": "brd-k01188359",
+        "brd-a22783572": "brd-k01188359"
+      },
+      "vincristine": {
+        "brd-k74793820": "brd-k82109576",
+        "brd-k49229349": "brd-k82109576",
+        "brd-a60414806": "brd-k82109576",
+        "brd-a76528577": "brd-k82109576"
+      },
+      "vinorelbine": {
+        "brd-k10916986": "brd-m30523314",
+        "brd-k69280563": "brd-m30523314",
+        "brd-k97514127": "brd-m30523314"
+      },
+      "brd-k62008436": {
+        "brd-k62008436": "brd-k86858124"
+      },
+      "sb-203580": {
+        "brd-a37704979": "brd-k99291625"
+      },
+      "sb-239063": {
+        "brd-k98143437": "brd-k82091397"
+      },
+      "ZQUSFAUAYSEREK-UHFFFAOYSA-N": {
+        "brd-k98143437": "brd-k82091397"
+      },
+      "ym-155": {
+        "brd-k76703230": "brd-k24681473"
+      },
+      "argatroban": {
+        "brd-a48261811": "brd-a10012892"
+      },
+      "fenretinide": {
+        "brd-k28168037": "brd-k89085489"
+      },
+      "exemestane": {
+        "brd-a73741725": "brd-k93923542"
+      },
+      "BFYIZQONLCFLEV-DAELLWKTSA-N": {
+        "brd-k33425534": "brd-k93923542"
+      },
+      "formestane": {
+        "brd-a26503646": "brd-a42153648",
+        "brd-a31801025": "brd-a42153648"
+      },
+      "safinamide": {
+        "brd-k92613113": "brd-k84639753"
+      },
+      "way-213613": {
+        "brd-a20968261": "brd-k96758128"
+      },
+      "norethindrone": {
+        "brd-a09349126": "brd-k92073408",
+        "brd-k24559712": "brd-k92073408",
+        "brd-k96037667": "brd-k92073408"
+      },
+      "altrenogest": {
+        "brd-a27554692": "brd-k14619660"
+      },
+      "noretynodrel": {
+        "brd-a00758722": "brd-k83229621"
+      },
+      "ICTXHFFSOAJUMG-SLHNCBLASA-N": {
+        "brd-k80334323": "brd-k83229621"
+      },
+      "dinoprost": {
+        "brd-m90449146": "brd-k81672972"
+      },
+      "RQZAXGRLVPAYTJ-VSUSFZLSSA-N": {
+        "brd-a35989968": "brd-k19507340"
+      },
+      "gnf-2": {
+        "gnf2": "brd-k97056771"
+      },
+      "guanadrel": {
+        "brd-m34926192": "brd-a14262390"
+      },
+      "glimepiride": {
+        "brd-k42693031": "brd-k34776109"
+      },
+      "WIGIZIANZCJQQY-UHFFFAOYSA-N": {
+        "brd-k42693031": "brd-k34776109"
+      },
+      "nateglinide": {
+        "brd-k44353683": "brd-k84658672"
+      },
+      "SUDAHWBOROXANE-UHFFFAOYSA-N": {
+        "brd-a50454580": "brd-k49865102"
+      },
+      "bortezomib": {
+        "brd-k88510285": "brd-k50691590"
+      },
+      "brd-k88510285": {
+        "brd-k88510285": "brd-k50691590"
+      },
+      "warfarin": {
+        "brd-a24514565": "brd-k25991148"
+      },
+      "p-1075": {
+        "brd-k56478238": "brd-k00206590"
+      },
+      "IVVNZDGDKPTYHK-UHFFFAOYSA-N": {
+        "brd-a43882281": "brd-a22897758",
+        "brd-a58207013": "brd-a22897758"
+      },
+      "brd-a43882281": {
+        "brd-a43882281": "brd-a22897758"
+      },
+      "brd-a58207013": {
+        "brd-a58207013": "brd-a22897758"
+      },
+      "cyclosporin-a": {
+        "brd-k03222093": "brd-k13533483",
+        "brd-a38030642": "brd-k13533483",
+        "brd-a69815203": "brd-k13533483",
+        "brd-a64290322": "brd-k13533483"
+      },
+      "brd-k03222093": {
+        "brd-k03222093": "brd-k13533483"
+      },
+      "PMATZTZNYRCHOR-NFOUMSERSA-N": {
+        "brd-a38030642": "brd-k13533483"
+      },
+      "PMATZTZNYRCHOR-IMVLJIQESA-N": {
+        "brd-a69815203": "brd-k13533483"
+      },
+      "tacrolimus": {
+        "brd-k69608737": "brd-k44094599",
+        "brd-k08845546": "brd-k44094599",
+        "brd-k65261396": "brd-k44094599",
+        "brd-a96754982": "brd-k44094599"
+      },
+      "calmidazolium": {
+        "brd-a26199074": "brd-a98283014"
+      },
+      "ezetimibe": {
+        "brd-a41519720": "brd-k42260897"
+      },
+      "pd-166793": {
+        "brd-a75478957": "brd-k60984070"
+      },
+      "brd-a75478957": {
+        "brd-a75478957": "brd-k60984070"
+      },
+      "alfaxalone": {
+        "brd-k37439386": "brd-k41445866"
+      },
+      "acarbose": {
+        "brd-k44276885": "brd-k01621533",
+        "brd-a16444946": "brd-k01621533"
+      },
+      "brd-k44276885": {
+        "brd-k44276885": "brd-k01621533"
+      },
+      "miglitol": {
+        "brd-k44779798": "brd-a63310107"
+      },
+      "bergenin": {
+        "brd-a15034104": "brd-k18550767"
+      },
+      "YWJXCIXBAKGUKZ-UHFFFAOYSA-N": {
+        "brd-a15034104": "brd-k18550767"
+      },
+      "colchicine": {
+        "brd-a46684810": "brd-k00259736"
+      },
+      "brd-a46684810": {
+        "brd-a46684810": "brd-k00259736"
+      },
+      "l-165041": {
+        "brd-k40656405": "brd-k98372770"
+      },
+      "pterostilbene": {
+        "brd-k53097745": "brd-k92870997"
+      },
+      "aprepitant": {
+        "brd-k52827117": "brd-k17306061",
+        "brd-k65170927": "brd-k17306061"
+      },
+      "sdz-nkt-343": {
+        "brd-a82590476": "brd-k65820248"
+      },
+      "RZRPTBIGEANTGU-IRIMSJTPSA-N": {
+        "brd-k17368287": "brd-k26171350"
+      },
+      "brd-k17368287": {
+        "brd-k17368287": "brd-k26171350"
+      },
+      "carbenoxolone": {
+        "brd-k12765235": "brd-k21955335",
+        "brd-a25216804": "brd-k21955335",
+        "brd-a98702003": "brd-k21955335"
+      },
+      "chenodiol": {
+        "brd-k43723251": "brd-k18135438"
+      },
+      "antimycin-a": {
+        "brd-a67709388": "brd-k56001384",
+        "brd-a52886023": "brd-k56001384"
+      },
+      "brd-k70555272": {
+        "brd-k70555272": "brd-k74133369"
+      },
+      "MNULEGDCPYONBU-VVXVDZGXSA-N": {
+        "brd-a81541225": "brd-k74133369"
+      },
+      "pd-123319": {
+        "brd-a63836183": "brd-k34713073"
+      },
+      "icg-001": {
+        "brd-k94455792": "brd-k73261812"
+      },
+      "fluocinolone-acetonide": {
+        "brd-a15297126": "brd-k94353609",
+        "brd-a77824596": "brd-k94353609"
+      },
+      "nelfinavir": {
+        "brd-k74117820": "brd-k60460488"
+      },
+      "ritonavir": {
+        "brd-a03323675": "brd-k51485625"
+      },
+      "NCDNCNXCDXHOMX-UHFFFAOYSA-N": {
+        "brd-a03323675": "brd-k51485625"
+      },
+      "bw-b70c": {
+        "brd-a68891053": "brd-a55946879"
+      },
+      "caffeic-acid": {
+        "brd-k84709232": "brd-k09900591"
+      },
+      "curcumin": {
+        "brd-k74148702": "brd-k07572174",
+        "brd-k69690935": "brd-k07572174"
+      },
+      "brd-k84709232": {
+        "brd-k84709232": "brd-k09900591"
+      },
+      "erythromycin": {
+        "brd-a44827100": "brd-k63550407"
+      },
+      "manumycin-a": {
+        "brd-a77216878": "brd-k78599730"
+      },
+      "brd-a77216878": {
+        "brd-a77216878": "brd-k78599730"
+      },
+      "fenoprofen": {
+        "brd-a81129465": "brd-m61246020"
+      },
+      "benzamil": {
+        "brd-k87158025": "brd-k97688263"
+      },
+      "LOUPRKONTZGTKE-LHHVKLHASA-N": {
+        "brd-k70799801": "brd-k59632282"
+      },
+      "quinidine": {
+        "brd-a64479082": "brd-k59632282"
+      },
+      "DDNCQMVWWZOMLN-IRLDBZIGSA-N": {
+        "brd-k53318339": "brd-k07390541"
+      },
+      "vinpocetine": {
+        "brd-a19374631": "brd-k07390541"
+      },
+      "zonisamide": {
+        "brd-k48300629": "brd-a28095882"
+      },
+      "CNPVJJQCETWNEU-CYFREDJKSA-N": {
+        "brd-k84748119": "brd-m72442222"
+      },
+      "amlodipine": {
+        "brd-a22032524": "brd-a64297288"
+      },
+      "cilnidipine": {
+        "brd-a02743701": "brd-a07875874"
+      },
+      "cinnarizine": {
+        "brd-k74927006": "brd-k07220430",
+        "brd-k32256916": "brd-k07220430"
+      },
+      "dantrolene": {
+        "brd-k31333309": "brd-k81272440"
+      },
+      "diltiazem": {
+        "brd-k81029756": "brd-k24023109",
+        "brd-a69636825": "brd-k24023109"
+      },
+      "flunarizine": {
+        "brd-k12184470": "brd-k29582677"
+      },
+      "isradipine": {
+        "brd-a69927616": "brd-a90799790"
+      },
+      "brd-a69927616": {
+        "brd-a69927616": "brd-a90799790"
+      },
+      "lacidipine": {
+        "brd-k05851096": "brd-k43586850",
+        "brd-a52282606": "brd-k43586850"
+      },
+      "nicardipine": {
+        "brd-a26711594": "brd-a63445921"
+      },
+      "nifedipine": {
+        "brd-a30977374": "brd-k96354014"
+      },
+      "SVJMLYUFVDMUHP-UHFFFAOYSA-N": {
+        "brd-a62336480": "brd-a43331270"
+      },
+      "nimodipine": {
+        "brd-a24891640": "brd-a58048407"
+      },
+      "BAARDDGSQHXDDB-UHFFFAOYSA-N": {
+        "brd-a24891640": "brd-a58048407"
+      },
+      "nisoldipine": {
+        "brd-a96107863": "brd-a84465106"
+      },
+      "nitrendipine": {
+        "brd-a12560204": "brd-a02006392"
+      },
+      "artemisinin": {
+        "brd-k13112821": "brd-k45770447"
+      },
+      "capecitabine": {
+        "brd-k61192372": "brd-k15574380",
+        "brd-a91877226": "brd-k15574380"
+      },
+      "fludarabine": {
+        "brd-a31374339": "brd-k66788707",
+        "brd-k72238567": "brd-k66788707"
+      },
+      "etomidate": {
+        "brd-a54880345": "brd-k55055802"
+      },
+      "nalbuphine": {
+        "brd-a92651262": "brd-k66404838",
+        "brd-a16934955": "brd-k66404838"
+      },
+      "brd-a16934955": {
+        "brd-a16934955": "brd-k66404838"
+      },
+      "nnc-63-0532": {
+        "brd-k36009368": "brd-k72904818"
+      },
+      "tramadol": {
+        "brd-k04412738": "brd-k51033547"
+      },
+      "brd-k04412738": {
+        "brd-k04412738": "brd-k51033547"
+      },
+      "prednicarbate": {
+        "brd-k46137903": "brd-k95391106"
+      },
+      "obaa": {
+        "brd-k48029790": "brd-k85318537"
+      },
+      "daunorubicin": {
+        "brd-k17210248": "brd-k91966436",
+        "brd-k43389675": "brd-k91966436",
+        "brd-a68009927": "brd-k91966436",
+        "brd-a37630846": "brd-k91966436"
+      },
+      "NZCRJKRKKOLAOJ-LGPAXTBISA-N": {
+        "brd-k89708791": "brd-a62879835"
+      },
+      "amsacrine": {
+        "brd-k68346641": "brd-k98490050"
+      },
+      "camptothecin": {
+        "brd-a30437061": "brd-k37890730"
+      },
+      "AOJJSUZBOXZQNB-TZSSRYMLSA-N": {
+        "brd-k92093830": "brd-k61468417"
+      },
+      "doxorubicin": {
+        "brd-a52530684": "brd-k61468417",
+        "brd-a76941896": "brd-k61468417"
+      },
+      "epirubicin": {
+        "brd-k56844688": "brd-k04548931",
+        "brd-a56518012": "brd-k04548931"
+      },
+      "etoposide": {
+        "brd-a33280134": "brd-k37798499",
+        "brd-k46503544": "brd-k37798499",
+        "brd-a79067928": "brd-k37798499",
+        "brd-a18419789": "brd-k37798499",
+        "brd-a02579693": "brd-k37798499"
+      },
+      "brd-k46503544": {
+        "brd-k46503544": "brd-k37798499"
+      },
+      "brd-a79067928": {
+        "brd-a79067928": "brd-k37798499"
+      },
+      "brd-a02579693": {
+        "brd-a02579693": "brd-k37798499"
+      },
+      "idarubicin": {
+        "brd-a71390734": "brd-k69650333"
+      },
+      "sn-38": {
+        "brd-a36630025": "brd-k89561498"
+      },
+      "topotecan": {
+        "brd-a59985574": "brd-k55696337"
+      },
+      "physostigmine": {
+        "brd-a37052580": "brd-k25650355"
+      },
+      "etodolac": {
+        "brd-k99260425": "brd-a16998493",
+        "brd-a74667430": "brd-a16998493"
+      },
+      "naproxen": {
+        "brd-k59197931": "brd-k33299843",
+        "brd-a87719232": "brd-k33299843"
+      },
+      "sulindac": {
+        "brd-a13946108": "brd-a03427350",
+        "brd-k76525302": "brd-a03427350"
+      },
+      "gabazine": {
+        "brd-k93280214": "brd-k79905821"
+      },
+      "ncs-382": {
+        "brd-a85025557": "brd-a67433117"
+      },
+      "brd-a85025557": {
+        "brd-a85025557": "brd-a67433117"
+      },
+      "picrotoxin": {
+        "brd-a15597386": "brd-m47793593",
+        "brd-a37817666": "brd-m47793593"
+      },
+      "brd-a37817666": {
+        "brd-a37817666": "brd-m47793593"
+      },
+      "brd-a25775766": {
+        "brd-a25775766": "brd-k49071277"
+      },
+      "dactinomycin": {
+        "brd-a73909368": "brd-k70578146"
+      },
+      "JQXXHWHPUNPDRT-YOPQJBRCSA-N": {
+        "brd-a83892713": "brd-k01507359"
+      },
+      "rifampicin": {
+        "brd-k99912150": "brd-k01507359"
+      },
+      "rifapentine": {
+        "brd-k55889443": "brd-k28346421",
+        "brd-k81601344": "brd-k28346421"
+      },
+      "brd-k81601344": {
+        "brd-k81601344": "brd-k28346421"
+      },
+      "retinol": {
+        "brd-k13927029": "brd-k22429181"
+      },
+      "FPIPGXGPPPQFEQ-HWCYFHEPSA-N": {
+        "brd-k13927029": "brd-k22429181"
+      },
+      "tretinoin": {
+        "brd-k06926592": "brd-k71879491",
+        "brd-k64634304": "brd-k71879491"
+      },
+      "SHGAZHPCJJPHSC-UHFFFAOYSA-N": {
+        "brd-k06926592": "brd-k71879491"
+      },
+      "maprotiline": {
+        "brd-k25433859": "brd-k03319035"
+      },
+      "OBMLHUPNRURLOK-XGRAFVIBSA-N": {
+        "brd-k02314383": "brd-a68650781"
+      },
+      "oxandrolone": {
+        "brd-k92467929": "brd-k43544024"
+      },
+      "oxymetholone": {
+        "brd-a93291428": "brd-a23637604"
+      },
+      "tibolone": {
+        "brd-k10467831": "brd-a82522119"
+      },
+      "brd-k10467831": {
+        "brd-k10467831": "brd-a82522119"
+      },
+      "eplerenone": {
+        "brd-a39969961": "brd-k19761926"
+      },
+      "flunisolide": {
+        "brd-k18674849": "brd-k49577446",
+        "brd-a65449987": "brd-k49577446"
+      },
+      "orteronel": {
+        "brd-a12409803": "brd-k00674894"
+      },
+      "voriconazole": {
+        "brd-k46212057": "brd-k06557128"
+      },
+      "bromocriptine": {
+        "brd-k72853990": "brd-k14496212",
+        "brd-a60274948": "brd-k14496212",
+        "brd-a80151636": "brd-k14496212",
+        "brd-a69960130": "brd-k14496212"
+      },
+      "brd-a60274948": {
+        "brd-a60274948": "brd-k14496212"
+      },
+      "OZVBMTJYIDMWIL-NXIPCUEUSA-N": {
+        "brd-a80151636": "brd-k14496212"
+      },
+      "cabergoline": {
+        "brd-a63043573": "brd-k86882815"
+      },
+      "KORNTPPJEAJQIU-UHFFFAOYSA-N": {
+        "brd-a63043573": "brd-k86882815"
+      },
+      "dihydrexidine": {
+        "brd-a99164655": "brd-k31471398"
+      },
+      "dopamine": {
+        "brd-k43887077": "brd-k90711641",
+        "brd-k58442346": "brd-k90711641",
+        "brd-a20958854": "brd-k90711641",
+        "brd-k33811357": "brd-k90711641"
+      },
+      "brd-k43887077": {
+        "brd-k43887077": "brd-k90711641"
+      },
+      "NZKRYJGNYPYXJZ-UHFFFAOYSA-N": {
+        "brd-k58442346": "brd-k90711641"
+      },
+      "CQASRCDNLNMIJY-ZAOAHOKWSA-N": {
+        "brd-a20958854": "brd-k90711641"
+      },
+      "DEKNNWJXAQTLFA-UHFFFAOYSA-N": {
+        "brd-k33811357": "brd-k90711641"
+      },
+      "metergoline": {
+        "brd-a72309220": "brd-k56699285",
+        "brd-a30435184": "brd-k56699285"
+      },
+      "WZHJKEUHNJHDLS-STDCAVTESA-N": {
+        "brd-a72309220": "brd-k56699285"
+      },
+      "gbr-13069": {
+        "brd-k11634954": "brd-k92577649"
+      },
+      "dienestrol": {
+        "brd-k55106630": "brd-k95309561"
+      },
+      "equilin": {
+        "brd-k04046242": "brd-k57943804",
+        "brd-a88080608": "brd-k57943804"
+      },
+      "equol": {
+        "brd-a74907996": "brd-k54847683"
+      },
+      "ADFCQWZHKCXPAJ-UHFFFAOYSA-N": {
+        "brd-a74907996": "brd-k54847683"
+      },
+      "VOXZDWNPVJITMN-ZBRFXRBCSA-N": {
+        "brd-k18910433": "brd-k60633875"
+      },
+      "estradiol": {
+        "brd-a18917088": "brd-k60633875",
+        "brd-a23226398": "brd-k60633875"
+      },
+      "estriol": {
+        "brd-k32793530": "brd-k17016787",
+        "brd-a18620900": "brd-k17016787",
+        "brd-a88939772": "brd-k17016787",
+        "brd-a84205515": "brd-k17016787"
+      },
+      "brd-a18620900": {
+        "brd-a18620900": "brd-k17016787"
+      },
+      "brd-a84205515": {
+        "brd-a84205515": "brd-k17016787"
+      },
+      "estrone": {
+        "brd-k81839095": "brd-k15236393",
+        "brd-k69743918": "brd-k15236393",
+        "brd-a37959677": "brd-k15236393"
+      },
+      "hexestrol": {
+        "brd-a01078468": "brd-k69253806"
+      },
+      "levonorgestrel": {
+        "brd-k35189033": "brd-k74741811",
+        "brd-k90543092": "brd-k74741811"
+      },
+      "mestranol": {
+        "brd-k31920458": "brd-k92042497",
+        "brd-k10481964": "brd-k92042497",
+        "brd-a14798026": "brd-k92042497"
+      },
+      "alimemazine": {
+        "brd-m58473998": "brd-a49225603"
+      },
+      "amiodarone": {
+        "brd-k87555556": "brd-k17561142"
+      },
+      "ibutilide": {
+        "brd-m56587789": "brd-a74391928"
+      },
+      "penitrem-a": {
+        "brd-k03842655": "brd-k52405437"
+      },
+      "acitretin": {
+        "brd-k90699611": "brd-k62012036"
+      },
+      "brd-k90699611": {
+        "brd-k90699611": "brd-k62012036"
+      },
+      "cd-1530": {
+        "brd-k25737009": "brd-k09619322"
+      },
+      "brd-k28168037": {
+        "brd-k28168037": "brd-k89085489"
+      },
+      "ttnpb": {
+        "brd-k68246049": "brd-k49685476"
+      },
+      "rimcazole": {
+        "brd-a63346720": "brd-k70490179"
+      },
+      "genistein": {
+        "brd-a36151937": "brd-k43797669"
+      },
+      "ZCOLJUOHXJRHDI-UHFFFAOYSA-N": {
+        "brd-a36151937": "brd-k43797669"
+      },
+      "su-11274": {
+        "brd-k59067695": "brd-k02965346"
+      },
+      "ZKSUYDZTGVUZGX-BKCXMMJFSA-N": {
+        "brd-a14652656": "brd-a94624445"
+      },
+      "brd-a15070535": {
+        "brd-a15070535": "brd-a94624445"
+      },
+      "brd-a15931911": {
+        "brd-a15931911": "brd-a94624445"
+      },
+      "brd-a04706586": {
+        "brd-a04706586": "brd-a94624445"
+      },
+      "cgs-21680": {
+        "brd-a81866333": "brd-a57152259"
+      },
+      "PAOANWZGLPPROA-UHFFFAOYSA-N": {
+        "brd-a81866333": "brd-a57152259"
+      },
+      "ib-meca": {
+        "brd-a48809242": "brd-k31135544",
+        "brd-a20527803": "brd-k31135544"
+      },
+      "forskolin": {
+        "brd-k77830450": "brd-a55416093",
+        "brd-k09602097": "brd-a55416093",
+        "brd-a70449690": "brd-a55416093",
+        "brd-k03015355": "brd-a55416093"
+      },
+      "cilastatin": {
+        "brd-a90311807": "brd-k85518562",
+        "brd-k62370608": "brd-k85518562"
+      },
+      "phccc": {
+        "brd-a48257147": "brd-a59709458"
+      },
+      "FPXPIEZPAXSELW-UHFFFAOYSA-N": {
+        "brd-a48257147": "brd-a59709458"
+      },
+      "molsidomine": {
+        "brd-k63861289": "brd-k35531059"
+      },
+      "WXOUFNFMPVMGFZ-BDQAUFNLSA-N": {
+        "brd-k18722736": "brd-a55484088"
+      },
+      "UZHSEJADLWPNLE-GRGSLBFTSA-N": {
+        "brd-k67511046": "brd-a70461345"
+      },
+      "naloxone": {
+        "brd-a23195370": "brd-a70461345",
+        "brd-a41833852": "brd-a70461345",
+        "brd-a37541666": "brd-a70461345"
+      },
+      "brd-a23195370": {
+        "brd-a23195370": "brd-a70461345"
+      },
+      "UZHSEJADLWPNLE-UHFFFAOYSA-N": {
+        "brd-a37541666": "brd-a70461345"
+      },
+      "naltrexone": {
+        "brd-a66559694": "brd-k88172511",
+        "brd-a83855350": "brd-k88172511"
+      },
+      "DQCKKXVULJGBQN-PODIIYFMSA-N": {
+        "brd-a66559694": "brd-k88172511"
+      },
+      "DQCKKXVULJGBQN-UHFFFAOYSA-N": {
+        "brd-a83855350": "brd-k88172511"
+      },
+      "naltriben": {
+        "brd-a21723284": "brd-a19102171"
+      },
+      "naltrindole": {
+        "brd-a82656074": "brd-a47342814"
+      },
+      "nor-binaltorphimine": {
+        "brd-a11135865": "brd-k36381762"
+      },
+      "taxifolin": {
+        "brd-k95808480": "brd-k94649603"
+      },
+      "cisapride": {
+        "brd-k06895174": "brd-k59163477",
+        "brd-a12896037": "brd-k59163477"
+      },
+      "alfacalcidol": {
+        "brd-k92644009": "brd-k93433262",
+        "brd-k86284654": "brd-k93433262",
+        "brd-k49522529": "brd-k93433262"
+      },
+      "calcifediol": {
+        "brd-a78971512": "brd-k77175907"
+      },
+      "calcipotriol": {
+        "brd-k96390176": "brd-k56429665",
+        "brd-a31158127": "brd-k56429665"
+      },
+      "GMRQFYUYWCNGIN-NKMMMXOESA-N": {
+        "brd-k27316855": "brd-k28731095"
+      },
+      "calcitriol": {
+        "brd-a84327315": "brd-k28731095",
+        "brd-a66229260": "brd-k28731095"
+      },
+      "finasteride": {
+        "brd-k59720958": "brd-k01095011",
+        "brd-a83081521": "brd-k01095011"
+      },
+      "cgp-12177": {
+        "brd-a40084411": "brd-a34706053"
+      },
+      "UMQUQWCJKFOUGV-UHFFFAOYSA-N": {
+        "brd-a40084411": "brd-a34706053"
+      },
+      "BPZSYCZIITTYBL-ORAYPTAESA-N": {
+        "brd-k54006094": "brd-m00539986"
+      },
+      "guanaben-acetate": {
+        "brd-k62736196": "brd-k56800335"
+      },
+      "isoprenaline": {
+        "brd-k24473282": "brd-k37264083",
+        "brd-a04322457": "brd-k37264083"
+      },
+      "brd-a04322457": {
+        "brd-a04322457": "brd-k37264083"
+      },
+      "isoxsuprine": {
+        "brd-a74269027": "brd-a16700644"
+      },
+      "medetomidine": {
+        "brd-a66563878": "brd-a21607826"
+      },
+      "brd-a66563878": {
+        "brd-a66563878": "brd-a21607826"
+      },
+      "orciprenaline": {
+        "brd-m02190957": "brd-a07780951"
+      },
+      "procaterol": {
+        "brd-a22684332": "brd-k78666826"
+      },
+      "CQXADFVORZEARL-UHFFFAOYSA-N": {
+        "brd-m62162320": "brd-k01638814"
+      },
+      "ritodrine": {
+        "brd-a59174698": "brd-k51465424"
+      },
+      "terbutaline": {
+        "brd-m79902621": "brd-a50157456"
+      },
+      "xamoterol": {
+        "brd-m39942365": "brd-a59337442"
+      },
+      "zd-7114": {
+        "brd-k28971625": "brd-k45296539"
+      },
+      "ostarine": {
+        "brd-k29735307": "brd-k16621777"
+      },
+      "doxycycline": {
+        "brd-a88774919": "brd-a08545410"
+      },
+      "selegiline": {
+        "brd-a28545468": "brd-k86434416"
+      },
+      "brd-a28545468": {
+        "brd-a28545468": "brd-k86434416"
+      },
+      "tranylcypromine": {
+        "brd-k88809146": "brd-k47029922",
+        "brd-a43974575": "brd-k47029922"
+      },
+      "brd-a43974575": {
+        "brd-a43974575": "brd-k47029922"
+      },
+      "cilomilast": {
+        "brd-k38473998": "brd-k62982419"
+      },
+      "HJORMJIFDVBMOB-UHFFFAOYSA-N": {
+        "brd-a34255068": "brd-k65856711"
+      },
+      "NUHPODZZKHQQET-UHFFFAOYSA-N": {
+        "brd-a91992993": "brd-a62071884"
+      },
+      "sildenafil": {
+        "brd-k79759585": "brd-k50128260"
+      },
+      "brd-a19374631": {
+        "brd-a19374631": "brd-k07390541"
+      },
+      "zaprinast": {
+        "brd-k12516989": "brd-k16542329"
+      },
+      "cromakalim": {
+        "brd-a76093993": "brd-m89827113"
+      },
+      "TVZCRIROJQEVOT-CABCVRRESA-N": {
+        "brd-k24526313": "brd-m89827113"
+      },
+      "GMVPRGQOIOIIMI-DWKJAMRDSA-N": {
+        "brd-k52459643": "brd-k73691377"
+      },
+      "bimatoprost": {
+        "brd-a87848830": "brd-a45153512"
+      },
+      "iloprost": {
+        "brd-a45664787": "brd-k57391913"
+      },
+      "HIFJCPQKFCZDDL-ACWOEMLNSA-N": {
+        "brd-a45664787": "brd-k57391913"
+      },
+      "PAJMKGZZBBTTOY-ZFORQUDYSA-N": {
+        "brd-k19706299": "brd-a67438293"
+      },
+      "OJLOPKGSLYJEMD-URPKTTJQSA-N": {
+        "brd-a72351335": "brd-a50310035"
+      },
+      "brd-a72351335": {
+        "brd-a72351335": "brd-a50310035"
+      },
+      "cycloheximide": {
+        "brd-a62184259": "brd-k36055864",
+        "brd-a82329351": "brd-k36055864"
+      },
+      "emetine": {
+        "brd-a25687296": "brd-k03067624",
+        "brd-k01976263": "brd-k03067624"
+      },
+      "etretinate": {
+        "brd-k36248164": "brd-k49076555"
+      },
+      "NSFFHOGKXHRQEW-DVRIZHICSA-N": {
+        "brd-a20697603": "brd-a52627843"
+      },
+      "cyproterone": {
+        "brd-a39290993": "brd-a51294525"
+      },
+      "anandamide": {
+        "brd-k87905482": "brd-k78280988",
+        "brd-k42352790": "brd-k78280988"
+      },
+      "dorzolamide": {
+        "brd-k48617017": "brd-k71075609"
+      },
+      "rivaroxaban": {
+        "brd-a50033377": "brd-k37130656"
+      },
+      "VSWBSWWIRNCQIJ-HUUCEWRRSA-N": {
+        "brd-k95260951": "brd-k57875380"
+      },
+      "brd-k95260951": {
+        "brd-k95260951": "brd-k57875380"
+      },
+      "fluphenazine": {
+        "brd-k55127134": "brd-k53987533"
+      },
+      "brd-k55127134": {
+        "brd-k55127134": "brd-k53987533"
+      },
+      "nemonapride": {
+        "brd-k47289124": "brd-m80207679",
+        "brd-a66927094": "brd-m80207679"
+      },
+      "quetiapine": {
+        "brd-k68867920": "brd-m66874015"
+      },
+      "brd-k68867920": {
+        "brd-k68867920": "brd-m66874015"
+      },
+      "sulpiride": {
+        "brd-a55272860": "brd-a10715913"
+      },
+      "thiothixene": {
+        "brd-k55070890": "brd-k97309399"
+      },
+      "clomifene": {
+        "brd-k29950728": "brd-k04218075",
+        "brd-k91328526": "brd-k04218075"
+      },
+      "danazol": {
+        "brd-a92537424": "brd-k21401044",
+        "brd-k48970916": "brd-k21401044",
+        "brd-a20243730": "brd-k21401044"
+      },
+      "brd-a92537424": {
+        "brd-a92537424": "brd-k21401044"
+      },
+      "brd-k48970916": {
+        "brd-k48970916": "brd-k21401044"
+      },
+      "fulvestrant": {
+        "brd-a83237092": "brd-a17828570",
+        "brd-a03249105": "brd-a17828570",
+        "brd-a90490067": "brd-a17828570",
+        "brd-a85667082": "brd-a17828570"
+      },
+      "tamoxifen": {
+        "brd-k93754473": "brd-k04210847",
+        "brd-k43744935": "brd-k04210847"
+      },
+      "toremifene": {
+        "brd-k67174588": "brd-k51350053",
+        "brd-k63460351": "brd-k51350053"
+      },
+      "milnacipran": {
+        "brd-a15202882": "brd-k02227374"
+      },
+      "brd-a15202882": {
+        "brd-a15202882": "brd-k02227374"
+      },
+      "zimelidine": {
+        "brd-k94173644": "brd-k47207162"
+      },
+      "ketoconazole": {
+        "brd-a38350138": "brd-k29113274",
+        "brd-a76019558": "brd-k29113274"
+      },
+      "aminophylline": {
+        "brd-m53001068": "brd-k97799481"
+      },
+      "brd-m53001068": {
+        "brd-m53001068": "brd-k97799481"
+      },
+      "l-655708": {
+        "brd-a84389091": "brd-k13474508"
+      },
+      "cpccoet": {
+        "brd-a05729358": "brd-a18202423"
+      },
+      "RPXVIAFEQBNEAX-UHFFFAOYSA-N": {
+        "brd-k53545112": "brd-k19438463"
+      },
+      "huperzine-a": {
+        "brd-k15402119": "brd-a47065382",
+        "brd-k45888792": "brd-a47065382",
+        "brd-k97618845": "brd-a47065382"
+      },
+      "BUGYDGFZZOZRHP-UHFFFAOYSA-N": {
+        "brd-a79803969": "brd-k91938660"
+      },
+      "UQNAFPHGVPVTAL-UHFFFAOYSA-N": {
+        "brd-k47717570": "brd-k11796549"
+      },
+      "ym-298198": {
+        "brd-k59650319": "brd-k48059230"
+      },
+      "ZRJBHWIHUMBLCN-YQEJDHNASA-N": {
+        "brd-k62240499": "brd-a47065382"
+      },
+      "AQIXAKUUQRKLND-UHFFFAOYSA-N": {
+        "brd-k18618618": "brd-k34157611"
+      },
+      "ZDIGNSYAACHWNL-HNNXBMFYSA-N": {
+        "brd-k22947005": "brd-a68723818"
+      },
+      "doxepin": {
+        "brd-k37694030": "brd-k54462405",
+        "brd-k36616567": "brd-k54462405"
+      },
+      "ODQWQRRAPPTVAG-UHFFFAOYSA-N": {
+        "brd-k36616567": "brd-k54462405"
+      },
+      "ici-162846": {
+        "brd-k11071038": "brd-k66782112"
+      },
+      "nizatidine": {
+        "brd-k46652470": "brd-k73589491",
+        "brd-k92193792": "brd-k73589491"
+      },
+      "olopatadine": {
+        "brd-k37130586": "brd-k67637637"
+      },
+      "ranitidine": {
+        "brd-k14204120": "brd-k70505054",
+        "brd-k30816563": "brd-k70505054"
+      },
+      "thioperamide": {
+        "brd-a85424553": "brd-k63874012"
+      },
+      "tiotidine": {
+        "brd-k11107424": "brd-k15071410"
+      },
+      "triprolidine": {
+        "brd-k56231354": "brd-k11742128"
+      },
+      "IMONTRJLAWHYGT-FJMAIUEKSA-N": {
+        "brd-a09349126": "brd-k92073408"
+      },
+      "JGMOKGBVKVMRFX-HQZYFCCVSA-N": {
+        "brd-k68620903": "brd-k11439261"
+      },
+      "medroxyprogesterone-acetate": {
+        "brd-a61221616": "brd-k82216340"
+      },
+      "IMONTRJLAWHYGT-ZCPXKWAGSA-N": {
+        "brd-k96037667": "brd-k92073408"
+      },
+      "norgestimate": {
+        "brd-a04756508": "brd-k22901619"
+      },
+      "progesterone": {
+        "brd-k47244735": "brd-k64994968",
+        "brd-a67479912": "brd-k64994968"
+      },
+      "RJKFOVLPORLFTN-OXZADQLBSA-N": {
+        "brd-k47244735": "brd-k64994968"
+      },
+      "brd-a67479912": {
+        "brd-a67479912": "brd-k64994968"
+      },
+      "dolasetron": {
+        "brd-k34008116": "brd-k37792492",
+        "brd-k28029915": "brd-k37792492"
+      },
+      "granisetron": {
+        "brd-k05510762": "brd-k10860596",
+        "brd-a10967948": "brd-k10860596"
+      },
+      "methysergide": {
+        "brd-a98725278": "brd-k35941380"
+      },
+      "KPJZHOPZRAFDTN-UHFFFAOYSA-N": {
+        "brd-a98725278": "brd-k35941380"
+      },
+      "RONZAEMNMFQXRA-UHFFFAOYSA-N": {
+        "brd-a64977602": "brd-k83153774"
+      },
+      "sertraline": {
+        "brd-k82036761": "brd-k70464547",
+        "brd-k57174586": "brd-k70464547"
+      },
+      "tropisetron": {
+        "brd-a79226577": "brd-k50866992",
+        "brd-a83859836": "brd-k50866992"
+      },
+      "WRJPSSPFHGNBMG-UHFFFAOYSA-N": {
+        "brd-a32673558": "brd-a80567352"
+      },
+      "cytisine": {
+        "brd-a55579717": "brd-k74186897"
+      },
+      "brd-a55579717": {
+        "brd-a55579717": "brd-k74186897"
+      },
+      "varenicline": {
+        "brd-a86216746": "brd-k18855837"
+      },
+      "galantamine": {
+        "brd-a49148672": "brd-k49481516"
+      },
+      "brd-k15402119": {
+        "brd-k15402119": "brd-a47065382"
+      },
+      "ZRJBHWIHUMBLCN-SEQYCRGISA-N": {
+        "brd-k45888792": "brd-a47065382"
+      },
+      "brd-k97618845": {
+        "brd-k97618845": "brd-a47065382"
+      },
+      "pralidoxime": {
+        "brd-k61327230": "brd-k84281997"
+      },
+      "brd-k62240499": {
+        "brd-k62240499": "brd-a47065382"
+      },
+      "atenolol": {
+        "brd-k44993696": "brd-a20239487"
+      },
+      "brd-k44993696": {
+        "brd-k44993696": "brd-a20239487"
+      },
+      "cyanopindolol": {
+        "brd-a47884604": "brd-k40965114"
+      },
+      "labetalol": {
+        "brd-a07440155": "brd-k04389336"
+      },
+      "brd-a07440155": {
+        "brd-a07440155": "brd-k04389336"
+      },
+      "levobunolol": {
+        "brd-k31812033": "brd-k73323637"
+      },
+      "metoprolol": {
+        "brd-m45038741": "brd-a03623303"
+      },
+      "nadolol": {
+        "brd-a97454584": "brd-a87606379"
+      },
+      "brd-a97454584": {
+        "brd-a97454584": "brd-a87606379"
+      },
+      "nicergoline": {
+        "brd-k79062806": "brd-k76810206"
+      },
+      "MRBDMNSDAVCSSF-UHFFFAOYSA-N": {
+        "brd-k90333595": "brd-k21317336"
+      },
+      "reboxetine": {
+        "brd-k32814891": "brd-m39350793",
+        "brd-k32480324": "brd-m39350793",
+        "brd-a43974499": "brd-m39350793"
+      },
+      "BLJRIMJGRPQVNF-JTQLQIEISA-N": {
+        "brd-k08806317": "brd-k30421593"
+      },
+      "yohimbine": {
+        "brd-k35586044": "brd-k77474816",
+        "brd-k99712306": "brd-k77474816",
+        "brd-a87445400": "brd-k77474816",
+        "brd-a51410489": "brd-k77474816"
+      },
+      "AKNNEGZIBPJZJG-ZENAZSQFSA-N": {
+        "brd-k66043364": "brd-k91301684"
+      },
+      "brd-k89237706": {
+        "brd-k89237706": "brd-k91301684"
+      },
+      "brd-a51393488": {
+        "brd-a51393488": "brd-k91301684"
+      },
+      "saxagliptin": {
+        "brd-a81513827": "brd-a82156122"
+      },
+      "ambrisentan": {
+        "brd-a34578416": "brd-k41185545"
+      },
+      "brd-a34578416": {
+        "brd-a34578416": "brd-k41185545"
+      },
+      "brd-k19706299": {
+        "brd-k19706299": "brd-a67438293"
+      },
+      "clopidogrel": {
+        "brd-a93269281": "brd-k27721098"
+      },
+      "cyclopamine": {
+        "brd-a02333338": "brd-k58938839"
+      },
+      "sant-1": {
+        "brd-k83637872": "brd-k99741577"
+      },
+      "mibefradil": {
+        "brd-a48631911": "brd-k09549677"
+      },
+      "brd-a48631911": {
+        "brd-a48631911": "brd-k09549677"
+      },
+      "ozagrel": {
+        "brd-k19525698": "brd-k53061490"
+      },
+      "brd-k61192372": {
+        "brd-k61192372": "brd-k15574380"
+      },
+      "GAGWJHPBXLXJQN-LXGADPQPSA-N": {
+        "brd-a91877226": "brd-k15574380"
+      },
+      "doxifluridine": {
+        "brd-a68537732": "brd-k83057217",
+        "brd-k58262659": "brd-k83057217"
+      },
+      "pemetrexed": {
+        "brd-k55395145": "brd-k32842773"
+      },
+      "trifluridine": {
+        "brd-a64485570": "brd-k03243820"
+      },
+      "abiraterone": {
+        "brd-k50071428": "brd-k55301415"
+      },
+      "losartan": {
+        "brd-k66198023": "brd-k76205745"
+      },
+      "valsartan": {
+        "brd-a14792000": "brd-k45158365"
+      },
+      "azacitidine": {
+        "brd-k03406345": "brd-k55026842",
+        "brd-a11263757": "brd-k55026842"
+      },
+      "zebularine": {
+        "brd-a01145011": "brd-k87714311"
+      },
+      "sb-205607": {
+        "brd-a11609859": "brd-k22878149"
+      },
+      "AKUJBENLRBOFTD-RPRRAYFGSA-N": {
+        "brd-k47635719": "brd-a93424738"
+      },
+      "WXURHACBFYSXBI-GQKYHHCASA-N": {
+        "brd-k61496577": "brd-k81774264"
+      },
+      "alclometasone": {
+        "brd-a63934767": "brd-a90131694"
+      },
+      "amcinonide": {
+        "brd-a36010170": "brd-k45149020",
+        "brd-a16478930": "brd-k45149020"
+      },
+      "beclometasone": {
+        "brd-k76747609": "brd-a17448384"
+      },
+      "betamethasone": {
+        "brd-a02180903": "brd-k39188321"
+      },
+      "budesonide": {
+        "brd-a58753560": "brd-a34299591",
+        "brd-a60571864": "brd-a34299591",
+        "brd-a82238138": "brd-a34299591"
+      },
+      "clobetasol": {
+        "brd-k84443303": "brd-k10799896",
+        "brd-a26095496": "brd-k10799896",
+        "brd-a63894585": "brd-k10799896"
+      },
+      "cortisone-acetate": {
+        "brd-a54487287": "brd-k86161929"
+      },
+      "dexamethasone": {
+        "brd-k45192137": "brd-a93424738",
+        "brd-k38775274": "brd-a93424738",
+        "brd-k30207000": "brd-a93424738",
+        "brd-a10188456": "brd-a93424738",
+        "brd-a69951442": "brd-a93424738",
+        "brd-k00835182": "brd-a93424738",
+        "brd-a35108200": "brd-a93424738"
+      },
+      "diflorasone": {
+        "brd-k17674993": "brd-k17041687"
+      },
+      "flumetasone": {
+        "brd-a01346607": "brd-k81774264"
+      },
+      "brd-a15297126": {
+        "brd-a15297126": "brd-k94353609"
+      },
+      "fluticasone": {
+        "brd-k14791739": "brd-a59943784",
+        "brd-k11469942": "brd-a59943784"
+      },
+      "WMWTYOKRWGGJOA-GFDKJMNNSA-N": {
+        "brd-k14791739": "brd-a59943784"
+      },
+      "WMWTYOKRWGGJOA-ZEVWSBCOSA-N": {
+        "brd-k11469942": "brd-a59943784"
+      },
+      "halcinonide": {
+        "brd-k71451869": "brd-k81709173",
+        "brd-a88138582": "brd-k81709173"
+      },
+      "hydrocortisone": {
+        "brd-k93568044": "brd-a75172220",
+        "brd-k73978287": "brd-a75172220",
+        "brd-a73635141": "brd-a75172220"
+      },
+      "medrysone": {
+        "brd-k13688115": "brd-k56515112",
+        "brd-a20126139": "brd-k56515112"
+      },
+      "methylprednisolone": {
+        "brd-a53176877": "brd-k35240538"
+      },
+      "mometasone": {
+        "brd-k92310201": "brd-k60640630"
+      },
+      "prednisone": {
+        "brd-k85883481": "brd-k82624463",
+        "brd-a62525898": "brd-k82624463"
+      },
+      "rimexolone": {
+        "brd-k31627533": "brd-k27218697"
+      },
+      "triamcinolone": {
+        "brd-k23714869": "brd-k77554836",
+        "brd-a37780065": "brd-k77554836",
+        "brd-a30717181": "brd-k77554836",
+        "brd-k53790871": "brd-k77554836"
+      },
+      "montelukast": {
+        "brd-k99673372": "brd-k69470111",
+        "brd-a31312900": "brd-k69470111"
+      },
+      "y-27632": {
+        "brd-a58280226": "brd-k44084986"
+      },
+      "IYOZTVGMEWJPKR-UHFFFAOYSA-N": {
+        "brd-a58280226": "brd-k44084986"
+      },
+      "serotonin": {
+        "brd-k63124331": "brd-k56060837",
+        "brd-a12881497": "brd-k56060837"
+      },
+      "WYFJNQLEVJHNQH-UHFFFAOYSA-N": {
+        "brd-k63124331": "brd-k56060837"
+      },
+      "QZAYGJVTTNCVMB-UHFFFAOYSA-N": {
+        "brd-k38580127": "brd-k56060837"
+      },
+      "gw-441756": {
+        "brd-k04146668": "brd-k28178212"
+      },
+      "BJJXHLWLUDYTGC-ANULTFPQSA-N": {
+        "brd-k97472745": "brd-a94793051"
+      },
+      "gestrinone": {
+        "brd-k59850506": "brd-a94793051"
+      },
+      "brd-k59850506": {
+        "brd-k59850506": "brd-a94793051"
+      },
+      "mifepristone": {
+        "brd-k37270826": "brd-k44094313",
+        "brd-a44780397": "brd-k44094313"
+      },
+      "atropine": {
+        "brd-a27290375": "brd-m35773784",
+        "brd-k39330046": "brd-m35773784"
+      },
+      "RKUNBYITZUJHSG-UHFFFAOYSA-N": {
+        "brd-a93739713": "brd-m35773784"
+      },
+      "benzatropine": {
+        "brd-a25067867": "brd-k68804560"
+      },
+      "biperiden": {
+        "brd-a36471396": "brd-a00546892"
+      },
+      "homatropine": {
+        "brd-a39671870": "brd-a74975734",
+        "brd-a09539288": "brd-a74975734"
+      },
+      "ipratropium": {
+        "brd-a37432947": "brd-a47449001",
+        "brd-a07029265": "brd-a47449001",
+        "brd-a96060515": "brd-a47449001",
+        "brd-a05352148": "brd-a47449001"
+      },
+      "OEXHQOGQTVQTAT-ZFWRPDKHSA-N": {
+        "brd-a37432947": "brd-a47449001"
+      },
+      "OEXHQOGQTVQTAT-QQLIVEQCSA-N": {
+        "brd-a96060515": "brd-a47449001"
+      },
+      "methscopolamine": {
+        "brd-a03932035": "brd-k48619321"
+      },
+      "brd-a03932035": {
+        "brd-a03932035": "brd-k48619321"
+      },
+      "rocuronium": {
+        "brd-k58951486": "brd-k43305603"
+      },
+      "scopolamine": {
+        "brd-k89923877": "brd-a33973768",
+        "brd-a62035778": "brd-a33973768",
+        "brd-a14566392": "brd-a33973768"
+      },
+      "brd-k89923877": {
+        "brd-k89923877": "brd-a33973768"
+      },
+      "STECJAGHUSJQJN-WLQVYHSDSA-N": {
+        "brd-a62035778": "brd-a33973768"
+      },
+      "STECJAGHUSJQJN-UHFFFAOYSA-N": {
+        "brd-a14566392": "brd-a33973768"
+      },
+      "JFJZZMVDLULRGK-URLMMPGGSA-O": {
+        "brd-k99621550": "brd-k02607075"
+      },
+      "brd-k99621550": {
+        "brd-k99621550": "brd-k02607075"
+      },
+      "BGSZAXLLHYERSY-XQIGCQGXSA-N": {
+        "brd-k20168442": "brd-k61341215"
+      },
+      "vecuronium": {
+        "brd-k31374463": "brd-k61341215"
+      },
+      "methotrexate": {
+        "brd-k59456551": "brd-a55424491"
+      },
+      "QSLMDECMDJKHMQ-UHFFFAOYSA-N": {
+        "brd-k25433859": "brd-k03319035"
+      },
+      "brd-a31836915": {
+        "brd-a31836915": "brd-a97502381"
+      },
+      "ZESRJSPZRDMNHY-YFWFAHHUSA-N": {
+        "brd-k98521173": "brd-k91511962"
+      },
+      "clofarabine": {
+        "brd-a82371568": "brd-k34022604"
+      },
+      "WDDPHFBMKLOVOX-UHFFFAOYSA-N": {
+        "brd-a82371568": "brd-k34022604"
+      },
+      "cytarabine": {
+        "brd-k71847383": "brd-k33106058",
+        "brd-a18929998": "brd-k33106058"
+      },
+      "UHDGCWIWMRVCDJ-XVFCMESISA-N": {
+        "brd-k71847383": "brd-k33106058"
+      },
+      "UHDGCWIWMRVCDJ-UHFFFAOYSA-N": {
+        "brd-a18929998": "brd-k33106058"
+      },
+      "tunicamycin": {
+        "brd-k10573841": "brd-a72024019"
+      },
+      "LMXYVLFTZRPNRV-KMKOMSMNSA-N": {
+        "brd-k07859598": "brd-k39520573"
+      },
+      "VSQQQLOSPVPRAZ-GFCOJPQKSA-N": {
+        "brd-a64485570": "brd-k03243820"
+      },
+      "quinine": {
+        "brd-k99257182": "brd-u94846492"
+      },
+      "LOUPRKONTZGTKE-WZBLMQSHSA-N": {
+        "brd-k07940445": "brd-u94846492"
+      },
+      "canrenone": {
+        "brd-a20644369": "brd-k00885784"
+      },
+      "drospirenone": {
+        "brd-a00938334": "brd-k04394237"
+      },
+      "METQSPRSQINEEU-GGORKCOASA-N": {
+        "brd-a00938334": "brd-k04394237"
+      },
+      "potassium-canrenoate": {
+        "brd-a29322418": "brd-k46556543"
+      },
+      "LXMSZDCAJNLERA-ZHYRCANASA-N": {
+        "brd-k90027355": "brd-k67919934"
+      },
+      "spironolactone": {
+        "brd-a97808748": "brd-k67919934"
+      },
+      "XFCLJVABOIYOMF-OCEACIFDSA-N": {
+        "brd-k67174588": "brd-k51350053"
+      },
+      "XFCLJVABOIYOMF-UHFFFAOYSA-N": {
+        "brd-k63460351": "brd-k51350053"
+      },
+      "nsc-632839": {
+        "brd-k37392901": "brd-k74402642"
+      },
+      "PKCYYPHSCUSQDK-UHFFFAOYSA-N": {
+        "brd-k37392901": "brd-k74402642"
+      },
+      "PKCYYPHSCUSQDK-AYKLPDECSA-N": {
+        "brd-k81197548": "brd-k74402642"
+      },
+      "entacapone": {
+        "brd-k92977333": "brd-k83636919"
+      },
+      "escitalopram": {
+        "brd-k70301876": "brd-a47598013"
+      },
+      "fluvoxamine": {
+        "brd-k31534764": "brd-k53517854",
+        "brd-k72676686": "brd-k53517854"
+      },
+      "AHOUBRCZNHFOSL-YOEHRIQHSA-N": {
+        "brd-k37991163": "brd-k19277754"
+      },
+      "paroxetine": {
+        "brd-a62326914": "brd-k19277754"
+      },
+      "benazepril": {
+        "brd-a15131297": "brd-k49807096"
+      },
+      "enalapril": {
+        "brd-k57545991": "brd-k44497846"
+      },
+      "perindopril": {
+        "brd-k92731339": "brd-k86940322"
+      },
+      "HDACQVRGBOVJII-JBDAPHQKSA-N": {
+        "brd-k89348303": "brd-k05111602"
+      },
+      "ramipril": {
+        "brd-a65739223": "brd-k05111602"
+      },
+      "cefadroxil": {
+        "brd-a56858165": "brd-k63242551"
+      },
+      "brd-a56858165": {
+        "brd-a56858165": "brd-k63242551"
+      },
+      "etomoxir": {
+        "brd-a67552655": "brd-k32405725",
+        "brd-k77625572": "brd-k32405725"
+      },
+      "reserpine": {
+        "brd-k95921201": "brd-k44495371"
+      },
+      "MKJIEFSOBYUXJB-HOCLYGCPSA-N": {
+        "brd-k95739795": "brd-k24125544"
+      },
+      "tetrabenazine": {
+        "brd-a47564106": "brd-k24125544"
+      },
+      "carbidopa": {
+        "brd-a69512159": "brd-k78712176"
+      },
+      "salubrinal": {
+        "brd-a77299732": "brd-a45107007"
+      }
+    }
+  }
+}

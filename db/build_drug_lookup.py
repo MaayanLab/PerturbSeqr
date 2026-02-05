@@ -1,12 +1,18 @@
 # /// script
-# requires-python = ">=3.14"
+# requires-python = ">=3.10"
 # dependencies = [
 #   "requests",
 #   "tqdm",
+#   "maayanlab-bioinformatics @ git+https://github.com/MaayanLab/maayanlab-bioinformatics.git@python3.14-compat",
 # ]
 # ///
 """
 Build drug_lookup.json with CID and MOA data from multiple sources.
+
+Uses IDMapper from maayanlab-bioinformatics for entity resolution:
+- Unifies entities via shared synonyms (names, InChI keys)
+- Tracks conflicts when same synonym maps to different chemical entities
+- Propagates CIDs across sources via entity linking
 
 Usage:
   uv run db/build_drug_lookup.py
@@ -16,15 +22,347 @@ Usage:
 import csv, json, time, argparse
 from pathlib import Path
 from collections import Counter
+from uuid import UUID
 
 import requests
 from tqdm import tqdm
+from maayanlab_bioinformatics.harmonization import IDMapper
 from gmt_parser import read_gmt
 from perturbation_parser import extract_perturbation
 from db_utils import DATA_DIR, METADATA_DIR, DRUG_DIR, DRUG_LOOKUP_PATH, get_lib_config
 
 # Latest public version (2024 requires auth): https://repo-hub.broadinstitute.org/repurposing
 HUB_BASE = "https://s3.amazonaws.com/data.clue.io/repurposing/downloads/repurposing_{}_20200324.txt"
+
+# Namespaces for IDMapper
+NS_PUBCHEM_CID = "pubchem_cid"
+NS_INCHI_KEY = "inchi_key"
+NS_LINCS_BRD = "lincs_brd"
+NS_DRUGSEQR_NSN = "drugseqr_nsn"
+NS_TAHOE_CODE = "tahoe_code"
+NS_DRUG_NAME = "drug_name"
+NS_HUB_NAME = "hub_name"
+
+# Map file names to display names for source attribution
+SOURCE_DISPLAY_NAMES = {
+    "drugseqr": "Novartis DRUG-seq",
+    "tahoe": "tahoe",
+    "lincs": "lincs",
+}
+
+LIBS_NEEDING_GMT_SCAN = {"cmap-build02", "sciplex", "deepcovermoa", "geo-chem", "ginkgo"}
+
+
+class DrugEntityStore:
+    """Combines IDMapper with metadata storage for drug entities."""
+
+    def __init__(self):
+        self.mapper = IDMapper()
+        self.metadata = {}  # {uuid: {moa, target, fda_approved, sources, primary_name}}
+
+    def _get_or_create_metadata(self, entity_id: UUID) -> dict:
+        """Get or create metadata dict for an entity."""
+        if entity_id not in self.metadata:
+            self.metadata[entity_id] = {
+                "moa": "", "target": "", "fda_approved": False,
+                "sources": [], "moa_source": "", "primary_name": ""
+            }
+        return self.metadata[entity_id]
+
+    def _merge_metadata(self, entity_id: UUID, info: dict, source: str):
+        """Merge metadata from a source into entity."""
+        meta = self._get_or_create_metadata(entity_id)
+
+        # Track sources
+        if source and source not in meta["sources"]:
+            meta["sources"].append(source)
+
+        # MOA: prefer Hub, then first non-empty
+        if info.get("moa") and not meta["moa"]:
+            meta["moa"] = info["moa"]
+            meta["moa_source"] = source
+
+        # Target: merge if new
+        if info.get("target") and not meta["target"]:
+            meta["target"] = info["target"]
+
+        # FDA: any True wins
+        if info.get("fda_approved"):
+            meta["fda_approved"] = True
+
+        # Primary name: prefer actual drug names over codes
+        name = info.get("name", "")
+        if name and not meta["primary_name"]:
+            meta["primary_name"] = name
+        elif name and not name.startswith("BRD-") and meta["primary_name"].startswith("BRD-"):
+            meta["primary_name"] = name
+
+    def add_hub_entry(self, name: str, info: dict):
+        """Add entry from Drug Repurposing Hub."""
+        synonyms = {name.lower()}
+
+        # Add InChI key as synonym (links to LINCS entries)
+        if inchi := info.get("inchi_key"):
+            synonyms.add(inchi)
+
+        # Add entry with hub_name namespace
+        self.mapper.update({name.lower(): synonyms}, namespace=NS_HUB_NAME)
+
+        # Also register CID in its own namespace if present
+        if cid := info.get("pubchem_cid"):
+            cid = clean_cid(cid)
+            if cid:
+                # CID links to the same entity via the name synonym
+                self.mapper.update({cid: {name.lower()}}, namespace=NS_PUBCHEM_CID)
+
+        # Store metadata
+        entity_id = self.mapper._reverse.get(name.lower())
+        if entity_id:
+            self._merge_metadata(entity_id, {**info, "name": name}, "drug_repurposing_hub")
+
+    def add_metadata_entry(self, source: str, code: str, name: str, info: dict):
+        """Add entry from metadata source (tahoe, drugseqr, lincs)."""
+        # Build synonym set
+        synonyms = set()
+        if name:
+            synonyms.add(name.lower())
+        if inchi := info.get("inchi_key"):
+            synonyms.add(inchi)
+
+        # Determine namespace based on source
+        ns_map = {
+            "tahoe": NS_TAHOE_CODE,
+            "drugseqr": NS_DRUGSEQR_NSN,
+            "lincs": NS_LINCS_BRD,
+        }
+        namespace = ns_map.get(source, source)
+
+        # Add to mapper - code is the primary ID
+        key = code.lower() if code else name.lower()
+        self.mapper.update({key: synonyms}, namespace=namespace)
+
+        # Also add CID to its namespace if present
+        if cid := clean_cid(info.get("cid", "")):
+            # Link CID to entity via the key
+            self.mapper.update({cid: {key}}, namespace=NS_PUBCHEM_CID)
+
+        # Store metadata
+        entity_id = self.mapper._reverse.get(key)
+        if entity_id:
+            display_source = SOURCE_DISPLAY_NAMES.get(source, source)
+            self._merge_metadata(entity_id, {**info, "name": name or code}, display_source)
+
+    def add_gmt_perturbation(self, pert: str, hub_info: dict = None):
+        """Add perturbation found in GMT file."""
+        # Only add if not already known
+        if pert.lower() in self.mapper._reverse:
+            return
+
+        synonyms = {pert.lower()}
+        self.mapper.update({pert.lower(): synonyms}, namespace=NS_DRUG_NAME)
+
+        entity_id = self.mapper._reverse.get(pert.lower())
+        if entity_id and hub_info:
+            self._merge_metadata(entity_id, hub_info, "drug_repurposing_hub")
+
+    def resolve_inchi_to_cid(self, skip_pubchem: bool = False):
+        """Resolve InChI keys to CIDs for entities missing them."""
+        if skip_pubchem:
+            return
+
+        # Find entities with InChI but no CID
+        entities_needing_cid = []
+        for entity_id in self.mapper._forward.keys():
+            refs = self.mapper._namespaces.get(entity_id, {})
+            if NS_PUBCHEM_CID in refs:
+                continue  # Already has CID
+
+            # Check if any synonym is an InChI key
+            for synonym in self.mapper._forward[entity_id].keys():
+                if is_inchi_key(synonym):
+                    entities_needing_cid.append((entity_id, synonym))
+                    break
+
+        if not entities_needing_cid:
+            return
+
+        print(f"  Resolving {len(entities_needing_cid)} InChI keys to CIDs...")
+
+        # Batch resolve
+        inchi_keys = list({inchi for _, inchi in entities_needing_cid})
+        inchi_to_cid = fetch_cids_from_pubchem(inchi_keys=inchi_keys)
+
+        # Update mapper with resolved CIDs
+        resolved = 0
+        for entity_id, inchi in entities_needing_cid:
+            if cid := inchi_to_cid.get(inchi):
+                # Add CID to entity via the InChI synonym
+                self.mapper.update({cid: {inchi}}, namespace=NS_PUBCHEM_CID)
+                resolved += 1
+
+        print(f"  Resolved {resolved} CIDs from InChI keys")
+
+    def resolve_names_to_cid(self, cid_cache: dict, skip_pubchem: bool = False):
+        """Resolve remaining names to CIDs via PubChem."""
+        if skip_pubchem:
+            return
+
+        # Find entities without CID that have a drug name
+        names_to_resolve = []
+        for entity_id in self.mapper._forward.keys():
+            refs = self.mapper._namespaces.get(entity_id, {})
+            if NS_PUBCHEM_CID in refs:
+                continue
+
+            # Get the primary name for this entity
+            meta = self.metadata.get(entity_id, {})
+            name = meta.get("primary_name", "")
+            if name and name.lower() not in cid_cache:
+                names_to_resolve.append((entity_id, name.lower()))
+
+        # Apply cached CIDs first
+        applied_from_cache = 0
+        for entity_id in list(self.mapper._forward.keys()):
+            # Entity may have been merged away by previous update
+            if entity_id not in self.mapper._forward:
+                continue
+            refs = self.mapper._namespaces.get(entity_id, {})
+            if NS_PUBCHEM_CID in refs:
+                continue
+
+            # Check if any synonym has a cached CID
+            for synonym in list(self.mapper._forward[entity_id].keys()):
+                if cached_cid := cid_cache.get(synonym):
+                    self.mapper.update({cached_cid: {synonym}}, namespace=NS_PUBCHEM_CID)
+                    applied_from_cache += 1
+                    break
+
+        print(f"  Applied {applied_from_cache} CIDs from cache")
+
+        if not names_to_resolve:
+            return
+
+        # Query all names not yet in cache (InChI resolution may have failed for some)
+        names_to_query = [(eid, name) for eid, name in names_to_resolve if name not in cid_cache]
+
+        if not names_to_query:
+            return
+
+        print(f"  Querying PubChem for {len(names_to_query)} names...")
+        new_cids = fetch_cids_from_pubchem(names=[n for _, n in names_to_query], cache=cid_cache)
+
+        # Update mapper with resolved CIDs
+        resolved = 0
+        for entity_id, name in names_to_query:
+            if cid := new_cids.get(name):
+                self.mapper.update({cid: {name}}, namespace=NS_PUBCHEM_CID)
+                resolved += 1
+
+        print(f"  Resolved {resolved} CIDs from name search")
+
+    def export_lookup(self) -> dict:
+        """Export to backward-compatible drug_lookup.json format."""
+        lookup = {}
+
+        for entity_id in self.mapper._forward.keys():
+            refs = self.mapper._namespaces.get(entity_id, {})
+            meta = self.metadata.get(entity_id, {})
+            synonyms = self.mapper._forward[entity_id]
+
+            # Get CID from namespace refs (None if missing)
+            cid = refs.get(NS_PUBCHEM_CID) or None
+
+            # Determine primary source
+            sources = meta.get("sources", [])
+            primary_source = sources[0] if sources else None
+
+            # Base entry (use None for missing values, not empty string)
+            entry = {
+                "cid": cid,
+                "moa": meta.get("moa") or None,
+                "target": meta.get("target") or None,
+                "fda_approved": meta.get("fda_approved", False),
+                "source": primary_source,
+            }
+            if meta.get("moa_source"):
+                entry["moa_source"] = meta["moa_source"]
+
+            # Get primary name for resolved_name field
+            primary_name = meta.get("primary_name", "")
+
+            # Add entry for each lookup key
+            for synonym in synonyms.keys():
+                syn_lower = str(synonym).lower()
+
+                # Skip InChI keys and CIDs as lookup keys
+                if is_inchi_key(syn_lower) or syn_lower == cid:
+                    continue
+
+                # Determine if this is a code that needs resolved_name
+                is_code = (
+                    syn_lower.startswith("brd-") or
+                    syn_lower.startswith("if-") or
+                    (len(syn_lower) > 5 and syn_lower[:2].isalpha() and "-" in syn_lower)
+                )
+
+                if is_code and primary_name and primary_name.lower() != syn_lower:
+                    lookup[syn_lower] = {**entry, "resolved_name": primary_name}
+                else:
+                    lookup[syn_lower] = entry.copy()
+
+        return lookup
+
+    def export_conflicts(self) -> dict:
+        """Export conflict report for debugging."""
+        return {
+            "summary": dict(self.mapper.conflicts_summary()),
+            "top_conflicts": [
+                {"synonym": str(syn), "namespace": ns, "count": count}
+                for (ns, syn), count in self.mapper.top_conflicts().most_common(100)
+            ],
+            "details": {
+                ns: {
+                    str(syn): {str(k): str(v) for k, v in cases.items()}
+                    for syn, cases in conflicts.items()
+                }
+                for ns, conflicts in self.mapper._conflicts.items()
+            }
+        }
+
+    def export_coverage(self) -> dict:
+        """Export coverage statistics."""
+        total = len(self.mapper._forward)
+
+        # Count entities per namespace
+        ns_counts = Counter()
+        for refs in self.mapper._namespaces.values():
+            for ns in refs.keys():
+                ns_counts[ns] += 1
+
+        # Count entities with metadata
+        with_moa = sum(1 for m in self.metadata.values() if m.get("moa"))
+        with_target = sum(1 for m in self.metadata.values() if m.get("target"))
+        fda_approved = sum(1 for m in self.metadata.values() if m.get("fda_approved"))
+
+        return {
+            "total_entities": total,
+            "with_cid": ns_counts.get(NS_PUBCHEM_CID, 0),
+            "with_moa": with_moa,
+            "with_target": with_target,
+            "fda_approved": fda_approved,
+            "namespace_coverage": dict(ns_counts),
+            "namespace_overlap": {"+".join(sorted(k)): v for k, v in self.mapper.summary().items()},
+        }
+
+
+# Helpers
+load_tsv = lambda p: csv.DictReader(open(p), delimiter='\t')
+clean_cid = lambda v: "" if (v := str(v).replace(".0", "").strip()) in ("", "nan", "None") else v
+is_inchi_key = lambda s: isinstance(s, str) and len(s) == 27 and s.count("-") == 2 and s[14] == "-" and s[25] == "-"
+
+CID_CACHE_PATH = DATA_DIR / 'cache' / 'pubchem_cid_cache.json'
+load_cid_cache = lambda: json.load(open(CID_CACHE_PATH)) if CID_CACHE_PATH.exists() else {}
+save_cid_cache = lambda c: CID_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True) or json.dump(c, open(CID_CACHE_PATH, 'w'))
 
 
 def download_hub():
@@ -39,94 +377,6 @@ def download_hub():
             drugs[n].update({"pubchem_cid": r.get("pubchem_cid", ""), "inchi_key": r.get("InChIKey", "")})
     json.dump(drugs, open(METADATA_DIR / "drug_master.json", "w"))
     print(f"  Saved {len(drugs)} drugs")
-
-CID_CACHE_PATH = DATA_DIR / 'cache' / 'pubchem_cid_cache.json'
-
-LIBS_NEEDING_GMT_SCAN = {"cmap-build02", "sciplex", "deepcovermoa", "geo-chem", "ginkgo"}
-
-# Map file names to display names for source attribution
-SOURCE_DISPLAY_NAMES = {
-    "drugseqr": "Novartis DRUG-seq",
-    "tahoe": "tahoe",
-    "lincs": "lincs",
-}
-
-# Helpers
-load_tsv = lambda p: csv.DictReader(open(p), delimiter='\t')
-
-
-clean_cid = lambda v: "" if (v := str(v).replace(".0", "").strip()) in ("", "nan", "None") else v
-
-
-def add_keyed_entries(result: dict, code: str, name: str, entry: dict):
-    """Add lookup entries for both code (e.g. BRD-xxx) and name."""
-    if code:
-        result[code.lower()] = {**entry, "resolved_name": name if name and name != code else ""}
-    if name and (not code or name.lower() != code.lower()):
-        result[name.lower()] = entry
-
-
-def add_to_lookup(lookup: dict, entries: dict, source: str, cid_fn=None) -> int:
-    """Add entries to lookup, return count with CIDs."""
-    count = 0
-    for name, info in entries.items():
-        if name not in lookup:
-            cid = (cid_fn(name) if cid_fn else info.get("cid")) or ""
-            lookup[name] = {"cid": cid, "moa": "", "target": info.get("target", ""),
-                           "fda_approved": info.get("fda_approved", False), "source": source,
-                           "_dataset_moa": info.get("moa", "")}
-            if info.get("resolved_name"): lookup[name]["resolved_name"] = info["resolved_name"]
-            if cid: count += 1
-    return count
-
-
-def apply_hub_info(info: dict, hub_info: dict):
-    """Apply Hub MOA/target/FDA to entry and update source for attribution."""
-    info["moa"] = hub_info["moa"]
-    info["moa_source"] = "drug_repurposing_hub"  # Track where MOA came from
-    info["fda_approved"] = hub_info.get("fda_approved", False)
-    if hub_info.get("target") and not info.get("target"): info["target"] = hub_info["target"]
-
-
-def load_drug_repurposing_hub() -> tuple[dict[str, dict], dict[str, dict]]:
-    """Load Drug Repurposing Hub → (by_name, by_cid) dicts."""
-    path = METADATA_DIR / "drug_master.json"
-    assert path.exists(), f"Missing {path}"
-
-    data = json.load(open(path))
-    by_name = {
-        name.lower(): {"cid": clean_cid(info.get("pubchem_cid", "")), "moa": info.get("moa") or "",
-                       "target": info.get("target") or "", "fda_approved": info.get("fda_approved", False),
-                       "source": "drug_repurposing_hub"}
-        for name, info in data.items()
-    }
-    by_cid = {e["cid"]: e for e in by_name.values() if e["cid"] and e["moa"]}
-    print(f"Loaded Hub: {len(by_name)} drugs, {len(by_cid)} with CID+MOA")
-    return by_name, by_cid
-
-
-def load_metadata(source: str) -> dict[str, dict]:
-    """Load normalized metadata file (tahoe.tsv, drugseqr.tsv, or lincs.tsv)."""
-    path = METADATA_DIR / f"{source}.tsv"
-    assert path.exists(), f"Missing {path}"
-
-    result = {}
-    for row in load_tsv(path):
-        name, code = row.get("name", "").strip(), row.get("code", "").strip()
-        entry = {
-            "cid": row.get("cid", "").strip(),
-            "moa": row.get("moa", "").strip(),
-            "target": row.get("target", "").strip(),
-            "fda_approved": row.get("fda_approved", "").lower() == "true",
-            "inchi_key": row.get("inchi_key", "").strip(),
-        }
-        add_keyed_entries(result, code, name, entry)
-    print(f"Loaded {source}: {len(result)} entries")
-    return result
-
-
-load_cid_cache = lambda: json.load(open(CID_CACHE_PATH)) if CID_CACHE_PATH.exists() else {}
-save_cid_cache = lambda c: CID_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True) or json.dump(c, open(CID_CACHE_PATH, 'w'))
 
 
 def fetch_cids_from_pubchem(names: list[str] = None, inchi_keys: list[str] = None, cache: dict = None) -> dict[str, str]:
@@ -155,150 +405,84 @@ def fetch_cids_from_pubchem(names: list[str] = None, inchi_keys: list[str] = Non
     return results
 
 
-def build_unified_lookup(skip_pubchem: bool = False) -> dict[str, dict]:
-    """
-    Build unified drug lookup with CID normalization.
+def load_drug_repurposing_hub() -> dict[str, dict]:
+    """Load Drug Repurposing Hub → dict by name."""
+    path = METADATA_DIR / "drug_master.json"
+    assert path.exists(), f"Missing {path}"
+    return json.load(open(path))
 
-    Strategy:
-    1. Libraries with metadata (Tahoe, DRUGseqr, LINCS): Use metadata directly for CID
-    2. Libraries without metadata: Scan GMTs, match Hub, then PubChem fallback
-    3. MOA: Always try Hub first, then dataset fallback, then "Unknown"
-    """
 
-    # Load all data sources
-    hub_by_name, hub_by_cid = load_drug_repurposing_hub()
+def load_metadata(source: str) -> list[tuple[str, str, dict]]:
+    """Load normalized metadata file, return list of (code, name, info) tuples."""
+    path = METADATA_DIR / f"{source}.tsv"
+    assert path.exists(), f"Missing {path}"
+
+    result = []
+    for row in load_tsv(path):
+        name, code = row.get("name", "").strip(), row.get("code", "").strip()
+        info = {
+            "cid": row.get("cid", "").strip(),
+            "moa": row.get("moa", "").strip(),
+            "target": row.get("target", "").strip(),
+            "fda_approved": row.get("fda_approved", "").lower() == "true",
+            "inchi_key": row.get("inchi_key", "").strip(),
+        }
+        result.append((code, name, info))
+    return result
+
+
+def build_drug_store(skip_pubchem: bool = False) -> DrugEntityStore:
+    """Build unified drug store using IDMapper for entity resolution."""
+    store = DrugEntityStore()
     cid_cache = load_cid_cache()
     print(f"Loaded CID cache: {len(cid_cache)} entries ({sum(1 for v in cid_cache.values() if v)} with CIDs)")
 
-    print("\n[1/4] Loading metadata libraries...")
-    lookup = {}
+    # 1. Load Drug Repurposing Hub first (best CID coverage, establishes canonical entities)
+    print("\n[1/5] Loading Drug Repurposing Hub...")
+    hub = load_drug_repurposing_hub()
+    for name, info in tqdm(hub.items(), desc="Hub"):
+        store.add_hub_entry(name, info)
+    print(f"  Loaded {len(hub)} Hub entries")
+
+    # 2. Load metadata sources (will merge with Hub via shared synonyms)
+    print("\n[2/5] Loading metadata libraries...")
     for source in ["tahoe", "drugseqr", "lincs"]:
-        meta = load_metadata(source)
+        entries = load_metadata(source)
+        for code, name, info in tqdm(entries, desc=source):
+            store.add_metadata_entry(source, code, name, info)
+        print(f"  {source}: {len(entries)} entries")
 
-        # LINCS needs InChI → CID resolution
-        cid_fn = None
-        if source == "lincs" and not skip_pubchem:
-            inchi_to_name = {info["inchi_key"]: name for name, info in meta.items() if info.get("inchi_key")}
-            if inchi_to_name:
-                inchi_to_cid = fetch_cids_from_pubchem(inchi_keys=list(inchi_to_name.keys()))
-                lincs_cids = {inchi_to_name[k]: v for k, v in inchi_to_cid.items() if k in inchi_to_name}
-                print(f"  LINCS InChI resolution: {len(lincs_cids)} CIDs")
-                cid_fn = lincs_cids.get
-
-        display_source = SOURCE_DISPLAY_NAMES.get(source, source)
-        print(f"  {source}: {len(meta)} entries, {add_to_lookup(lookup, meta, display_source, cid_fn)} with CID")
-
-    print("\n[2/4] Scanning GMT files for libraries without metadata...")
+    # 3. Scan GMT files for additional perturbations
+    print("\n[3/5] Scanning GMT files...")
+    hub_by_name = {n.lower(): info for n, info in hub.items()}
     is_valid_pert = lambda p: p and len(p) > 2 and not p.replace('.', '').replace('-', '').isdigit()
-    gmt_perturbations = set()
+    gmt_count = 0
+
     for lib_key in LIBS_NEEDING_GMT_SCAN:
         config = get_lib_config(lib_key)
         for gmt_file in DRUG_DIR.glob(f"{lib_key}*.gmt*"):
             print(f"  Scanning {gmt_file.name}...")
             for (term, _), _ in read_gmt(gmt_file):
-                if (pert := extract_perturbation(term, lib_config=config)) and is_valid_pert(pert := pert.strip().lower()):
-                    gmt_perturbations.add(pert)
-    print(f"  Found {len(gmt_perturbations)} unique perturbations")
+                if (pert := extract_perturbation(term, lib_config=config)) and is_valid_pert(pert := pert.strip()):
+                    hub_info = hub_by_name.get(pert.lower(), {})
+                    store.add_gmt_perturbation(pert, hub_info)
+                    gmt_count += 1
+    print(f"  Processed {gmt_count} GMT perturbations")
 
-    # For each GMT perturbation not already in lookup, create entry from Hub or empty
-    new_perts = {p: hub_by_name.get(p, {}) for p in gmt_perturbations if p not in lookup}
-    for p, info in new_perts.items():
-        lookup[p] = {"cid": info.get("cid", ""), "moa": "", "target": info.get("target", ""),
-                     "fda_approved": info.get("fda_approved", False),
-                     "source": "drug_repurposing_hub" if info else ""}
-    hub_matches = sum(1 for info in new_perts.values() if info)
-    print(f"  New from GMT: {len(new_perts)}, Hub matches: {hub_matches}")
+    # 4. Resolve InChI keys to CIDs
+    print("\n[4/5] Resolving InChI keys to CIDs...")
+    store.resolve_inchi_to_cid(skip_pubchem)
 
-    if not skip_pubchem:
-        print("\n[3/4] PubChem fallback...")
-        # Apply cached CIDs, then lookup remaining
-        for name, info in lookup.items():
-            if not info.get("cid") and (cached := cid_cache.get(name)):
-                info["cid"], info["source"] = cached, info["source"] or "pubchem"
+    # 5. Resolve remaining names to CIDs
+    print("\n[5/5] PubChem name resolution...")
+    store.resolve_names_to_cid(cid_cache, skip_pubchem)
+    save_cid_cache(cid_cache)
 
-        names_needing = [n for n, i in lookup.items() if not i.get("cid") and n not in cid_cache
-                        and i.get("source") not in ("tahoe", "Novartis DRUG-seq", "lincs")]
-        new_cids = fetch_cids_from_pubchem(names=names_needing, cache=cid_cache) if names_needing else {}
-        for name, cid in new_cids.items():
-            if name in lookup:
-                lookup[name]["cid"], lookup[name]["source"] = cid, lookup[name]["source"] or "pubchem"
-        save_cid_cache(cid_cache)
-        print(f"  Resolved {len(new_cids)} CIDs, cache has {len(cid_cache)} entries")
-
-    print("\n[4/4] Resolving MOA...")
-    stats = {"hub_name": 0, "hub_cid": 0, "dataset_fallback": 0, "unknown": 0}
-
-    for name, info in tqdm(lookup.items(), desc="Resolving MOA"):
-        cid, dataset_moa = info.get("cid", ""), info.pop("_dataset_moa", "")
-        if (hub := hub_by_name.get(name)) and hub.get("moa"):
-            apply_hub_info(info, hub); stats["hub_name"] += 1
-        elif cid and (hub := hub_by_cid.get(cid)) and hub.get("moa"):
-            apply_hub_info(info, hub); stats["hub_cid"] += 1
-        elif dataset_moa and info.get("source") in ("tahoe", "Novartis DRUG-seq", "lincs"):
-            info["moa"] = dataset_moa
-            info["moa_source"] = info["source"]  # MOA came from the dataset itself
-            stats["dataset_fallback"] += 1
-        else:
-            stats["unknown"] += 1
-
-    print(f"  MOA: {stats['hub_name']} hub(name), {stats['hub_cid']} hub(cid), {stats['dataset_fallback']} fallback, {stats['unknown']} unknown")
-
-    return lookup
-
-
-def normalize_name(name: str) -> str:
-    """Normalize drug name for matching: lowercase, replace hyphens/underscores with spaces."""
-    return name.lower().replace("-", " ").replace("_", " ").strip()
-
-
-def deduplicate_by_cid(lookup: dict) -> dict:
-    """
-    Propagate CIDs to name variants that lack them.
-
-    For compounds with the same normalized name (e.g., "antimycin a" and "antimycin-a"),
-    ensure all variants have the CID populated from the entry that has it.
-    """
-    print("\n[5/5] CID-based deduplication...")
-
-    # Build normalized name → CID mapping from entries that have CIDs
-    normalized_to_cid = {}
-    normalized_to_best = {}
-    for name, info in lookup.items():
-        norm = normalize_name(name)
-        if info.get("cid"):
-            normalized_to_cid[norm] = info["cid"]
-            # Track best entry (most complete data) for each normalized name
-            if norm not in normalized_to_best or \
-               (info.get("moa") and not normalized_to_best[norm].get("moa")):
-                normalized_to_best[norm] = info
-
-    # Propagate CIDs to entries missing them
-    propagated = 0
-    for name, info in lookup.items():
-        if info.get("cid"):
-            continue
-        norm = normalize_name(name)
-        if norm in normalized_to_cid:
-            cid = normalized_to_cid[norm]
-            info["cid"] = cid
-            # Also copy other data from the best entry
-            if norm in normalized_to_best:
-                best = normalized_to_best[norm]
-                if best.get("moa") and not info.get("moa"):
-                    info["moa"] = best["moa"]
-                    info["moa_source"] = best.get("moa_source", "")
-                if best.get("target") and not info.get("target"):
-                    info["target"] = best["target"]
-                if best.get("fda_approved"):
-                    info["fda_approved"] = True
-            propagated += 1
-
-    print(f"  Propagated CID to {propagated} name variants")
-    return lookup
+    return store
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Build unified drug lookup JSON")
+    parser = argparse.ArgumentParser(description="Build unified drug lookup JSON using IDMapper")
     parser.add_argument("--skip-pubchem", action="store_true", help="Skip PubChem API calls")
     parser.add_argument("--download", action="store_true", help="Re-download Drug Repurposing Hub")
     parser.add_argument("--output", "-o", type=str, default=str(DRUG_LOOKUP_PATH))
@@ -307,28 +491,52 @@ def main():
     if args.download or not (METADATA_DIR / "drug_master.json").exists():
         download_hub()
 
-    print("Building drug_lookup.json...")
-    lookup = build_unified_lookup(skip_pubchem=args.skip_pubchem)
-    lookup = deduplicate_by_cid(lookup)
+    print("Building drug lookup using IDMapper...")
+    store = build_drug_store(skip_pubchem=args.skip_pubchem)
 
-    print("\nResults:")
-    total = len(lookup)
-    pct = lambda n: f"{n} ({100*n/total:.1f}%)"
-    print(f"Total: {total}, CID: {pct(sum(1 for d in lookup.values() if d.get('cid')))}, "
-          f"MOA: {pct(sum(1 for d in lookup.values() if d.get('moa')))}, "
-          f"Target: {pct(sum(1 for d in lookup.values() if d.get('target')))}, "
-          f"FDA: {sum(1 for d in lookup.values() if d.get('fda_approved'))}")
-    print("By source:", {src: pct(n) for src, n in Counter(d.get("source") or "unknown" for d in lookup.values()).most_common()})
+    # Export coverage stats
+    coverage = store.export_coverage()
+    print("\nCoverage:")
+    print(f"  Total entities: {coverage['total_entities']}")
+    print(f"  With CID: {coverage['with_cid']} ({100*coverage['with_cid']/coverage['total_entities']:.1f}%)")
+    print(f"  With MOA: {coverage['with_moa']} ({100*coverage['with_moa']/coverage['total_entities']:.1f}%)")
+    print(f"  FDA approved: {coverage['fda_approved']}")
+    print(f"  Namespaces: {coverage['namespace_coverage']}")
 
-    # Save
+    # Export conflicts
+    conflicts = store.export_conflicts()
+    if conflicts["summary"]:
+        print(f"\nConflicts detected: {conflicts['summary']}")
+
+    # Export lookup
+    lookup = store.export_lookup()
+    print(f"\nLookup entries: {len(lookup)}")
+
+    # Stats on lookup
+    with_cid = sum(1 for e in lookup.values() if e.get("cid"))
+    with_moa = sum(1 for e in lookup.values() if e.get("moa"))
+    print(f"  With CID: {with_cid} ({100*with_cid/len(lookup):.1f}%)")
+    print(f"  With MOA: {with_moa} ({100*with_moa/len(lookup):.1f}%)")
+
+    # Save outputs
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     with open(output_path, 'w') as f:
         json.dump(lookup, f)
+    print(f"\nSaved lookup to {output_path}")
 
-    print(f"\nSaved to {output_path}")
-    print(f"File size: {output_path.stat().st_size / 1024 / 1024:.1f} MB")
+    # Save conflicts report
+    conflicts_path = output_path.parent / "drug_id_conflicts.json"
+    with open(conflicts_path, 'w') as f:
+        json.dump(conflicts, f, indent=2, default=str)
+    print(f"Saved conflicts to {conflicts_path}")
+
+    # Save coverage report
+    coverage_path = output_path.parent / "drug_id_coverage.json"
+    with open(coverage_path, 'w') as f:
+        json.dump(coverage, f, indent=2, default=str)
+    print(f"Saved coverage to {coverage_path}")
 
 
 if __name__ == "__main__":
