@@ -236,8 +236,8 @@ export type DrugInfo = {
   fda_approved: boolean
   clinical_phase?: string
   name?: string  // Resolved name for BRD/NSN codes
-  source: 'drug_repurposing_hub' | 'tahoe' | 'drugseqr' | 'lincs' | 'pubchem'
-  moa_source?: 'drug_repurposing_hub' | 'tahoe' | 'drugseqr' | 'lincs'  // Where the MOA came from (may differ from source)
+  source: 'drug_repurposing_hub' | 'tahoe' | 'Novartis DRUG-seq' | 'lincs' | 'pubchem'
+  moa_source?: 'drug_repurposing_hub' | 'tahoe' | 'Novartis DRUG-seq' | 'lincs'  // Where the MOA came from (may differ from source)
   source_url: string
 }
 
@@ -251,7 +251,7 @@ export const SOURCE_INFO: Record<string, { name: string; url: string }> = {
     name: 'Tahoe-100M',
     url: 'https://huggingface.co/datasets/tahoebio/Tahoe-100M#drug-metadata',
   },
-  drugseqr: {
+  'Novartis DRUG-seq': {
     name: 'Novartis DRUG-seq',
     url: 'https://zenodo.org/records/14291446',
   },
@@ -469,7 +469,7 @@ export const DATASET_URLS: Record<string, string> = {
   'l1000-cp': 'https://l2s2.maayanlab.cloud/download',
   'l1000-xpr': 'https://l2s2.maayanlab.cloud/download',
   'cmap-build02': 'https://www.broadinstitute.org/connectivity-map-cmap',
-  'drugseqr': 'https://drugseqr.maayanlab.cloud/download',
+  'Novartis DRUG-seq': 'https://drugseqr.maayanlab.cloud/download',
   'sciplex': 'https://github.com/cole-trapnell-lab/sci-plex',
   'deepcovermoa': 'https://wren.hms.harvard.edu/DeepCoverMOA/',
   'geo-chem': 'https://www.ncbi.nlm.nih.gov/geo/',

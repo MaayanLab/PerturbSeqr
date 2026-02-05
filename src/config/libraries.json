@@ -42,7 +42,7 @@
       "exampleTerm": "metformin_10uM_MCF7_6h_batch1 up",
       "parsedExample": { "perturbation": "metformin", "concentration": "10uM", "cellLine": "MCF7", "timepoint": "6h", "batch": "batch1", "direction": "up" }
     },
-    "drugseqr": {
+    "Novartis DRUG-seq": {
       "displayName": "Novartis DRUG-seq",
       "category": "drug",
       "source": "https://github.com/Novartis/DRUG-seq/tree/main/data/Novartis_drugseq_U2OS_MoABox",

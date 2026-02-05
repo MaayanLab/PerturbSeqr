@@ -62,11 +62,21 @@ export function parseTerm(term: string, libraryName?: string): ParsedTerm {
     }
   }
 
-  // Get term format from config (normalize library name to lowercase for lookup)
-  const libraries = libraryConfig.libraries as Record<string, { termFormat?: TermFormat }>
-  // Try lowercase version for config lookup (config keys are lowercase with hyphens)
-  const normalizedLibraryName = detectedLibrary.toLowerCase()
-  const libConfig = libraries[normalizedLibraryName]
+  // Get term format from config
+  const libraries = libraryConfig.libraries as Record<string, { termFormat?: TermFormat; displayName?: string }>
+  // Try direct match first, then case-insensitive match
+  let libConfig = libraries[detectedLibrary]
+  if (!libConfig) {
+    // Build reverse lookup from displayName to key
+    const normalizedName = detectedLibrary.toLowerCase()
+    for (const [key, config] of Object.entries(libraries)) {
+      if (key.toLowerCase() === normalizedName ||
+          config.displayName?.toLowerCase() === normalizedName) {
+        libConfig = config
+        break
+      }
+    }
+  }
   const termFormat = libConfig?.termFormat
 
   if (!termFormat) {

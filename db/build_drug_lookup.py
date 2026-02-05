@@ -44,6 +44,13 @@ CID_CACHE_PATH = DATA_DIR / 'cache' / 'pubchem_cid_cache.json'
 
 LIBS_NEEDING_GMT_SCAN = {"cmap-build02", "sciplex", "deepcovermoa", "geo-chem", "ginkgo"}
 
+# Map file names to display names for source attribution
+SOURCE_DISPLAY_NAMES = {
+    "drugseqr": "Novartis DRUG-seq",
+    "tahoe": "tahoe",
+    "lincs": "lincs",
+}
+
 # Helpers
 load_tsv = lambda p: csv.DictReader(open(p), delimiter='\t')
 
@@ -178,7 +185,8 @@ def build_unified_lookup(skip_pubchem: bool = False) -> dict[str, dict]:
                 print(f"  LINCS InChI resolution: {len(lincs_cids)} CIDs")
                 cid_fn = lincs_cids.get
 
-        print(f"  {source}: {len(meta)} entries, {add_to_lookup(lookup, meta, source, cid_fn)} with CID")
+        display_source = SOURCE_DISPLAY_NAMES.get(source, source)
+        print(f"  {source}: {len(meta)} entries, {add_to_lookup(lookup, meta, display_source, cid_fn)} with CID")
 
     print("\n[2/4] Scanning GMT files for libraries without metadata...")
     is_valid_pert = lambda p: p and len(p) > 2 and not p.replace('.', '').replace('-', '').isdigit()
@@ -209,7 +217,7 @@ def build_unified_lookup(skip_pubchem: bool = False) -> dict[str, dict]:
                 info["cid"], info["source"] = cached, info["source"] or "pubchem"
 
         names_needing = [n for n, i in lookup.items() if not i.get("cid") and n not in cid_cache
-                        and i.get("source") not in ("tahoe", "drugseqr", "lincs")]
+                        and i.get("source") not in ("tahoe", "Novartis DRUG-seq", "lincs")]
         new_cids = fetch_cids_from_pubchem(names=names_needing, cache=cid_cache) if names_needing else {}
         for name, cid in new_cids.items():
             if name in lookup:
@@ -226,7 +234,7 @@ def build_unified_lookup(skip_pubchem: bool = False) -> dict[str, dict]:
             apply_hub_info(info, hub); stats["hub_name"] += 1
         elif cid and (hub := hub_by_cid.get(cid)) and hub.get("moa"):
             apply_hub_info(info, hub); stats["hub_cid"] += 1
-        elif dataset_moa and info.get("source") in ("tahoe", "drugseqr", "lincs"):
+        elif dataset_moa and info.get("source") in ("tahoe", "Novartis DRUG-seq", "lincs"):
             info["moa"] = dataset_moa
             info["moa_source"] = info["source"]  # MOA came from the dataset itself
             stats["dataset_fallback"] += 1
@@ -235,6 +243,57 @@ def build_unified_lookup(skip_pubchem: bool = False) -> dict[str, dict]:
 
     print(f"  MOA: {stats['hub_name']} hub(name), {stats['hub_cid']} hub(cid), {stats['dataset_fallback']} fallback, {stats['unknown']} unknown")
 
+    return lookup
+
+
+def normalize_name(name: str) -> str:
+    """Normalize drug name for matching: lowercase, replace hyphens/underscores with spaces."""
+    return name.lower().replace("-", " ").replace("_", " ").strip()
+
+
+def deduplicate_by_cid(lookup: dict) -> dict:
+    """
+    Propagate CIDs to name variants that lack them.
+
+    For compounds with the same normalized name (e.g., "antimycin a" and "antimycin-a"),
+    ensure all variants have the CID populated from the entry that has it.
+    """
+    print("\n[5/5] CID-based deduplication...")
+
+    # Build normalized name → CID mapping from entries that have CIDs
+    normalized_to_cid = {}
+    normalized_to_best = {}
+    for name, info in lookup.items():
+        norm = normalize_name(name)
+        if info.get("cid"):
+            normalized_to_cid[norm] = info["cid"]
+            # Track best entry (most complete data) for each normalized name
+            if norm not in normalized_to_best or \
+               (info.get("moa") and not normalized_to_best[norm].get("moa")):
+                normalized_to_best[norm] = info
+
+    # Propagate CIDs to entries missing them
+    propagated = 0
+    for name, info in lookup.items():
+        if info.get("cid"):
+            continue
+        norm = normalize_name(name)
+        if norm in normalized_to_cid:
+            cid = normalized_to_cid[norm]
+            info["cid"] = cid
+            # Also copy other data from the best entry
+            if norm in normalized_to_best:
+                best = normalized_to_best[norm]
+                if best.get("moa") and not info.get("moa"):
+                    info["moa"] = best["moa"]
+                    info["moa_source"] = best.get("moa_source", "")
+                if best.get("target") and not info.get("target"):
+                    info["target"] = best["target"]
+                if best.get("fda_approved"):
+                    info["fda_approved"] = True
+            propagated += 1
+
+    print(f"  Propagated CID to {propagated} name variants")
     return lookup
 
 
@@ -250,6 +309,7 @@ def main():
 
     print("Building drug_lookup.json...")
     lookup = build_unified_lookup(skip_pubchem=args.skip_pubchem)
+    lookup = deduplicate_by_cid(lookup)
 
     print("\nResults:")
     total = len(lookup)

@@ -317,7 +317,7 @@ function EnrichmentResults({
         </button>
 
         {/* TODO: Implement perturbation type filter by library prefix
-            Drug libraries: l1000-cp, l1000-sigs, tahoe-100m, drugseqr, cmap-build02, ginkgo, sciplex, deepcovermoa, geo-chem
+            Drug libraries: l1000-cp, l1000-sigs, tahoe-100m, Novartis DRUG-seq, cmap-build02, ginkgo, sciplex, deepcovermoa, geo-chem
             Gene libraries: l1000crispr, perturbatlas, perturbatlasmouse, reploglek562*, reploglerpe1*, geogene
         */}
         <div
