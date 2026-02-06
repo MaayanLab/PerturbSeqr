@@ -122,7 +122,7 @@ export default function DatasetIcons({
                 alt={libraries[0]}
                 width={80}
                 height={80}
-                className="object-contain max-w-full max-h-full"
+                className="object-contain max-w-full max-h-full dark:invert"
               />
             </div>
             <span className="text-xs mt-1 leading-tight text-center">{subtitle}</span>
