@@ -103,7 +103,7 @@ export default function RootLayout({
       <head>{jsonld}</head>
       <ApolloWrapper>
         <RuntimeConfig>
-          <body className="min-h-screen flex flex-col bg-gradient-to-t from-blue-300 to-white dark:from-black dark:to-blue-900 dark:text-white">
+          <body className="min-h-screen flex flex-col bg-gray-100 dark:bg-gray-900 dark:text-white">
             <React.Suspense fallback={null}>
               <Header />
               <main className="flex-1 flex-col justify-stretch mx-8 md:mx-32">
