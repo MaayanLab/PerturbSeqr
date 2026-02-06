@@ -815,9 +815,15 @@ async fn query(
             // Construct the 2x2 contingency table
             let a = *count_sig; // Drug appears in significant results
             let b = *count_insig; // Drug appears in insignificant results
-            let c = n_significant_drugs - *count_sig; // Drug does not appear in significant results
-            let d = n_insignificant_drugs - *count_insig; // Drug does not appear in insignificant results
+            let c = n_significant_drugs.saturating_sub(*count_sig); // Drug does not appear in significant results
+            let d = n_insignificant_drugs.saturating_sub(*count_insig); // Drug does not appear in insignificant results
             let total_terms_by_dir = (*count_sig + *count_insig) / 2;
+
+            // Log data quality warnings for potential stale materialized view
+            if *count_insig > n_insignificant_drugs || *count_sig > n_significant_drugs {
+                eprintln!("[DATA WARNING] Drug '{}': count_sig={} (max {}), count_insig={} (max {})",
+                          display_name, *count_sig, n_significant_drugs, *count_insig, n_insignificant_drugs);
+            }
 
             if (a < 5 || (*count_insig > n_insignificant_drugs)|| (*count_sig > n_significant_drugs)) {
                 return DrugConsensusResult {
@@ -846,9 +852,9 @@ async fn query(
 
             // Construct the second 2x2 table for directionality analysis
             let a_up = *sig_up; // Upregulated and significant
-            let b_up = a - *sig_up; // Downregulated and significant
-            let a_down = total_terms_by_dir as usize - *sig_up; // Upregulated and insignificant
-            let b_down = *count_insig - a_down; // Downregulated and insignificant
+            let b_up = a.saturating_sub(*sig_up); // Downregulated and significant
+            let a_down = (total_terms_by_dir as usize).saturating_sub(*sig_up); // Upregulated and insignificant
+            let b_down = (*count_insig).saturating_sub(a_down); // Downregulated and insignificant
 
             let odds_ratio_up = ((a_up as f64 + 0.5) / (b_up as f64 + 0.5)) / ((a_down as f64 + 0.5) / (b_down as f64 + 0.5));
             let odds_ratio_down = ((b_up as f64 + 0.5) / (a_up as f64 + 0.5)) / ((b_down as f64 + 0.5) / (a_down as f64 + 0.5));
@@ -928,9 +934,15 @@ async fn query(
         // Construct the 2x2 contingency table
         let a = *count_sig; // Drug appears in significant results
         let b = *count_insig; // Drug appears in insignificant results
-        let c = n_significant_drugs - *count_sig; // Drug does not appear in significant results
-        let d = n_insignificant_drugs - *count_insig; // Drug does not appear in insignificant results
+        let c = n_significant_drugs.saturating_sub(*count_sig); // Drug does not appear in significant results
+        let d = n_insignificant_drugs.saturating_sub(*count_insig); // Drug does not appear in insignificant results
         let total_terms_by_dir = (*count_sig + *count_insig) / 2;
+
+        // Log data quality warnings for potential stale materialized view
+        if *count_insig > n_insignificant_drugs || *count_sig > n_significant_drugs {
+            eprintln!("[DATA WARNING] MOA '{}': count_sig={} (max {}), count_insig={} (max {})",
+                      moa, *count_sig, n_significant_drugs, *count_insig, n_insignificant_drugs);
+        }
 
         if (a < 5 || (*count_insig > n_insignificant_drugs)|| (*count_sig > n_significant_drugs)) {
             return DrugConsensusResult {
@@ -959,9 +971,9 @@ async fn query(
 
         // Construct the second 2x2 table for directionality analysis
         let a_up = *sig_up; // Upregulated and significant
-        let b_up = a - *sig_up; // Downregulated and significant
-        let a_down = total_terms_by_dir as usize - *sig_up; // Upregulated and insignificant
-        let b_down = *count_insig - a_down; // Downregulated and insignificant
+        let b_up = a.saturating_sub(*sig_up); // Downregulated and significant
+        let a_down = (total_terms_by_dir as usize).saturating_sub(*sig_up); // Upregulated and insignificant
+        let b_down = (*count_insig).saturating_sub(a_down); // Downregulated and insignificant
 
         let odds_ratio_up = ((a_up as f64 + 0.5) / (b_up as f64 + 0.5)) / ((a_down as f64 + 0.5) / (b_down as f64 + 0.5));
         let odds_ratio_down = ((b_up as f64 + 0.5) / (a_up as f64 + 0.5)) / ((b_down as f64 + 0.5) / (a_down as f64 + 0.5));
@@ -1534,9 +1546,15 @@ async fn query_pairs(
             // Construct the 2x2 contingency table
             let a = *count_sig; // Drug appears in significant results
             let b = *count_insig; // Drug appears in insignificant results
-            let c = n_significant_drugs - *count_sig; // Drug does not appear in significant results
-            let d = n_insignificant_drugs - *count_insig; // Drug does not appear in insignificant results
+            let c = n_significant_drugs.saturating_sub(*count_sig); // Drug does not appear in significant results
+            let d = n_insignificant_drugs.saturating_sub(*count_insig); // Drug does not appear in insignificant results
             let total_terms_by_dir = (*count_sig + *count_insig) / 2;
+
+            // Log data quality warnings for potential stale materialized view
+            if *count_insig > n_insignificant_drugs || *count_sig > n_significant_drugs {
+                eprintln!("[DATA WARNING] Drug '{}': count_sig={} (max {}), count_insig={} (max {})",
+                          display_name, *count_sig, n_significant_drugs, *count_insig, n_insignificant_drugs);
+            }
 
             if (a < 5 || (*count_insig > n_insignificant_drugs)|| (*count_sig > n_significant_drugs)) {
                 return DrugConsensusResult {
@@ -1565,9 +1583,9 @@ async fn query_pairs(
 
             // Construct the second 2x2 table for directionality analysis
             let a_up = *sig_up; // Upregulated and significant
-            let b_up = a - *sig_up; // Downregulated and significant
-            let a_down = total_terms_by_dir as usize - *sig_up; // Upregulated and insignificant
-            let b_down = *count_insig - a_down; // Downregulated and insignificant
+            let b_up = a.saturating_sub(*sig_up); // Downregulated and significant
+            let a_down = (total_terms_by_dir as usize).saturating_sub(*sig_up); // Upregulated and insignificant
+            let b_down = (*count_insig).saturating_sub(a_down); // Downregulated and insignificant
 
             let odds_ratio_up = ((a_up as f64 + 0.5) / (b_up as f64 + 0.5)) / ((a_down as f64 + 0.5) / (b_down as f64 + 0.5));
             let odds_ratio_down = ((b_up as f64 + 0.5) / (a_up as f64 + 0.5)) / ((b_down as f64 + 0.5) / (a_down as f64 + 0.5));
@@ -1647,9 +1665,15 @@ async fn query_pairs(
         // Construct the 2x2 contingency table
         let a = *count_sig; // Drug appears in significant results
         let b = *count_insig; // Drug appears in insignificant results
-        let c = n_significant_drugs - *count_sig; // Drug does not appear in significant results
-        let d = n_insignificant_drugs - *count_insig; // Drug does not appear in insignificant results
+        let c = n_significant_drugs.saturating_sub(*count_sig); // Drug does not appear in significant results
+        let d = n_insignificant_drugs.saturating_sub(*count_insig); // Drug does not appear in insignificant results
         let total_terms_by_dir = (*count_sig + *count_insig) / 2;
+
+        // Log data quality warnings for potential stale materialized view
+        if *count_insig > n_insignificant_drugs || *count_sig > n_significant_drugs {
+            eprintln!("[DATA WARNING] MOA '{}': count_sig={} (max {}), count_insig={} (max {})",
+                      moa, *count_sig, n_significant_drugs, *count_insig, n_insignificant_drugs);
+        }
 
         if (a < 5 || (*count_insig > n_insignificant_drugs)|| (*count_sig > n_significant_drugs)) {
             return DrugConsensusResult {
@@ -1678,9 +1702,9 @@ async fn query_pairs(
 
         // Construct the second 2x2 table for directionality analysis
         let a_up = *sig_up; // Upregulated and significant
-        let b_up = a - *sig_up; // Downregulated and significant
-        let a_down = total_terms_by_dir as usize - *sig_up; // Upregulated and insignificant
-        let b_down = *count_insig - a_down; // Downregulated and insignificant
+        let b_up = a.saturating_sub(*sig_up); // Downregulated and significant
+        let a_down = (total_terms_by_dir as usize).saturating_sub(*sig_up); // Upregulated and insignificant
+        let b_down = (*count_insig).saturating_sub(a_down); // Downregulated and insignificant
 
         let odds_ratio_up = ((a_up as f64 + 0.5) / (b_up as f64 + 0.5)) / ((a_down as f64 + 0.5) / (b_down as f64 + 0.5));
         let odds_ratio_down = ((b_up as f64 + 0.5) / (a_up as f64 + 0.5)) / ((b_down as f64 + 0.5) / (a_down as f64 + 0.5));
