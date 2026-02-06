@@ -5,6 +5,10 @@ import uniqueArray from '@/utils/uniqueArray'
 import { useAddUserGeneSetMutation } from '@/graphql'
 import classNames from 'classnames'
 import { useRouter } from 'next/navigation'
+import libraryConfig from '@/config/libraries.json'
+
+// Get total library count to check if all are selected
+const allLibraryCount = Object.keys(libraryConfig.libraries).length
 
 
 /**
@@ -89,8 +93,8 @@ export default function InputFormUpDown({setInputSingle, selectedLibraries = []}
             const params = new URLSearchParams()
             params.append('dataset', idUp)
             params.append('dataset', idDown)
-            // Pass selected libraries as comma-separated list if any are selected
-            if (selectedLibraries.length > 0) {
+            // Pass selected libraries only if NOT all are selected (all selected = no filter)
+            if (selectedLibraries.length > 0 && selectedLibraries.length < allLibraryCount) {
               params.set('libraries', selectedLibraries.join(','))
             }
             router.push(`/enrichpair?${params.toString()}`)

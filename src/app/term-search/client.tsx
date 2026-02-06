@@ -101,7 +101,7 @@ export default function TermSearchClientPage(props: { searchParams?: { page?: st
                   setQueryString({
                     page: '1',
                     q: rawTerms,
-                    libraries: selectedLibraries.length > 0 ? selectedLibraries.join(',') : ''
+                    libraries: selectedLibraries.length > 0 && selectedLibraries.length < allLibraries.length ? selectedLibraries.join(',') : ''
                   })
                 }}
               >
@@ -130,7 +130,7 @@ export default function TermSearchClientPage(props: { searchParams?: { page?: st
                     onClick={() => {setQueryString({
                       page: '1',
                       q: example,
-                      libraries: selectedLibraries.length > 0 ? selectedLibraries.join(',') : ''
+                      libraries: selectedLibraries.length > 0 && selectedLibraries.length < allLibraries.length ? selectedLibraries.join(',') : ''
                     })}}
                   >{example}</a>
                 ])}
