@@ -56,21 +56,21 @@ FIGURE_DIR = OUTPUT_DIR / "figures"
 LIBRARIES = {
     # Drug perturbations
     "sciplex": ("drug", "sciplex"),
-    "drugseqr": ("drug", "drugseqr"),
-    "deepcovermoa": ("drug", "deepcovermoa"),
-    "ginkgo": ("drug", "ginkgo"),
-    "l1000-cp": ("drug", "l1000-cp"),
+    "nibr-drug-seq": ("drug", "nibr-drug-seq"),
+    "deepcover-moa": ("drug", "deepcover-moa"),
+    "gingko-bioworks": ("drug", "gingko-bioworks"),
+    "lincs-l1000-cp": ("drug", "lincs-l1000-cp"),
     "geo-chem": ("drug", "geo-chem"),
     "tahoe-100m": ("drug", "tahoe-100m"),
-    "cmap-build02": ("drug", "cmap-build02-meta"),
+    "microarrays-cmap": ("drug", "microarrays-cmap"),
     # Gene perturbations
-    "l1000-xpr": ("gene", "l1000-xpr"),
-    "perturbatlas": ("gene", "perturbatlas"),
-    "perturbatlas-mouse": ("gene", "perturbatlasmouse"),
-    "geo-gene": ("gene", "geogene"),
-    "replogle-k562-essential": ("gene", "reploglek562essential"),
-    "replogle-k562-genomewide": ("gene", "reploglek562genomewide"),
-    "replogle-rpe1-essential": ("gene", "reploglerpe1essential"),
+    "lincs-l1000-xpr": ("gene", "lincs-l1000-xpr"),
+    "perturb-atlas": ("gene", "perturb-atlas"),
+    "perturb-atlas-mouse": ("gene", "perturb-atlas-mouse"),
+    "geo-gene": ("gene", "geo-gene"),
+    "replogle-perturb-seq-k562-essential": ("gene", "replogle-perturb-seq-k562-essential"),
+    "replogle-perturb-seq-k562-genomewide": ("gene", "replogle-perturb-seq-k562-genomewide"),
+    "replogle-perturb-seq-rpe1-essential": ("gene", "replogle-perturb-seq-rpe1-essential"),
 }
 
 
@@ -80,18 +80,15 @@ def get_gmt_path(category: str, file_pattern: str, direction: str) -> Path:
     """Get the path to a GMT file."""
     base_dir = DRUG_DIR if category == "drug" else GENE_DIR
 
-    # Try different naming patterns
-    patterns = [
-        f"{file_pattern}_{direction}.gmt.gz",
-        f"{file_pattern}_{direction}.gmt",
-        f"{file_pattern}-{direction}*.gmt.gz",
-        f"{file_pattern}-{direction}*.gmt",
-    ]
+    # Normalize direction: "dn" -> also try "down"
+    directions = [direction]
+    if direction == "dn":
+        directions.append("down")
 
-    for pattern in patterns:
-        matches = list(base_dir.glob(pattern))
-        if matches:
-            return matches[0]
+    for d in directions:
+        path = base_dir / f"{file_pattern}-{d}.gmt.gz"
+        if path.exists():
+            return path
 
     return None
 
@@ -381,7 +378,7 @@ def process_all_libraries(
         skip_large: Skip libraries with >500k gene sets (L1000-CP, L1000-XPR)
         save_html: Whether to save Bokeh HTML visualizations
     """
-    large_libraries = {"l1000-cp", "l1000-xpr"}
+    large_libraries = {"lincs-l1000-cp", "lincs-l1000-xpr"}
 
     for library_name in LIBRARIES.keys():
         if skip_large and library_name in large_libraries:

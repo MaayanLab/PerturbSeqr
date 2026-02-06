@@ -19,7 +19,7 @@ import GeneSetModal from "@/components/geneSetModal";
 import { FaFilter, FaSortUp } from "react-icons/fa6";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { parseTerm } from "@/utils/parseTerm";
-import { preloadMetadata, enrichWithMetadataSync, preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, getDrugMoaSource, isGenePerturbationLibrary } from "@/utils/metadataLookup";
+import { preloadMetadata, enrichWithMetadataSync, preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, getDrugMoaSource, isGenePerturbationLibrary, getDatasetUrl } from "@/utils/metadataLookup";
 
 const pageSize = 12;
 
@@ -791,7 +791,7 @@ function EnrichmentResults({
               <tbody>
                 {!enrichmentResults?.currentBackground?.pairedEnrich && !error ? (
                   <tr>
-                    <td colSpan={7}>
+                    <td colSpan={100}>
                       <Loading />
                     </td>
                   </tr>
@@ -940,6 +940,7 @@ function EnrichmentResults({
             <thead>
               <tr className="text-left align-text-bottom overflow-visible">
                 <th className={"hidden"}>Term</th>
+                <th>Dataset</th>
                 <th className="relative group">
                   <div className="absolute z-10 left-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
                     Preclinical compound, drug, or gene targeted by CRISPR KO
@@ -1142,7 +1143,7 @@ function EnrichmentResults({
             <tbody>
               {!enrichmentResults?.currentBackground?.pairedEnrich && !error ? (
                 <tr>
-                  <td colSpan={7}>
+                  <td colSpan={100}>
                     <Loading />
                   </td>
                 </tr>
@@ -1186,9 +1187,26 @@ function EnrichmentResults({
                   const moaSource = moa ? (getDrugMoaSource(perturbation) || getDrugMoaSource(parsed.nsn || '')) : null;
 
                   if (!enrichmentResult?.geneSet) return null;
+                  const dataset = libraryName || '';
+
                   return (
                     <tr key={genesetIndex} className="text-left">
                       <td className={"hidden"}>{term}</td>
+                      <td>
+                        {getDatasetUrl(dataset) ? (
+                          <a
+                            href={getDatasetUrl(dataset)!}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="link link-primary hover:link-hover"
+                            title={`View ${dataset} source`}
+                          >
+                            {dataset}
+                          </a>
+                        ) : (
+                          dataset
+                        )}
+                      </td>
                       <td>
                         {/* Perturbation with appropriate link (PubChem for drugs, NCBI Gene for genes) */}
                         <div>

@@ -26,7 +26,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy ingest scripts (GMT data comes from MinIO or mounted volume)
 COPY db/ingest.py db/ingest_fda_counts.py db/ingest_gene_info.py db/update_background.py ./db/
 COPY db/db_utils.py db/gmt_parser.py db/perturbation_parser.py ./db/
-COPY scripts/upload_gmts_to_minio.py ./scripts/
 COPY src/config/libraries.json ./config/libraries.json
 COPY public/metadata/drug_lookup.json ./metadata/drug_lookup.json
 

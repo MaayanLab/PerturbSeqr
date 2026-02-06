@@ -5,22 +5,22 @@ import React, { useState, useEffect } from 'react'
 const DATASETS = {
   drug: [
     { id: 'sciplex', name: 'SciPlex', signatures: '4,604' },
-    { id: 'drugseqr', name: 'Novartis DRUG-seq', signatures: '26,316' },
-    { id: 'deepcovermoa', name: 'DeepCoverMoA', signatures: '1,748' },
-    { id: 'ginkgo', name: 'Ginkgo', signatures: '9,310' },
-    { id: 'l1000-cp', name: 'L1000-CP', signatures: '1,436,110' },
+    { id: 'nibr-drug-seq', name: 'NIBR DRUG-seq', signatures: '26,316' },
+    { id: 'deepcover-moa', name: 'DeepCover MoA', signatures: '1,748' },
+    { id: 'gingko-bioworks', name: 'Gingko Bioworks', signatures: '9,310' },
+    { id: 'lincs-l1000-cp', name: 'LINCS L1000 CP', signatures: '1,436,110' },
     { id: 'geo-chem', name: 'GEO-Chem', signatures: '810' },
     { id: 'tahoe-100m', name: 'Tahoe-100M', signatures: '37,800' },
-    { id: 'cmap-build02', name: 'CMAP-Build02', signatures: '12,200' },
+    { id: 'microarrays-cmap', name: 'Microarrays CMap', signatures: '12,200' },
   ],
   gene: [
-    { id: 'l1000-xpr', name: 'L1000-XPR', signatures: '281,890' },
-    { id: 'perturbatlas', name: 'PerturbAtlas', signatures: '12,852' },
-    { id: 'perturbatlas-mouse', name: 'PerturbAtlas-Mouse', signatures: '10,743' },
+    { id: 'lincs-l1000-xpr', name: 'LINCS L1000 XPR', signatures: '281,890' },
+    { id: 'perturb-atlas', name: 'Perturb Atlas', signatures: '12,852' },
+    { id: 'perturb-atlas-mouse', name: 'Perturb Atlas Mouse', signatures: '10,743' },
     { id: 'geo-gene', name: 'GEO-Gene', signatures: '1,477' },
-    { id: 'replogle-k562-essential', name: 'Replogle K562 Essential', signatures: '2,383' },
-    { id: 'replogle-k562-genomewide', name: 'Replogle K562 Genome-wide', signatures: '4,110' },
-    { id: 'replogle-rpe1-essential', name: 'Replogle RPE1 Essential', signatures: '2,714' },
+    { id: 'replogle-perturb-seq-k562-essential', name: 'Replogle K562 Essential', signatures: '2,383' },
+    { id: 'replogle-perturb-seq-k562-genomewide', name: 'Replogle K562 Genome-wide', signatures: '4,110' },
+    { id: 'replogle-perturb-seq-rpe1-essential', name: 'Replogle RPE1 Essential', signatures: '2,714' },
   ],
 }
 

@@ -769,13 +769,13 @@ function EnrichmentResults({
               <tbody>
                 {!enrichmentResults?.currentBackground?.enrich && !error ? (
                   <tr>
-                    <td colSpan={7}>
+                    <td colSpan={100}>
                       <Loading />
                     </td>
                   </tr>
                 ) : null}
-                {(moas 
-                    ? enrichmentResults?.currentBackground?.enrich?.moas 
+                {(moas
+                    ? enrichmentResults?.currentBackground?.enrich?.moas
                     : enrichmentResults?.currentBackground?.enrich?.consensus
                   )?.flatMap(
                   (enrichmentResult, genesetIndex) => {
@@ -1058,7 +1058,7 @@ function EnrichmentResults({
             <tbody>
               {!enrichmentResults?.currentBackground?.enrich && !error ? (
                 <tr>
-                  <td colSpan={7}>
+                  <td colSpan={100}>
                     <Loading />
                   </td>
                 </tr>

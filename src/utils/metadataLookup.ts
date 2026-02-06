@@ -83,9 +83,20 @@ function buildLookupKey(parsed: Record<string, any>, keyBuilder: string[]): stri
  * Get metadata lookup config for a library.
  */
 export function getMetadataLookupConfig(libraryName: string): MetadataLookupConfig | null {
-  const libraries = libraryConfig.libraries as Record<string, LibraryConfig>
-  const normalizedName = libraryName.toLowerCase()
-  const config = libraries[normalizedName]
+  const libraries = libraryConfig.libraries as Record<string, LibraryConfig & { displayName?: string }>
+  // Try direct key match first
+  let config = libraries[libraryName]
+  if (!config) {
+    // Reverse lookup by displayName (case-insensitive)
+    const normalizedName = libraryName.toLowerCase()
+    for (const [key, cfg] of Object.entries(libraries)) {
+      if (key.toLowerCase() === normalizedName ||
+          cfg.displayName?.toLowerCase() === normalizedName) {
+        config = cfg
+        break
+      }
+    }
+  }
   return config?.metadataLookup || null
 }
 
@@ -236,8 +247,8 @@ export type DrugInfo = {
   fda_approved: boolean
   clinical_phase?: string
   name?: string  // Resolved name for BRD/NSN codes
-  source: 'drug_repurposing_hub' | 'tahoe' | 'Novartis DRUG-seq' | 'lincs' | 'pubchem'
-  moa_source?: 'drug_repurposing_hub' | 'tahoe' | 'Novartis DRUG-seq' | 'lincs'  // Where the MOA came from (may differ from source)
+  source: 'drug_repurposing_hub' | 'tahoe' | 'NIBR DRUG-seq' | 'lincs' | 'pubchem'
+  moa_source?: 'drug_repurposing_hub' | 'tahoe' | 'NIBR DRUG-seq' | 'lincs'  // Where the MOA came from (may differ from source)
   source_url: string
 }
 
@@ -251,8 +262,8 @@ export const SOURCE_INFO: Record<string, { name: string; url: string }> = {
     name: 'Tahoe-100M',
     url: 'https://huggingface.co/datasets/tahoebio/Tahoe-100M#drug-metadata',
   },
-  'Novartis DRUG-seq': {
-    name: 'Novartis DRUG-seq',
+  'NIBR DRUG-seq': {
+    name: 'NIBR DRUG-seq',
     url: 'https://zenodo.org/records/14291446',
   },
   lincs: {
@@ -466,20 +477,22 @@ export function getPerturbationLinkTitle(libraryName: string): string {
  */
 export const DATASET_URLS: Record<string, string> = {
   'tahoe-100m': 'https://huggingface.co/datasets/tahoebio/Tahoe-100M',
-  'l1000-cp': 'https://l2s2.maayanlab.cloud/download',
-  'l1000-xpr': 'https://l2s2.maayanlab.cloud/download',
-  'cmap-build02': 'https://www.broadinstitute.org/connectivity-map-cmap',
-  'Novartis DRUG-seq': 'https://drugseqr.maayanlab.cloud/download',
+  'lincs l1000 cp': 'https://l2s2.maayanlab.cloud/download',
+  'lincs l1000 xpr': 'https://l2s2.maayanlab.cloud/download',
+  'microarrays cmap': 'https://www.broadinstitute.org/connectivity-map-cmap',
+  'nibr drug-seq': 'https://drugseqr.maayanlab.cloud/download',
   'sciplex': 'https://github.com/cole-trapnell-lab/sci-plex',
-  'deepcovermoa': 'https://wren.hms.harvard.edu/DeepCoverMOA/',
+  'deepcover moa': 'https://wren.hms.harvard.edu/DeepCoverMOA/',
   'geo-chem': 'https://www.ncbi.nlm.nih.gov/geo/',
   'geo-gene': 'https://www.ncbi.nlm.nih.gov/geo/',
-  'ginkgo': 'https://www.ginkgobioworks.com/',
-  'perturbatlas': 'https://perturbatlas.kratoss.site/#/',
-  'perturbatlas-mouse': 'https://perturbatlas.kratoss.site/#/',
-  'replogle et al.-k562-essential': 'https://pubmed.ncbi.nlm.nih.gov/35688146/',
-  'replogle et al.-k562-genomewide': 'https://pubmed.ncbi.nlm.nih.gov/35688146/',
-  'replogle et al.-rpe1-essential': 'https://pubmed.ncbi.nlm.nih.gov/35688146/',
+  'rummageo chem': 'https://rummageo.com',
+  'rummageo gene': 'https://rummageo.com',
+  'gingko bioworks': 'https://www.ginkgobioworks.com/',
+  'perturb atlas': 'https://perturbatlas.kratoss.site/#/',
+  'perturb atlas mouse': 'https://perturbatlas.kratoss.site/#/',
+  'replogle k562 essential': 'https://pubmed.ncbi.nlm.nih.gov/35688146/',
+  'replogle k562 genome-wide': 'https://pubmed.ncbi.nlm.nih.gov/35688146/',
+  'replogle rpe1 essential': 'https://pubmed.ncbi.nlm.nih.gov/35688146/',
 }
 
 /**

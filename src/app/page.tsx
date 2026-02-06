@@ -1,5 +1,6 @@
 "use client"
 import React from "react";
+import Image from "next/image";
 import InputForm from "./inputForm";
 import InputFormUpDown from "./inputFormUpDown";
 import LibraryFilter from "@/components/libraryFilter";
@@ -26,9 +27,19 @@ export default function Home() {
   return (
     <div className="flex flex-col items-center">
       {/* Header with stats */}
-      <h1 className="text-2xl font-bold mb-4">
-        PerturbSeqr: Search through <Stats bold show_gene_sets />
-      </h1>
+      <div className="flex items-center gap-2 mb-1">
+        <h1 className="text-2xl font-bold">PerturbSeqr</h1>
+        <Image
+          className="dark:invert"
+          src="/images/perturbseqr-logo.png"
+          alt="PerturbSeqr logo"
+          width={60}
+          height={90}
+        />
+      </div>
+      <p className="text-center text-sm mb-4 max-w-2xl">
+        Search through <Stats show_gene_sets bold /> created from 10 Connectivity Mapping resources that performed massive single perturbations followed by expression experiments in human cells
+      </p>
       {/* Dataset icons filter - centered below header */}
       <DatasetIcons
         selectedLibraries={selectedLibraries}

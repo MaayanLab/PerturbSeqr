@@ -45,12 +45,12 @@ NS_HUB_NAME = "hub_name"
 
 # Map file names to display names for source attribution
 SOURCE_DISPLAY_NAMES = {
-    "drugseqr": "Novartis DRUG-seq",
+    "drugseqr": "NIBR DRUG-seq",
     "tahoe": "tahoe",
     "lincs": "lincs",
 }
 
-LIBS_NEEDING_GMT_SCAN = {"cmap-build02", "sciplex", "deepcovermoa", "geo-chem", "ginkgo"}
+LIBS_NEEDING_GMT_SCAN = {"microarrays-cmap", "sciplex", "deepcover-moa", "geo-chem", "ginkgo-bioworks", "rummageo-chem"}
 
 
 class DrugEntityStore:

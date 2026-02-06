@@ -29,10 +29,10 @@ export function TermSearchResults({ terms, libraryNames }: { terms: string, libr
   })
   if (!data) {
     return (
-      <>
-        <Image className={'rounded mx-auto'} src={'/images/loading.gif'} width={125} height={250} alt={'Loading...'} />
+      <div className="text-center p-5">
+        <Image className={'rounded mx-auto dark:invert'} src={'/images/loading.gif'} width={250} height={293} alt={'Loading...'} />
         <p>Searching through <Stats show_gene_sets /> with your search term.</p>
-      </>
+      </div>
     )
   }
   return (
@@ -80,9 +80,19 @@ export default function TermSearchClientPage(props: { searchParams?: { page?: st
     return (
       <div className="flex flex-col items-center">
         {/* Header with stats */}
-        <h1 className="text-2xl font-bold mb-4">
-          PerturbSeqr: Search through <Stats bold show_gene_sets />
-        </h1>
+        <div className="flex items-center gap-2 mb-1">
+          <h1 className="text-2xl font-bold">PerturbSeqr</h1>
+          <Image
+            className="dark:invert"
+            src="/images/perturbseqr-logo.png"
+            alt="PerturbSeqr logo"
+            width={60}
+            height={90}
+          />
+        </div>
+        <p className="text-center text-sm mb-4 max-w-2xl">
+          Search through 1,912,262 gene sets created from 10 Connectivity Mapping resources that performed massive single perturbations followed by expression experiments in human cells
+        </p>
         {/* Dataset icons filter - centered below header */}
         <DatasetIcons
           selectedLibraries={selectedLibraries}

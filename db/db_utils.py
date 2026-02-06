@@ -78,67 +78,61 @@ def query(conn, sql, params=None):
 def get_or_create_library(conn, library_name: str) -> str:
     """Get existing library_id or create new one."""
     display_name = get_display_name(library_name)
-    rows = query(conn, 'SELECT id FROM app_public.gene_set_library WHERE name = %s', [display_name])
-    if rows:
-        return str(rows[0]['id'])
     with conn.cursor() as cur:
         cur.execute(
-            'INSERT INTO app_public.gene_set_library (name, description) VALUES (%s, %s) RETURNING id',
+            'INSERT INTO app_public.gene_set_library (name, description) VALUES (%s, %s) '
+            'ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name RETURNING id',
             [display_name, f'{display_name} gene set library']
         )
         return str(cur.fetchone()[0])
 
 
-def parse_gmt_filename(filepath: Path) -> tuple[str, str] | None:
-    """Parse GMT filename to extract library name and direction (up/down)."""
-    for pattern in [r'^(.+)-(up|dn)_.*\.gmt', r'^(.+)_(up|dn)\.gmt']:
-        if match := re.match(pattern, filepath.name):
-            return (match.group(1), 'up' if match.group(2) == 'up' else 'down')
+def parse_gmt_filename(filepath: Path) -> str | None:
+    """Parse GMT filename to extract library name.
+
+    Checks MINIO_FILE_MAPPING first (handles standardized filenames),
+    then falls back to stripping .gmt.gz extension.
+    """
+    if filepath.name in MINIO_FILE_MAPPING:
+        return MINIO_FILE_MAPPING[filepath.name]
+
+    # Fallback: strip .gmt.gz or .gmt extension
+    name = filepath.name
+    for suffix in ['.gmt.gz', '.gmt']:
+        if name.endswith(suffix):
+            return name[:-len(suffix)]
     return None
 
 
-def discover_gmt_files(dirs: list[Path] = None) -> list[tuple[Path, str, str]]:
-    """Discover all GMT files in data directories. Returns [(path, library, direction), ...]."""
+def discover_gmt_files(dirs: list[Path] = None) -> list[tuple[Path, str]]:
+    """Discover all GMT files in data directories. Returns [(path, library), ...]."""
     dirs = dirs or [DRUG_DIR, GENE_DIR]
-    return [(f, *parsed) for d in dirs if d.exists()
+    return [(f, parsed) for d in dirs if d.exists()
             for f in sorted(d.glob('*.gmt*')) if (parsed := parse_gmt_filename(f))]
 
 
-# MinIO file mapping: MinIO object name -> (library_name, direction)
+# MinIO file mapping: MinIO object name -> library_name
 # This maps the standardized MinIO names back to library names used in the database
 MINIO_FILE_MAPPING = {
     # Drug Perturbation
-    "l1000-cp-up.gmt.gz": ("l1000-cp", "up"),
-    "l1000-cp-down.gmt.gz": ("l1000-cp", "down"),
-    "tahoe-100m-up.gmt.gz": ("tahoe-100m", "up"),
-    "tahoe-100m-down.gmt.gz": ("tahoe-100m", "down"),
-    "drugseqr-up.gmt.gz": ("Novartis DRUG-seq", "up"),
-    "drugseqr-down.gmt.gz": ("Novartis DRUG-seq", "down"),
-    "cmap-build02-up.gmt.gz": ("cmap-build02", "up"),
-    "cmap-build02-down.gmt.gz": ("cmap-build02", "down"),
-    "sciplex-up.gmt.gz": ("sciplex", "up"),
-    "sciplex-down.gmt.gz": ("sciplex", "down"),
-    "deepcovermoa-up.gmt.gz": ("deepcovermoa", "up"),
-    "deepcovermoa-down.gmt.gz": ("deepcovermoa", "down"),
-    "geo-chem-up.gmt.gz": ("geo-chem", "up"),
-    "geo-chem-down.gmt.gz": ("geo-chem", "down"),
-    "ginkgo-up_lv_081925.gmt.gz": ("ginkgo", "up"),
-    "ginkgo-dn_lv_081925.gmt.gz": ("ginkgo", "down"),
+    "lincs-l1000-cp.gmt.gz": "lincs-l1000-cp",
+    "tahoe-100m.gmt.gz": "tahoe-100m",
+    "nibr-drug-seq.gmt.gz": "nibr-drug-seq",
+    "microarrays-cmap.gmt.gz": "microarrays-cmap",
+    "sciplex.gmt.gz": "sciplex",
+    "deepcover-moa.gmt.gz": "deepcover-moa",
+    "geo-chem.gmt.gz": "geo-chem",
+    "rummageo-chem.gmt.gz": "rummageo-chem",
+    "gingko-bioworks.gmt.gz": "gingko-bioworks",
     # Gene Perturbation
-    "l1000-xpr-up.gmt.gz": ("l1000-xpr", "up"),
-    "l1000-xpr-down.gmt.gz": ("l1000-xpr", "down"),
-    "perturbatlas-up.gmt.gz": ("perturbatlas", "up"),
-    "perturbatlas-down.gmt.gz": ("perturbatlas", "down"),
-    "perturbatlas-mouse-up.gmt.gz": ("perturbatlas-mouse", "up"),
-    "perturbatlas-mouse-down.gmt.gz": ("perturbatlas-mouse", "down"),
-    "replogle-k562-genomewide-up.gmt.gz": ("reploglek562genomewide", "up"),
-    "replogle-k562-genomewide-down.gmt.gz": ("reploglek562genomewide", "down"),
-    "replogle-rpe1-essential-up.gmt.gz": ("reploglerpe1essential", "up"),
-    "replogle-rpe1-essential-down.gmt.gz": ("reploglerpe1essential", "down"),
-    "replogle-k562-essential-up.gmt.gz": ("reploglek562essential", "up"),
-    "replogle-k562-essential-down.gmt.gz": ("reploglek562essential", "down"),
-    "geo-gene-up.gmt.gz": ("geo-gene", "up"),
-    "geo-gene-down.gmt.gz": ("geo-gene", "down"),
+    "lincs-l1000-xpr.gmt.gz": "lincs-l1000-xpr",
+    "perturb-atlas.gmt.gz": "perturb-atlas",
+    "perturb-atlas-mouse.gmt.gz": "perturb-atlas-mouse",
+    "replogle-perturb-seq-k562-genomewide.gmt.gz": "replogle-perturb-seq-k562-genomewide",
+    "replogle-perturb-seq-rpe1-essential.gmt.gz": "replogle-perturb-seq-rpe1-essential",
+    "replogle-perturb-seq-k562-essential.gmt.gz": "replogle-perturb-seq-k562-essential",
+    "geo-gene.gmt.gz": "geo-gene",
+    "rummageo-gene.gmt.gz": "rummageo-gene",
 }
 
 
@@ -158,15 +152,15 @@ def get_minio_client() -> "Minio":
     return Minio(endpoint, access_key=access_key, secret_key=secret_key, secure=secure)
 
 
-def discover_minio_gmt_files(bucket: str = "gmts") -> list[tuple[str, str, str]]:
-    """Discover all GMT files in MinIO bucket. Returns [(object_name, library, direction), ...]."""
+def discover_minio_gmt_files(bucket: str = "gmts") -> list[tuple[str, str]]:
+    """Discover all GMT files in MinIO bucket. Returns [(object_name, library), ...]."""
     client = get_minio_client()
 
     files = []
     for obj in client.list_objects(bucket):
         if obj.object_name in MINIO_FILE_MAPPING:
-            library, direction = MINIO_FILE_MAPPING[obj.object_name]
-            files.append((obj.object_name, library, direction))
+            library = MINIO_FILE_MAPPING[obj.object_name]
+            files.append((obj.object_name, library))
 
     return sorted(files, key=lambda x: x[0])
 

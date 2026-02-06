@@ -16,8 +16,8 @@
       "exampleTerm": "(R)-Verapamil (hydrochloride)_0.05uM_A-172 up",
       "parsedExample": { "perturbation": "(R)-Verapamil (hydrochloride)", "concentration": "0.05uM", "cellLine": "A-172", "timepoint": "24h", "direction": "up" }
     },
-    "l1000-cp": {
-      "displayName": "L1000-CP",
+    "lincs-l1000-cp": {
+      "displayName": "LINCS L1000 CP",
       "category": "drug",
       "source": "https://maayanlab.cloud/sigcom-lincs/#/Download",
       "sourceNote": "L2S2/SigCom LINCS chemical perturbations. 1,436,110 signatures from LINCS L1000 experiments.",
@@ -29,8 +29,8 @@
       "exampleTerm": "ABY001_A375_XH_A13_afatinib_10uM up",
       "parsedExample": { "batch": "ABY001", "cellLine": "A375", "timepoint": "XH", "batch2": "A13", "perturbation": "afatinib", "concentration": "10uM", "direction": "up" }
     },
-    "cmap-build02": {
-      "displayName": "CMAP-Build02",
+    "microarrays-cmap": {
+      "displayName": "Microarrays CMap",
       "category": "drug",
       "source": "https://maayanlab.cloud/Harmonizome/dataset/CMAP+Signatures+of+Differentially+Expressed+Genes+for+Small+Molecules",
       "sourceNote": "Connectivity Map Build 02 (Lamb et al. 2006). Reprocessed from Harmonizome with full experimental metadata. 1,309 drugs across 5 cell lines.",
@@ -42,8 +42,8 @@
       "exampleTerm": "metformin_10uM_MCF7_6h_batch1 up",
       "parsedExample": { "perturbation": "metformin", "concentration": "10uM", "cellLine": "MCF7", "timepoint": "6h", "batch": "batch1", "direction": "up" }
     },
-    "Novartis DRUG-seq": {
-      "displayName": "Novartis DRUG-seq",
+    "nibr-drug-seq": {
+      "displayName": "NIBR DRUG-seq",
       "category": "drug",
       "source": "https://github.com/Novartis/DRUG-seq/tree/main/data/Novartis_drugseq_U2OS_MoABox",
       "termFormat": {
@@ -72,8 +72,8 @@
       "exampleTerm": "A549_2-Methoxyestradiol_100nM_24h up",
       "parsedExample": { "cellLine": "A549", "perturbation": "2-Methoxyestradiol", "concentration": "100nM", "timepoint": "24h", "direction": "up" }
     },
-    "deepcovermoa": {
-      "displayName": "DeepCoverMoA",
+    "deepcover-moa": {
+      "displayName": "DeepCover MoA",
       "category": "drug",
       "source": "https://wren.hms.harvard.edu/DeepCoverMOA/",
       "sourceNote": "Proteome-wide atlas of drug mechanism of action. Mitchell et al., Nature Biotechnology 2023. PMID:36593396. Raw data: MassIVE MSV000089282.",
@@ -101,8 +101,26 @@
       "exampleTerm": "fluoxetine_mus musculus_gpl1261_gds2803 up",
       "parsedExample": { "perturbation": "fluoxetine", "organism": "mus musculus", "platform": "gpl1261", "dataset": "gds2803", "direction": "up" }
     },
-    "ginkgo": {
-      "displayName": "Ginkgo",
+    "rummageo-chem": {
+      "displayName": "RummaGEO Chem",
+      "category": "drug",
+      "source": "https://rummageo.com",
+      "sourceNote": "Automatically mined drug perturbation signatures from GEO RNA-seq. Marino et al. 2024 Patterns.",
+      "termFormat": {
+        "delimiter": "_",
+        "fields": ["gse", "sampleA", "v", "sampleB", "perturbation", "organism"],
+        "optional": []
+      },
+      "metadataLookup": {
+        "file": "rummageo_metadata.json",
+        "keyBuilder": ["gse", "sampleA"],
+        "fields": ["cell_line", "cell_type", "timepoint", "tissue", "title"]
+      },
+      "exampleTerm": "GSE100217_1_v_0_ethanol_mouse up",
+      "parsedExample": { "gse": "GSE100217", "sampleA": "1", "v": "v", "sampleB": "0", "perturbation": "ethanol", "organism": "mouse", "direction": "up" }
+    },
+    "gingko-bioworks": {
+      "displayName": "Gingko Bioworks",
       "category": "drug",
       "termFormat": {
         "delimiter": "-",
@@ -114,8 +132,8 @@
       "exampleTerm": "human_dermal_fibroblast-(S)-(+)-Camptothecin-3000-24 up",
       "parsedExample": { "cellLine": "human_dermal_fibroblast", "perturbation": "(S)-(+)-Camptothecin", "concentration": "3000", "timepoint": "24", "direction": "up" }
     },
-    "l1000-xpr": {
-      "displayName": "L1000-XPR",
+    "lincs-l1000-xpr": {
+      "displayName": "LINCS L1000 XPR",
       "category": "gene",
       "source": "https://maayanlab.cloud/sigcom-lincs/#/Download",
       "sourceNote": "L2S2/SigCom LINCS CRISPR knockouts. 281,890 signatures from LINCS L1000 experiments.",
@@ -127,8 +145,8 @@
       "exampleTerm": "HAHN001_A549_96H_A03_AKT1 up",
       "parsedExample": { "batch": "HAHN001", "cellLine": "A549", "timepoint": "96H", "batch2": "A03", "perturbation": "AKT1", "direction": "up" }
     },
-    "perturbatlas": {
-      "displayName": "PerturbAtlas",
+    "perturb-atlas": {
+      "displayName": "Perturb Atlas",
       "category": "gene",
       "termFormat": {
         "delimiter": "_",
@@ -138,8 +156,8 @@
       "exampleTerm": "Perturb_10000_KD_CPSF6_SRP013565 up",
       "parsedExample": { "prefix": "Perturb", "id": "10000", "perturbationType": "KD", "perturbation": "CPSF6", "dataset": "SRP013565", "direction": "up" }
     },
-    "perturbatlas-mouse": {
-      "displayName": "PerturbAtlas-Mouse",
+    "perturb-atlas-mouse": {
+      "displayName": "Perturb Atlas Mouse",
       "category": "gene",
       "termFormat": {
         "delimiter": "_",
@@ -160,8 +178,26 @@
       "exampleTerm": "NIX_Deficiency_GDS2630_160_mouse_spleen up",
       "parsedExample": { "perturbation": "NIX", "perturbationType": "Deficiency", "dataset": "GDS2630", "batch": "160", "organism": "mouse", "tissue": "spleen", "direction": "up" }
     },
-    "reploglek562essential": {
-      "displayName": "Replogle et al.-K562-Essential",
+    "rummageo-gene": {
+      "displayName": "RummaGEO Gene",
+      "category": "gene",
+      "source": "https://rummageo.com",
+      "sourceNote": "Automatically mined gene perturbation signatures from GEO RNA-seq. Marino et al. 2024 Patterns.",
+      "termFormat": {
+        "delimiter": "_",
+        "fields": ["gse", "sampleA", "v", "sampleB", "perturbation", "organism"],
+        "optional": []
+      },
+      "metadataLookup": {
+        "file": "rummageo_metadata.json",
+        "keyBuilder": ["gse", "sampleA"],
+        "fields": ["cell_line", "cell_type", "timepoint", "tissue", "title"]
+      },
+      "exampleTerm": "GSE100102_0_v_5_cgas_mouse up",
+      "parsedExample": { "gse": "GSE100102", "sampleA": "0", "v": "v", "sampleB": "5", "perturbation": "cgas", "organism": "mouse", "direction": "up" }
+    },
+    "replogle-perturb-seq-k562-essential": {
+      "displayName": "Replogle K562 Essential",
       "category": "gene",
       "termFormat": {
         "delimiter": "_",
@@ -171,8 +207,8 @@
       "exampleTerm": "10023_ZC3H18_P1P2 up",
       "parsedExample": { "id": "10023", "perturbation": "ZC3H18", "batch": "P1P2", "direction": "up" }
     },
-    "reploglek562genomewide": {
-      "displayName": "Replogle et al.-K562-GenomeWide",
+    "replogle-perturb-seq-k562-genomewide": {
+      "displayName": "Replogle K562 Genome-wide",
       "category": "gene",
       "termFormat": {
         "delimiter": "_",
@@ -182,8 +218,8 @@
       "exampleTerm": "10005_ZBTB4_P1 up",
       "parsedExample": { "id": "10005", "perturbation": "ZBTB4", "batch": "P1", "direction": "up" }
     },
-    "reploglerpe1essential": {
-      "displayName": "Replogle et al.-RPE1-Essential",
+    "replogle-perturb-seq-rpe1-essential": {
+      "displayName": "Replogle RPE1 Essential",
       "category": "gene",
       "termFormat": {
         "delimiter": "_",

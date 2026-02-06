@@ -10,11 +10,13 @@
 """
 Ingest GMT files into PerturbSeek database.
 
+Each GMT file contains unified up/down terms (terms already have " up"/" down" suffix).
+
 Usage:
   uv run db/ingest.py --batch              # Ingest all GMT files from data directories
   uv run db/ingest.py --batch --minio      # Ingest all GMT files from MinIO
   uv run db/ingest.py --batch --dry-run    # Preview without ingesting
-  uv run db/ingest.py -i FILE -l LIB -d up # Single file mode
+  uv run db/ingest.py -i FILE -l LIB       # Single file mode
 
 Environment variables for MinIO mode:
   MINIO_ENDPOINT: MinIO server endpoint (default: localhost:9000)
@@ -37,7 +39,7 @@ from perturbation_parser import extract_perturbation
 from db_utils import get_conn, get_cid, get_or_create_library, query, discover_gmt_files, discover_minio_gmt_files, download_minio_gmt_file
 
 # Helper lambdas
-extract_fallback_id = lambda term, lib: term.rsplit(" ", 1)[0].split("_")[1] if lib == "Novartis DRUG-seq" else None
+extract_fallback_id = lambda term, lib: term.rsplit(" ", 1)[0].split("_")[1] if lib == "nibr-drug-seq" else None
 lookup_cid = lambda pert, fallback=None: (get_cid(fallback) or get_cid(pert)) if fallback else get_cid(pert)
 compute_hash = lambda genes: str(uuid.uuid5(uuid.UUID(int=0), '\t'.join(sorted(set(genes)))))
 genes_to_json = lambda genes, gmap: json.dumps({gmap[g]: i for i, g in enumerate(genes) if g in gmap})
@@ -49,12 +51,12 @@ GENE_SET_COLUMNS = ['term', 'description', 'hash', 'gene_ids', 'n_gene_ids', 'li
 import gc
 CHUNK_SIZE = 5000  # Process 5K gene sets at a time
 
-def _process_chunk(conn, chunk_data, all_genes, library_id, library_name, direction):
+def _process_chunk(conn, chunk_data, all_genes, library_id, library_name):
     """Process a single chunk of gene sets. Returns (inserted, skipped) counts."""
     if not chunk_data:
         return 0, 0
 
-    terms = [f"{t} {direction}" for t, _, _ in chunk_data]
+    terms = [t for t, _, _ in chunk_data]
     descriptions = [d for _, d, _ in chunk_data]
     gene_lists = [g for _, _, g in chunk_data]
 
@@ -129,10 +131,10 @@ def _process_chunk(conn, chunk_data, all_genes, library_id, library_name, direct
     return n_new, n_skipped
 
 
-def ingest_gmt(conn, gmt_path: Path, library_name: str, direction: str):
+def ingest_gmt(conn, gmt_path: Path, library_name: str):
     """Ingest a GMT file into the database using chunked processing for memory efficiency."""
     library_id = get_or_create_library(conn, library_name)
-    print(f"Library: {library_name} ({library_id}), direction: {direction}")
+    print(f"Library: {library_name} ({library_id})")
 
     # Process GMT in chunks
     chunk, all_genes_chunk = [], set()
@@ -147,7 +149,7 @@ def ingest_gmt(conn, gmt_path: Path, library_name: str, direction: str):
         if len(chunk) >= CHUNK_SIZE:
             chunk_num += 1
             tqdm.write(f"  Processing chunk {chunk_num} ({len(chunk)} gene sets)...")
-            inserted, skipped = _process_chunk(conn, chunk, all_genes_chunk, library_id, library_name, direction)
+            inserted, skipped = _process_chunk(conn, chunk, all_genes_chunk, library_id, library_name)
             total_inserted += inserted
             total_skipped += skipped
             conn.commit()
@@ -158,7 +160,7 @@ def ingest_gmt(conn, gmt_path: Path, library_name: str, direction: str):
     if chunk:
         chunk_num += 1
         tqdm.write(f"  Processing final chunk {chunk_num} ({len(chunk)} gene sets)...")
-        inserted, skipped = _process_chunk(conn, chunk, all_genes_chunk, library_id, library_name, direction)
+        inserted, skipped = _process_chunk(conn, chunk, all_genes_chunk, library_id, library_name)
         total_inserted += inserted
         total_skipped += skipped
         conn.commit()
@@ -174,14 +176,13 @@ def main():
     parser.add_argument('--dry-run', action='store_true', help='Preview what would be ingested')
     parser.add_argument('-i', '--input', type=Path, help='GMT file to ingest')
     parser.add_argument('-l', '--library', type=str, help='Library/dataset name')
-    parser.add_argument('-d', '--direction', type=str, choices=['up', 'down'], help='Direction suffix')
     args = parser.parse_args()
 
     use_minio = args.minio
 
     if args.batch:
-        if args.input or args.library or args.direction:
-            parser.error('--batch cannot be used with -i, -l, or -d')
+        if args.input or args.library:
+            parser.error('--batch cannot be used with -i or -l')
 
         if use_minio:
             print("Discovering GMT files from MinIO...")
@@ -189,29 +190,29 @@ def main():
             if not minio_files:
                 return print("No GMT files found in MinIO bucket 'gmts'")
             print(f"Found {len(minio_files)} GMT files in MinIO:\n")
-            for obj_name, lib, d in minio_files:
-                print(f"  {obj_name:<45} -> library={lib}, direction={d}")
-            files = minio_files  # [(object_name, library, direction), ...]
+            for obj_name, lib in minio_files:
+                print(f"  {obj_name:<50} -> library={lib}")
+            files = minio_files  # [(object_name, library), ...]
         else:
             files = discover_gmt_files()
             if not files:
                 return print("No GMT files found in data directories")
             print(f"Found {len(files)} GMT files to ingest:\n")
-            for f, lib, d in files:
-                print(f"  {f.name:<50} -> library={lib}, direction={d}")
+            for f, lib in files:
+                print(f"  {f.name:<50} -> library={lib}")
     else:
         if args.minio:
             parser.error('--minio requires --batch')
-        if not all([args.input, args.library, args.direction]):
-            parser.error('-i, -l, and -d are required when not using --batch')
-        files = [(args.input, args.library, args.direction)]
+        if not all([args.input, args.library]):
+            parser.error('-i and -l are required when not using --batch')
+        files = [(args.input, args.library)]
 
     if args.dry_run:
         return print("\n[DRY RUN] No changes made")
 
     conn = get_conn()
     try:
-        for i, (file_ref, library, direction) in enumerate(files, 1):
+        for i, (file_ref, library) in enumerate(files, 1):
             if use_minio:
                 object_name = file_ref
                 print(f"\n[{i}/{len(files)}] Downloading {object_name} from MinIO...")
@@ -223,7 +224,7 @@ def main():
                     print(f"\n[{i}/{len(files)}] Processing {filepath.name}\n" + "=" * 60)
 
             try:
-                ingest_gmt(conn, filepath, library, direction)
+                ingest_gmt(conn, filepath, library)
             finally:
                 # Clean up temp file if downloaded from MinIO
                 if use_minio:

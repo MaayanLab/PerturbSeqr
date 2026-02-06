@@ -61,6 +61,7 @@ docs/
 ARCHITECTURE.md
 
 # Local development
+scripts/deploy_to_dev.sh
 notes/
 notebooks/
 startup_log*.txt

@@ -7,30 +7,33 @@ import libraryConfig from '@/config/libraries.json'
 // Some datasets share logos (e.g., L1000-CP and L1000-XPR both use LINCS logo)
 const logoMap: Record<string, { src: string; type: 'image' | 'svg' }> = {
   'Tahoe-100M': { src: '/images/tahoe-logo-new.png', type: 'image' },
-  'L1000-CP': { src: '/images/lincs-logo.png', type: 'image' },
-  'L1000-XPR': { src: '/images/lincs-logo.png', type: 'image' },
-  'CMAP-Build02': { src: '/images/cmap-logo.svg', type: 'svg' },
-  'Novartis DRUG-seq': { src: '/images/nibr-logo.png', type: 'image' },
+  'LINCS L1000 CP': { src: '/images/lincs-logo.png', type: 'image' },
+  'LINCS L1000 XPR': { src: '/images/lincs-logo.png', type: 'image' },
+  'Microarrays CMap': { src: '/images/cmap-logo.svg', type: 'svg' },
+  'NIBR DRUG-seq': { src: '/images/nibr-logo.png', type: 'image' },
   'SciPlex': { src: '/images/sciplex-logo.svg', type: 'svg' },
-  'DeepCoverMoA': { src: '/images/deepcovermoa-logo.png', type: 'image' },
-  'GEO-Chem': { src: '/images/rummageo-logo.png', type: 'image' },
-  'GEO-Gene': { src: '/images/rummageo-logo.png', type: 'image' },
-  'Ginkgo': { src: '/images/ginkgo-logo.png', type: 'image' },
-  'PerturbAtlas': { src: '/images/perturbatlas-logo.png', type: 'image' },
-  'PerturbAtlas-Mouse': { src: '/images/perturbatlas-logo.png', type: 'image' },
-  'Replogle et al.-K562-Essential': { src: '/images/replogle-logo.svg', type: 'svg' },
-  'Replogle et al.-K562-GenomeWide': { src: '/images/replogle-logo.svg', type: 'svg' },
-  'Replogle et al.-RPE1-Essential': { src: '/images/replogle-logo.svg', type: 'svg' },
+  'DeepCover MoA': { src: '/images/deepcovermoa-logo.png', type: 'image' },
+  'GEO-Chem': { src: '/images/geo-logo.svg', type: 'svg' },
+  'GEO-Gene': { src: '/images/geo-logo.svg', type: 'svg' },
+  'RummaGEO Chem': { src: '/images/rummageo-logo.png', type: 'image' },
+  'RummaGEO Gene': { src: '/images/rummageo-logo.png', type: 'image' },
+  'Gingko Bioworks': { src: '/images/ginkgo-logo.png', type: 'image' },
+  'Perturb Atlas': { src: '/images/perturbatlas-logo.png', type: 'image' },
+  'Perturb Atlas Mouse': { src: '/images/perturbatlas-logo.png', type: 'image' },
+  'Replogle K562 Essential': { src: '/images/replogle-logo.svg', type: 'svg' },
+  'Replogle K562 Genome-wide': { src: '/images/replogle-logo.svg', type: 'svg' },
+  'Replogle RPE1 Essential': { src: '/images/replogle-logo.svg', type: 'svg' },
 }
 
 // Subtitle overrides for groups with multiple datasets sharing a logo
 const groupSubtitles: Record<string, string> = {
-  '/images/lincs-logo.png': 'L1000',
+  '/images/lincs-logo.png': 'LINCS L1000',
+  '/images/geo-logo.svg': 'GEO',
   '/images/rummageo-logo.png': 'RummaGEO',
-  '/images/perturbatlas-logo.png': 'PerturbAtlas',
-  '/images/replogle-logo.svg': 'Replogle et al.',
-  '/images/nibr-logo.png': 'DRUG-seq',
-  '/images/cmap-logo.svg': 'CMAP',
+  '/images/perturbatlas-logo.png': 'Perturb Atlas',
+  '/images/replogle-logo.svg': 'Replogle Perturb-seq',
+  '/images/nibr-logo.png': 'NIBR DRUG-seq',
+  '/images/cmap-logo.svg': 'Microarrays CMap',
 }
 
 // Get all library display names
@@ -116,12 +119,12 @@ export default function DatasetIcons({
             className={`btn btn-ghost p-2 h-auto min-h-0 w-28 flex flex-col items-center justify-center transition-all rounded-lg mx-1 ${getButtonStyle(libraries)}`}
             title={libraries.join(', ')}
           >
-            <div className={`w-20 h-20 relative flex items-center justify-center ${logo === '/images/sciplex-logo.svg' ? 'bg-gray-800 rounded-lg p-2' : ''}`}>
+            <div className={`w-20 h-20 relative flex items-center justify-center ${logo === '/images/sciplex-logo.svg' || logo === '/images/lincs-logo.png' ? 'bg-white dark:bg-gray-800 rounded-lg p-2' : ''}`}>
               <Image
                 src={logo}
                 alt={libraries[0]}
-                width={logo === '/images/sciplex-logo.svg' ? 50 : 80}
-                height={logo === '/images/sciplex-logo.svg' ? 50 : 80}
+                width={logo === '/images/sciplex-logo.svg' || logo === '/images/lincs-logo.png' ? 50 : 80}
+                height={logo === '/images/sciplex-logo.svg' || logo === '/images/lincs-logo.png' ? 50 : 80}
                 className={`object-contain max-w-full max-h-full ${logo === '/images/sciplex-logo.svg' ? '' : 'dark:invert'}`}
               />
             </div>
