@@ -5,6 +5,10 @@ import InputFormUpDown from "./inputFormUpDown";
 import LibraryFilter from "@/components/libraryFilter";
 import DatasetIcons from "@/components/datasetIcons";
 import Stats from "@/components/stats";
+import libraryConfig from '@/config/libraries.json';
+
+// Get all library display names for default selection
+const allLibraries = Object.values(libraryConfig.libraries).map((l: any) => l.displayName as string);
 
 /**
  * Home page component - Gene set input with library filter
@@ -16,7 +20,8 @@ import Stats from "@/components/stats";
 export default function Home() {
   const [inputSingle, setInputSingle] = React.useState(true)
   // State for selected libraries - passed to enrich page via URL params
-  const [selectedLibraries, setSelectedLibraries] = React.useState<string[]>([])
+  // Default to all libraries selected
+  const [selectedLibraries, setSelectedLibraries] = React.useState<string[]>(allLibraries)
 
   return (
     <div className="flex flex-col items-center">

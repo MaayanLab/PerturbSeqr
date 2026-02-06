@@ -7,6 +7,10 @@ import useQsState from '@/utils/useQsState'
 import Stats from '@/components/stats'
 import LibraryFilter from '@/components/libraryFilter'
 import DatasetIcons from '@/components/datasetIcons'
+import libraryConfig from '@/config/libraries.json'
+
+// Get all library display names for default selection
+const allLibraries = Object.values(libraryConfig.libraries).map((l: any) => l.displayName as string)
 
 /**
  * TermSearchResults component - Displays search results
@@ -63,8 +67,8 @@ export default function TermSearchClientPage(props: { searchParams?: { page?: st
     libraries: props.searchParams?.libraries ?? ''
   })
   const [rawTerms, setRawTerms] = React.useState('')
-  // State for selected libraries on landing page - empty array means all libraries (no filter)
-  const [selectedLibraries, setSelectedLibraries] = React.useState<string[]>([])
+  // State for selected libraries on landing page - default to all libraries selected
+  const [selectedLibraries, setSelectedLibraries] = React.useState<string[]>(allLibraries)
   // Parse libraries from query string (comma-separated)
   const libraryNames = React.useMemo(() =>
     queryString.libraries ? queryString.libraries.split(',').filter(Boolean) : null,
