@@ -18,7 +18,7 @@ export default function JSONLD() {
           "target": "https://rummagene.com/term-search?q={query}",
           "query-input": "required name=query",
           "name": "Table title search",
-          "description": "Query extracted gene set table titles to find relevant gene sets",
+          "description": "Query extracted gene set table titles to find matching gene sets",
         }
       ],
     }) }}

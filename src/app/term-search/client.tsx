@@ -89,7 +89,7 @@ export default function TermSearchClientPage(props: { searchParams?: { page?: st
           {/* Input card */}
           <div className="card w-[480px] shadow-2xl bg-base-100">
             <div className="card-body">
-              <h1 className="text-xl">Query extracted gene set table titles to find relevant gene sets</h1>
+              <h1 className="text-xl">Query extracted gene set table titles to find matching gene sets</h1>
               <form
                 className="flex flex-col items-center gap-2"
                 onSubmit={evt => {
@@ -117,7 +117,7 @@ export default function TermSearchClientPage(props: { searchParams?: { page?: st
                 >Search gene sets</button>
               </form>
               <p className="prose">
-                try an example:&nbsp;
+                Try an example:&nbsp;
                 {examples.flatMap((example, i) => [
                   i > 0 ? <React.Fragment key={i}>, </React.Fragment> : null,
                   <a
@@ -169,7 +169,7 @@ export default function TermSearchClientPage(props: { searchParams?: { page?: st
             type="submit"
             className="btn normal-case"
           >Search gene sets</button>
-        <div> Query extracted gene set table titles to find relevant gene sets.</div>
+        <div> Query extracted gene set table titles to find matching gene sets.</div>
         {libraryNames && libraryNames.length > 0 && (
           <div className="text-sm text-base-content/70">
             Filtering: {libraryNames.length} dataset{libraryNames.length > 1 ? 's' : ''}
@@ -177,7 +177,7 @@ export default function TermSearchClientPage(props: { searchParams?: { page?: st
         )}
         </form>
         <p className="prose p-2">
-          try an example:&nbsp;
+          Try an example:&nbsp;
           {examples.flatMap((example, i) => [
             i > 0 ? <React.Fragment key={i}>, </React.Fragment> : null,
             <a
