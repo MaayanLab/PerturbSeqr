@@ -13,8 +13,8 @@ const logoMap: Record<string, { src: string; type: 'image' | 'svg' }> = {
   'Novartis DRUG-seq': { src: '/images/nibr-logo.png', type: 'image' },
   'SciPlex': { src: '/images/sciplex-logo.svg', type: 'svg' },
   'DeepCoverMoA': { src: '/images/deepcovermoa-logo.png', type: 'image' },
-  'GEO-Chem': { src: '/images/geo-logo.svg', type: 'svg' },
-  'GEO-Gene': { src: '/images/geo-logo.svg', type: 'svg' },
+  'GEO-Chem': { src: '/images/rummageo-logo.png', type: 'image' },
+  'GEO-Gene': { src: '/images/rummageo-logo.png', type: 'image' },
   'Ginkgo': { src: '/images/ginkgo-logo.png', type: 'image' },
   'PerturbAtlas': { src: '/images/perturbatlas-logo.png', type: 'image' },
   'PerturbAtlas-Mouse': { src: '/images/perturbatlas-logo.png', type: 'image' },
@@ -26,7 +26,7 @@ const logoMap: Record<string, { src: string; type: 'image' | 'svg' }> = {
 // Subtitle overrides for groups with multiple datasets sharing a logo
 const groupSubtitles: Record<string, string> = {
   '/images/lincs-logo.png': 'L1000',
-  '/images/geo-logo.svg': 'GEO',
+  '/images/rummageo-logo.png': 'RummaGEO',
   '/images/perturbatlas-logo.png': 'PerturbAtlas',
   '/images/replogle-logo.svg': 'Replogle et al.',
   '/images/nibr-logo.png': 'DRUG-seq',
