@@ -283,14 +283,43 @@ function EnrichmentResults({
         >
           Consensus Perturbations
         </button>
-        <div className="tooltip" data-tip="MOAs coming soon">
-          <button
-            disabled
-            className="button btn btn-sm float-left mr-4 btn-disabled opacity-50 cursor-not-allowed"
-          >
-            Consensus MoAs
-          </button>
-        </div>
+        <button
+          onClick={() => {
+            if (queryString.moas === "false")
+              setQueryString({
+                page: "1",
+                q: rawTerm,
+                fda: queryString.fda,
+                consensus: "false",
+                moas: "true",
+                dir: queryString.dir,
+                sort: queryString.sort,
+                ko: queryString.ko,
+                topn: queryString.topn,
+                pvaluele: queryString.pvaluele,
+              });
+            else
+              setQueryString({
+                page: "1",
+                q: rawTerm,
+                fda: queryString.fda,
+                consensus: "false",
+                moas: "false",
+                dir: queryString.dir,
+                sort: queryString.sort,
+                ko: queryString.ko,
+                topn: queryString.topn,
+                pvaluele: queryString.pvaluele,
+              });
+          }}
+          className={
+            queryString.moas === "true"
+              ? "button btn btn-sm float-left mr-4 bg-purple-400 hover:bg-purple-600"
+              : "button btn btn-sm float-left mr-4"
+          }
+        >
+          Consensus MoAs
+        </button>
 
         <button
           onClick={() => {
@@ -332,7 +361,7 @@ function EnrichmentResults({
 
         <div
           id="dir-select"
-          className="join place-content-start place-items-center"
+          className="join place-content-start place-items-center float-left mr-4"
         >
           <div
             className={
