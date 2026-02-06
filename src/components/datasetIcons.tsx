@@ -5,13 +5,13 @@ import libraryConfig from '@/config/libraries.json'
 
 // Map dataset keys to their logo files
 // Some datasets share logos (e.g., L1000-CP and L1000-XPR both use LINCS logo)
-const logoMap: Record<string, { src: string; type: 'image' | 'svg' }> = {
+const logoMap: Record<string, { src: string; darkSrc?: string; type: 'image' | 'svg' }> = {
   'Tahoe-100M': { src: '/images/tahoe-logo-new.png', type: 'image' },
   'LINCS L1000 CP': { src: '/images/lincs-logo.png', type: 'image' },
   'LINCS L1000 XPR': { src: '/images/lincs-logo.png', type: 'image' },
   'Microarrays CMap': { src: '/images/cmap-logo.svg', type: 'svg' },
   'NIBR DRUG-seq': { src: '/images/nibr-logo.png', type: 'image' },
-  'SciPlex': { src: '/images/sciplex-logo.svg', type: 'svg' },
+  'SciPlex': { src: '/images/sciplex-logo.svg', darkSrc: '/images/sciplex-logo-dark.svg', type: 'svg' },
   'DeepCover MoA': { src: '/images/deepcovermoa-logo.png', type: 'image' },
   'GEO-Chem': { src: '/images/geo-logo.svg', type: 'svg' },
   'GEO-Gene': { src: '/images/geo-logo.svg', type: 'svg' },
@@ -40,7 +40,7 @@ const groupSubtitles: Record<string, string> = {
 const allLibraries = Object.values(libraryConfig.libraries).map((l: any) => l.displayName as string)
 
 // Group libraries by their logo (for shared logos like LINCS, GEO, PerturbAtlas, Replogle)
-const logoGroups: { logo: string; libraries: string[]; subtitle: string }[] = []
+const logoGroups: { logo: string; darkLogo?: string; libraries: string[]; subtitle: string }[] = []
 const seenLogos = new Set<string>()
 
 allLibraries.forEach(name => {
@@ -51,7 +51,7 @@ allLibraries.forEach(name => {
     const sharedLibraries = allLibraries.filter(lib => logoMap[lib]?.src === logoInfo.src)
     // Use group subtitle override, or the single library name if only one
     const subtitle = groupSubtitles[logoInfo.src] || sharedLibraries[0]
-    logoGroups.push({ logo: logoInfo.src, libraries: sharedLibraries, subtitle })
+    logoGroups.push({ logo: logoInfo.src, darkLogo: logoInfo.darkSrc, libraries: sharedLibraries, subtitle })
   }
 })
 
@@ -111,26 +111,31 @@ export default function DatasetIcons({
   return (
     <div className="flex flex-col items-center mb-5">
       <div className="flex flex-row items-center justify-center flex-wrap gap-2">
-        {logoGroups.map(({ logo, libraries, subtitle }) => (
-          <button
-            key={logo}
-            type="button"
-            onClick={() => handleToggleGroup(libraries)}
-            className={`btn btn-ghost p-2 h-auto min-h-0 w-28 flex flex-col items-center justify-center transition-all rounded-lg mx-1 ${getButtonStyle(libraries)}`}
-            title={libraries.join(', ')}
-          >
-            <div className={`w-20 h-20 relative flex items-center justify-center ${logo === '/images/sciplex-logo.svg' || logo === '/images/lincs-logo.png' ? 'bg-white dark:bg-gray-800 rounded-lg p-2' : ''}`}>
-              <Image
-                src={logo}
-                alt={libraries[0]}
-                width={logo === '/images/sciplex-logo.svg' || logo === '/images/lincs-logo.png' ? 50 : 80}
-                height={logo === '/images/sciplex-logo.svg' || logo === '/images/lincs-logo.png' ? 50 : 80}
-                className={`object-contain max-w-full max-h-full ${logo === '/images/sciplex-logo.svg' ? '' : 'dark:invert'}`}
-              />
-            </div>
-            <span className="text-xs mt-1 leading-tight text-center">{subtitle}</span>
-          </button>
-        ))}
+        {logoGroups.map(({ logo, darkLogo, libraries, subtitle }) => {
+          const isSmall = logo === '/images/sciplex-logo.svg' || logo === '/images/lincs-logo.png'
+          const size = isSmall ? 50 : 80
+          return (
+            <button
+              key={logo}
+              type="button"
+              onClick={() => handleToggleGroup(libraries)}
+              className={`btn btn-ghost p-2 h-auto min-h-0 w-28 flex flex-col items-center justify-center transition-all rounded-lg mx-1 ${getButtonStyle(libraries)}`}
+              title={libraries.join(', ')}
+            >
+              <div className={`w-20 h-20 relative flex items-center justify-center ${isSmall ? 'bg-white dark:bg-gray-800 rounded-lg p-2' : ''}`}>
+                {darkLogo ? (
+                  <>
+                    <Image src={logo} alt={libraries[0]} width={size} height={size} className="object-contain max-w-full max-h-full dark:hidden" />
+                    <Image src={darkLogo} alt={libraries[0]} width={size} height={size} className="object-contain max-w-full max-h-full hidden dark:block" />
+                  </>
+                ) : (
+                  <Image src={logo} alt={libraries[0]} width={size} height={size} className={`object-contain max-w-full max-h-full ${logo === '/images/sciplex-logo.svg' ? '' : 'dark:invert'}`} />
+                )}
+              </div>
+              <span className="text-xs mt-1 leading-tight text-center">{subtitle}</span>
+            </button>
+          )
+        })}
       </div>
     </div>
   )
