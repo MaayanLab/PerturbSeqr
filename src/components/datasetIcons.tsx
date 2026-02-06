@@ -10,8 +10,8 @@ const logoMap: Record<string, { src: string; type: 'image' | 'svg' }> = {
   'L1000-CP': { src: '/images/lincs-logo.png', type: 'image' },
   'L1000-XPR': { src: '/images/lincs-logo.png', type: 'image' },
   'CMAP-Build02': { src: '/images/cmap-logo.svg', type: 'svg' },
-  'Novartis DRUG-seq': { src: '/images/novartis-logo.png', type: 'image' },
-  'SciPlex': { src: '/images/sciplex-logo.png', type: 'image' },
+  'Novartis DRUG-seq': { src: '/images/nibr-logo.png', type: 'image' },
+  'SciPlex': { src: '/images/sciplex-logo.svg', type: 'svg' },
   'DeepCoverMoA': { src: '/images/deepcovermoa-logo.png', type: 'image' },
   'GEO-Chem': { src: '/images/geo-logo.svg', type: 'svg' },
   'GEO-Gene': { src: '/images/geo-logo.svg', type: 'svg' },
@@ -29,7 +29,7 @@ const groupSubtitles: Record<string, string> = {
   '/images/geo-logo.svg': 'GEO',
   '/images/perturbatlas-logo.png': 'PerturbAtlas',
   '/images/replogle-logo.svg': 'Replogle et al.',
-  '/images/novartis-logo.png': 'DRUG-seq',
+  '/images/nibr-logo.png': 'DRUG-seq',
   '/images/cmap-logo.svg': 'CMAP',
 }
 
@@ -116,13 +116,13 @@ export default function DatasetIcons({
             className={`btn btn-ghost p-2 h-auto min-h-0 w-28 flex flex-col items-center justify-center transition-all rounded-lg mx-1 ${getButtonStyle(libraries)}`}
             title={libraries.join(', ')}
           >
-            <div className="w-20 h-20 relative flex items-center justify-center">
+            <div className={`w-20 h-20 relative flex items-center justify-center ${logo === '/images/sciplex-logo.svg' ? 'bg-gray-800 rounded-lg p-2' : ''}`}>
               <Image
                 src={logo}
                 alt={libraries[0]}
-                width={80}
-                height={80}
-                className="object-contain max-w-full max-h-full dark:invert"
+                width={logo === '/images/sciplex-logo.svg' ? 50 : 80}
+                height={logo === '/images/sciplex-logo.svg' ? 50 : 80}
+                className={`object-contain max-w-full max-h-full ${logo === '/images/sciplex-logo.svg' ? '' : 'dark:invert'}`}
               />
             </div>
             <span className="text-xs mt-1 leading-tight text-center">{subtitle}</span>
