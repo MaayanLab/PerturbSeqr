@@ -17,7 +17,7 @@ const logoMap: Record<string, { src: string; darkSrc?: string; type: 'image' | '
   'GEO-Gene': { src: '/images/geo-logo.svg', type: 'svg' },
   'RummaGEO Chem': { src: '/images/rummageo-logo.png', type: 'image' },
   'RummaGEO Gene': { src: '/images/rummageo-logo.png', type: 'image' },
-  'Gingko Bioworks': { src: '/images/ginkgo-logo.png', type: 'image' },
+  'Ginkgo Bioworks': { src: '/images/ginkgo-logo.png', type: 'image' },
   'Perturb Atlas': { src: '/images/perturbatlas-logo.png', type: 'image' },
   'Perturb Atlas Mouse': { src: '/images/perturbatlas-logo.png', type: 'image' },
   'Replogle K562 Essential': { src: '/images/replogle-logo.svg', type: 'svg' },

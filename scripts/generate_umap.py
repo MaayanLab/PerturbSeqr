@@ -58,7 +58,7 @@ LIBRARIES = {
     "sciplex": ("drug", "sciplex"),
     "nibr-drug-seq": ("drug", "nibr-drug-seq"),
     "deepcover-moa": ("drug", "deepcover-moa"),
-    "gingko-bioworks": ("drug", "gingko-bioworks"),
+    "ginkgo-bioworks": ("drug", "ginkgo-bioworks"),
     "lincs-l1000-cp": ("drug", "lincs-l1000-cp"),
     "geo-chem": ("drug", "geo-chem"),
     "tahoe-100m": ("drug", "tahoe-100m"),

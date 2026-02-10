@@ -119,8 +119,8 @@
       "exampleTerm": "GSE100217_1_v_0_ethanol_mouse up",
       "parsedExample": { "gse": "GSE100217", "sampleA": "1", "v": "v", "sampleB": "0", "perturbation": "ethanol", "organism": "mouse", "direction": "up" }
     },
-    "gingko-bioworks": {
-      "displayName": "Gingko Bioworks",
+    "ginkgo-bioworks": {
+      "displayName": "Ginkgo Bioworks",
       "category": "drug",
       "termFormat": {
         "delimiter": "-",

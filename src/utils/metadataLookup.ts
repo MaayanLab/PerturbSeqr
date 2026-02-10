@@ -487,7 +487,7 @@ export const DATASET_URLS: Record<string, string> = {
   'geo-gene': 'https://www.ncbi.nlm.nih.gov/geo/',
   'rummageo chem': 'https://rummageo.com',
   'rummageo gene': 'https://rummageo.com',
-  'gingko bioworks': 'https://www.ginkgobioworks.com/',
+  'ginkgo bioworks': 'https://www.ginkgobioworks.com/',
   'perturb atlas': 'https://perturbatlas.kratoss.site/#/',
   'perturb atlas mouse': 'https://perturbatlas.kratoss.site/#/',
   'replogle k562 essential': 'https://pubmed.ncbi.nlm.nih.gov/35688146/',

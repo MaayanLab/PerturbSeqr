@@ -123,7 +123,7 @@ MINIO_FILE_MAPPING = {
     "deepcover-moa.gmt.gz": "deepcover-moa",
     "geo-chem.gmt.gz": "geo-chem",
     "rummageo-chem.gmt.gz": "rummageo-chem",
-    "gingko-bioworks.gmt.gz": "gingko-bioworks",
+    "ginkgo-bioworks.gmt.gz": "ginkgo-bioworks",
     # Gene Perturbation
     "lincs-l1000-xpr.gmt.gz": "lincs-l1000-xpr",
     "perturb-atlas.gmt.gz": "perturb-atlas",
