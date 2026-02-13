@@ -27,13 +27,17 @@ const logoMap: Record<string, { src: string; darkSrc?: string; type: 'image' | '
 
 // Subtitle overrides for groups with multiple datasets sharing a logo
 const groupSubtitles: Record<string, string> = {
-  '/images/lincs-logo.png': 'LINCS L1000',
-  '/images/geo-logo.svg': 'GEO',
-  '/images/rummageo-logo.png': 'RummaGEO',
-  '/images/perturbatlas-logo.png': 'Perturb Atlas',
-  '/images/replogle-logo.svg': 'Replogle Perturb-seq',
-  '/images/nibr-logo.png': 'NIBR DRUG-seq',
-  '/images/cmap-logo.svg': 'Microarrays CMap',
+  '/images/lincs-logo.png': 'lincs l1000',
+  '/images/geo-logo.svg': 'geo',
+  '/images/rummageo-logo.png': 'rummageo',
+  '/images/perturbatlas-logo.png': 'perturb atl',
+  '/images/replogle-logo.svg': 'replogle',
+  '/images/nibr-logo.png': 'nibr d-seq',
+  '/images/cmap-logo.svg': 'cmap arrays',
+  '/images/tahoe-logo-new.png': 'tahoe-100m',
+  '/images/sciplex-logo.svg': 'sciplex',
+  '/images/deepcovermoa-logo.png': 'deepcover',
+  '/images/ginkgo-logo.png': 'ginkgo bio',
 }
 
 // Get all library display names
