@@ -20,7 +20,7 @@
       "displayName": "LINCS L1000 CP",
       "category": "drug",
       "source": "https://maayanlab.cloud/sigcom-lincs/#/Download",
-      "sourceNote": "L2S2/SigCom LINCS chemical perturbations. 1,436,110 signatures from LINCS L1000 experiments.",
+      "sourceNote": "LINCS L1000 chemical perturbations (pruned, top 250 by CD coefficient). 156,926 signatures.",
       "termFormat": {
         "delimiter": "_",
         "fields": ["batch", "cellLine", "timepoint", "batch2", "perturbation", "concentration"],
@@ -148,10 +148,17 @@
     "perturb-atlas": {
       "displayName": "Perturb Atlas",
       "category": "gene",
+      "source": "https://maayanlab.cloud/Harmonizome/dataset/PerturbAtlas+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations",
+      "sourceNote": "Gene expression profiles following genetic perturbation (KD/KO/OE/Mut). Zhang et al. 2024 Nucleic Acids Res. Reprocessed from Harmonizome.",
       "termFormat": {
         "delimiter": "_",
         "fields": ["prefix", "id", "perturbationType", "perturbation", "dataset"],
         "optional": []
+      },
+      "metadataLookup": {
+        "file": "perturbatlas_metadata.json",
+        "keyBuilder": ["prefix", "id"],
+        "fields": ["cell_line", "cell_type", "condition", "disease", "study_accession"]
       },
       "exampleTerm": "Perturb_10000_KD_CPSF6_SRP013565 up",
       "parsedExample": { "prefix": "Perturb", "id": "10000", "perturbationType": "KD", "perturbation": "CPSF6", "dataset": "SRP013565", "direction": "up" }
@@ -159,10 +166,17 @@
     "perturb-atlas-mouse": {
       "displayName": "Perturb Atlas Mouse",
       "category": "gene",
+      "source": "https://maayanlab.cloud/Harmonizome/dataset/PerturbAtlas+Signatures+of+Differentially+Expressed+Genes+for+Mouse+Gene+Perturbations",
+      "sourceNote": "Mouse gene expression profiles following genetic perturbation (KD/KO/OE/Mut). Zhang et al. 2024 Nucleic Acids Res. Reprocessed from Harmonizome.",
       "termFormat": {
         "delimiter": "_",
         "fields": ["prefix", "id", "perturbationType", "perturbation", "dataset"],
         "optional": []
+      },
+      "metadataLookup": {
+        "file": "perturbatlas_metadata.json",
+        "keyBuilder": ["prefix", "id"],
+        "fields": ["cell_line", "cell_type", "condition", "disease", "study_accession"]
       },
       "exampleTerm": "Perturb_1001_KO_Adar1_SRP360154 up",
       "parsedExample": { "prefix": "Perturb", "id": "1001", "perturbationType": "KO", "perturbation": "Adar1", "dataset": "SRP360154", "direction": "up" }
@@ -199,10 +213,15 @@
     "replogle-perturb-seq-k562-essential": {
       "displayName": "Replogle K562 Essential",
       "category": "gene",
+      "source": "https://maayanlab.cloud/Harmonizome/dataset/Replogle+et+al.,+Cell,+2022+K562+Essential+Perturb-seq+Gene+Perturbation+Signatures",
+      "sourceNote": "Gene expression profiles in K562 cells following CRISPRi perturbation of essential genes. Replogle et al., Cell, 2022. Reprocessed from Harmonizome.",
       "termFormat": {
         "delimiter": "_",
         "fields": ["id", "perturbation", "batch"],
-        "optional": []
+        "optional": [],
+        "fixedValues": {
+          "cellLine": "K562"
+        }
       },
       "exampleTerm": "10023_ZC3H18_P1P2 up",
       "parsedExample": { "id": "10023", "perturbation": "ZC3H18", "batch": "P1P2", "direction": "up" }
@@ -210,10 +229,15 @@
     "replogle-perturb-seq-k562-genomewide": {
       "displayName": "Replogle K562 Genome-wide",
       "category": "gene",
+      "source": "https://maayanlab.cloud/Harmonizome/dataset/Replogle+et+al.,+Cell,+2022+K562+Genome-wide+Perturb-seq+Gene+Perturbation+Signatures",
+      "sourceNote": "Gene expression profiles in K562 cells following CRISPRi perturbation genome-wide. Replogle et al., Cell, 2022. Reprocessed from Harmonizome.",
       "termFormat": {
         "delimiter": "_",
         "fields": ["id", "perturbation", "batch"],
-        "optional": []
+        "optional": [],
+        "fixedValues": {
+          "cellLine": "K562"
+        }
       },
       "exampleTerm": "10005_ZBTB4_P1 up",
       "parsedExample": { "id": "10005", "perturbation": "ZBTB4", "batch": "P1", "direction": "up" }
@@ -221,10 +245,15 @@
     "replogle-perturb-seq-rpe1-essential": {
       "displayName": "Replogle RPE1 Essential",
       "category": "gene",
+      "source": "https://maayanlab.cloud/Harmonizome/dataset/Replogle+et+al.,+Cell,+2022+RPE1+Essential+Perturb-seq+Gene+Perturbation+Signatures",
+      "sourceNote": "Gene expression profiles in RPE1 cells following CRISPRi perturbation of essential genes. Replogle et al., Cell, 2022. Reprocessed from Harmonizome.",
       "termFormat": {
         "delimiter": "_",
         "fields": ["id", "perturbation", "batch"],
-        "optional": []
+        "optional": [],
+        "fixedValues": {
+          "cellLine": "RPE1"
+        }
       },
       "exampleTerm": "10005_ZBTB4_P1 up",
       "parsedExample": { "id": "10005", "perturbation": "ZBTB4", "batch": "P1", "direction": "up" }

@@ -8,7 +8,7 @@ const MINIO_BASE = process.env.NEXT_PUBLIC_MINIO_URL || 'https://s3.perturbseqr.
 type Dataset = {
   title: string
   value: string
-  info: string
+  info: React.ReactNode
   publicationUrl: string
   publicationUrl2?: string
   sourceUrl?: string
@@ -24,8 +24,8 @@ type Dataset = {
 const drugPerturbationDatasets: Dataset[] = [
   {
     title: 'L1000-CP (Chemical Perturbations)',
-    value: '1,436,110 signatures',
-    info: 'Last Updated Jul 1 2021',
+    value: '156,926 signatures',
+    info: 'Pruned, top 250 by CD coefficient',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/35524556/',
     gmtUrl: `${MINIO_BASE}/gmts/lincs-l1000-cp.gmt.gz`,
     note: 'See also ',
@@ -35,7 +35,7 @@ const drugPerturbationDatasets: Dataset[] = [
   {
     title: 'Tahoe 100M',
     value: '37,800 signatures',
-    info: '',
+    info: <><a href="https://huggingface.co/datasets/tahoebio/Tahoe-100M/viewer/pseudobulk_differential_expression" target="_blank" rel="noopener noreferrer" className="link link-primary">Pseudobulk DESeq2</a>, padj ≤ 0.05, top 100 by log2FC, per-concentration</>,
     publicationUrl: 'https://www.biorxiv.org/content/10.1101/2025.02.20.639398v3',
     sourceUrl: 'https://huggingface.co/datasets/tahoebio/Tahoe-100M',
     sourceLabel: 'Hugging Face',
@@ -250,7 +250,7 @@ function DatasetCard({ dataset, showDownloads = true }: { dataset: Dataset, show
   return (
     <div className="bg-base-100 shadow-sm border rounded-lg px-3 py-2">
       <h3 className="font-medium text-sm leading-tight">{dataset.title}</h3>
-      <p className="text-xs text-gray-500 leading-tight">{dataset.value}{dataset.info && ` · ${dataset.info}`}</p>
+      <p className="text-xs text-gray-500 leading-tight">{dataset.value}{dataset.info && <> · {dataset.info}</>}</p>
       <div className="text-xs leading-tight mt-1">
         {dataset.publicationUrl ? (
           dataset.publicationUrl2 ? (

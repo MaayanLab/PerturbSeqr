@@ -152,8 +152,8 @@ function EnrichmentResults({
                 After rummaging through <Stats show_gene_sets />.{" "}
                 PerturbSeqr{" "}
                 <Image
-                  className="inline-block rounded"
-                  src="/images/DR_logo.png"
+                  className="inline-block rounded dark:invert"
+                  src="/images/perturbseqr-logo.png"
                   width={50}
                   height={50}
                   alt="PerturbSeqr"
@@ -169,8 +169,8 @@ function EnrichmentResults({
             After rummaging through <Stats show_gene_sets />.{" "}
                 PerturbSeqr{" "}
                 <Image
-                  className="inline-block rounded"
-                  src="/images/DR_logo.png"
+                  className="inline-block rounded dark:invert"
+                  src="/images/perturbseqr-logo.png"
                   width={50}
                   height={50}
                   alt="PerturbSeqr"
@@ -186,8 +186,8 @@ function EnrichmentResults({
                 After rummaging through <Stats show_gene_sets />.{" "}
                 PerturbSeqr{" "}
                 <Image
-                  className="inline-block rounded"
-                  src="/images/DR_logo.png"
+                  className="inline-block rounded dark:invert"
+                  src="/images/perturbseqr-logo.png"
                   width={50}
                   height={50}
                   alt="PerturbSeqr"

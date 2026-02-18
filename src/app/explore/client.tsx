@@ -8,7 +8,7 @@ const DATASETS = {
     { id: 'nibr-drug-seq', name: 'NIBR DRUG-seq', signatures: '26,316' },
     { id: 'deepcover-moa', name: 'DeepCover MoA', signatures: '1,748' },
     { id: 'ginkgo-bioworks', name: 'Ginkgo Bioworks', signatures: '9,310' },
-    { id: 'lincs-l1000-cp', name: 'LINCS L1000 CP', signatures: '1,436,110' },
+    { id: 'lincs-l1000-cp', name: 'LINCS L1000 CP', signatures: '156,926' },
     { id: 'geo-chem', name: 'GEO-Chem', signatures: '810' },
     { id: 'tahoe-100m', name: 'Tahoe-100M', signatures: '37,800' },
     { id: 'microarrays-cmap', name: 'Microarrays CMap', signatures: '12,200' },
