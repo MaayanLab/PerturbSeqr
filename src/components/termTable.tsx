@@ -131,7 +131,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
                           href={getDatasetUrl(dataset)!}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="link link-primary hover:link-hover"
+                          className="link link-neutral hover:link-hover"
                           title={`View ${dataset} source`}
                         >
                           {dataset}
@@ -150,7 +150,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
                         href={perturbationUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="link link-primary hover:link-hover"
+                        className="link link-neutral hover:link-hover"
                         title={perturbationLinkTitle}
                       >
                         {perturbation}
@@ -188,7 +188,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
                   <td>
                     {cellLine ? (
                       <a
-                        className="link link-primary hover:link-hover cursor-pointer"
+                        className="link link-neutral hover:link-hover cursor-pointer"
                         title="View on DepMap"
                         onClick={async (evt) => {
                           evt.preventDefault();

@@ -34,8 +34,8 @@ const drugPerturbationDatasets: Dataset[] = [
   },
   {
     title: 'Tahoe 100M',
-    value: '37,800 signatures',
-    info: <><a href="https://huggingface.co/datasets/tahoebio/Tahoe-100M/viewer/pseudobulk_differential_expression" target="_blank" rel="noopener noreferrer" className="link link-primary">Pseudobulk DESeq2</a>, padj ≤ 0.05, top 100 by log2FC, per-concentration</>,
+    value: '105,404 signatures',
+    info: <><a href="https://huggingface.co/datasets/tahoebio/Tahoe-100M/viewer/pseudobulk_differential_expression" target="_blank" rel="noopener noreferrer" className="link link-neutral">Pseudobulk DESeq2</a>, padj ≤ 0.05, top 100 by log2FC, per-concentration</>,
     publicationUrl: 'https://www.biorxiv.org/content/10.1101/2025.02.20.639398v3',
     sourceUrl: 'https://huggingface.co/datasets/tahoebio/Tahoe-100M',
     sourceLabel: 'Hugging Face',
@@ -193,10 +193,13 @@ const genePerturbationDatasets: Dataset[] = [
     noteUrl: 'https://rummageo.com',
   },
   {
-    title: 'CM4A1',
+    title: 'CM4AI',
     value: '11,739 perturbed genes',
     info: '',
     publicationUrl: '',
+    sourceUrl: 'https://cm4ai.org',
+    sourceLabel: 'CM4AI',
+    gmtUrl: `${MINIO_BASE}/gmts/cm4ai.gmt.gz`,
     fullSignaturesUrl: 'https://figshare.com/s/ee85bb1880921326249b',
   },
 ]
@@ -255,19 +258,19 @@ function DatasetCard({ dataset, showDownloads = true }: { dataset: Dataset, show
         {dataset.publicationUrl ? (
           dataset.publicationUrl2 ? (
             <>
-              Publication: <a href={dataset.publicationUrl} target="_blank" rel="noopener noreferrer" className="link link-primary">[1]</a>
-              {' '}<a href={dataset.publicationUrl2} target="_blank" rel="noopener noreferrer" className="link link-primary">[2]</a>
+              Publication: <a href={dataset.publicationUrl} target="_blank" rel="noopener noreferrer" className="link link-neutral">[1]</a>
+              {' '}<a href={dataset.publicationUrl2} target="_blank" rel="noopener noreferrer" className="link link-neutral">[2]</a>
               {' · '}
             </>
           ) : (
             <>
-              <a href={dataset.publicationUrl} target="_blank" rel="noopener noreferrer" className="link link-primary">Publication</a>
+              <a href={dataset.publicationUrl} target="_blank" rel="noopener noreferrer" className="link link-neutral">Publication</a>
               {' · '}
             </>
           )
         ) : null}
         {dataset.sourceUrl ? (
-          <a href={dataset.sourceUrl} target="_blank" rel="noopener noreferrer" className="link link-primary">{dataset.sourceLabel || 'Source'}</a>
+          <a href={dataset.sourceUrl} target="_blank" rel="noopener noreferrer" className="link link-neutral">{dataset.sourceLabel || 'Source'}</a>
         ) : (
           <span className="text-gray-400">Source</span>
         )}
@@ -275,13 +278,13 @@ function DatasetCard({ dataset, showDownloads = true }: { dataset: Dataset, show
           <>
             {' · '}
             {dataset.gmtUrl ? (
-              <a href={dataset.gmtUrl} download className="link link-primary">Gene Matrix Transposed</a>
+              <a href={dataset.gmtUrl} download className="link link-neutral">Gene Matrix Transposed</a>
             ) : (
               <span className="text-gray-400">Gene Matrix Transposed</span>
             )}
             {' · '}
             {dataset.fullSignaturesUrl ? (
-              <a href={dataset.fullSignaturesUrl} target="_blank" rel="noopener noreferrer" className="link link-primary">Full Signatures</a>
+              <a href={dataset.fullSignaturesUrl} target="_blank" rel="noopener noreferrer" className="link link-neutral">Full Signatures</a>
             ) : (
               <span className="text-gray-400">Full Signatures</span>
             )}
@@ -292,7 +295,7 @@ function DatasetCard({ dataset, showDownloads = true }: { dataset: Dataset, show
         <p className="text-xs italic text-gray-400 leading-tight">
           {dataset.note}
           {dataset.noteLinkText && dataset.noteUrl && (
-            <a href={dataset.noteUrl} target="_blank" rel="noopener noreferrer" className="link link-primary">{dataset.noteLinkText}</a>
+            <a href={dataset.noteUrl} target="_blank" rel="noopener noreferrer" className="link link-neutral">{dataset.noteLinkText}</a>
           )}
         </p>
       )}
@@ -329,7 +332,7 @@ export default function DownloadClientPage() {
       </div>
 
       <p className="text-sm mt-4">
-        Developed in <a className='link link-primary' href="https://labs.icahn.mssm.edu/maayanlab/">the Ma&apos;ayan Lab</a>
+        Developed in <a className='link link-neutral' href="https://labs.icahn.mssm.edu/maayanlab/">the Ma&apos;ayan Lab</a>
       </p>
     </div>
   )

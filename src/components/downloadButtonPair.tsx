@@ -81,7 +81,7 @@ export default function DownloadButtonPair(
           />
           <div className="flex justify-end space-x-2">
             <button className="btn btn-sm btn-ghost" onClick={() => setShowModal(false)}>Cancel</button>
-            <button className="btn btn-sm btn-primary" onClick={handleDownload}>Download</button>
+            <button className="btn btn-sm btn-neutral" onClick={handleDownload}>Download</button>
           </div>
         </div>
       )}

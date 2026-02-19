@@ -1,5 +1,44 @@
 {
   "libraries": {
+    "lincs-l1000-cp": {
+      "displayName": "LINCS L1000 CP",
+      "category": "drug",
+      "source": "https://maayanlab.cloud/sigcom-lincs/#/Download",
+      "sourceNote": "LINCS L1000 chemical perturbations (pruned, top 250 by CD coefficient). 156,926 signatures.",
+      "termFormat": {
+        "delimiter": "_",
+        "fields": ["batch", "cellLine", "timepoint", "batch2", "perturbation", "concentration"],
+        "optional": []
+      },
+      "exampleTerm": "ABY001_A375_XH_A13_afatinib_10uM up",
+      "parsedExample": { "batch": "ABY001", "cellLine": "A375", "timepoint": "XH", "batch2": "A13", "perturbation": "afatinib", "concentration": "10uM", "direction": "up" }
+    },
+    "lincs-l1000-xpr": {
+      "displayName": "LINCS L1000 XPR",
+      "category": "gene",
+      "source": "https://maayanlab.cloud/sigcom-lincs/#/Download",
+      "sourceNote": "L2S2/SigCom LINCS CRISPR knockouts. 281,890 signatures from LINCS L1000 experiments.",
+      "termFormat": {
+        "delimiter": "_",
+        "fields": ["batch", "cellLine", "timepoint", "batch2", "perturbation"],
+        "optional": []
+      },
+      "exampleTerm": "HAHN001_A549_96H_A03_AKT1 up",
+      "parsedExample": { "batch": "HAHN001", "cellLine": "A549", "timepoint": "96H", "batch2": "A03", "perturbation": "AKT1", "direction": "up" }
+    },
+    "cm4ai": {
+      "displayName": "CM4AI",
+      "category": "gene",
+      "source": "https://cm4ai.org",
+      "sourceNote": "Cell Maps for AI gene perturbation signatures.",
+      "termFormat": {
+        "delimiter": "_",
+        "fields": ["perturbation"],
+        "optional": []
+      },
+      "exampleTerm": "GENE1 up",
+      "parsedExample": { "perturbation": "GENE1", "direction": "up" }
+    },
     "tahoe-100m": {
       "displayName": "Tahoe-100M",
       "category": "drug",
@@ -15,19 +54,6 @@
       },
       "exampleTerm": "(R)-Verapamil (hydrochloride)_0.05uM_A-172 up",
       "parsedExample": { "perturbation": "(R)-Verapamil (hydrochloride)", "concentration": "0.05uM", "cellLine": "A-172", "timepoint": "24h", "direction": "up" }
-    },
-    "lincs-l1000-cp": {
-      "displayName": "LINCS L1000 CP",
-      "category": "drug",
-      "source": "https://maayanlab.cloud/sigcom-lincs/#/Download",
-      "sourceNote": "LINCS L1000 chemical perturbations (pruned, top 250 by CD coefficient). 156,926 signatures.",
-      "termFormat": {
-        "delimiter": "_",
-        "fields": ["batch", "cellLine", "timepoint", "batch2", "perturbation", "concentration"],
-        "optional": []
-      },
-      "exampleTerm": "ABY001_A375_XH_A13_afatinib_10uM up",
-      "parsedExample": { "batch": "ABY001", "cellLine": "A375", "timepoint": "XH", "batch2": "A13", "perturbation": "afatinib", "concentration": "10uM", "direction": "up" }
     },
     "microarrays-cmap": {
       "displayName": "Microarrays CMap",
@@ -131,19 +157,6 @@
       },
       "exampleTerm": "human_dermal_fibroblast-(S)-(+)-Camptothecin-3000-24 up",
       "parsedExample": { "cellLine": "human_dermal_fibroblast", "perturbation": "(S)-(+)-Camptothecin", "concentration": "3000", "timepoint": "24", "direction": "up" }
-    },
-    "lincs-l1000-xpr": {
-      "displayName": "LINCS L1000 XPR",
-      "category": "gene",
-      "source": "https://maayanlab.cloud/sigcom-lincs/#/Download",
-      "sourceNote": "L2S2/SigCom LINCS CRISPR knockouts. 281,890 signatures from LINCS L1000 experiments.",
-      "termFormat": {
-        "delimiter": "_",
-        "fields": ["batch", "cellLine", "timepoint", "batch2", "perturbation"],
-        "optional": []
-      },
-      "exampleTerm": "HAHN001_A549_96H_A03_AKT1 up",
-      "parsedExample": { "batch": "HAHN001", "cellLine": "A549", "timepoint": "96H", "batch2": "A03", "perturbation": "AKT1", "direction": "up" }
     },
     "perturb-atlas": {
       "displayName": "Perturb Atlas",

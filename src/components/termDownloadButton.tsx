@@ -70,8 +70,8 @@ export default function TermDownloadButton({dataFiltered, filterTerm}: {dataFilt
           <label className="block mb-2 font-semibold text-left">Signifigant results to download (max 5k):</label>
 
           <div className="flex justify-end space-x-2">
-            <button className="btn btn-sm btn-primary" onClick={handleDownload}>Download GMT</button>
-            <button className="btn btn-sm btn-primary" onClick={handleMetadataDownload}>Download Metadata</button>
+            <button className="btn btn-sm btn-neutral" onClick={handleDownload}>Download GMT</button>
+            <button className="btn btn-sm btn-neutral" onClick={handleMetadataDownload}>Download Metadata</button>
           </div>
         
           <div className="flex justify-center text-center mx-auto space-x-2 mt-2 ">

@@ -68,3 +68,6 @@ startup_log*.txt
 startup_log*.md
 .python-version
 scratch/
+
+# Use case data files
+*.xlsx

@@ -11,7 +11,7 @@ export default function Pagination(props: {
       {props.page > 2 ? <button className="join-item btn" onClick={() => {props.onChange(1)}}>{1}</button> : null}
       {props.page > 3 ? <button className="join-item btn btn-disabled">...</button> : null}
       {props.page > 1 ? <button className="join-item btn" onClick={() => {props.onChange(props.page-1)}}>{props.page-1}</button> : null}
-      <button className="join-item btn btn-active">{props.page}</button>
+      <button className="join-item btn bg-gray-600 text-white">{props.page}</button>
       {props.page < lastPage-1 ? <button className="join-item btn" onClick={() => {props.onChange(props.page+1)}}>{props.page+1}</button> : null}
       {props.page < lastPage-2 ? <button className="join-item btn btn-disabled">...</button> : null}
       {props.totalCount !== undefined && props.page < lastPage ? <button className="join-item btn" onClick={() => {props.onChange(lastPage)}}>{lastPage}</button> : null}

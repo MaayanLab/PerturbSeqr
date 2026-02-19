@@ -10,7 +10,7 @@ const DATASETS = {
     { id: 'ginkgo-bioworks', name: 'Ginkgo Bioworks', signatures: '9,310' },
     { id: 'lincs-l1000-cp', name: 'LINCS L1000 CP', signatures: '156,926' },
     { id: 'geo-chem', name: 'GEO-Chem', signatures: '810' },
-    { id: 'tahoe-100m', name: 'Tahoe-100M', signatures: '37,800' },
+    { id: 'tahoe-100m', name: 'Tahoe-100M', signatures: '105,404' },
     { id: 'microarrays-cmap', name: 'Microarrays CMap', signatures: '12,200' },
   ],
   gene: [
@@ -21,6 +21,7 @@ const DATASETS = {
     { id: 'replogle-perturb-seq-k562-essential', name: 'Replogle K562 Essential', signatures: '2,383' },
     { id: 'replogle-perturb-seq-k562-genomewide', name: 'Replogle K562 Genome-wide', signatures: '4,110' },
     { id: 'replogle-perturb-seq-rpe1-essential', name: 'Replogle RPE1 Essential', signatures: '2,714' },
+    { id: 'cm4ai', name: 'CM4AI', signatures: '11,739' },
   ],
 }
 
@@ -81,13 +82,13 @@ export default function ExploreClientPage() {
           <label className="block text-sm font-medium mb-1">Direction</label>
           <div className="btn-group">
             <button
-              className={`btn btn-sm ${direction === 'up' ? 'btn-active' : ''}`}
+              className={`btn btn-sm ${direction === 'up' ? 'bg-gray-600 hover:bg-gray-800 text-white' : ''}`}
               onClick={() => setDirection('up')}
             >
               Up-regulated
             </button>
             <button
-              className={`btn btn-sm ${direction === 'dn' ? 'btn-active' : ''}`}
+              className={`btn btn-sm ${direction === 'dn' ? 'bg-gray-600 hover:bg-gray-800 text-white' : ''}`}
               onClick={() => setDirection('dn')}
             >
               Down-regulated

@@ -62,12 +62,14 @@ function EnrichmentResults({
   setModalGeneSet,
   datasetUp,
   datasetDown,
+  libraryNames,
 }: {
   userGeneSetUp?: FetchUserGeneSetQuery;
   userGeneSetDown?: FetchUserGeneSetQuery;
   setModalGeneSet: React.Dispatch<React.SetStateAction<GeneSetModalT>>;
   datasetUp: string;
   datasetDown: string;
+  libraryNames: string[] | null;
 }) {
 
   
@@ -127,6 +129,7 @@ function EnrichmentResults({
       genesUp,
       genesDown,
       filterTerm: term + " " + queryString.dir,
+      libraryNames: libraryNames,
       offset: (page - 1) * pageSize,
       first: pageSize,
       filterFda: fda,
@@ -162,7 +165,7 @@ function EnrichmentResults({
                         After rummaging through <Stats show_gene_sets />.{" "}
                         <Image
                           className="inline-block rounded"
-                          src="/images/DR-logo-cropped.png"
+                          src="/images/perturbseqr-logo.png"
                           width={50}
                           height={100}
                           alt="PerturbSeqr"
@@ -178,7 +181,7 @@ function EnrichmentResults({
                     After rummaging through <Stats show_gene_sets />.{" "}
                         <Image
                           className="inline-block rounded"
-                          src="/images/DR-logo-cropped.png"
+                          src="/images/perturbseqr-logo.png"
                           width={50}
                           height={100}
                           alt="PerturbSeqr"
@@ -194,7 +197,7 @@ function EnrichmentResults({
                         After rummaging through <Stats show_gene_sets />.{" "}
                         <Image
                           className="inline-block rounded"
-                          src="/images/DR-logo-cropped.png"
+                          src="/images/perturbseqr-logo.png"
                           width={50}
                           height={100}
                           alt="PerturbSeqr"
@@ -239,7 +242,7 @@ function EnrichmentResults({
           }}
           className={
             queryString.fda === "true"
-              ? "button btn btn-sm float-left mx-4 bg-purple-400 hover:bg-purple-600"
+              ? "button btn btn-sm float-left mx-4 bg-gray-600 hover:bg-gray-800"
               : "button btn btn-sm float-left mx-4"
           }
         >
@@ -277,7 +280,7 @@ function EnrichmentResults({
           }}
           className={
             queryString.consensus === "true"
-              ? "button btn btn-sm float-left mr-4 bg-purple-400 hover:bg-purple-600"
+              ? "button btn btn-sm float-left mr-4 bg-gray-600 hover:bg-gray-800"
               : "button btn btn-sm float-left mr-4"
           }
         >
@@ -314,7 +317,7 @@ function EnrichmentResults({
           }}
           className={
             queryString.moas === "true"
-              ? "button btn btn-sm float-left mr-4 bg-purple-400 hover:bg-purple-600"
+              ? "button btn btn-sm float-left mr-4 bg-gray-600 hover:bg-gray-800"
               : "button btn btn-sm float-left mr-4"
           }
         >
@@ -352,7 +355,7 @@ function EnrichmentResults({
           }}
           className={
             queryString.ko === "true"
-              ? "button btn btn-sm float-left mr-4 bg-purple-400 hover:bg-purple-600"
+              ? "button btn btn-sm float-left mr-4 bg-gray-600 hover:bg-gray-800"
               : "button btn btn-sm float-left mr-4"
           }
         >
@@ -366,7 +369,7 @@ function EnrichmentResults({
           <div
             className={
               (queryString.dir == "up" || queryString.sortBy == "pvalue_mimic")
-                ? "join-item px-3 py-1.5 text-sm bg-purple-400 hover:bg-purple-600 font-bold cursor-pointer"
+                ? "join-item px-3 py-1.5 text-sm bg-gray-600 hover:bg-gray-800 font-bold cursor-pointer"
                 : "join-item px-3 py-1.5  bg-gray-100 cursor-pointer font-bold text-sm dark:bg-gray-900"
             }
             onClick={(evt) => {
@@ -404,7 +407,7 @@ function EnrichmentResults({
           <div
             className={
               (queryString.dir == "down" || queryString.sortBy == "pvalue_reverse")
-                ? "join-item px-3 py-1.5 text-sm bg-purple-400 hover:bg-purple-600 font-bold cursor-pointer"
+                ? "join-item px-3 py-1.5 text-sm bg-gray-600 hover:bg-gray-800 font-bold cursor-pointer"
                 : "join-item px-3 py-1.5 bg-gray-100 cursor-pointer font-bold text-sm dark:bg-gray-900"
             }
             onClick={(evt) => {
@@ -441,7 +444,7 @@ function EnrichmentResults({
           </div>
         </div>
         {(consensus || moas) ? (
-          <div className="inline-flex items-center ml-5 transition-all accent-purple-500">
+          <div className="inline-flex items-center ml-5 transition-all accent-gray-600">
             <label
               className="text-sm font-bold mr-3 tooltip inline-flex"
               htmlFor="default-range"
@@ -1198,7 +1201,7 @@ function EnrichmentResults({
                             href={getDatasetUrl(dataset)!}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="link link-primary hover:link-hover"
+                            className="link link-neutral hover:link-hover"
                             title={`View ${dataset} source`}
                           >
                             {dataset}
@@ -1214,7 +1217,7 @@ function EnrichmentResults({
                             href={perturbationUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="link link-primary hover:link-hover"
+                            className="link link-neutral hover:link-hover"
                             title={perturbationLinkTitle}
                           >
                             {perturbation}
@@ -1544,10 +1547,21 @@ export default function EnrichClientPage({
 }: {
   searchParams: {
     dataset: string | string[] | undefined;
+    libraries?: string;
   };
 }) {
   const datasetUp = ensureArray(searchParams.dataset)[0];
   const datasetDown = ensureArray(searchParams.dataset)[1];
+
+  // Parse libraries from URL params (comma-separated)
+  // null means no filter (use all libraries), array means filter to those libraries
+  const libraryNames = React.useMemo(() => {
+    if (searchParams.libraries) {
+      const libs = searchParams.libraries.split(',').filter(Boolean);
+      return libs.length > 0 ? libs : null;
+    }
+    return null;
+  }, [searchParams.libraries]);
 
   const { data: userGeneSetUp } = useFetchUserGeneSetQuery({
     skip: !datasetUp,
@@ -1598,12 +1612,18 @@ export default function EnrichClientPage({
           ) : null}
         </label>
       </div>
+      {libraryNames && libraryNames.length > 0 && (
+        <span className="text-sm text-base-content/70 ml-2">
+          | Filtering: {libraryNames.length} dataset{libraryNames.length > 1 ? 's' : ''}
+        </span>
+      )}
       <EnrichmentResults
         userGeneSetUp={userGeneSetUp}
         userGeneSetDown={userGeneSetDown}
         setModalGeneSet={setModalGeneSet}
         datasetUp={datasetUp}
         datasetDown={datasetDown}
+        libraryNames={libraryNames}
       />
       <GeneSetModalWrapper
         modalGeneSet={modalGeneSet}

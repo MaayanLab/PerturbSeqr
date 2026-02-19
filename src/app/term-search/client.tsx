@@ -91,7 +91,7 @@ export default function TermSearchClientPage(props: { searchParams?: { page?: st
           />
         </div>
         <p className="text-center text-sm mb-4 max-w-2xl">
-          Search through 1,912,262 gene sets created from 10 Connectivity Mapping resources that performed massive single perturbations followed by expression experiments in human cells
+          Search through <Stats show_gene_sets /> created from 10 Connectivity Mapping resources that performed massive single perturbations followed by expression experiments in human cells
         </p>
         {/* Dataset icons filter - centered below header */}
         <DatasetIcons

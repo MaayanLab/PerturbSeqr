@@ -23,6 +23,7 @@ const logoMap: Record<string, { src: string; darkSrc?: string; type: 'image' | '
   'Replogle K562 Essential': { src: '/images/replogle-logo.svg', type: 'svg' },
   'Replogle K562 Genome-wide': { src: '/images/replogle-logo.svg', type: 'svg' },
   'Replogle RPE1 Essential': { src: '/images/replogle-logo.svg', type: 'svg' },
+  'CM4AI': { src: '/images/cm4ai-logo.png', type: 'image' },
 }
 
 // Subtitle overrides for groups with multiple datasets sharing a logo
@@ -38,6 +39,7 @@ const groupSubtitles: Record<string, string> = {
   '/images/sciplex-logo.svg': 'sciplex',
   '/images/deepcovermoa-logo.png': 'deepcover',
   '/images/ginkgo-logo.png': 'ginkgo bio',
+  '/images/cm4ai-logo.png': 'cm4ai',
 }
 
 // Get all library display names
@@ -106,7 +108,7 @@ export default function DatasetIcons({
     if (!hasAnySelection) {
       return 'opacity-100' // All enabled when nothing selected
     } else if (isSelected) {
-      return 'opacity-100 ring-2 ring-primary bg-base-200' // Active/selected
+      return 'opacity-100 ring-2 ring-neutral bg-base-200' // Active/selected
     } else {
       return 'opacity-40' // Disabled/dimmed
     }

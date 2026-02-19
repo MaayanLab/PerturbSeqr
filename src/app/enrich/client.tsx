@@ -234,7 +234,7 @@ function EnrichmentResults({
           }}
           className={
             queryString.fda === "true"
-              ? "button btn btn-sm float-left mx-4 bg-purple-400 hover:bg-purple-600"
+              ? "button btn btn-sm float-left mx-4 bg-gray-600 hover:bg-gray-800"
               : "button btn btn-sm float-left mx-4"
           }
         >
@@ -272,7 +272,7 @@ function EnrichmentResults({
           }}
           className={
             queryString.consensus === "true"
-              ? "button btn btn-sm float-left mr-4 bg-purple-400 hover:bg-purple-600"
+              ? "button btn btn-sm float-left mr-4 bg-gray-600 hover:bg-gray-800"
               : "button btn btn-sm float-left mr-4"
           }
         >
@@ -309,7 +309,7 @@ function EnrichmentResults({
           }}
           className={
             queryString.moas === "true"
-              ? "button btn btn-sm float-left mr-4 bg-purple-400 hover:bg-purple-600"
+              ? "button btn btn-sm float-left mr-4 bg-gray-600 hover:bg-gray-800"
               : "button btn btn-sm float-left mr-4"
           }
         >
@@ -343,7 +343,7 @@ function EnrichmentResults({
           <div
             className={
               queryString.dir == "up"
-                ? "join-item px-3 py-1.5 text-sm bg-purple-400 hover:bg-purple-600 font-bold cursor-pointer"
+                ? "join-item px-3 py-1.5 text-sm bg-gray-600 hover:bg-gray-800 font-bold cursor-pointer"
                 : "join-item px-3 py-1.5  bg-gray-100 cursor-pointer font-bold text-sm dark:bg-gray-900"
             }
             onClick={(evt) => {
@@ -379,7 +379,7 @@ function EnrichmentResults({
           <div
             className={
               queryString.dir == "down"
-                ? "join-item px-3 py-1.5 text-sm bg-purple-400 hover:bg-purple-600 font-bold cursor-pointer"
+                ? "join-item px-3 py-1.5 text-sm bg-gray-600 hover:bg-gray-800 font-bold cursor-pointer"
                 : "join-item px-3 py-1.5 bg-gray-100 cursor-pointer font-bold text-sm dark:bg-gray-900"
             }
             onClick={(evt) => {
@@ -413,7 +413,7 @@ function EnrichmentResults({
             DOWN
           </div>
         </div>
-        {(consensus || moas) ? <div className="inline-flex items-center ml-5 transition-all accent-purple-500">
+        {(consensus || moas) ? <div className="inline-flex items-center ml-5 transition-all accent-gray-600">
           <label
             className="text-sm font-bold mr-3 tooltip inline-flex"
             htmlFor="default-range"
@@ -1108,7 +1108,7 @@ function EnrichmentResults({
                             href={getDatasetUrl(dataset)!}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="link link-primary hover:link-hover"
+                            className="link link-neutral hover:link-hover"
                             title={`View ${dataset} source`}
                           >
                             {dataset}
@@ -1124,7 +1124,7 @@ function EnrichmentResults({
                             href={perturbationUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="link link-primary hover:link-hover"
+                            className="link link-neutral hover:link-hover"
                             title={perturbationLinkTitle}
                           >
                             {perturbation}
@@ -1140,7 +1140,7 @@ function EnrichmentResults({
                       <td>
                         {cellLine ? (
                           <a
-                            className="link link-primary hover:link-hover cursor-pointer"
+                            className="link link-neutral hover:link-hover cursor-pointer"
                             title="View on DepMap"
                             onClick={async (evt) => {
                               evt.preventDefault();
