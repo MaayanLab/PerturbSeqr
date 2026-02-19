@@ -149,7 +149,7 @@ function EnrichmentResults({
           <>
             {consensus ? (
               <>
-                After rummaging through <Stats show_gene_sets />.{" "}
+                After rummaging through {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.enrich?.geneSetCount || 0)} gene sets.{" "}
                 PerturbSeqr{" "}
                 <Image
                   className="inline-block rounded dark:invert"
@@ -166,7 +166,7 @@ function EnrichmentResults({
                 consensus perturbations.
               </>
             ) : moas ? <>
-            After rummaging through <Stats show_gene_sets />.{" "}
+            After rummaging through {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.enrich?.geneSetCount || 0)} gene sets.{" "}
                 PerturbSeqr{" "}
                 <Image
                   className="inline-block rounded dark:invert"
@@ -183,7 +183,7 @@ function EnrichmentResults({
                 consensus MoAs.</>
             : (
               <>
-                After rummaging through <Stats show_gene_sets />.{" "}
+                After rummaging through {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.enrich?.geneSetCount || 0)} gene sets.{" "}
                 PerturbSeqr{" "}
                 <Image
                   className="inline-block rounded dark:invert"
