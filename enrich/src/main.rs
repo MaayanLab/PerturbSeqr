@@ -1,10 +1,3 @@
-// TODO: Apply library filtering to paired enrichment endpoint (query_pairs function)
-// - Add library_names parameter to route
-// - Parse into HashSet
-// - Compute filtered background using library_backgrounds
-// - Filter gene set pairs by library
-// - Handle caching (skip cache when filter active)
-
 mod async_rwlockhashmap;
 mod fastfisher;
 mod bitvec;
@@ -685,22 +678,29 @@ async fn query(
                     .collect()
             };
             let pre_adj_count = results.len();
-            // Extract pvalues from results and compute adj_pvalues using Benjamini-Hochberg
-            // NOTE: We allocate for all gene sets because result.index references original positions.
-            // The BH adjustment needs consistent indexing. This is O(N) space but the main loop
-            // optimization above already reduced computation from O(N) to O(M).
-            let mut pvalues = vec![1.0; bitmap.values.len()];
-            for result in &results {
-                pvalues[result.index] = result.pvalue;
-            }
-            // add adj_pvalues to results
-            let adj_pvalues = adjust(&pvalues, Procedure::BenjaminiHochberg);
-            results.retain_mut(|result| {
-                if let Some(adj_pvalue) = adj_pvalues.get(result.index) {
-                    result.adj_pvalue = *adj_pvalue;
+            // Compute adj_pvalues using Benjamini-Hochberg.
+            // When library filtering is active, use compact indexing so BH only corrects
+            // over the filtered gene sets, not the entire database.
+            if library_filter.is_some() {
+                let pvalues: Vec<f64> = results.iter().map(|r| r.pvalue).collect();
+                let adj_pvalues = adjust(&pvalues, Procedure::BenjaminiHochberg);
+                for (i, result) in results.iter_mut().enumerate() {
+                    result.adj_pvalue = adj_pvalues[i];
                 }
-                result.adj_pvalue <= adj_pvalue_le
-            });
+                results.retain(|result| result.adj_pvalue <= adj_pvalue_le);
+            } else {
+                let mut pvalues = vec![1.0; bitmap.values.len()];
+                for result in &results {
+                    pvalues[result.index] = result.pvalue;
+                }
+                let adj_pvalues = adjust(&pvalues, Procedure::BenjaminiHochberg);
+                results.retain_mut(|result| {
+                    if let Some(adj_pvalue) = adj_pvalues.get(result.index) {
+                        result.adj_pvalue = *adj_pvalue;
+                    }
+                    result.adj_pvalue <= adj_pvalue_le
+                });
+            }
             let post_adj_count = results.len();
             println!("[{}] filter stats: {} passed pvalue, {} passed adj_pvalue", background_id, pre_adj_count, post_adj_count);
             results.sort_unstable_by(|a, b| a.pvalue.partial_cmp(&b.pvalue).unwrap_or(std::cmp::Ordering::Equal));
@@ -1428,25 +1428,38 @@ async fn query_pairs(
             })
             .collect();
 
-            // extract pvalues from results and compute adj_pvalues
-            let mut pvalues_mimic = vec![1.0; bitmap.values.len()];
-            let mut pvalues_reverse = vec![1.0; bitmap.values.len()];
-            for result in &results {
-                pvalues_mimic[result.index] = result.pvalue_mimic;
-                pvalues_reverse[result.index] = result.pvalue_reverse;
+            // Compute adj_pvalues using Benjamini-Hochberg.
+            // When library filtering is active, use compact indexing so BH only corrects
+            // over the filtered gene sets, not the entire database.
+            if library_filter.is_some() {
+                let pvalues_mimic: Vec<f64> = results.iter().map(|r| r.pvalue_mimic).collect();
+                let pvalues_reverse: Vec<f64> = results.iter().map(|r| r.pvalue_reverse).collect();
+                let adj_pvalues_mimic = adjust(&pvalues_mimic, Procedure::BenjaminiHochberg);
+                let adj_pvalues_reverse = adjust(&pvalues_reverse, Procedure::BenjaminiHochberg);
+                for (i, result) in results.iter_mut().enumerate() {
+                    result.adj_pvalue_mimic = adj_pvalues_mimic[i];
+                    result.adj_pvalue_reverse = adj_pvalues_reverse[i];
+                }
+                results.retain(|result| result.adj_pvalue_mimic <= adj_pvalue_le || result.adj_pvalue_reverse <= adj_pvalue_le);
+            } else {
+                let mut pvalues_mimic = vec![1.0; bitmap.values.len()];
+                let mut pvalues_reverse = vec![1.0; bitmap.values.len()];
+                for result in &results {
+                    pvalues_mimic[result.index] = result.pvalue_mimic;
+                    pvalues_reverse[result.index] = result.pvalue_reverse;
+                }
+                let adj_pvalues_mimic = adjust(&pvalues_mimic, Procedure::BenjaminiHochberg);
+                let adj_pvalues_reverse = adjust(&pvalues_reverse, Procedure::BenjaminiHochberg);
+                results.retain_mut(|result| {
+                    if let Some(adj_pvalue_mimic) = adj_pvalues_mimic.get(result.index) {
+                        result.adj_pvalue_mimic = *adj_pvalue_mimic;
+                    }
+                    if let Some(adj_pvalue_reverse) = adj_pvalues_reverse.get(result.index) {
+                        result.adj_pvalue_reverse = *adj_pvalue_reverse;
+                    }
+                    result.adj_pvalue_mimic <= adj_pvalue_le || result.adj_pvalue_reverse <= adj_pvalue_le
+                });
             }
-            // add adj_pvalues to results
-            let adj_pvalues_mimic = adjust(&pvalues_mimic, Procedure::BenjaminiHochberg);
-            let adj_pvalues_reverse = adjust(&pvalues_reverse, Procedure::BenjaminiHochberg);
-            results.retain_mut(|result| {
-                if let Some(adj_pvalue_mimic) = adj_pvalues_mimic.get(result.index) {
-                    result.adj_pvalue_mimic = *adj_pvalue_mimic;
-                }
-                if let Some(adj_pvalue_reverse) = adj_pvalues_reverse.get(result.index) {
-                    result.adj_pvalue_reverse = *adj_pvalue_reverse;
-                }
-                result.adj_pvalue_mimic <= adj_pvalue_le || result.adj_pvalue_reverse <= adj_pvalue_le
-            });
             results.sort_unstable_by(|a, b| a.pvalue_mimic.partial_cmp(&b.pvalue_mimic).unwrap_or(std::cmp::Ordering::Equal));
 
             let results = Arc::new(results);
