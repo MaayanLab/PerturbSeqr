@@ -19,7 +19,7 @@ import GeneSetModal from "@/components/geneSetModal";
 import { FaFilter, FaSortUp } from "react-icons/fa6";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { parseTerm } from "@/utils/parseTerm";
-import { preloadMetadata, enrichWithMetadataSync, preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, getDrugMoaSource, isGenePerturbationLibrary, getDatasetUrl } from "@/utils/metadataLookup";
+import { preloadMetadata, enrichWithMetadataSync, preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary, getDatasetUrl } from "@/utils/metadataLookup";
 
 const pageSize = 12;
 
@@ -1162,9 +1162,9 @@ function EnrichmentResults({
                   const baseParsed = term ? parseTerm(term, libraryName) : {};
                   const parsed = metadataLoaded ? enrichWithMetadataSync(baseParsed, libraryName) : baseParsed;
 
-                  const cellLine = parsed.cellLine || '';
-                  const timepoint = parsed.timepoint || '';
-                  const concentration = parsed.concentration || '';
+                  const cellLine = parsed.cellLine || 'N/A';
+                  const timepoint = parsed.timepoint || 'N/A';
+                  const concentration = parsed.concentration || 'N/A';
                   let perturbation = parsed.perturbation || parsed.raw || '';
                   // Mark KO perturbations
                   if (perturbation?.split(" ").length == 2 && !perturbation.includes("KO"))
@@ -1187,7 +1187,6 @@ function EnrichmentResults({
                   const perturbationLinkTitle = getPerturbationLinkTitle(libraryName);
                   // Use database MOA first, fallback to JSON lookup (only for drugs)
                   const moa = isGenePert ? '' : (dbMoa || drugInfo?.moa || '');
-                  const moaSource = moa ? (getDrugMoaSource(perturbation) || getDrugMoaSource(parsed.nsn || '')) : null;
 
                   if (!enrichmentResult?.geneSet) return null;
                   const dataset = libraryName || '';
@@ -1231,32 +1230,36 @@ function EnrichmentResults({
                         </div>
                       </td>
                       <td>
-                        <a
-                          className="underline cursor-pointer"
-                          onClick={async (evt) => {
-                            evt.preventDefault();
-                            const res = await fetch("enrich/depmapcl", {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({
-                                cellLine: cellLine,
-                              }),
-                            });
+                        {cellLine && cellLine !== 'N/A' ? (
+                          <a
+                            className="underline cursor-pointer"
+                            onClick={async (evt) => {
+                              evt.preventDefault();
+                              const res = await fetch("enrich/depmapcl", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                  cellLine: cellLine,
+                                }),
+                              });
 
-                            const resJson = await res.json();
-                            const suggestedCellLines = resJson.filter(
-                              (entry: any) => entry.type == "cell_line"
-                            );
-                            if (suggestedCellLines.length > 0) {
-                              window.open(
-                                `https://depmap.org${suggestedCellLines[0].url}`,
-                                "_blank"
+                              const resJson = await res.json();
+                              const suggestedCellLines = resJson.filter(
+                                (entry: any) => entry.type == "cell_line"
                               );
-                            }
-                          }}
-                        >
-                          {cellLine}
-                        </a>
+                              if (suggestedCellLines.length > 0) {
+                                window.open(
+                                  `https://depmap.org${suggestedCellLines[0].url}`,
+                                  "_blank"
+                                );
+                              }
+                            }}
+                          >
+                            {cellLine}
+                          </a>
+                        ) : (
+                          cellLine
+                        )}
                       </td>
                       <td>{timepoint}</td>
                       <td>{concentration}</td>
@@ -1268,16 +1271,6 @@ function EnrichmentResults({
                             <span className="line-clamp-2" title={moa}>
                               {moa}
                             </span>
-                            {moaSource && (
-                              <a
-                                href={moaSource.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-gray-500 hover:text-gray-700 block mt-0.5"
-                              >
-                                Source: {moaSource.name}
-                              </a>
-                            )}
                           </div>
                         ) : (
                           <span className="text-gray-400">-</span>

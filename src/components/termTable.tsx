@@ -5,7 +5,7 @@ import useQsState from '@/utils/useQsState';
 import Pagination from '@/components/pagination';
 import TermDownloadButton from '@/components/termDownloadButton';
 import { parseTerm } from '@/utils/parseTerm';
-import { preloadMetadata, enrichWithMetadataSync, preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, getDrugMoaSource, isGenePerturbationLibrary, getDatasetUrl } from '@/utils/metadataLookup';
+import { preloadMetadata, enrichWithMetadataSync, preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary, getDatasetUrl } from '@/utils/metadataLookup';
 import Image from 'next/image';
 
 
@@ -106,9 +106,9 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
               const dataset = libraryName || parsed.library || ''
               const direction = parsed.direction || ''
               const perturbation = parsed.perturbation || parsed.raw || ''
-              const cellLine = parsed.cellLine || ''
-              const timepoint = parsed.timepoint || ''
-              const concentration = parsed.concentration || ''
+              const cellLine = parsed.cellLine || 'N/A'
+              const timepoint = parsed.timepoint || 'N/A'
+              const concentration = parsed.concentration || 'N/A'
 
               // Check if this is a gene or drug perturbation library
               const isGenePert = isGenePerturbationLibrary(libraryName)
@@ -120,7 +120,6 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
                 : null
               const perturbationUrl = getPerturbationUrl(perturbation, libraryName)
               const perturbationLinkTitle = getPerturbationLinkTitle(libraryName)
-              const moaSource = drugInfo?.moa ? getDrugMoaSource(perturbation) || getDrugMoaSource(parsed.nsn || '') : null
 
               return (
                   <tr key={el?.term}>
@@ -170,23 +169,13 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
                         <span className="line-clamp-2" title={drugInfo.moa}>
                           {drugInfo.moa}
                         </span>
-                        {moaSource && (
-                          <a
-                            href={moaSource.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-gray-500 hover:text-gray-700 block mt-0.5"
-                          >
-                            Source: {moaSource.name}
-                          </a>
-                        )}
                       </div>
                     ) : (
                       <span className="text-gray-400">-</span>
                     )}
                   </td>
                   <td>
-                    {cellLine ? (
+                    {cellLine && cellLine !== 'N/A' ? (
                       <a
                         className="link link-neutral hover:link-hover cursor-pointer"
                         title="View on DepMap"
@@ -212,7 +201,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
                         {cellLine}
                       </a>
                     ) : (
-                      "-"
+                      cellLine
                     )}
                   </td>
                   <td>

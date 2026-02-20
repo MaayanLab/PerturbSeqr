@@ -91,7 +91,7 @@ const drugPerturbationDatasets: Dataset[] = [
   },
   {
     title: 'GEO Small Molecules',
-    value: '810 signatures',
+    value: '693 signatures',
     info: '',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/23193258/',
     publicationUrl2: 'https://pubmed.ncbi.nlm.nih.gov/11752295/',

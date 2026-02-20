@@ -19,7 +19,7 @@ import GeneSetModal from "@/components/geneSetModal";
 import { FaFilter, FaSortUp } from "react-icons/fa6";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { parseTerm } from "@/utils/parseTerm";
-import { preloadMetadata, enrichWithMetadataSync, preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, getDrugMoaSource, isGenePerturbationLibrary, getDatasetUrl } from "@/utils/metadataLookup";
+import { preloadMetadata, enrichWithMetadataSync, preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary, getDatasetUrl } from "@/utils/metadataLookup";
 
 const pageSize = 12;
 
@@ -1075,9 +1075,9 @@ function EnrichmentResults({
                   const dataset = libraryName || parsed.library || '';
                   const direction = parsed.direction || '';
                   const perturbation = parsed.perturbation || parsed.raw || '';
-                  const cellLine = parsed.cellLine || '';
-                  const timepoint = parsed.timepoint || '';
-                  const concentration = parsed.concentration || '';
+                  const cellLine = parsed.cellLine || 'N/A';
+                  const timepoint = parsed.timepoint || 'N/A';
+                  const concentration = parsed.concentration || 'N/A';
 
                   // Check if this is a gene or drug perturbation library
                   const isGenePert = isGenePerturbationLibrary(libraryName);
@@ -1096,7 +1096,6 @@ function EnrichmentResults({
                   const perturbationLinkTitle = getPerturbationLinkTitle(libraryName);
                   // Use database MOA first, fallback to JSON lookup (only for drugs)
                   const moa = isGenePert ? '' : (dbMoa || drugInfo?.moa || '');
-                  const moaSource = moa ? (getDrugMoaSource(perturbation) || getDrugMoaSource(parsed.nsn || '')) : null;
 
                   if (!enrichmentResult?.geneSets) return null;
                   return (
@@ -1138,7 +1137,7 @@ function EnrichmentResults({
                         </div>
                       </td>
                       <td>
-                        {cellLine ? (
+                        {cellLine && cellLine !== 'N/A' ? (
                           <a
                             className="link link-neutral hover:link-hover cursor-pointer"
                             title="View on DepMap"
@@ -1164,7 +1163,7 @@ function EnrichmentResults({
                             {cellLine}
                           </a>
                         ) : (
-                          "-"
+                          cellLine
                         )}
                       </td>
                       <td>{timepoint}</td>
@@ -1204,16 +1203,6 @@ function EnrichmentResults({
                             <span className="line-clamp-2" title={moa}>
                               {moa}
                             </span>
-                            {moaSource && (
-                              <a
-                                href={moaSource.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-gray-500 hover:text-gray-700 block mt-0.5"
-                              >
-                                Source: {moaSource.name}
-                              </a>
-                            )}
                           </div>
                         ) : (
                           <span className="text-gray-400">-</span>
