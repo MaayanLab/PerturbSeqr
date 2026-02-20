@@ -61,6 +61,8 @@ allLibraries.forEach(name => {
   }
 })
 
+export const resourceCount = logoGroups.length
+
 /**
  * DatasetIcons component - Clickable logo filter for datasets
  * Similar to enrichr-kg header icon bar

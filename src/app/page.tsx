@@ -4,7 +4,7 @@ import Image from "next/image";
 import InputForm from "./inputForm";
 import InputFormUpDown from "./inputFormUpDown";
 import LibraryFilter from "@/components/libraryFilter";
-import DatasetIcons from "@/components/datasetIcons";
+import DatasetIcons, { resourceCount } from "@/components/datasetIcons";
 import Stats from "@/components/stats";
 import libraryConfig from '@/config/libraries.json';
 
@@ -38,7 +38,7 @@ export default function Home() {
         />
       </div>
       <p className="text-center text-sm mb-4 max-w-2xl">
-        Search through <Stats show_gene_sets bold /> created from 10 Connectivity Mapping resources that performed massive single perturbations followed by expression experiments in human cells
+        Search through <Stats show_gene_sets bold /> created from {resourceCount} Connectivity Mapping resources that performed massive single perturbations followed by expression experiments in human cells
       </p>
       {/* Dataset icons filter - centered below header */}
       <DatasetIcons

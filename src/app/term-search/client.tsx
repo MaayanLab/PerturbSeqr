@@ -6,7 +6,7 @@ import Image from 'next/image'
 import useQsState from '@/utils/useQsState'
 import Stats from '@/components/stats'
 import LibraryFilter from '@/components/libraryFilter'
-import DatasetIcons from '@/components/datasetIcons'
+import DatasetIcons, { resourceCount } from '@/components/datasetIcons'
 import libraryConfig from '@/config/libraries.json'
 
 // Get all library display names for default selection
@@ -91,7 +91,7 @@ export default function TermSearchClientPage(props: { searchParams?: { page?: st
           />
         </div>
         <p className="text-center text-sm mb-4 max-w-2xl">
-          Search through <Stats show_gene_sets /> created from 10 Connectivity Mapping resources that performed massive single perturbations followed by expression experiments in human cells
+          Search through <Stats show_gene_sets /> created from {resourceCount} Connectivity Mapping resources that performed massive single perturbations followed by expression experiments in human cells
         </p>
         {/* Dataset icons filter - centered below header */}
         <DatasetIcons

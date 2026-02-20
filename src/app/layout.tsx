@@ -59,19 +59,19 @@ export const metadata: Metadata = {
     "L1000",
     "LINCS",
   ].join(", "),
-  metadataBase: new URL("https://l2s2.maayanlab.cloud"),
+  metadataBase: new URL("https://perturbseqr.k8s.dev.maayanlab.cloud"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: "PerturbSeqr",
     description:
-      "Search through 1,912,262 gene sets created from 10 Connectivity Mapping resources that performed massive single perturbations followed by expression experiments in human cells",
-    url: "https://l2s2.maayanlab.cloud",
+      "Search through 646,250 gene sets created from 12 Connectivity Mapping resources that performed massive single perturbations followed by expression experiments in human cells",
+    url: "https://perturbseqr.k8s.dev.maayanlab.cloud",
     siteName: "PerturbSeqr",
     images: [
       {
-        url: "https://l2s2.maayanlab.cloud/images/perturbseqr-logo.png",
+        url: "https://perturbseqr.k8s.dev.maayanlab.cloud/images/perturbseqr-logo.png",
         width: 1024,
         height: 998,
       },
