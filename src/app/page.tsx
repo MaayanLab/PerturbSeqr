@@ -1,5 +1,6 @@
 "use client"
-import React from "react";
+import React, { Suspense } from "react";
+import { useSearchParams } from 'next/navigation';
 import Image from "next/image";
 import InputForm from "./inputForm";
 import InputFormUpDown from "./inputFormUpDown";
@@ -18,11 +19,21 @@ const allLibraries = Object.values(libraryConfig.libraries).map((l: any) => l.di
  *   - selectedLibraries: Array of selected library names for filtering enrichment results
  * Output: Renders input card, library filter, and dataset icons side by side
  */
-export default function Home() {
-  const [inputSingle, setInputSingle] = React.useState(true)
+function HomeContent() {
+  const searchParams = useSearchParams()
+  const datasetIds = searchParams?.getAll('dataset') ?? []
+  const librariesParam = searchParams?.get('libraries') ?? null
+
+  const [inputSingle, setInputSingle] = React.useState(datasetIds.length !== 2)
   // State for selected libraries - passed to enrich page via URL params
-  // Default to all libraries selected
-  const [selectedLibraries, setSelectedLibraries] = React.useState<string[]>(allLibraries)
+  // Default to all libraries selected, or restore from URL params when returning from results
+  const [selectedLibraries, setSelectedLibraries] = React.useState<string[]>(() => {
+    if (librariesParam) {
+      const libs = librariesParam.split(',').filter(Boolean)
+      return libs.length > 0 ? libs : allLibraries
+    }
+    return allLibraries
+  })
 
   return (
     <div className="flex flex-col items-center">
@@ -51,9 +62,18 @@ export default function Home() {
         <div className="card w-[480px] shadow-2xl bg-base-100">
           <div className="card-body">
             {inputSingle ? (
-              <InputForm setInputSingle={setInputSingle} selectedLibraries={selectedLibraries} />
+              <InputForm
+                setInputSingle={setInputSingle}
+                selectedLibraries={selectedLibraries}
+                initialDatasetId={datasetIds.length === 1 ? datasetIds[0] : undefined}
+              />
             ) : (
-              <InputFormUpDown setInputSingle={setInputSingle} selectedLibraries={selectedLibraries} />
+              <InputFormUpDown
+                setInputSingle={setInputSingle}
+                selectedLibraries={selectedLibraries}
+                initialDatasetUpId={datasetIds.length >= 2 ? datasetIds[0] : undefined}
+                initialDatasetDownId={datasetIds.length >= 2 ? datasetIds[1] : undefined}
+              />
             )}
           </div>
         </div>
@@ -66,5 +86,13 @@ export default function Home() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function Home() {
+  return (
+    <Suspense>
+      <HomeContent />
+    </Suspense>
   )
 }

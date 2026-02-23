@@ -2,7 +2,7 @@
 import React from 'react'
 import example from './example.json'
 import uniqueArray from '@/utils/uniqueArray'
-import { useAddUserGeneSetMutation } from '@/graphql'
+import { useAddUserGeneSetMutation, useFetchUserGeneSetQuery } from '@/graphql'
 import classNames from 'classnames'
 import { useRouter } from 'next/navigation'
 import libraryConfig from '@/config/libraries.json'
@@ -18,14 +18,46 @@ const allLibraryCount = Object.keys(libraryConfig.libraries).length
  *   - selectedLibraries: Array of selected library names for filtering (passed to enrichpair page)
  * Output: Renders two gene input textareas (up and down), file uploads, and submit button
  */
-export default function InputFormUpDown({setInputSingle, selectedLibraries = []} : {setInputSingle:  React.Dispatch<React.SetStateAction<boolean>>, selectedLibraries?: string[]}) {
+export default function InputFormUpDown({setInputSingle, selectedLibraries = [], initialDatasetUpId, initialDatasetDownId} : {setInputSingle:  React.Dispatch<React.SetStateAction<boolean>>, selectedLibraries?: string[], initialDatasetUpId?: string, initialDatasetDownId?: string}) {
   const router = useRouter()
   const [rawGenesUp, setRawGenesUp] = React.useState('')
   const [rawGenesDown, setRawGenesDown] = React.useState('')
+
+  // Fetch initial gene sets when returning from results page
+  const { data: initialGeneSetUp } = useFetchUserGeneSetQuery({
+    skip: !initialDatasetUpId,
+    variables: { id: initialDatasetUpId || '' },
+  })
+  const { data: initialGeneSetDown } = useFetchUserGeneSetQuery({
+    skip: !initialDatasetDownId,
+    variables: { id: initialDatasetDownId || '' },
+  })
+  const appliedInitialUp = React.useRef(false)
+  const appliedInitialDown = React.useRef(false)
+  React.useEffect(() => {
+    if (!appliedInitialUp.current && initialGeneSetUp?.userGeneSet?.genes) {
+      const genes = initialGeneSetUp.userGeneSet.genes.filter((g): g is string => !!g)
+      if (genes.length > 0) {
+        setRawGenesUp(genes.join('\n'))
+        appliedInitialUp.current = true
+      }
+    }
+  }, [initialGeneSetUp])
+  React.useEffect(() => {
+    if (!appliedInitialDown.current && initialGeneSetDown?.userGeneSet?.genes) {
+      const genes = initialGeneSetDown.userGeneSet.genes.filter((g): g is string => !!g)
+      if (genes.length > 0) {
+        setRawGenesDown(genes.join('\n'))
+        appliedInitialDown.current = true
+      }
+    }
+  }, [initialGeneSetDown])
   const genesUp = React.useMemo(() => uniqueArray(rawGenesUp.split(/[;,\t\r\n\s]+/).filter(v => v)), [rawGenesUp])
   const genesDown = React.useMemo(() => uniqueArray(rawGenesDown.split(/[;,\t\r\n\s]+/).filter(v => v)), [rawGenesDown])
   const [addUserGeneSetMutation, { loading, error }] = useAddUserGeneSetMutation()
   var fileReader = React.useRef<FileReader | null>(null);
+  const fileInputUpRef = React.useRef<HTMLInputElement>(null);
+  const fileInputDownRef = React.useRef<HTMLInputElement>(null);
   const [upDescription, setUpDescription] = React.useState('User Up Gene Set')
   const [downDescription, setDownDescription] = React.useState('User Down Gene Set') 
 
@@ -114,7 +146,8 @@ export default function InputFormUpDown({setInputSingle, selectedLibraries = []}
             />
             <input
                 className="block w-full mb-5 text-xs border-2 rounded-lg pl-2 text-gray-900 cursor-pointer dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-                id="fileUpload"
+                ref={fileInputUpRef}
+                id="fileUploadUp"
                 type="file"
                 onChange={(e) => {handleFileChosenUp(e.target.files?.[0] || null)}}/>
             {genesUp.length} up gene(s) entered
@@ -131,7 +164,8 @@ export default function InputFormUpDown({setInputSingle, selectedLibraries = []}
           />
           <input
               className="block w-full text-xs mb-5 border-2 rounded-lg pl-2 text-gray-900 cursor-pointer dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-              id="fileUpload"
+              ref={fileInputDownRef}
+              id="fileUploadDown"
               type="file"
               onChange={(e) => {handleFileChosenDown(e.target.files?.[0] || null)}}/>
           {genesDown.length} down gene(s) entered
@@ -140,6 +174,7 @@ export default function InputFormUpDown({setInputSingle, selectedLibraries = []}
         <span className={classNames("loading", "w-6", { 'hidden': !loading })}></span>
         <div className={classNames("alert alert-error", { 'hidden': !error })}>{error?.message ?? null}</div>
         <button className="btn mx-auto" type="submit" disabled={(genesUp.length < 1 || genesDown.length < 1)}>Submit</button>
+        <button className="btn btn-outline btn-sm mx-auto mt-1" type="button" disabled={genesUp.length < 1 && genesDown.length < 1} onClick={() => { setRawGenesUp(''); setRawGenesDown(''); if (fileInputUpRef.current) fileInputUpRef.current.value = ''; if (fileInputDownRef.current) fileInputDownRef.current.value = '' }}>Clear</button>
       </form>
       <button className='btn btn-outline text-xs p-2' onClick={() => setInputSingle(true)}>SWITCH TO SINGLE SET INPUT</button>
     </>

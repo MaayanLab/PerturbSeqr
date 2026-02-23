@@ -74,7 +74,7 @@ export default function TermSearchClientPage(props: { searchParams?: { page?: st
     queryString.libraries ? queryString.libraries.split(',').filter(Boolean) : null,
     [queryString.libraries]
   )
-  React.useEffect(() => {setRawTerms(queryString.q ?? '')}, [queryString.q])
+  React.useEffect(() => { if (queryString.q) setRawTerms(queryString.q) }, [queryString.q])
   if (!queryString.q) {
     // Initial state: Header, DatasetIcons, Input card, Library filter
     return (
@@ -169,6 +169,18 @@ export default function TermSearchClientPage(props: { searchParams?: { page?: st
             setQueryString({ page: '1', q: rawTerms, libraries: queryString.libraries })
           }}
         >
+          <button
+            type="button"
+            className="btn btn-sm btn-outline"
+            onClick={() => {
+              if (libraryNames && libraryNames.length > 0) {
+                setSelectedLibraries(libraryNames)
+              }
+              setQueryString({ page: '1', q: '', libraries: '' })
+            }}
+          >
+            ← Back
+          </button>
           <span className="label-text text-lg">Term</span>
           <input
             type="text"

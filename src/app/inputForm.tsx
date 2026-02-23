@@ -2,7 +2,7 @@
 import React from 'react'
 import example from './example.json'
 import uniqueArray from '@/utils/uniqueArray'
-import { useAddUserGeneSetMutation } from '@/graphql'
+import { useAddUserGeneSetMutation, useFetchUserGeneSetQuery } from '@/graphql'
 import classNames from 'classnames'
 import { useRouter } from 'next/navigation'
 import libraryConfig from '@/config/libraries.json'
@@ -18,9 +18,25 @@ const allLibraryCount = Object.keys(libraryConfig.libraries).length
  *   - selectedLibraries: Array of selected library names for filtering (passed to enrich page)
  * Output: Renders gene input textarea, file upload, and submit button
  */
-export default function InputForm({setInputSingle, selectedLibraries = []} : {setInputSingle:  React.Dispatch<React.SetStateAction<boolean>>, selectedLibraries?: string[]}) {
+export default function InputForm({setInputSingle, selectedLibraries = [], initialDatasetId} : {setInputSingle:  React.Dispatch<React.SetStateAction<boolean>>, selectedLibraries?: string[], initialDatasetId?: string}) {
   const router = useRouter()
   const [rawGenes, setRawGenes] = React.useState('')
+
+  // Fetch initial gene set when returning from results page
+  const { data: initialGeneSet } = useFetchUserGeneSetQuery({
+    skip: !initialDatasetId,
+    variables: { id: initialDatasetId || '' },
+  })
+  const appliedInitial = React.useRef(false)
+  React.useEffect(() => {
+    if (!appliedInitial.current && initialGeneSet?.userGeneSet?.genes) {
+      const genes = initialGeneSet.userGeneSet.genes.filter((g): g is string => !!g)
+      if (genes.length > 0) {
+        setRawGenes(genes.join('\n'))
+        appliedInitial.current = true
+      }
+    }
+  }, [initialGeneSet])
   const genes = React.useMemo(() =>
     uniqueArray(
       rawGenes
@@ -32,6 +48,7 @@ export default function InputForm({setInputSingle, selectedLibraries = []} : {se
   
   const [addUserGeneSetMutation, { loading, error }] = useAddUserGeneSetMutation()
   var fileReader = React.useRef<FileReader | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [description, setDescription] = React.useState('User Gene Set')
 
   const handleFileRead = React.useCallback(() => {
@@ -96,11 +113,13 @@ export default function InputForm({setInputSingle, selectedLibraries = []} : {se
         />
         <input
             className="block w-full mb-5 text-xs border-2 rounded-lg pl-2 text-gray-900 cursor-pointer dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+            ref={fileInputRef}
             id="fileUpload"
             type="file"
             onChange={(e) => {handleFileChosen(e.target.files?.[0] || null)}}/>
         <span className='mx-auto'>{genes.length} gene(s) entered</span>
         <button className="btn mx-auto" type="submit" disabled={genes.length < 1 || genes.length > 3000}  data-tooltip-target="tooltip">Submit</button>
+        <button className="btn btn-outline btn-sm mx-auto mt-1" type="button" disabled={genes.length < 1} onClick={() => { setRawGenes(''); if (fileInputRef.current) fileInputRef.current.value = '' }}>Clear</button>
         <span className={classNames("loading", "w-6", { 'hidden': !loading })}></span>
         <div className={classNames("alert alert-error", { 'hidden': !error })}>{error?.message ?? null}</div>
         {genes.length > 3000 && <div className="alert alert-error">Gene set is too large. Please enter a gene set with less than 3000 genes.</div>}

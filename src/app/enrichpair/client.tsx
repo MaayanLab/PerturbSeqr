@@ -20,6 +20,7 @@ import { FaFilter, FaSortUp } from "react-icons/fa6";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { parseTerm } from "@/utils/parseTerm";
 import { preloadMetadata, enrichWithMetadataSync, preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary, getDatasetUrl } from "@/utils/metadataLookup";
+import { useRouter } from "next/navigation";
 
 const pageSize = 12;
 
@@ -1566,6 +1567,7 @@ export default function EnrichClientPage({
     variables: { id: datasetDown },
   });
   const [modalGeneSet, setModalGeneSet] = React.useState<GeneSetModalT>();
+  const router = useRouter();
 
   const allGenes = userGeneSetDown?.userGeneSet?.genes?.filter((gene): gene is string => !!gene).concat(
     userGeneSetUp?.userGeneSet?.genes?.filter((gene): gene is string => !!gene) || []
@@ -1582,6 +1584,20 @@ export default function EnrichClientPage({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-row gap-2 alert">
+        <button
+          className="btn btn-sm btn-outline"
+          onClick={() => {
+            const params = new URLSearchParams()
+            params.append('dataset', datasetUp)
+            params.append('dataset', datasetDown)
+            if (libraryNames && libraryNames.length > 0) {
+              params.set('libraries', libraryNames.join(','))
+            }
+            router.push(`/?${params.toString()}`)
+          }}
+        >
+          ← Back
+        </button>
         <span className="prose">Input:</span>
         <label
           htmlFor="geneSetModal"

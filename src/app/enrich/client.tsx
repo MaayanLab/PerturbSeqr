@@ -20,6 +20,7 @@ import { FaFilter, FaSortUp } from "react-icons/fa6";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { parseTerm } from "@/utils/parseTerm";
 import { preloadMetadata, enrichWithMetadataSync, preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary, getDatasetUrl } from "@/utils/metadataLookup";
+import { useRouter } from "next/navigation";
 
 const pageSize = 12;
 
@@ -1426,6 +1427,7 @@ export default function EnrichClientPage({
   });
 
   const [modalGeneSet, setModalGeneSet] = React.useState<GeneSetModalT>();
+  const router = useRouter();
 
   const { data: userGeneSetInfo } = useFetchGeneInfoQuery({
       skip: !dataset,
@@ -1439,6 +1441,19 @@ export default function EnrichClientPage({
     <div className="flex flex-col gap-4">
       {/* Input info */}
       <div className="flex flex-row gap-2 alert">
+        <button
+          className="btn btn-sm btn-outline"
+          onClick={() => {
+            const params = new URLSearchParams()
+            params.set('dataset', dataset)
+            if (libraryNames && libraryNames.length > 0) {
+              params.set('libraries', libraryNames.join(','))
+            }
+            router.push(`/?${params.toString()}`)
+          }}
+        >
+          ← Back
+        </button>
         <span className="prose">Input:</span>
         <label
           htmlFor="geneSetModal"
