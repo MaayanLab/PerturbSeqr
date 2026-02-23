@@ -69,11 +69,11 @@ export default function LibraryFilter({
     <label key={libraryName} className="flex items-center gap-2 cursor-pointer">
       <input
         type="checkbox"
-        className="checkbox checkbox-xs"
+        className="checkbox checkbox-sm"
         checked={selectedLibraries.includes(libraryName)}
         onChange={() => handleToggle(libraryName)}
       />
-      <span className="text-xs">{libraryName}</span>
+      <span className="text-sm">{libraryName}</span>
     </label>
   )
 
@@ -86,7 +86,7 @@ export default function LibraryFilter({
     return (
       <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between">
-          <span className="font-medium text-xs text-base-content/70">{title}</span>
+          <span className="font-bold text-base text-base-content">{title}</span>
           <button
             type="button"
             className="btn btn-xs btn-ghost text-xs px-1"
@@ -95,7 +95,7 @@ export default function LibraryFilter({
             {isCategoryAllSelected(categoryLibraries) ? 'None' : 'All'}
           </button>
         </div>
-        <div className="flex flex-col gap-1 ml-1">
+        <div className="flex flex-col gap-2 ml-1">
           {categoryLibraries.map(renderLibraryCheckbox)}
         </div>
       </div>
@@ -104,7 +104,7 @@ export default function LibraryFilter({
 
   return (
     <div className={`bg-base-100 h-full ${compact ? 'rounded-lg border' : 'card shadow-2xl'}`}>
-      <div className={`flex flex-col gap-3 ${compact ? 'p-3 max-h-80 overflow-y-auto' : 'card-body p-4'}`}>
+      <div className={`flex flex-col gap-4 h-full ${compact ? 'p-3 max-h-80 overflow-y-auto' : 'card-body p-4'}`}>
         {renderCategory('Drug/Chemical Perturbation', drugLibraries)}
         {renderCategory('Gene Perturbation', geneLibraries)}
         {compact && selectedLibraries.length > 0 && (

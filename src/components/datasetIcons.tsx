@@ -20,9 +20,9 @@ const logoMap: Record<string, { src: string; darkSrc?: string; type: 'image' | '
   'Ginkgo Bioworks': { src: '/images/ginkgo-logo.png', type: 'image' },
   'Perturb Atlas': { src: '/images/perturbatlas-logo.png', type: 'image' },
   'Perturb Atlas Mouse': { src: '/images/perturbatlas-logo.png', type: 'image' },
-  'Replogle K562 Essential': { src: '/images/replogle-logo.svg', type: 'svg' },
-  'Replogle K562 Genome-wide': { src: '/images/replogle-logo.svg', type: 'svg' },
-  'Replogle RPE1 Essential': { src: '/images/replogle-logo.svg', type: 'svg' },
+  'Replogle et al. K562 Essential': { src: '/images/replogle-logo.svg', type: 'svg' },
+  'Replogle et al. K562 Genome-wide': { src: '/images/replogle-logo.svg', type: 'svg' },
+  'Replogle et al. RPE1 Essential': { src: '/images/replogle-logo.svg', type: 'svg' },
   'CM4AI': { src: '/images/cm4ai-logo.png', darkSrc: '/images/cm4ai-logo-dark.png', type: 'image' },
 }
 
@@ -32,7 +32,7 @@ const groupSubtitles: Record<string, string> = {
   '/images/creeds-logo.png': 'creeds',
   '/images/rummageo-logo.png': 'rummageo',
   '/images/perturbatlas-logo.png': 'perturb atl',
-  '/images/replogle-logo.svg': 'replogle',
+  '/images/replogle-logo.svg': 'replogle et al.',
   '/images/nibr-logo.png': 'nibr d-seq',
   '/images/cmap-logo.svg': 'cmap arrays',
   '/images/tahoe-logo-new.png': 'tahoe-100m',
@@ -121,16 +121,17 @@ export default function DatasetIcons({
       <div className="flex flex-row items-center justify-center flex-wrap gap-2">
         {logoGroups.map(({ logo, darkLogo, libraries, subtitle }) => {
           const isSmall = logo === '/images/sciplex-logo.svg' || logo === '/images/lincs-logo.png'
-          const size = isSmall ? 50 : 80
+          const customSize: Record<string, number> = { '/images/rummageo-logo.png': 60 }
+          const size = customSize[logo] || (isSmall ? 50 : 80)
           return (
             <button
               key={logo}
               type="button"
               onClick={() => handleToggleGroup(libraries)}
-              className={`btn btn-ghost p-2 h-auto min-h-0 w-28 flex flex-col items-center justify-center transition-all rounded-lg mx-1 ${getButtonStyle(libraries)}`}
+              className={`btn btn-ghost p-2 h-auto min-h-0 w-32 flex flex-col items-center justify-center transition-all rounded-lg mx-1 ${getButtonStyle(libraries)}`}
               title={libraries.join(', ')}
             >
-              <div className={`w-20 h-20 relative flex items-center justify-center ${isSmall ? 'bg-white dark:bg-gray-800 rounded-lg p-2' : ''}`}>
+              <div className={`w-24 h-24 relative flex items-center justify-center ${isSmall ? 'bg-white dark:bg-gray-800 rounded-lg p-2' : ''}`}>
                 {darkLogo ? (
                   <>
                     <Image src={logo} alt={libraries[0]} width={size} height={size} className="object-contain max-w-full max-h-full dark:hidden" />
@@ -140,7 +141,7 @@ export default function DatasetIcons({
                   <Image src={logo} alt={libraries[0]} width={size} height={size} className={`object-contain max-w-full max-h-full ${logo === '/images/sciplex-logo.svg' ? '' : 'dark:invert'}`} />
                 )}
               </div>
-              <span className="text-xs mt-1 leading-tight text-center">{subtitle}</span>
+              <span className="text-xs mt-1 leading-tight text-center whitespace-nowrap">{subtitle}</span>
             </button>
           )
         })}

@@ -18,9 +18,9 @@ const DATASETS = {
     { id: 'perturb-atlas', name: 'Perturb Atlas', signatures: '12,852' },
     { id: 'perturb-atlas-mouse', name: 'Perturb Atlas Mouse', signatures: '10,743' },
     { id: 'geo-gene', name: 'GEO-Gene', signatures: '1,477' },
-    { id: 'replogle-perturb-seq-k562-essential', name: 'Replogle K562 Essential', signatures: '2,383' },
-    { id: 'replogle-perturb-seq-k562-genomewide', name: 'Replogle K562 Genome-wide', signatures: '4,110' },
-    { id: 'replogle-perturb-seq-rpe1-essential', name: 'Replogle RPE1 Essential', signatures: '2,714' },
+    { id: 'replogle-perturb-seq-k562-essential', name: 'Replogle et al. K562 Essential', signatures: '2,383' },
+    { id: 'replogle-perturb-seq-k562-genomewide', name: 'Replogle et al. K562 Genome-wide', signatures: '4,110' },
+    { id: 'replogle-perturb-seq-rpe1-essential', name: 'Replogle et al. RPE1 Essential', signatures: '2,714' },
     { id: 'cm4ai', name: 'CM4AI', signatures: '11,739' },
   ],
 }

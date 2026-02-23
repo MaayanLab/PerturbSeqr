@@ -224,7 +224,7 @@
       "parsedExample": { "gse": "GSE100102", "sampleA": "0", "v": "v", "sampleB": "5", "perturbation": "cgas", "organism": "mouse", "direction": "up" }
     },
     "replogle-perturb-seq-k562-essential": {
-      "displayName": "Replogle K562 Essential",
+      "displayName": "Replogle et al. K562 Essential",
       "category": "gene",
       "source": "https://maayanlab.cloud/Harmonizome/dataset/Replogle+et+al.,+Cell,+2022+K562+Essential+Perturb-seq+Gene+Perturbation+Signatures",
       "sourceNote": "Gene expression profiles in K562 cells following CRISPRi perturbation of essential genes. Replogle et al., Cell, 2022. Reprocessed from Harmonizome.",
@@ -240,7 +240,7 @@
       "parsedExample": { "id": "10023", "perturbation": "ZC3H18", "batch": "P1P2", "direction": "up" }
     },
     "replogle-perturb-seq-k562-genomewide": {
-      "displayName": "Replogle K562 Genome-wide",
+      "displayName": "Replogle et al. K562 Genome-wide",
       "category": "gene",
       "source": "https://maayanlab.cloud/Harmonizome/dataset/Replogle+et+al.,+Cell,+2022+K562+Genome-wide+Perturb-seq+Gene+Perturbation+Signatures",
       "sourceNote": "Gene expression profiles in K562 cells following CRISPRi perturbation genome-wide. Replogle et al., Cell, 2022. Reprocessed from Harmonizome.",
@@ -256,7 +256,7 @@
       "parsedExample": { "id": "10005", "perturbation": "ZBTB4", "batch": "P1", "direction": "up" }
     },
     "replogle-perturb-seq-rpe1-essential": {
-      "displayName": "Replogle RPE1 Essential",
+      "displayName": "Replogle et al. RPE1 Essential",
       "category": "gene",
       "source": "https://maayanlab.cloud/Harmonizome/dataset/Replogle+et+al.,+Cell,+2022+RPE1+Essential+Perturb-seq+Gene+Perturbation+Signatures",
       "sourceNote": "Gene expression profiles in RPE1 cells following CRISPRi perturbation of essential genes. Replogle et al., Cell, 2022. Reprocessed from Harmonizome.",

@@ -26,9 +26,19 @@ export default async function About() {
       </div>
       <div className="flex">
         <div className="flex-col">
-          <br></br>
-          <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
+          <h3 className="text-lg font-semibold mt-4">Perturb-Seqr: Comprehensive Signature Search Engine Integrating Connectivity Maps from Multiple Sources</h3>
+          <p className="text-sm mt-1">
+            John K. Gardner<sup>1</sup>, Lily D. Taub<sup>1</sup>, Ido Diamant<sup>1</sup>, Avi Ma&apos;ayan<sup>1</sup>
+          </p>
+          <p className="text-xs text-gray-500 mt-1">
+            <sup>1</sup>Department of Pharmacological Sciences, Mount Sinai Center for Bioinformatics, Icahn School of Medicine at Mount Sinai, New York, New York; CFDE Data Resource Center
+          </p>
+          <h4 className="text-md font-semibold mt-4">Abstract</h4>
+          <p className="mt-1">
+            Connectivity Mapping was significantly expanded via the NIH Common Fund LINCS program that produced a massive drug and single gene knockout perturbations followed by expression resource with the L1000 assay. These efforts set the stage for a new wave of Connectivity Mapping datasets that recently emerged due the availability of the DRUG-seq and Perturb-seq biotechnologies. However, as far as we know, no efforts were made to integrate multiple Connectivity Mapping resources for an integrative search. Motivated by this opportunity, we have developed Perturb-seqr, a comprehensive Connectivity Mapping search engine that integrates 9 small molecules transcriptomics Connectivity Maps and 9 single gene perturbation Connectivity Maps. Specifically, Perturb-seqr contains processed data from Bridge2AI CM4AI (Perturb-seq), LINCS (L1000), Tahoe-100M, NIBR (DRUG-seq), the original CMap (cDNA microarrays), Ginkgo Bioworks (DRUG-seq), SciPlex, DeepCover MoA (Proteomics), Perturb Atlas (Perturb-seq), Replogle et al. (Perturb-seq), and CREEDS (cDNA microarrays), and RummaGEO (RNA-seq). To serve these dataset in one unifying search engine, we assembled over 650,000 sets of up- and down-regulated genes measuring the effects of over 11,000 unique drugs, and over 12,000 unique gene perturbations, targeting over 4,000 cell lines or tissues. Users of Perturb-seqr can submit their own up- and down-gene-sets to identify small molecules and gene perturbations that produce the most similar or opposite effect on gene expression. Perturb-seqr also provides interactive UMAP visualizations for exploring the clustering of signatures from each dataset, as well as programmatic access to Perturb-seqr via a GraphQL API. To demonstrate how Perturb-seqr can be used for drug and target discovery, we applied it to a dataset that seeks to identify drugs that would maximize insulin secretion from pancreatic islets. Overall, Perturb-Seqr introduces the most comprehensive up-to-date Connectivity Mapping search engine and database, enabling the discovery of new drugs and targets.
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            Supported by the NIH Common Fund (Award OT2OD036435).
           </p>
           <br />
           <p>

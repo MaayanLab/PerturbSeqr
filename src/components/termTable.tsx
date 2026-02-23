@@ -79,7 +79,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
             <TermDownloadButton dataFiltered={dataFiltered} filterTerm={searchTerm || ""} />
           </div>
         </div>
-        <table className="table table-xs">
+        <table className="table table-sm">
           <thead>
             <tr>
               {/* Dataset column - extracted from term prefix before colon */}
