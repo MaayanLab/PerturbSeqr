@@ -252,30 +252,6 @@ export type DrugInfo = {
   source_url: string
 }
 
-// Source display names and URLs
-export const SOURCE_INFO: Record<string, { name: string; url: string }> = {
-  drug_repurposing_hub: {
-    name: 'Drug Repurposing Hub',
-    url: 'https://repo-hub.broadinstitute.org/repurposing-app',
-  },
-  tahoe: {
-    name: 'Tahoe-100M',
-    url: 'https://huggingface.co/datasets/tahoebio/Tahoe-100M#drug-metadata',
-  },
-  'NIBR DRUG-seq': {
-    name: 'NIBR DRUG-seq',
-    url: 'https://zenodo.org/records/14291446',
-  },
-  lincs: {
-    name: 'LINCS',
-    url: 'https://clue.io/data/REP#LINCS',
-  },
-  pubchem: {
-    name: 'PubChem',
-    url: 'https://pubchem.ncbi.nlm.nih.gov',
-  },
-}
-
 let drugLookupCache: Record<string, DrugInfo> | null = null
 let drugLookupLoading: Promise<Record<string, DrugInfo> | null> | null = null
 
@@ -374,24 +350,6 @@ export function getDrugTargets(drugName: string): string | null {
 export function isDrugFdaApproved(drugName: string): boolean {
   const info = getDrugInfo(drugName)
   return info?.fda_approved ?? false
-}
-
-/**
- * Get source information for MOA attribution.
- * Returns the source name and URL for displaying "Source: [Link]"
- * Uses moa_source if available (tracks where MOA actually came from),
- * otherwise falls back to source for backwards compatibility.
- */
-export function getDrugMoaSource(drugName: string): { name: string; url: string } | null {
-  const info = getDrugInfo(drugName)
-  if (!info?.moa) {
-    return null  // No MOA, no source to show
-  }
-
-  // Use moa_source if available (new field that tracks where MOA came from)
-  // Fall back to source for backwards compatibility with old drug_lookup.json
-  const sourceKey = info.moa_source || info.source
-  return SOURCE_INFO[sourceKey] || null
 }
 
 /**

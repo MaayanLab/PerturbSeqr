@@ -23,7 +23,7 @@ const logoMap: Record<string, { src: string; darkSrc?: string; type: 'image' | '
   'Replogle K562 Essential': { src: '/images/replogle-logo.svg', type: 'svg' },
   'Replogle K562 Genome-wide': { src: '/images/replogle-logo.svg', type: 'svg' },
   'Replogle RPE1 Essential': { src: '/images/replogle-logo.svg', type: 'svg' },
-  'CM4AI': { src: '/images/cm4ai-logo.png', type: 'image' },
+  'CM4AI': { src: '/images/cm4ai-logo.png', darkSrc: '/images/cm4ai-logo-dark.png', type: 'image' },
 }
 
 // Subtitle overrides for groups with multiple datasets sharing a logo

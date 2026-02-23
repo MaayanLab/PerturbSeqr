@@ -171,7 +171,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
                         </span>
                       </div>
                     ) : (
-                      <span className="text-gray-400">-</span>
+                      <span className="text-gray-400">N/A</span>
                     )}
                   </td>
                   <td>
