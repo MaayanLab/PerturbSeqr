@@ -213,7 +213,8 @@ function EnrichmentResults({
                   </>
                 )}
       </h2>
-      <div className="flex-row">
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-row flex-wrap items-center gap-2">
         <button
           onClick={() => {
             if (queryString.fda === "false")
@@ -243,8 +244,8 @@ function EnrichmentResults({
           }}
           className={
             queryString.fda === "true"
-              ? "button btn btn-sm float-left mx-4 bg-gray-600 hover:bg-gray-800"
-              : "button btn btn-sm float-left mx-4"
+              ? "button btn btn-sm bg-gray-600 hover:bg-gray-800"
+              : "button btn btn-sm"
           }
         >
           Approved
@@ -281,8 +282,8 @@ function EnrichmentResults({
           }}
           className={
             queryString.consensus === "true"
-              ? "button btn btn-sm float-left mr-4 bg-gray-600 hover:bg-gray-800"
-              : "button btn btn-sm float-left mr-4"
+              ? "button btn btn-sm bg-gray-600 hover:bg-gray-800"
+              : "button btn btn-sm"
           }
         >
           Consensus Perturbations
@@ -318,8 +319,8 @@ function EnrichmentResults({
           }}
           className={
             queryString.moas === "true"
-              ? "button btn btn-sm float-left mr-4 bg-gray-600 hover:bg-gray-800"
-              : "button btn btn-sm float-left mr-4"
+              ? "button btn btn-sm bg-gray-600 hover:bg-gray-800"
+              : "button btn btn-sm"
           }
         >
           Consensus MoAs
@@ -356,8 +357,8 @@ function EnrichmentResults({
           }}
           className={
             queryString.ko === "true"
-              ? "button btn btn-sm float-left mr-4 bg-gray-600 hover:bg-gray-800"
-              : "button btn btn-sm float-left mr-4"
+              ? "button btn btn-sm bg-gray-600 hover:bg-gray-800"
+              : "button btn btn-sm"
           }
         >
           CRISPR KOs
@@ -365,7 +366,7 @@ function EnrichmentResults({
 
         <div
           id="dir-select"
-          className="join place-content-start place-items-center float-left mr-4"
+          className="join place-content-start place-items-center"
         >
           <div
             className={
@@ -445,7 +446,7 @@ function EnrichmentResults({
           </div>
         </div>
         {(consensus || moas) ? (
-          <div className="inline-flex items-center ml-5 transition-all accent-gray-600">
+          <div className="inline-flex items-center transition-all accent-gray-600">
             <label
               className="text-sm font-bold mr-3 tooltip inline-flex"
               htmlFor="default-range"
@@ -490,9 +491,10 @@ function EnrichmentResults({
             </div>
           </div>
         ) : <></>}
+        </div>
         <form
           id="search-form"
-          className="join flex flex-row place-content-end place-items-center overflow-visible mt-5"
+          className="join flex flex-row place-content-end place-items-center overflow-visible"
           onSubmit={(evt) => {
             evt.preventDefault();
             setQueryString({
