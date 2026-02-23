@@ -139,6 +139,24 @@ function EnrichmentResults({
     loadData();
   }, [libraryNames]);
 
+  // Compute column visibility - hide columns that are entirely N/A on current page
+  const columnVisibility = React.useMemo(() => {
+    const nodes = enrichmentResults?.currentBackground?.enrich?.nodes;
+    if (!nodes) return { cellLine: true, timepoint: true, concentration: true };
+    let hasCellLine = false, hasTimepoint = false, hasConcentration = false;
+    for (const node of nodes) {
+      const term = node?.geneSets.nodes[0].term;
+      const libraryName = node?.geneSets.nodes[0].library?.name || '';
+      const baseParsed = term ? parseTerm(term, libraryName) : {};
+      const parsed = metadataLoaded ? enrichWithMetadataSync(baseParsed, libraryName) : baseParsed;
+      if (parsed.cellLine && parsed.cellLine !== 'N/A') hasCellLine = true;
+      if (parsed.timepoint && parsed.timepoint !== 'N/A') hasTimepoint = true;
+      if (parsed.concentration && parsed.concentration !== 'N/A') hasConcentration = true;
+      if (hasCellLine && hasTimepoint && hasConcentration) break;
+    }
+    return { cellLine: hasCellLine, timepoint: hasTimepoint, concentration: hasConcentration };
+  }, [enrichmentResults, metadataLoaded]);
+
   return (
     <div className="flex flex-col gap-2 my-2">
       <h2 className="text-md font-bold">
@@ -515,7 +533,7 @@ function EnrichmentResults({
           <DownloadButton queryString={queryString}></DownloadButton>
         </form>
       </div>
-      <div className="overflow-x-scroll">
+      <div className="overflow-x-auto -mx-8 md:-mx-24 px-2">
         {consensus || moas ? (
           <>
             <table className="table table-sm">
@@ -811,7 +829,7 @@ function EnrichmentResults({
                               </a>
                               {cid && (
                                 <div className="text-xs text-gray-500">
-                                  PubChem CID: {cid}
+                                  <span title="PubChem Compound ID">PCID:</span> {cid}
                                 </div>
                               )}
                             </div>
@@ -930,13 +948,13 @@ function EnrichmentResults({
                     <IoMdInformationCircleOutline className="ml-0.5" />
                   </span>
                 </th>
-                <th>Cell Line</th>
-                <th>
+                <th className={columnVisibility.cellLine ? "" : "hidden"}>Cell Line</th>
+                <th className={columnVisibility.timepoint ? "" : "hidden"}>
                   Time
                   <br />
                   point
                 </th>
-                <th>Concentration</th>
+                <th className={columnVisibility.concentration ? "" : "hidden"}>Concentration</th>
                 <th>Direction</th>
                 <th className="relative group">
                   <div className="absolute z-10 left-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
@@ -1103,46 +1121,46 @@ function EnrichmentResults({
                   return (
                     <tr key={genesetIndex} className="text-left">
                       <td className={"hidden"}>{term}</td>
-                      <td>
+                      <td className="max-w-[120px]">
                         {getDatasetUrl(dataset) ? (
                           <a
                             href={getDatasetUrl(dataset)!}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="link link-neutral hover:link-hover"
+                            className="link link-neutral hover:link-hover truncate block"
                             title={`View ${dataset} source`}
                           >
                             {dataset}
                           </a>
                         ) : (
-                          dataset
+                          <span className="truncate block" title={dataset}>{dataset}</span>
                         )}
                       </td>
-                      <td>
+                      <td className="max-w-[130px]">
                         {/* Perturbation with appropriate link (PubChem for drugs, NCBI Gene for genes) */}
                         <div>
                           <a
                             href={perturbationUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="link link-neutral hover:link-hover"
-                            title={perturbationLinkTitle}
+                            className="link link-neutral hover:link-hover truncate block"
+                            title={perturbation}
                           >
                             {perturbation}
                           </a>
                           {/* Show CID for drug perturbations */}
                           {!isGenePert && drugInfo?.cid && (
                             <div className="text-xs text-gray-500">
-                              PubChem CID: {drugInfo.cid}
+                              <span title="PubChem Compound ID">PCID:</span> {drugInfo.cid}
                             </div>
                           )}
                         </div>
                       </td>
-                      <td>
+                      <td className={`max-w-[100px] ${columnVisibility.cellLine ? "" : "hidden"}`}>
                         {cellLine && cellLine !== 'N/A' ? (
                           <a
-                            className="link link-neutral hover:link-hover cursor-pointer"
-                            title="View on DepMap"
+                            className="link link-neutral hover:link-hover cursor-pointer truncate block"
+                            title={cellLine}
                             onClick={async (evt) => {
                               evt.preventDefault();
                               const res = await fetch("enrich/depmapcl", {
@@ -1165,11 +1183,11 @@ function EnrichmentResults({
                             {cellLine}
                           </a>
                         ) : (
-                          cellLine
+                          <span className="text-gray-400">{cellLine}</span>
                         )}
                       </td>
-                      <td>{timepoint}</td>
-                      <td>{concentration}</td>
+                      <td className={`max-w-[70px] ${columnVisibility.timepoint ? "" : "hidden"}`}>{timepoint === 'N/A' ? <span className="text-gray-400">N/A</span> : <span className="truncate block" title={timepoint}>{timepoint}</span>}</td>
+                      <td className={`max-w-[80px] ${columnVisibility.concentration ? "" : "hidden"}`}>{concentration === 'N/A' ? <span className="text-gray-400">N/A</span> : <span className="truncate block" title={concentration}>{concentration}</span>}</td>
                       <td>
                         {direction === "up" ? (
                           <Image
@@ -1198,7 +1216,7 @@ function EnrichmentResults({
                         )}
                       </td>
                       <td>{sigCount}</td>
-                      <td className="max-w-[200px]">
+                      <td className="max-w-[150px]">
                         {/* MOA with source attribution */}
                         {moa ? (
                           <div className="text-sm">

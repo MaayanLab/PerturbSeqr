@@ -124,45 +124,45 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
               return (
                   <tr key={el?.term}>
                     {/* Dataset column - shows library/dataset name with link to source */}
-                    <td className="font-medium">
+                    <td className="font-medium max-w-[120px]">
                       {getDatasetUrl(dataset) ? (
                         <a
                           href={getDatasetUrl(dataset)!}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="link link-neutral hover:link-hover"
+                          className="link link-neutral hover:link-hover truncate block"
                           title={`View ${dataset} source`}
                         >
                           {dataset}
                         </a>
                       ) : (
-                        dataset
+                        <span className="truncate block" title={dataset}>{dataset}</span>
                       )}
                     </td>
                     <td>
                     {term}
                   </td>
-                  <td>
+                  <td className="max-w-[130px]">
                     {/* Perturbation with appropriate link (PubChem for drugs, NCBI Gene for genes) */}
                     <div>
                       <a
                         href={perturbationUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="link link-neutral hover:link-hover"
-                        title={perturbationLinkTitle}
+                        className="link link-neutral hover:link-hover truncate block"
+                        title={perturbation}
                       >
                         {perturbation}
                       </a>
                       {/* Show CID for drug perturbations */}
                       {!isGenePert && drugInfo?.cid && (
                         <div className="text-xs text-gray-500">
-                          PubChem CID: {drugInfo.cid}
+                          <span title="PubChem Compound ID">PCID:</span> {drugInfo.cid}
                         </div>
                       )}
                     </div>
                   </td>
-                  <td className="max-w-[200px]">
+                  <td className="max-w-[150px]">
                     {/* MOA with source attribution (only for drug perturbations) */}
                     {!isGenePert && drugInfo?.moa ? (
                       <div className="text-sm">
@@ -174,11 +174,11 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
                       <span className="text-gray-400">N/A</span>
                     )}
                   </td>
-                  <td>
+                  <td className="max-w-[100px]">
                     {cellLine && cellLine !== 'N/A' ? (
                       <a
-                        className="link link-neutral hover:link-hover cursor-pointer"
-                        title="View on DepMap"
+                        className="link link-neutral hover:link-hover cursor-pointer truncate block"
+                        title={cellLine}
                         onClick={async (evt) => {
                           evt.preventDefault();
                           const res = await fetch("/enrich/depmapcl", {
@@ -201,14 +201,14 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
                         {cellLine}
                       </a>
                     ) : (
-                      cellLine
+                      <span className="text-gray-400">{cellLine}</span>
                     )}
                   </td>
-                  <td>
-                    {timepoint}
+                  <td className="max-w-[70px]">
+                    {timepoint === 'N/A' ? <span className="text-gray-400">N/A</span> : <span className="truncate block" title={timepoint}>{timepoint}</span>}
                   </td>
-                  <td>
-                    {concentration}
+                  <td className="max-w-[80px]">
+                    {concentration === 'N/A' ? <span className="text-gray-400">N/A</span> : <span className="truncate block" title={concentration}>{concentration}</span>}
                   </td>
                   <td>
                     {direction === "up" ? (
