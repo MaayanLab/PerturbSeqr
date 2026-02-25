@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
 import libraryConfig from '@/config/libraries.json'
+import { useAllLibrariesQuery } from '@/graphql'
 
 const libraries = Object.values(libraryConfig.libraries) as { displayName: string; category: string }[]
 const DRUG_PERTURBATION_LIBRARIES = libraries.filter(l => l.category === 'drug').map(l => l.displayName)
@@ -26,6 +27,15 @@ export default function LibraryFilter({
 }) {
   const drugLibraries = DRUG_PERTURBATION_LIBRARIES
   const geneLibraries = GENE_PERTURBATION_LIBRARIES
+
+  const { data: libraryData } = useAllLibrariesQuery()
+  const signatureCounts = React.useMemo(() => {
+    const counts: Record<string, number> = {}
+    libraryData?.geneSetLibraries?.nodes.forEach(node => {
+      counts[node.name] = node.geneSetsByLibraryId.totalCount
+    })
+    return counts
+  }, [libraryData])
 
   /**
    * Handle toggle change for a single library
@@ -65,17 +75,23 @@ export default function LibraryFilter({
   /**
    * Render a library checkbox
    */
-  const renderLibraryCheckbox = (libraryName: string) => (
-    <label key={libraryName} className="flex items-center gap-2 cursor-pointer">
-      <input
-        type="checkbox"
-        className="checkbox checkbox-sm"
-        checked={selectedLibraries.includes(libraryName)}
-        onChange={() => handleToggle(libraryName)}
-      />
-      <span className="text-sm">{libraryName}</span>
-    </label>
-  )
+  const renderLibraryCheckbox = (libraryName: string) => {
+    const count = signatureCounts[libraryName]
+    return (
+      <label key={libraryName} className="flex items-center gap-2 cursor-pointer">
+        <input
+          type="checkbox"
+          className="checkbox checkbox-sm"
+          checked={selectedLibraries.includes(libraryName)}
+          onChange={() => handleToggle(libraryName)}
+        />
+        <span className="text-sm">
+          {libraryName}
+          {count != null && <span className="text-xs text-base-content/50 ml-1">({count.toLocaleString()})</span>}
+        </span>
+      </label>
+    )
+  }
 
   /**
    * Render a category section with header and library list

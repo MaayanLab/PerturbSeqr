@@ -1237,7 +1237,7 @@ export type PairEnrichmentQueryMoAsQuery = { __typename?: 'Query', currentBackgr
 export type AllLibrariesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllLibrariesQuery = { __typename?: 'Query', geneSetLibraries?: { __typename?: 'GeneSetLibrariesConnection', nodes: Array<{ __typename?: 'GeneSetLibrary', id: any, name: string }> } | null };
+export type AllLibrariesQuery = { __typename?: 'Query', geneSetLibraries?: { __typename?: 'GeneSetLibrariesConnection', nodes: Array<{ __typename?: 'GeneSetLibrary', id: any, name: string, geneSetsByLibraryId: { __typename?: 'GeneSetsConnection', totalCount: number } }> } | null };
 
 export type GeneSearchQueryVariables = Exact<{
   genes: Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>;
@@ -2114,6 +2114,9 @@ export const AllLibrariesDocument = gql`
     nodes {
       id
       name
+      geneSetsByLibraryId {
+        totalCount
+      }
     }
   }
 }

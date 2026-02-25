@@ -439,12 +439,15 @@ query PairEnrichmentQueryMoAs($genesUp: [String]!, $genesDown: [String]!, $filte
 
 # AllLibraries: Fetch all available gene set libraries for filtering
 # Input: None
-# Output: List of library nodes with id and name
+# Output: List of library nodes with id, name, and gene set count
 query AllLibraries {
   geneSetLibraries {
     nodes {
       id
       name
+      geneSetsByLibraryId {
+        totalCount
+      }
     }
   }
 }
