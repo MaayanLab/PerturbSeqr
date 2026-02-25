@@ -7,9 +7,9 @@ import libraryConfig from '@/config/libraries.json'
 // Some datasets share logos (e.g., L1000-CP and L1000-XPR both use LINCS logo)
 const logoMap: Record<string, { src: string; darkSrc?: string; type: 'image' | 'svg' }> = {
   'Tahoe-100M': { src: '/images/tahoe-logo-new.png', type: 'image' },
-  'LINCS L1000 CP': { src: '/images/lincs-logo.png', type: 'image' },
-  'LINCS L1000 XPR': { src: '/images/lincs-logo.png', type: 'image' },
-  'Microarrays CMap': { src: '/images/cmap-logo.svg', type: 'svg' },
+  'LINCS L1000 CP': { src: '/images/cmap-logo.svg', type: 'svg' },
+  'LINCS L1000 XPR': { src: '/images/cmap-logo.svg', type: 'svg' },
+  'Microarrays CMap': { src: '/images/broad-logo.png', type: 'image' },
   'NIBR DRUG-seq': { src: '/images/nibr-logo.png', type: 'image' },
   'SciPlex': { src: '/images/sciplex-logo.svg', darkSrc: '/images/sciplex-logo-dark.svg', type: 'svg' },
   'DeepCover MoA': { src: '/images/deepcovermoa-logo.png', type: 'image' },
@@ -26,13 +26,13 @@ const logoMap: Record<string, { src: string; darkSrc?: string; type: 'image' | '
 
 // Subtitle overrides for groups with multiple datasets sharing a logo
 const groupSubtitles: Record<string, string> = {
-  '/images/lincs-logo.png': 'lincs l1000',
+  '/images/cmap-logo.svg': 'lincs l1000',
   '/images/creeds-logo.png': 'creeds',
   '/images/rummageo-logo.png': 'rummageo',
   '/images/perturbatlas-logo.png': 'perturb atl',
   '/images/replogle-logo.svg': 'replogle et al.',
   '/images/nibr-logo.png': 'nibr d-seq',
-  '/images/cmap-logo.svg': 'cmap arrays',
+  '/images/broad-logo.png': 'cmap arrays',
   '/images/tahoe-logo-new.png': 'tahoe-100m',
   '/images/sciplex-logo.svg': 'sciplex',
   '/images/deepcovermoa-logo.png': 'deepcover',
@@ -118,8 +118,8 @@ export default function DatasetIcons({
     <div className="flex flex-col items-center mb-5">
       <div className="flex flex-row items-center justify-center flex-wrap gap-2">
         {logoGroups.map(({ logo, darkLogo, libraries, subtitle }) => {
-          const isSmall = logo === '/images/sciplex-logo.svg' || logo === '/images/lincs-logo.png'
-          const customSize: Record<string, number> = { '/images/rummageo-logo.png': 60 }
+          const isSmall = logo === '/images/sciplex-logo.svg'
+          const customSize: Record<string, number> = { '/images/rummageo-logo.png': 60, '/images/broad-logo.png': 100 }
           const size = customSize[logo] || (isSmall ? 50 : 80)
           return (
             <button
