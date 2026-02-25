@@ -14,7 +14,7 @@ const DATASETS = {
     { id: 'microarrays-cmap', name: 'Microarrays CMap', signatures: '12,200' },
   ],
   gene: [
-    { id: 'lincs-l1000-xpr', name: 'LINCS L1000 XPR', signatures: '281,890' },
+    { id: 'lincs-l1000-xpr', name: 'LINCS L1000 XPR', signatures: '65,672' },
     { id: 'perturb-atlas', name: 'Perturb Atlas', signatures: '12,852' },
     { id: 'perturb-atlas-mouse', name: 'Perturb Atlas Mouse', signatures: '10,743' },
     { id: 'geo-gene', name: 'GEO-Gene', signatures: '1,477' },

@@ -128,9 +128,7 @@ MINIO_FILE_MAPPING = {
     "lincs-l1000-xpr.gmt.gz": "lincs-l1000-xpr",
     "perturb-atlas.gmt.gz": "perturb-atlas",
     "perturb-atlas-mouse.gmt.gz": "perturb-atlas-mouse",
-    "replogle-perturb-seq-k562-genomewide.gmt.gz": "replogle-perturb-seq-k562-genomewide",
-    "replogle-perturb-seq-rpe1-essential.gmt.gz": "replogle-perturb-seq-rpe1-essential",
-    "replogle-perturb-seq-k562-essential.gmt.gz": "replogle-perturb-seq-k562-essential",
+    "replogle-perturb-seq.gmt.gz": "replogle-perturb-seq",
     "geo-gene.gmt.gz": "geo-gene",
     "rummageo-gene.gmt.gz": "rummageo-gene",
 }
