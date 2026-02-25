@@ -98,11 +98,15 @@ export default function LibraryFilter({
    */
   const renderCategory = (title: string, categoryLibraries: string[]) => {
     if (categoryLibraries.length === 0) return null
+    const categoryTotal = categoryLibraries.reduce((sum, name) => sum + (signatureCounts[name] ?? 0), 0)
 
     return (
       <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between">
-          <span className="font-bold text-base text-base-content">{title}</span>
+          <span className="font-bold text-base text-base-content">
+            {title}
+            {categoryTotal > 0 && <span className="text-xs font-normal text-base-content/50 ml-1">({categoryTotal.toLocaleString()})</span>}
+          </span>
           <button
             type="button"
             className="btn btn-xs btn-ghost text-xs px-1"
