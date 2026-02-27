@@ -84,9 +84,6 @@ export default function DatasetIcons({
     }
   }
 
-  const firstRow = allLibraries.slice(0, 8)
-  const secondRow = allLibraries.slice(8)
-
   const renderButton = ({ name, category }: { name: string; category: 'drug' | 'gene' }) => {
     const logoInfo = logoMap[name]
     if (!logoInfo) return null
@@ -117,13 +114,8 @@ export default function DatasetIcons({
   }
 
   return (
-    <div className="flex flex-col items-center mb-5 gap-2">
-      <div className="flex flex-row items-center justify-center">
-        {firstRow.map(renderButton)}
-      </div>
-      <div className="flex flex-row items-center justify-center">
-        {secondRow.map(renderButton)}
-      </div>
+    <div className="flex flex-wrap items-center justify-center mb-5 gap-2">
+      {allLibraries.map(renderButton)}
     </div>
   )
 }
