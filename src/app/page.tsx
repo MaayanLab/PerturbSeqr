@@ -5,7 +5,7 @@ import Image from "next/image";
 import InputForm from "./inputForm";
 import InputFormUpDown from "./inputFormUpDown";
 import LibraryFilter from "@/components/libraryFilter";
-import DatasetIcons, { resourceCount } from "@/components/datasetIcons";
+import DatasetIcons, { resourceCount, libraryCount, drugLibraryCount, geneLibraryCount } from "@/components/datasetIcons";
 import Stats from "@/components/stats";
 import libraryConfig from '@/config/libraries.json';
 
@@ -39,7 +39,7 @@ function HomeContent() {
     <div className="flex flex-col items-center">
       {/* Header with stats */}
       <div className="flex items-center gap-2 mb-1">
-        <h1 className="text-2xl font-bold">PerturbSeqr</h1>
+        <h1 className="text-4xl font-bold">PerturbSeqr</h1>
         <Image
           className="dark:invert"
           src="/images/perturbseqr-logo.png"
@@ -48,8 +48,8 @@ function HomeContent() {
           height={90}
         />
       </div>
-      <p className="text-center text-sm mb-4 max-w-2xl">
-        Search through <Stats show_gene_sets bold /> created from {resourceCount} Connectivity Mapping resources that performed massive single perturbations followed by expression experiments in human cells
+      <p className="text-center text-base mb-4 max-w-2xl">
+        Search through <Stats show_gene_sets bold /> created from {resourceCount} Connectivity Mapping resources organized into {libraryCount} gene set libraries, {drugLibraryCount} drug perturbation and {geneLibraryCount} gene perturbation followed by expression
       </p>
       {/* Dataset icons filter - centered below header */}
       <DatasetIcons
