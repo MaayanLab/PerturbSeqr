@@ -9,7 +9,7 @@ const DATASETS = {
     { id: 'deepcover-moa', name: 'DeepCover MoA', signatures: '1,748' },
     { id: 'ginkgo-bioworks', name: 'Ginkgo Bioworks', signatures: '9,310' },
     { id: 'lincs-l1000-cp', name: 'LINCS L1000 CP', signatures: '156,926' },
-    { id: 'geo-chem', name: 'GEO-Chem', signatures: '810' },
+    { id: 'creeds-chem', name: 'CREEDS Chem', signatures: '1,860' },
     { id: 'tahoe-100m', name: 'Tahoe-100M', signatures: '105,404' },
     { id: 'microarrays-cmap', name: 'Microarrays CMap', signatures: '12,200' },
   ],
@@ -17,11 +17,10 @@ const DATASETS = {
     { id: 'lincs-l1000-xpr', name: 'LINCS L1000 XPR', signatures: '65,672' },
     { id: 'perturb-atlas', name: 'Perturb Atlas', signatures: '12,852' },
     { id: 'perturb-atlas-mouse', name: 'Perturb Atlas Mouse', signatures: '10,743' },
-    { id: 'geo-gene', name: 'GEO-Gene', signatures: '1,477' },
+    { id: 'creeds-gene', name: 'CREEDS Gene', signatures: '4,788' },
     { id: 'replogle-perturb-seq-k562-essential', name: 'Replogle et al. K562 Essential', signatures: '2,383' },
     { id: 'replogle-perturb-seq-k562-genomewide', name: 'Replogle et al. K562 Genome-wide', signatures: '4,110' },
     { id: 'replogle-perturb-seq-rpe1-essential', name: 'Replogle et al. RPE1 Essential', signatures: '2,714' },
-    { id: 'cm4ai', name: 'CM4AI', signatures: '11,739' },
   ],
 }
 

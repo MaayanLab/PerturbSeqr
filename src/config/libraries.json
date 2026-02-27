@@ -26,19 +26,6 @@
       "exampleTerm": "HAHN001_A549_96H_A03_AKT1 up",
       "parsedExample": { "batch": "HAHN001", "cellLine": "A549", "timepoint": "96H", "batch2": "A03", "perturbation": "AKT1", "direction": "up" }
     },
-    "cm4ai": {
-      "displayName": "CM4AI",
-      "category": "gene",
-      "source": "https://cm4ai.org",
-      "sourceNote": "Cell Maps for AI gene perturbation signatures.",
-      "termFormat": {
-        "delimiter": "_",
-        "fields": ["perturbation"],
-        "optional": []
-      },
-      "exampleTerm": "GENE1 up",
-      "parsedExample": { "perturbation": "GENE1", "direction": "up" }
-    },
     "tahoe-100m": {
       "displayName": "Tahoe-100M",
       "category": "drug",
@@ -116,13 +103,15 @@
       "exampleTerm": "(4-Chlorobenzyl)pyridine up",
       "parsedExample": { "perturbation": "(4-Chlorobenzyl)pyridine", "cellLine": "HCT116", "timepoint": "24h", "concentration": "10µM", "direction": "up" }
     },
-    "geo-chem": {
-      "displayName": "GEO-Chem",
+    "creeds-chem": {
+      "displayName": "CREEDS Chem",
       "category": "drug",
+      "source": "https://maayanlab.cloud/CREEDS/",
+      "sourceNote": "CREEDS drug perturbation signatures (Wang et al. 2016) combined with Harmonizome GEO microarray signatures not in CREEDS.",
       "termFormat": {
         "delimiter": "_",
         "fields": ["perturbation", "organism", "platform", "dataset"],
-        "optional": ["platform", "dataset"]
+        "optional": ["organism", "platform", "dataset"]
       },
       "exampleTerm": "fluoxetine_mus musculus_gpl1261_gds2803 up",
       "parsedExample": { "perturbation": "fluoxetine", "organism": "mus musculus", "platform": "gpl1261", "dataset": "gds2803", "direction": "up" }
@@ -194,13 +183,15 @@
       "exampleTerm": "Perturb_1001_KO_Adar1_SRP360154 up",
       "parsedExample": { "prefix": "Perturb", "id": "1001", "perturbationType": "KO", "perturbation": "Adar1", "dataset": "SRP360154", "direction": "up" }
     },
-    "geo-gene": {
-      "displayName": "GEO-Gene",
+    "creeds-gene": {
+      "displayName": "CREEDS Gene",
       "category": "gene",
+      "source": "https://maayanlab.cloud/CREEDS/",
+      "sourceNote": "CREEDS gene perturbation signatures (Wang et al. 2016) combined with Harmonizome GEO microarray signatures not in CREEDS.",
       "termFormat": {
         "delimiter": "_",
         "fields": ["perturbation", "perturbationType", "dataset", "batch", "organism", "tissue"],
-        "optional": ["tissue"]
+        "optional": ["perturbationType", "dataset", "batch", "organism", "tissue"]
       },
       "exampleTerm": "NIX_Deficiency_GDS2630_160_mouse_spleen up",
       "parsedExample": { "perturbation": "NIX", "perturbationType": "Deficiency", "dataset": "GDS2630", "batch": "160", "organism": "mouse", "tissue": "spleen", "direction": "up" }

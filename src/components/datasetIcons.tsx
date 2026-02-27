@@ -13,15 +13,14 @@ const logoMap: Record<string, { src: string; darkSrc?: string; type: 'image' | '
   'NIBR DRUG-seq': { src: '/images/nibr-logo.png', type: 'image' },
   'SciPlex': { src: '/images/sciplex-logo.svg', darkSrc: '/images/sciplex-logo-dark.svg', type: 'svg' },
   'DeepCover MoA': { src: '/images/deepcovermoa-logo.png', type: 'image' },
-  'GEO-Chem': { src: '/images/creeds-logo.png', type: 'image' },
-  'GEO-Gene': { src: '/images/creeds-logo.png', type: 'image' },
+  'CREEDS Chem': { src: '/images/creeds-logo.png', type: 'image' },
+  'CREEDS Gene': { src: '/images/creeds-logo.png', type: 'image' },
   'RummaGEO Chem': { src: '/images/rummageo-logo.png', type: 'image' },
   'RummaGEO Gene': { src: '/images/rummageo-logo.png', type: 'image' },
   'Ginkgo Bioworks': { src: '/images/ginkgo-logo.png', type: 'image' },
   'Perturb Atlas': { src: '/images/perturbatlas-logo.png', type: 'image' },
   'Perturb Atlas Mouse': { src: '/images/perturbatlas-logo.png', type: 'image' },
   'Replogle et al.': { src: '/images/replogle-logo.svg', type: 'svg' },
-  'CM4AI': { src: '/images/cm4ai-logo.png', darkSrc: '/images/cm4ai-logo-dark.png', type: 'image' },
 }
 
 // Subtitle overrides for groups with multiple datasets sharing a logo
@@ -37,7 +36,6 @@ const groupSubtitles: Record<string, string> = {
   '/images/sciplex-logo.svg': 'sciplex',
   '/images/deepcovermoa-logo.png': 'deepcover',
   '/images/ginkgo-logo.png': 'ginkgo bio',
-  '/images/cm4ai-logo.png': 'cm4ai',
 }
 
 // Get all library display names
