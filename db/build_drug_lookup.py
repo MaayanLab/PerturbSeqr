@@ -50,7 +50,7 @@ SOURCE_DISPLAY_NAMES = {
     "lincs": "lincs",
 }
 
-LIBS_NEEDING_GMT_SCAN = {"microarrays-cmap", "sciplex", "deepcover-moa", "geo-chem", "ginkgo-bioworks", "rummageo-chem"}
+LIBS_NEEDING_GMT_SCAN = {"microarrays-cmap", "sciplex", "deepcover-moa", "creeds-chem", "ginkgo-bioworks", "rummageo-chem"}
 
 
 class DrugEntityStore:

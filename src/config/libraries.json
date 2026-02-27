@@ -110,11 +110,11 @@
       "sourceNote": "CREEDS drug perturbation signatures (Wang et al. 2016) combined with Harmonizome GEO microarray signatures not in CREEDS.",
       "termFormat": {
         "delimiter": "_",
-        "fields": ["perturbation", "organism", "platform", "dataset"],
-        "optional": ["organism", "platform", "dataset"]
+        "fields": ["perturbation", "organism", "cellType", "geoId"],
+        "optional": []
       },
-      "exampleTerm": "fluoxetine_mus musculus_gpl1261_gds2803 up",
-      "parsedExample": { "perturbation": "fluoxetine", "organism": "mus musculus", "platform": "gpl1261", "dataset": "gds2803", "direction": "up" }
+      "exampleTerm": "Fluorouracil_mus musculus_Bone marrow Sca+ SP hematopoeitic stem cells_GSE1559 up",
+      "parsedExample": { "perturbation": "Fluorouracil", "organism": "mus musculus", "cellType": "Bone marrow Sca+ SP hematopoeitic stem cells", "geoId": "GSE1559", "direction": "up" }
     },
     "rummageo-chem": {
       "displayName": "RummaGEO Chem",
@@ -190,11 +190,11 @@
       "sourceNote": "CREEDS gene perturbation signatures (Wang et al. 2016) combined with Harmonizome GEO microarray signatures not in CREEDS.",
       "termFormat": {
         "delimiter": "_",
-        "fields": ["perturbation", "perturbationType", "dataset", "batch", "organism", "tissue"],
-        "optional": ["perturbationType", "dataset", "batch", "organism", "tissue"]
+        "fields": ["perturbation", "perturbationType", "organism", "cellType", "geoId"],
+        "optional": []
       },
-      "exampleTerm": "NIX_Deficiency_GDS2630_160_mouse_spleen up",
-      "parsedExample": { "perturbation": "NIX", "perturbationType": "Deficiency", "dataset": "GDS2630", "batch": "160", "organism": "mouse", "tissue": "spleen", "direction": "up" }
+      "exampleTerm": "Foxo1_KO_mus musculus_T reg_GSE40655 up",
+      "parsedExample": { "perturbation": "Foxo1", "perturbationType": "KO", "organism": "mus musculus", "cellType": "T reg", "geoId": "GSE40655", "direction": "up" }
     },
     "rummageo-gene": {
       "displayName": "RummaGEO Gene",

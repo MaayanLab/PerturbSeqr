@@ -121,7 +121,7 @@ MINIO_FILE_MAPPING = {
     "microarrays-cmap.gmt.gz": "microarrays-cmap",
     "sciplex.gmt.gz": "sciplex",
     "deepcover-moa.gmt.gz": "deepcover-moa",
-    "geo-chem.gmt.gz": "geo-chem",
+    "creeds-chem.gmt.gz": "creeds-chem",
     "rummageo-chem.gmt.gz": "rummageo-chem",
     "ginkgo-bioworks.gmt.gz": "ginkgo-bioworks",
     # Gene Perturbation
@@ -129,7 +129,7 @@ MINIO_FILE_MAPPING = {
     "perturb-atlas.gmt.gz": "perturb-atlas",
     "perturb-atlas-mouse.gmt.gz": "perturb-atlas-mouse",
     "replogle-perturb-seq.gmt.gz": "replogle-perturb-seq",
-    "geo-gene.gmt.gz": "geo-gene",
+    "creeds-gene.gmt.gz": "creeds-gene",
     "rummageo-gene.gmt.gz": "rummageo-gene",
 }
 
