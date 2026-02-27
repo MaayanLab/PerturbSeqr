@@ -1,154 +1,69 @@
-import libraryConfig from '@/config/libraries.json'
+const DELIMITER = '::'
+const FIELDS = ['perturbation', 'cellLine', 'cellType', 'timepoint', 'concentration'] as const
 
-type TermFormat = {
-  delimiter: string
-  fields: string[]
-  optional: string[]
-  splitFromEnd?: boolean  // If true, assign fields from the end of parts array (first field gets joined remainder)
-  joinMiddle?: boolean    // If true, first field = first part, last N fields from end, middle parts joined for second field
-  fieldsFromEnd?: number  // Number of fields to assign from end (used with joinMiddle)
-  fixedValues?: Record<string, string>  // Fixed values to include for all terms (e.g., cellLine for single-cell-line datasets)
-}
-
-type ParsedTerm = {
-  [key: string]: string | undefined
+export type ParsedTerm = {
+  perturbation: string
+  cellLine: string
+  cellType: string
+  timepoint: string
+  concentration: string
+  direction: string
+  extras: string[]
+  raw: string
 }
 
 /**
- * Parse a term string into its component fields based on library config.
+ * Parse a canonical GMT term into its component fields.
  *
- * Handles both formats:
- * - Old: "library:term direction" (e.g., "l1000-sigs:BRD-A00267231_HEMADO_A549_24.0_h_10.0_um up")
- * - New: "term direction" (e.g., "BRD-A00267231_HEMADO_A549_24.0_h_10.0_um up")
+ * Canonical format: perturbation::cellLine::cellType::timepoint::concentration[::extra1::extra2::...] up|down
  *
- * @param term - The term with optional library prefix and direction suffix
- * @param libraryName - The library/dataset name (from gene set's library relation, optional)
- * @returns Object with parsed fields (perturbation, cellLine, timepoint, etc.)
+ * @param term - The term string with direction suffix
+ * @returns ParsedTerm with all fields
  */
-export function parseTerm(term: string, libraryName?: string): ParsedTerm {
-  let termBody = term
-  let detectedLibrary = libraryName
-
-  // Check for old format with library prefix (library:term)
-  const colonIndex = termBody.indexOf(':')
-  if (colonIndex !== -1) {
-    // Extract library from term prefix if present
-    const prefixLibrary = termBody.substring(0, colonIndex)
-    termBody = termBody.substring(colonIndex + 1)
-    // Use prefix library if no library name provided
-    if (!detectedLibrary) {
-      detectedLibrary = prefixLibrary
-    }
-  }
-
-  // Extract direction (last space-separated part if it's "up" or "down")
+export function parseTerm(term: string): ParsedTerm {
+  let body = term
   let direction = ''
-  if (termBody.endsWith(' up')) {
+
+  if (body.endsWith(' up')) {
     direction = 'up'
-    termBody = termBody.slice(0, -3)
-  } else if (termBody.endsWith(' down')) {
+    body = body.slice(0, -3)
+  } else if (body.endsWith(' down')) {
     direction = 'down'
-    termBody = termBody.slice(0, -5)
-  } else if (termBody.endsWith(' dn')) {
+    body = body.slice(0, -5)
+  } else if (body.endsWith(' dn')) {
     direction = 'down'
-    termBody = termBody.slice(0, -3)
+    body = body.slice(0, -3)
   }
 
-  // If no library name, return raw term with direction
-  if (!detectedLibrary) {
-    return {
-      raw: termBody,
-      direction
-    }
+  const parts = body.split(DELIMITER)
+
+  return {
+    perturbation: parts[0] ?? '',
+    cellLine: parts[1] ?? '',
+    cellType: parts[2] ?? '',
+    timepoint: parts[3] ?? '',
+    concentration: parts[4] ?? '',
+    direction,
+    extras: parts.slice(5),
+    raw: body,
   }
+}
 
-  // Get term format from config
-  const libraries = libraryConfig.libraries as Record<string, { termFormat?: TermFormat; displayName?: string }>
-  // Try direct match first, then case-insensitive match
-  let libConfig = libraries[detectedLibrary]
-  if (!libConfig) {
-    // Build reverse lookup from displayName to key
-    const normalizedName = detectedLibrary.toLowerCase()
-    for (const [key, config] of Object.entries(libraries)) {
-      if (key.toLowerCase() === normalizedName ||
-          config.displayName?.toLowerCase() === normalizedName) {
-        libConfig = config
-        break
-      }
-    }
-  }
-  const termFormat = libConfig?.termFormat
-
-  if (!termFormat) {
-    // No format defined, return raw term
-    return {
-      library: detectedLibrary,
-      raw: termBody,
-      direction
-    }
-  }
-
-  // Split by delimiter
-  const parts = termBody.split(termFormat.delimiter)
-
-  // Map parts to field names
-  const result: ParsedTerm = {
-    library: detectedLibrary,
-    direction
-  }
-
-  if (termFormat.joinMiddle && termFormat.fieldsFromEnd && parts.length > termFormat.fieldsFromEnd + 1) {
-    // First part → first field
-    // Last N parts → last N fields
-    // Everything in between joined → second field
-    // e.g., "human_dermal_fibroblast-(S)-(+)-Camptothecin-3000-24" with fields ["cellLine", "perturbation", "concentration", "timepoint"]
-    // -> cellLine: "human_dermal_fibroblast", perturbation: "(S)-(+)-Camptothecin", concentration: "3000", timepoint: "24"
-    const numFromEnd = termFormat.fieldsFromEnd
-    result[termFormat.fields[0]] = parts[0]
-    const middleParts = parts.slice(1, -numFromEnd)
-    result[termFormat.fields[1]] = middleParts.join(termFormat.delimiter)
-    const endParts = parts.slice(-numFromEnd)
-    endParts.forEach((part, index) => {
-      result[termFormat.fields[termFormat.fields.length - numFromEnd + index]] = part
-    })
-  } else if (termFormat.splitFromEnd && parts.length >= termFormat.fields.length) {
-    // Assign fields from the end, join remainder for first field
-    // e.g., "N-acetyl-L-leucine-4622" with fields ["perturbation", "batch"]
-    // -> perturbation: "N-acetyl-L-leucine", batch: "4622"
-    const numFieldsFromEnd = termFormat.fields.length - 1
-    const endParts = parts.slice(-numFieldsFromEnd)
-    const firstPart = parts.slice(0, -numFieldsFromEnd).join(termFormat.delimiter)
-
-    result[termFormat.fields[0]] = firstPart
-    endParts.forEach((part, index) => {
-      result[termFormat.fields[index + 1]] = part
-    })
-  } else {
-    // Normal left-to-right assignment
-    termFormat.fields.forEach((field, index) => {
-      if (index < parts.length) {
-        result[field] = parts[index]
-      } else if (!termFormat.optional.includes(field)) {
-        // Required field is missing
-        result[field] = undefined
-      }
-    })
-  }
-
-  // Apply fixed values (e.g., cellLine for single-cell-line datasets like DRUGseqr)
-  if (termFormat.fixedValues) {
-    for (const [key, value] of Object.entries(termFormat.fixedValues)) {
-      result[key] = value
-    }
-  }
-
-  return result
+/**
+ * Get the display value for cell line. Does NOT fall back to cellType,
+ * as cellType often contains long tissue/condition descriptions (e.g. from CREEDS/GEO)
+ * that don't belong in a "Cell Line" column.
+ */
+export function getCellDisplay(parsed: ParsedTerm): string {
+  return parsed.cellLine || ''
 }
 
 /**
  * Get a specific field from a parsed term, with fallback.
  */
-export function getTermField(term: string, field: string, libraryName?: string, fallback = ''): string {
-  const parsed = parseTerm(term, libraryName)
-  return parsed[field] ?? fallback
+export function getTermField(term: string, field: keyof ParsedTerm, fallback = ''): string {
+  const parsed = parseTerm(term)
+  const val = parsed[field]
+  if (Array.isArray(val)) return val.join(DELIMITER) || fallback
+  return val || fallback
 }

@@ -4,7 +4,289 @@ import React from 'react'
 // MinIO base URL for GMT downloads
 const MINIO_BASE = process.env.NEXT_PUBLIC_MINIO_URL || 'https://s3.perturbseqr.k8s.dev.maayanlab.cloud'
 
-// Dataset type definition
+// --- Term structure types and colors ---
+
+type TermField = { text: string; label: string }
+
+type TermStructure = {
+  example: string
+  direction: string
+  fields: TermField[]
+  extraFields: TermField[]
+}
+
+// Standard field colors (positions 0-4)
+const FIELD_COLORS = ['#2563eb', '#059669', '#0891b2', '#d97706', '#dc2626']
+// Extra field colors (positions 5+)
+const EXTRA_COLORS = ['#7c3aed', '#be185d', '#6d28d9', '#9333ea']
+
+function TermStructureDisplay({ structure, compact = false }: { structure: TermStructure; compact?: boolean }) {
+  const allFields = [...structure.fields, ...structure.extraFields]
+  const textSize = compact ? 'text-xs' : 'text-sm'
+  const monoSize = compact ? 'text-xs' : 'text-base'
+
+  return (
+    <div>
+      {/* Colored term */}
+      <div className={`font-mono ${monoSize} leading-relaxed mb-1 break-all`}>
+        {allFields.map((field, i) => (
+          <span key={i}>
+            <span
+              className="font-bold"
+              style={{ color: i < 5 ? FIELD_COLORS[i] : EXTRA_COLORS[(i - 5) % EXTRA_COLORS.length] }}
+            >
+              {field.text || '\u00A0'}
+            </span>
+            {i < allFields.length - 1 && <span className="text-gray-400">::</span>}
+          </span>
+        ))}
+        <span className="text-gray-400">{' '}</span>
+        <span className="font-bold text-gray-600">{structure.direction}</span>
+      </div>
+      {/* Labels */}
+      <div className="flex flex-wrap gap-x-2 gap-y-0.5">
+        {allFields.map((field, i) => {
+          const color = i < 5 ? FIELD_COLORS[i] : EXTRA_COLORS[(i - 5) % EXTRA_COLORS.length]
+          const dot = i < 5 ? '\u25CF' : '\u25CB'
+          return (
+            <span key={i} className={textSize} style={{ color }}>
+              {dot} {field.label}
+            </span>
+          )
+        })}
+        <span className={`${textSize} text-gray-600`}>{'\u25CF'} Direction</span>
+      </div>
+    </div>
+  )
+}
+
+// --- Per-dataset term structures ---
+
+const termStructures: Record<string, TermStructure> = {
+  'lincs-l1000-cp': {
+    example: 'bortezomib::HT29::::24H::20uM::REP.B007::C23 up',
+    direction: 'up',
+    fields: [
+      { text: 'bortezomib', label: 'Perturbation' },
+      { text: 'HT29', label: 'Cell Line' },
+      { text: '', label: 'Cell Type' },
+      { text: '24H', label: 'Timepoint' },
+      { text: '20uM', label: 'Concentration' },
+    ],
+    extraFields: [
+      { text: 'REP.B007', label: 'Batch ID' },
+      { text: 'C23', label: 'Well' },
+    ],
+  },
+  'tahoe-100m': {
+    example: '(R)-Verapamil (hydrochloride)::A-172::::24h::0.05uM up',
+    direction: 'up',
+    fields: [
+      { text: '(R)-Verapamil (hydrochloride)', label: 'Perturbation' },
+      { text: 'A-172', label: 'Cell Line' },
+      { text: '', label: 'Cell Type' },
+      { text: '24h', label: 'Timepoint' },
+      { text: '0.05uM', label: 'Concentration' },
+    ],
+    extraFields: [],
+  },
+  'nibr-drug-seq': {
+    example: 'Diphenidol::U2OS::::24h::0.01uM::AF-80-QK39::batchid1 up',
+    direction: 'up',
+    fields: [
+      { text: 'Diphenidol', label: 'Perturbation' },
+      { text: 'U2OS', label: 'Cell Line' },
+      { text: '', label: 'Cell Type' },
+      { text: '24h', label: 'Timepoint' },
+      { text: '0.01uM', label: 'Concentration' },
+    ],
+    extraFields: [
+      { text: 'AF-80-QK39', label: 'NSN Code' },
+      { text: 'batchid1', label: 'Batch' },
+    ],
+  },
+  'microarrays-cmap': {
+    example: '(+)-chelidonine::HL60::::6h::11uM::batch641 up',
+    direction: 'up',
+    fields: [
+      { text: '(+)-chelidonine', label: 'Perturbation' },
+      { text: 'HL60', label: 'Cell Line' },
+      { text: '', label: 'Cell Type' },
+      { text: '6h', label: 'Timepoint' },
+      { text: '11uM', label: 'Concentration' },
+    ],
+    extraFields: [
+      { text: 'batch641', label: 'Batch' },
+    ],
+  },
+  'ginkgo-bioworks': {
+    example: 'SC_514::A549::::24::1000 up',
+    direction: 'up',
+    fields: [
+      { text: 'SC_514', label: 'Perturbation' },
+      { text: 'A549', label: 'Cell Line' },
+      { text: '', label: 'Cell Type' },
+      { text: '24', label: 'Timepoint' },
+      { text: '1000', label: 'Concentration' },
+    ],
+    extraFields: [],
+  },
+  'sciplex': {
+    example: '2-Methoxyestradiol::A549::::24h::100nM up',
+    direction: 'up',
+    fields: [
+      { text: '2-Methoxyestradiol', label: 'Perturbation' },
+      { text: 'A549', label: 'Cell Line' },
+      { text: '', label: 'Cell Type' },
+      { text: '24h', label: 'Timepoint' },
+      { text: '100nM', label: 'Concentration' },
+    ],
+    extraFields: [],
+  },
+  'deepcover-moa': {
+    example: '(4-Chlorobenzyl)pyridine::HCT116::::24h::10uM up',
+    direction: 'up',
+    fields: [
+      { text: '(4-Chlorobenzyl)pyridine', label: 'Perturbation' },
+      { text: 'HCT116', label: 'Cell Line' },
+      { text: '', label: 'Cell Type' },
+      { text: '24h', label: 'Timepoint' },
+      { text: '10uM', label: 'Concentration' },
+    ],
+    extraFields: [],
+  },
+  'creeds-chem': {
+    example: 'Fluorouracil::::Bone marrow cells::::::mus musculus::GSE1559.3639 up',
+    direction: 'up',
+    fields: [
+      { text: 'Fluorouracil', label: 'Perturbation' },
+      { text: '', label: 'Cell Line' },
+      { text: 'Bone marrow cells', label: 'Cell Type' },
+      { text: '', label: 'Timepoint' },
+      { text: '', label: 'Concentration' },
+    ],
+    extraFields: [
+      { text: 'mus musculus', label: 'Organism' },
+      { text: 'GSE1559.3639', label: 'GEO ID' },
+    ],
+  },
+  'rummageo-chem': {
+    example: 'valproic acid::::Neural stem cells::12w::::mouse::GSE101239::3::0 up',
+    direction: 'up',
+    fields: [
+      { text: 'valproic acid', label: 'Perturbation' },
+      { text: '', label: 'Cell Line' },
+      { text: 'Neural stem cells', label: 'Cell Type' },
+      { text: '12w', label: 'Timepoint' },
+      { text: '', label: 'Concentration' },
+    ],
+    extraFields: [
+      { text: 'mouse', label: 'Organism' },
+      { text: 'GSE101239', label: 'GEO ID' },
+      { text: '3', label: 'Group 1' },
+      { text: '0', label: 'Group 2' },
+    ],
+  },
+  'perturb-atlas': {
+    example: 'CPSF6::K562::cell line::::::KD::SRP013565::10000 up',
+    direction: 'up',
+    fields: [
+      { text: 'CPSF6', label: 'Perturbation' },
+      { text: 'K562', label: 'Cell Line' },
+      { text: 'cell line', label: 'Cell Type' },
+      { text: '', label: 'Timepoint' },
+      { text: '', label: 'Concentration' },
+    ],
+    extraFields: [
+      { text: 'KD', label: 'Pert. Type' },
+      { text: 'SRP013565', label: 'SRA ID' },
+      { text: '10000', label: 'Atlas ID' },
+    ],
+  },
+  'perturb-atlas-mouse': {
+    example: 'Adar1::activated B cells::cell::::::KO::SRP360154::1001 up',
+    direction: 'up',
+    fields: [
+      { text: 'Adar1', label: 'Perturbation' },
+      { text: 'activated B cells', label: 'Cell Line' },
+      { text: 'cell', label: 'Cell Type' },
+      { text: '', label: 'Timepoint' },
+      { text: '', label: 'Concentration' },
+    ],
+    extraFields: [
+      { text: 'KO', label: 'Pert. Type' },
+      { text: 'SRP360154', label: 'SRA ID' },
+      { text: '1001', label: 'Atlas ID' },
+    ],
+  },
+  'lincs-l1000-xpr': {
+    example: 'AKT1::A549::::96H::::HAHN001::A03 up',
+    direction: 'up',
+    fields: [
+      { text: 'AKT1', label: 'Perturbation' },
+      { text: 'A549', label: 'Cell Line' },
+      { text: '', label: 'Cell Type' },
+      { text: '96H', label: 'Timepoint' },
+      { text: '', label: 'Concentration' },
+    ],
+    extraFields: [
+      { text: 'HAHN001', label: 'Pert. ID' },
+      { text: 'A03', label: 'Well' },
+    ],
+  },
+  'replogle-perturb-seq': {
+    example: 'ZC3H18::K562::::day6::::P1P2::essential::10023 up',
+    direction: 'up',
+    fields: [
+      { text: 'ZC3H18', label: 'Perturbation' },
+      { text: 'K562', label: 'Cell Line' },
+      { text: '', label: 'Cell Type' },
+      { text: 'day6', label: 'Timepoint' },
+      { text: '', label: 'Concentration' },
+    ],
+    extraFields: [
+      { text: 'P1P2', label: 'Guide' },
+      { text: 'essential', label: 'Screen' },
+      { text: '10023', label: 'Study ID' },
+    ],
+  },
+  'creeds-gene': {
+    example: 'Foxo1::::T reg::::::KO::mus musculus::GSE40655.508 up',
+    direction: 'up',
+    fields: [
+      { text: 'Foxo1', label: 'Perturbation' },
+      { text: '', label: 'Cell Line' },
+      { text: 'T reg', label: 'Cell Type' },
+      { text: '', label: 'Timepoint' },
+      { text: '', label: 'Concentration' },
+    ],
+    extraFields: [
+      { text: 'KO', label: 'Pert. Type' },
+      { text: 'mus musculus', label: 'Organism' },
+      { text: 'GSE40655.508', label: 'GEO ID' },
+    ],
+  },
+  'rummageo-gene': {
+    example: 'parp14::::RAW 264.7 Macrophages::2h::::mouse::GSE100886::1::3 up',
+    direction: 'up',
+    fields: [
+      { text: 'parp14', label: 'Perturbation' },
+      { text: '', label: 'Cell Line' },
+      { text: 'RAW 264.7 Macrophages', label: 'Cell Type' },
+      { text: '2h', label: 'Timepoint' },
+      { text: '', label: 'Concentration' },
+    ],
+    extraFields: [
+      { text: 'mouse', label: 'Organism' },
+      { text: 'GSE100886', label: 'GEO ID' },
+      { text: '1', label: 'Group 1' },
+      { text: '3', label: 'Group 2' },
+    ],
+  },
+}
+
+// --- Dataset definitions ---
+
 type Dataset = {
   title: string
   value: string
@@ -13,11 +295,14 @@ type Dataset = {
   publicationUrl2?: string
   sourceUrl?: string
   sourceLabel?: string
+  sourceUrl2?: string
+  sourceLabel2?: string
   gmtUrl?: string
   fullSignaturesUrl?: string
   note?: string
   noteLinkText?: string
   noteUrl?: string
+  termKey?: string  // key into termStructures
 }
 
 // Drug/Chemical Perturbation Datasets
@@ -31,6 +316,7 @@ const drugPerturbationDatasets: Dataset[] = [
     note: 'See also ',
     noteLinkText: 'L2S2',
     noteUrl: 'https://l2s2.maayanlab.cloud/download',
+    termKey: 'lincs-l1000-cp',
   },
   {
     title: 'Tahoe 100M',
@@ -40,6 +326,7 @@ const drugPerturbationDatasets: Dataset[] = [
     sourceUrl: 'https://huggingface.co/datasets/tahoebio/Tahoe-100M',
     sourceLabel: 'Hugging Face',
     gmtUrl: `${MINIO_BASE}/gmts/tahoe-100m.gmt.gz`,
+    termKey: 'tahoe-100m',
   },
   {
     title: 'Novartis/DRUG-seq U2OS MoABox Dataset',
@@ -52,6 +339,7 @@ const drugPerturbationDatasets: Dataset[] = [
     note: 'See also ',
     noteLinkText: 'DRUGseqr',
     noteUrl: 'https://drugseqr.maayanlab.cloud/download',
+    termKey: 'nibr-drug-seq',
   },
   {
     title: 'CMAP Build 02',
@@ -61,6 +349,7 @@ const drugPerturbationDatasets: Dataset[] = [
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/CMAP+Signatures+of+Differentially+Expressed+Genes+for+Small+Molecules',
     sourceLabel: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/gmts/microarrays-cmap.gmt.gz`,
+    termKey: 'microarrays-cmap',
   },
   {
     title: 'Ginkgo Bioworks',
@@ -70,6 +359,7 @@ const drugPerturbationDatasets: Dataset[] = [
     sourceUrl: 'https://huggingface.co/ginkgo-datapoints',
     sourceLabel: 'Hugging Face',
     note: 'Data used under license',
+    termKey: 'ginkgo-bioworks',
   },
   {
     title: 'Sci-Plex Drug Perturbations',
@@ -79,6 +369,7 @@ const drugPerturbationDatasets: Dataset[] = [
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/Sci-Plex+Drug+Perturbation+Signatures',
     sourceLabel: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/gmts/sciplex.gmt.gz`,
+    termKey: 'sciplex',
   },
   {
     title: 'DeepCoverMOA',
@@ -88,6 +379,7 @@ const drugPerturbationDatasets: Dataset[] = [
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/DeepCoverMOA+Drug+Mechanisms+of+Action',
     sourceLabel: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/gmts/deepcover-moa.gmt.gz`,
+    termKey: 'deepcover-moa',
   },
   {
     title: 'CREEDS Drug Perturbations',
@@ -96,7 +388,10 @@ const drugPerturbationDatasets: Dataset[] = [
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/26673713/',
     sourceUrl: 'https://maayanlab.cloud/CREEDS/',
     sourceLabel: 'CREEDS',
+    sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/CREEDS+Signatures+of+Differentially+Expressed+Genes+for+Drugs',
+    sourceLabel2: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/gmts/creeds-chem.gmt.gz`,
+    termKey: 'creeds-chem',
   },
   {
     title: 'RummaGEO Drug Perturbations',
@@ -109,6 +404,7 @@ const drugPerturbationDatasets: Dataset[] = [
     note: 'See also ',
     noteLinkText: 'RummaGEO',
     noteUrl: 'https://rummageo.com',
+    termKey: 'rummageo-chem',
   },
 ]
 
@@ -122,6 +418,7 @@ const genePerturbationDatasets: Dataset[] = [
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/PerturbAtlas+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations',
     sourceLabel: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/gmts/perturb-atlas.gmt.gz`,
+    termKey: 'perturb-atlas',
   },
   {
     title: 'PerturbAtlas Mouse Gene Perturbations',
@@ -131,16 +428,18 @@ const genePerturbationDatasets: Dataset[] = [
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/PerturbAtlas+Signatures+of+Differentially+Expressed+Genes+for+Mouse+Gene+Perturbations',
     sourceLabel: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/gmts/perturb-atlas-mouse.gmt.gz`,
+    termKey: 'perturb-atlas-mouse',
   },
   {
     title: 'L1000-XPR (Gene Knockouts)',
     value: '65,672 signatures',
-    info: 'Last Updated Jul 1 2021',
+    info: 'Pruned, top 250 by CD coefficient',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/35524556/',
     gmtUrl: `${MINIO_BASE}/gmts/lincs-l1000-xpr.gmt.gz`,
     note: 'See also ',
     noteLinkText: 'L2S2',
     noteUrl: 'https://l2s2.maayanlab.cloud/download',
+    termKey: 'lincs-l1000-xpr',
   },
   {
     title: 'Replogle et al. Perturb-seq',
@@ -150,6 +449,7 @@ const genePerturbationDatasets: Dataset[] = [
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/Replogle+et+al.,+Cell,+2022+K562+Genome-wide+Perturb-seq+Gene+Perturbation+Signatures',
     sourceLabel: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/gmts/replogle-perturb-seq.gmt.gz`,
+    termKey: 'replogle-perturb-seq',
   },
   {
     title: 'CREEDS Gene Perturbations',
@@ -158,7 +458,10 @@ const genePerturbationDatasets: Dataset[] = [
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/26673713/',
     sourceUrl: 'https://maayanlab.cloud/CREEDS/',
     sourceLabel: 'CREEDS',
+    sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/CREEDS+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations',
+    sourceLabel2: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/gmts/creeds-gene.gmt.gz`,
+    termKey: 'creeds-gene',
   },
   {
     title: 'RummaGEO Gene Perturbations',
@@ -171,6 +474,7 @@ const genePerturbationDatasets: Dataset[] = [
     note: 'See also ',
     noteLinkText: 'RummaGEO',
     noteUrl: 'https://rummageo.com',
+    termKey: 'rummageo-gene',
   },
 ]
 
@@ -218,8 +522,11 @@ const metadataDatasets: Dataset[] = [
   },
 ]
 
-// Dataset card component
-function DatasetCard({ dataset, showDownloads = true }: { dataset: Dataset, showDownloads?: boolean }) {
+// --- Components ---
+
+function DatasetCard({ dataset, showDownloads = true, forceShowTermFormat = false }: { dataset: Dataset, showDownloads?: boolean, forceShowTermFormat?: boolean }) {
+  const structure = dataset.termKey ? termStructures[dataset.termKey] : null
+
   return (
     <div className="bg-base-100 shadow-sm border rounded-lg px-3 py-2">
       <h3 className="font-medium text-sm leading-tight">{dataset.title}</h3>
@@ -243,6 +550,12 @@ function DatasetCard({ dataset, showDownloads = true }: { dataset: Dataset, show
           <a href={dataset.sourceUrl} target="_blank" rel="noopener noreferrer" className="link link-neutral">{dataset.sourceLabel || 'Source'}</a>
         ) : (
           <span className="text-gray-400">Source</span>
+        )}
+        {dataset.sourceUrl2 && (
+          <>
+            {' · '}
+            <a href={dataset.sourceUrl2} target="_blank" rel="noopener noreferrer" className="link link-neutral">{dataset.sourceLabel2 || 'Source'}</a>
+          </>
         )}
         {showDownloads && (
           <>
@@ -269,28 +582,87 @@ function DatasetCard({ dataset, showDownloads = true }: { dataset: Dataset, show
           )}
         </p>
       )}
+      {structure && (
+        <details className="mt-1.5" open={forceShowTermFormat || undefined}>
+          <summary className="text-xs cursor-pointer text-gray-500 hover:text-gray-700 select-none">
+            Term format
+          </summary>
+          <div className="mt-1.5 pt-1.5 border-t border-gray-200">
+            <TermStructureDisplay structure={structure} compact />
+          </div>
+        </details>
+      )}
     </div>
   )
 }
 
 export default function DownloadClientPage() {
+  const [showAllTermFormats, setShowAllTermFormats] = React.useState(false)
+
   return (
     <div className="prose max-w-none">
-      <p className="text-sm font-bold mb-4">
-        GMT downloads contain both up- and down-regulated gene sets in a single compressed .gmt.gz file
-      </p>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-sm font-bold m-0">
+          GMT downloads contain both up- and down-regulated gene sets in a single compressed .gmt.gz file
+        </p>
+        <button
+          className="btn btn-xs btn-outline whitespace-nowrap ml-4"
+          onClick={() => setShowAllTermFormats(prev => !prev)}
+        >
+          {showAllTermFormats ? 'Hide' : 'Show'} all term formats
+        </button>
+      </div>
+
+      {/* Master GMT card */}
+      <div className="flex justify-center my-4">
+        <div className="bg-base-100 shadow-md border-2 border-neutral/20 rounded-xl px-6 py-4 max-w-xl w-full text-center">
+          <h3 className="font-bold text-lg">PerturbSeqr Combined GMT</h3>
+          <p className="text-sm text-gray-500">All datasets combined · 425,416 signatures (14 datasets, excludes Ginkgo Bioworks)</p>
+          <div className="text-sm mt-1">
+            <a href={`${MINIO_BASE}/gmts/perturbseqr-all.gmt.gz`} download className="link link-neutral">Gene Matrix Transposed</a>
+          </div>
+          <details className="mt-3 text-left" open={showAllTermFormats || undefined}>
+            <summary className="text-xs cursor-pointer text-gray-500 hover:text-gray-700 select-none text-center">
+              Term format
+            </summary>
+            <div className="mt-2 pt-2 border-t border-gray-200">
+              <TermStructureDisplay
+                structure={{
+                  example: 'LINCS L1000 CP::bortezomib::HT29::::24H::20uM up',
+                  direction: 'up',
+                  fields: [
+                    { text: 'LINCS L1000 CP', label: 'Dataset' },
+                    { text: 'bortezomib', label: 'Perturbation' },
+                    { text: 'HT29', label: 'Cell Line' },
+                    { text: '', label: 'Cell Type' },
+                    { text: '24H', label: 'Timepoint' },
+                  ],
+                  extraFields: [
+                    { text: '20uM', label: 'Concentration' },
+                    { text: '...', label: 'Dataset Extras' },
+                  ],
+                }}
+                compact
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                The combined GMT prepends the dataset name to the standard term format. Fields 1-4 (Perturbation, Cell Line, Cell Type, Timepoint) are shared across all datasets. Remaining fields vary by dataset.
+              </p>
+            </div>
+          </details>
+        </div>
+      </div>
 
       <h3 className="text-lg font-medium mt-4 mb-2">Drug/Chemical Perturbation Datasets</h3>
       <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-3 my-3">
         {drugPerturbationDatasets.map(dataset => (
-          <DatasetCard key={dataset.title} dataset={dataset} />
+          <DatasetCard key={dataset.title} dataset={dataset} forceShowTermFormat={showAllTermFormats} />
         ))}
       </div>
 
       <h3 className="text-lg font-medium mt-4 mb-2">Gene Perturbation Datasets</h3>
       <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-3 my-3">
         {genePerturbationDatasets.map(dataset => (
-          <DatasetCard key={dataset.title} dataset={dataset} />
+          <DatasetCard key={dataset.title} dataset={dataset} forceShowTermFormat={showAllTermFormats} />
         ))}
       </div>
 

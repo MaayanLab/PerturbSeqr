@@ -18,8 +18,8 @@ import Image from "next/image";
 import GeneSetModal from "@/components/geneSetModal";
 import { FaFilter, FaSortUp } from "react-icons/fa6";
 import { IoMdInformationCircleOutline } from "react-icons/io";
-import { parseTerm } from "@/utils/parseTerm";
-import { preloadMetadata, enrichWithMetadataSync, preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary, getDatasetUrl } from "@/utils/metadataLookup";
+import { parseTerm, getCellDisplay } from "@/utils/parseTerm";
+import { preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary, getDatasetUrl } from "@/utils/metadataLookup";
 import { useRouter } from "next/navigation";
 
 const pageSize = 12;
@@ -84,7 +84,6 @@ function EnrichmentResults({
   const [rawTerm, setRawTerm] = React.useState("");
   const [topNSlider, setTopNSlider] = React.useState(10000);
   const [pvalueLeSlider, setPvalueLeSlider] = React.useState(0.05);
-  const [metadataLoaded, setMetadataLoaded] = React.useState(false);
   const [drugLookupLoaded, setDrugLookupLoaded] = React.useState(false);
 
   const { page, term, fda, consensus, moas, sort, ko, topN, pvalueLe } =
@@ -126,18 +125,10 @@ function EnrichmentResults({
     setRawTerm(term);
   }, [term]);
 
-  // Preload metadata and drug lookup for libraries in the filter (if any)
+  // Preload drug lookup
   React.useEffect(() => {
-    const loadData = async () => {
-      await preloadDrugLookup();
-      setDrugLookupLoaded(true);
-      if (libraryNames && libraryNames.length > 0) {
-        await preloadMetadata(libraryNames);
-      }
-      setMetadataLoaded(true);
-    };
-    loadData();
-  }, [libraryNames]);
+    preloadDrugLookup().then(() => setDrugLookupLoaded(true));
+  }, []);
 
   // Compute column visibility - hide columns that are entirely N/A on current page
   const columnVisibility = React.useMemo(() => {
@@ -146,16 +137,14 @@ function EnrichmentResults({
     let hasCellLine = false, hasTimepoint = false, hasConcentration = false;
     for (const node of nodes) {
       const term = node?.geneSets.nodes[0].term;
-      const libraryName = node?.geneSets.nodes[0].library?.name || '';
-      const baseParsed = term ? parseTerm(term, libraryName) : {};
-      const parsed = metadataLoaded ? enrichWithMetadataSync(baseParsed, libraryName) : baseParsed;
-      if (parsed.cellLine && parsed.cellLine !== 'N/A') hasCellLine = true;
-      if (parsed.timepoint && parsed.timepoint !== 'N/A') hasTimepoint = true;
-      if (parsed.concentration && parsed.concentration !== 'N/A') hasConcentration = true;
+      const parsed = term ? parseTerm(term) : parseTerm('');
+      if (getCellDisplay(parsed)) hasCellLine = true;
+      if (parsed.timepoint) hasTimepoint = true;
+      if (parsed.concentration) hasConcentration = true;
       if (hasCellLine && hasTimepoint && hasConcentration) break;
     }
     return { cellLine: hasCellLine, timepoint: hasTimepoint, concentration: hasConcentration };
-  }, [enrichmentResults, metadataLoaded]);
+  }, [enrichmentResults]);
 
   return (
     <div className="flex flex-col gap-2 my-2">
@@ -1088,14 +1077,11 @@ function EnrichmentResults({
                   const term = enrichmentResult?.geneSets.nodes[0].term;
                   const libraryName = enrichmentResult?.geneSets.nodes[0].library?.name || '';
 
-                  // Parse term using the parseTerm utility
-                  const baseParsed = term ? parseTerm(term, libraryName) : {};
-                  // Enrich with external metadata (e.g., RummaGEO cell line/timepoint)
-                  const parsed = metadataLoaded ? enrichWithMetadataSync(baseParsed, libraryName) : baseParsed;
-                  const dataset = libraryName || parsed.library || '';
+                  const parsed = term ? parseTerm(term) : parseTerm('');
+                  const dataset = libraryName;
                   const direction = parsed.direction || '';
                   const perturbation = parsed.perturbation || parsed.raw || '';
-                  const cellLine = parsed.cellLine || 'N/A';
+                  const cellLine = getCellDisplay(parsed) || 'N/A';
                   const timepoint = parsed.timepoint || 'N/A';
                   const concentration = parsed.concentration || 'N/A';
 
@@ -1110,7 +1096,7 @@ function EnrichmentResults({
 
                   // Get additional drug info from JSON lookup (only for drug perturbations)
                   const drugInfo = !isGenePert && drugLookupLoaded
-                    ? (getDrugInfo(perturbation) || getDrugInfo(parsed.nsn || ''))
+                    ? (getDrugInfo(perturbation) || getDrugInfo(parsed.extras[0] || ''))
                     : null;
                   const perturbationUrl = getPerturbationUrl(perturbation, libraryName);
                   const perturbationLinkTitle = getPerturbationLinkTitle(libraryName);

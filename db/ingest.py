@@ -39,7 +39,7 @@ from perturbation_parser import extract_perturbation
 from db_utils import get_conn, get_cid, get_or_create_library, query, discover_gmt_files, discover_minio_gmt_files, download_minio_gmt_file
 
 # Helper lambdas
-extract_fallback_id = lambda term, lib: term.rsplit(" ", 1)[0].split("_")[1] if lib == "nibr-drug-seq" else None
+extract_fallback_id = lambda term, lib: term.rsplit(" ", 1)[0].split("::")[5] if lib == "nibr-drug-seq" and len(term.rsplit(" ", 1)[0].split("::")) > 5 else None
 lookup_cid = lambda pert, fallback=None: (get_cid(fallback) or get_cid(pert)) if fallback else get_cid(pert)
 compute_hash = lambda genes: str(uuid.uuid5(uuid.UUID(int=0), '\t'.join(sorted(set(genes)))))
 genes_to_json = lambda genes, gmap: json.dumps({gmap[g]: i for i, g in enumerate(genes) if g in gmap})

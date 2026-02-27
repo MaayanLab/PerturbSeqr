@@ -2,72 +2,33 @@
 Shared term parsing utilities for extracting perturbation names from GMT terms.
 
 Used by ingest.py and build_drug_lookup.py.
+
+With canonical :: delimited format, perturbation is always position 0.
 """
 
-import json
-import os
-from pathlib import Path
-
-# Load libraries config once at module level
-# Support configurable path via INGEST_CONFIG_DIR for container deployment
-if config_dir := os.environ.get('INGEST_CONFIG_DIR'):
-    LIBRARIES_JSON = Path(config_dir) / "libraries.json"
-else:
-    LIBRARIES_JSON = Path(__file__).parent.parent / "src" / "config" / "libraries.json"
-
-LIBRARIES_CONFIG = json.load(open(LIBRARIES_JSON)).get("libraries", {}) if LIBRARIES_JSON.exists() else {}
-
-get_lib_config = lambda name: LIBRARIES_CONFIG.get(name, {})
+from typing import Optional
 
 
-def extract_perturbation(term: str, library_name: str = None, lib_config: dict = None) -> str | None:
+def extract_perturbation(term: str, library_name: str = None, lib_config: dict = None) -> Optional[str]:
     """
-    Extract the perturbation name from a term using library config.
+    Extract the perturbation name from a canonical term.
+
+    Canonical format: perturbation::cellLine::cellType::timepoint::concentration[::extras...] up|down
 
     Args:
-        term: The full term string (e.g., "aspirin_10uM_MCF7 up")
-        library_name: Library key to look up config (e.g., "tahoe-100m")
-        lib_config: Direct library config dict (alternative to library_name)
+        term: The full term string (e.g., "afatinib::A375::::XH::10uM::ABY001::A13 up")
+        library_name: Unused, kept for API compatibility
+        lib_config: Unused, kept for API compatibility
 
     Returns:
         Extracted perturbation name or None
     """
-    if lib_config is None:
-        lib_config = get_lib_config(library_name) if library_name else {}
-
-    term_format = lib_config.get("termFormat", {})
-    if not term_format:
-        return None
-
-    fields = term_format.get("fields", [])
-    if not fields or "perturbation" not in fields:
-        return None
-
-    delimiter = term_format.get("delimiter", "_")
-    join_middle = term_format.get("joinMiddle", False)
-    fields_from_end = term_format.get("fieldsFromEnd", 0)
-
     # Remove direction suffix
     base_term = term
-    for suffix in [" up", " down", " dn"]:
+    for suffix in (" up", " down", " dn"):
         if base_term.lower().endswith(suffix):
-            base_term = base_term[:-len(suffix)]
+            base_term = base_term[: -len(suffix)]
             break
 
-    pert_index = fields.index("perturbation")
-    parts = base_term.split(delimiter)
-
-    if join_middle and fields_from_end > 0:
-        if len(parts) <= fields_from_end + 1:
-            return parts[pert_index] if pert_index < len(parts) else None
-        if pert_index == 0:
-            return parts[0]
-        elif pert_index >= len(fields) - fields_from_end:
-            end_offset = len(fields) - pert_index - 1
-            return parts[-(end_offset + 1)] if end_offset < len(parts) else None
-        else:
-            middle_start = 1
-            middle_end = len(parts) - fields_from_end
-            return delimiter.join(parts[middle_start:middle_end])
-    else:
-        return parts[pert_index] if pert_index < len(parts) else None
+    # Perturbation is always position 0 in canonical format
+    return base_term.split("::")[0] or None

@@ -13,6 +13,7 @@ import {
     PairEnrichmentQueryMoAsQuery,
   } from "@/graphql";
   import { getClient } from "@/lib/apollo/client";
+  import { parseTerm, getCellDisplay } from "@/utils/parseTerm";
   
 
 export async function* paginatedNodeGenerator(genes: string[], term: string, filterFda: boolean, filterKo: boolean, topN: number = 1000, sort: string, maxTotal: number = 100000) {
@@ -44,34 +45,16 @@ export async function* paginatedNodeGenerator(genes: string[], term: string, fil
         for (const geneSet of node.geneSets.nodes) {
           if (!geneSet) continue;
           const fdaInfo = geneSet.geneSetFdaCountsById.nodes[0];
-          const perturbationId =
-            geneSet.term.split("_")[0];
-          const cellLine =
-            geneSet.term.split("_")[1];
-          const timepoint =
-            geneSet.term.split("_")[2];
-          const batch =
-            geneSet.term.split("_")[3];
-          var perturbation =
-            geneSet.term.split("_")[4];
-          if (perturbation?.split(" ").length == 2)
-            perturbation = perturbation?.split(" ")[0] + " KO";
-
-          const concentration =
-            geneSet.term
-              .split("_")[5]
-              ?.split(" ")[0] ?? "N/A";
-          const direction =
-            geneSet.term.split(" ")[1];
+          const parsed = parseTerm(geneSet.term);
 
           yield {
-            drug: perturbation,
-            perturbationId,
-            concentration,
-            cellLine,
-            timepoint,
-            batch,
-            direction,
+            drug: parsed.perturbation,
+            perturbationId: parsed.perturbation,
+            concentration: parsed.concentration || "N/A",
+            cellLine: getCellDisplay(parsed),
+            timepoint: parsed.timepoint,
+            batch: parsed.extras[0] || '',
+            direction: parsed.direction,
             geneSetSize: geneSet.nGeneIds,
             moa: geneSet.geneSetFdaCountsById.nodes[0]?.moa,
             nOverlap: node.nOverlap,
@@ -248,31 +231,15 @@ export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: 
         const geneSet = node.geneSet.nodes[0];
           if (!geneSet) continue;
           const fdaInfo = geneSet.geneSetFdaCountsById.nodes[0];
-          const term = geneSet.term.split(" ")[0]
-          const perturbationId =
-          term.split("_")[0];
-          const cellLine =
-          term.split("_")[1];
-          const timepoint =
-            term.split("_")[2];
-          const batch =
-            term.split("_")[3];
-          var perturbation =
-            term.split("_")[4];
-          if (perturbation?.split(" ").length == 2)
-            perturbation = perturbation?.split(" ")[0] + " KO";
+          const parsed = parseTerm(geneSet.term);
 
-          const concentration =
-            geneSet.term
-              .split("_")[5]
-              ?.split(" ")[0] ?? "N/A";
           yield {
-            perturbation,
-            cellLine,
-            timepoint,
-            concentration,
-            batch,
-            perturbationId,
+            perturbation: parsed.perturbation,
+            cellLine: getCellDisplay(parsed),
+            timepoint: parsed.timepoint,
+            concentration: parsed.concentration || "N/A",
+            batch: parsed.extras[0] || '',
+            perturbationId: parsed.perturbation,
             nMimicOverlap: node.mimickerOverlap,
             pvalueMimic: node.pvalueMimic,
             adjPvalueMimic: node.adjPvalueMimic,

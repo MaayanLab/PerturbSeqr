@@ -4,8 +4,8 @@ import GeneSetModal from '@/components/geneSetModal';
 import useQsState from '@/utils/useQsState';
 import Pagination from '@/components/pagination';
 import TermDownloadButton from '@/components/termDownloadButton';
-import { parseTerm } from '@/utils/parseTerm';
-import { preloadMetadata, enrichWithMetadataSync, preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary, getDatasetUrl } from '@/utils/metadataLookup';
+import { parseTerm, getCellDisplay } from '@/utils/parseTerm';
+import { preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary, getDatasetUrl } from '@/utils/metadataLookup';
 import Image from 'next/image';
 
 
@@ -25,18 +25,11 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
   const [currTerm, setCurrTerm] = React.useState(terms[0].term)
   const [currDataset, setCurrDataset] = React.useState(terms[0].library?.name || '')
   const [showModal, setShowModal] = React.useState(false)
-  const [metadataLoaded, setMetadataLoaded] = React.useState(false)
-
   const [drugLookupLoaded, setDrugLookupLoaded] = React.useState(false)
 
-  // Preload metadata and drug lookup for libraries in the results
+  // Preload drug lookup for libraries in the results
   React.useEffect(() => {
-    const libraryNames = Array.from(new Set(terms.map(t => t.library?.name).filter(Boolean))) as string[]
-    Promise.all([
-      preloadMetadata(libraryNames),
-      preloadDrugLookup()
-    ]).then(() => {
-      setMetadataLoaded(true)
+    preloadDrugLookup().then(() => {
       setDrugLookupLoaded(true)
     })
   }, [terms])
@@ -99,14 +92,11 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
               if (!el) return null
               const term = el.term
               const libraryName = el.library?.name || ''
-              // Parse term using the parseTerm utility
-              const baseParsed = term ? parseTerm(term, libraryName) : {}
-              // Enrich with external metadata (e.g., RummaGEO cell line/timepoint)
-              const parsed = metadataLoaded ? enrichWithMetadataSync(baseParsed, libraryName) : baseParsed
-              const dataset = libraryName || parsed.library || ''
+              const parsed = term ? parseTerm(term) : parseTerm('')
+              const dataset = libraryName
               const direction = parsed.direction || ''
               const perturbation = parsed.perturbation || parsed.raw || ''
-              const cellLine = parsed.cellLine || 'N/A'
+              const cellLine = getCellDisplay(parsed) || 'N/A'
               const timepoint = parsed.timepoint || 'N/A'
               const concentration = parsed.concentration || 'N/A'
 
@@ -116,7 +106,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
               // Drug lookup for MOA and links (only relevant for drug perturbations)
               // Try perturbation name, then NSN code (for DRUGseqr)
               const drugInfo = !isGenePert && drugLookupLoaded
-                ? (getDrugInfo(perturbation) || getDrugInfo(parsed.nsn || ''))
+                ? (getDrugInfo(perturbation) || getDrugInfo(parsed.extras[0] || ''))
                 : null
               const perturbationUrl = getPerturbationUrl(perturbation, libraryName)
               const perturbationLinkTitle = getPerturbationLinkTitle(libraryName)
