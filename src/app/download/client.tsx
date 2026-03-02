@@ -204,12 +204,12 @@ const termStructures: Record<string, TermStructure> = {
     ],
   },
   'perturb-atlas-mouse': {
-    example: 'Adar1::activated B cells::cell::::::KO::SRP360154::1001 up',
+    example: 'Adar1::::Anti-CD40 and anti-IgM activated B cells::::::KO::SRP360154::1001 up',
     direction: 'up',
     fields: [
       { text: 'Adar1', label: 'Perturbation' },
-      { text: 'activated B cells', label: 'Cell Line' },
-      { text: 'cell', label: 'Cell Type' },
+      { text: '', label: 'Cell Line' },
+      { text: 'Anti-CD40 and anti-IgM activated B cells', label: 'Cell Type' },
       { text: '', label: 'Timepoint' },
       { text: '', label: 'Concentration' },
     ],
@@ -308,6 +308,48 @@ type Dataset = {
 // Drug/Chemical Perturbation Datasets
 const drugPerturbationDatasets: Dataset[] = [
   {
+    title: 'CMAP Build 02',
+    value: '12,200 signatures',
+    info: '',
+    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/17008526/',
+    sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/CMAP+Signatures+of+Differentially+Expressed+Genes+for+Small+Molecules',
+    sourceLabel: 'Harmonizome',
+    gmtUrl: `${MINIO_BASE}/gmts/microarrays-cmap.gmt.gz`,
+    termKey: 'microarrays-cmap',
+  },
+  {
+    title: 'CREEDS Drug Perturbations',
+    value: '1,860 signatures',
+    info: 'CREEDS + Harmonizome GEO microarray',
+    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/26673713/',
+    sourceUrl: 'https://maayanlab.cloud/CREEDS/',
+    sourceLabel: 'CREEDS',
+    sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/CREEDS+Signatures+of+Differentially+Expressed+Genes+for+Drugs',
+    sourceLabel2: 'Harmonizome',
+    gmtUrl: `${MINIO_BASE}/gmts/creeds-chem.gmt.gz`,
+    termKey: 'creeds-chem',
+  },
+  {
+    title: 'DeepCoverMOA',
+    value: '1,748 signatures',
+    info: '',
+    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/36593396/',
+    sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/DeepCoverMOA+Drug+Mechanisms+of+Action',
+    sourceLabel: 'Harmonizome',
+    gmtUrl: `${MINIO_BASE}/gmts/deepcover-moa.gmt.gz`,
+    termKey: 'deepcover-moa',
+  },
+  {
+    title: 'Ginkgo Bioworks',
+    value: '9,310 signatures',
+    info: '',
+    publicationUrl: 'https://www.ginkgobioworks.com/',
+    sourceUrl: 'https://huggingface.co/ginkgo-datapoints',
+    sourceLabel: 'Hugging Face',
+    note: 'Data used under license',
+    termKey: 'ginkgo-bioworks',
+  },
+  {
     title: 'L1000-CP (Chemical Perturbations)',
     value: '156,926 signatures',
     info: 'Pruned, top 250 by CD coefficient',
@@ -317,16 +359,6 @@ const drugPerturbationDatasets: Dataset[] = [
     noteLinkText: 'L2S2',
     noteUrl: 'https://l2s2.maayanlab.cloud/download',
     termKey: 'lincs-l1000-cp',
-  },
-  {
-    title: 'Tahoe 100M',
-    value: '105,404 signatures',
-    info: <><a href="https://huggingface.co/datasets/tahoebio/Tahoe-100M/viewer/pseudobulk_differential_expression" target="_blank" rel="noopener noreferrer" className="link link-neutral">Pseudobulk DESeq2</a>, padj ≤ 0.05, top 100 by log2FC, per-concentration</>,
-    publicationUrl: 'https://www.biorxiv.org/content/10.1101/2025.02.20.639398v3',
-    sourceUrl: 'https://huggingface.co/datasets/tahoebio/Tahoe-100M',
-    sourceLabel: 'Hugging Face',
-    gmtUrl: `${MINIO_BASE}/gmts/tahoe-100m.gmt.gz`,
-    termKey: 'tahoe-100m',
   },
   {
     title: 'Novartis/DRUG-seq U2OS MoABox Dataset',
@@ -342,58 +374,6 @@ const drugPerturbationDatasets: Dataset[] = [
     termKey: 'nibr-drug-seq',
   },
   {
-    title: 'CMAP Build 02',
-    value: '12,200 signatures',
-    info: '',
-    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/17008526/',
-    sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/CMAP+Signatures+of+Differentially+Expressed+Genes+for+Small+Molecules',
-    sourceLabel: 'Harmonizome',
-    gmtUrl: `${MINIO_BASE}/gmts/microarrays-cmap.gmt.gz`,
-    termKey: 'microarrays-cmap',
-  },
-  {
-    title: 'Ginkgo Bioworks',
-    value: '9,310 signatures',
-    info: '',
-    publicationUrl: 'https://www.ginkgobioworks.com/',
-    sourceUrl: 'https://huggingface.co/ginkgo-datapoints',
-    sourceLabel: 'Hugging Face',
-    note: 'Data used under license',
-    termKey: 'ginkgo-bioworks',
-  },
-  {
-    title: 'Sci-Plex Drug Perturbations',
-    value: '4,604 signatures',
-    info: '',
-    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/31806696/',
-    sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/Sci-Plex+Drug+Perturbation+Signatures',
-    sourceLabel: 'Harmonizome',
-    gmtUrl: `${MINIO_BASE}/gmts/sciplex.gmt.gz`,
-    termKey: 'sciplex',
-  },
-  {
-    title: 'DeepCoverMOA',
-    value: '1,748 signatures',
-    info: '',
-    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/36593396/',
-    sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/DeepCoverMOA+Drug+Mechanisms+of+Action',
-    sourceLabel: 'Harmonizome',
-    gmtUrl: `${MINIO_BASE}/gmts/deepcover-moa.gmt.gz`,
-    termKey: 'deepcover-moa',
-  },
-  {
-    title: 'CREEDS Drug Perturbations',
-    value: '1,860 signatures',
-    info: 'CREEDS + Harmonizome GEO microarray',
-    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/26673713/',
-    sourceUrl: 'https://maayanlab.cloud/CREEDS/',
-    sourceLabel: 'CREEDS',
-    sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/CREEDS+Signatures+of+Differentially+Expressed+Genes+for+Drugs',
-    sourceLabel2: 'Harmonizome',
-    gmtUrl: `${MINIO_BASE}/gmts/creeds-chem.gmt.gz`,
-    termKey: 'creeds-chem',
-  },
-  {
     title: 'RummaGEO Drug Perturbations',
     value: '5,345 signatures',
     info: '',
@@ -406,10 +386,53 @@ const drugPerturbationDatasets: Dataset[] = [
     noteUrl: 'https://rummageo.com',
     termKey: 'rummageo-chem',
   },
+  {
+    title: 'Sci-Plex Drug Perturbations',
+    value: '4,604 signatures',
+    info: '',
+    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/31806696/',
+    sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/Sci-Plex+Drug+Perturbation+Signatures',
+    sourceLabel: 'Harmonizome',
+    gmtUrl: `${MINIO_BASE}/gmts/sciplex.gmt.gz`,
+    termKey: 'sciplex',
+  },
+  {
+    title: 'Tahoe 100M',
+    value: '105,404 signatures',
+    info: <><a href="https://huggingface.co/datasets/tahoebio/Tahoe-100M/viewer/pseudobulk_differential_expression" target="_blank" rel="noopener noreferrer" className="link link-neutral">Pseudobulk DESeq2</a>, padj ≤ 0.05, top 100 by log2FC, per-concentration</>,
+    publicationUrl: 'https://www.biorxiv.org/content/10.1101/2025.02.20.639398v3',
+    sourceUrl: 'https://huggingface.co/datasets/tahoebio/Tahoe-100M',
+    sourceLabel: 'Hugging Face',
+    gmtUrl: `${MINIO_BASE}/gmts/tahoe-100m.gmt.gz`,
+    termKey: 'tahoe-100m',
+  },
 ]
 
 // Gene Perturbation Datasets
 const genePerturbationDatasets: Dataset[] = [
+  {
+    title: 'CREEDS Gene Perturbations',
+    value: '4,788 signatures',
+    info: 'CREEDS + Harmonizome GEO microarray',
+    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/26673713/',
+    sourceUrl: 'https://maayanlab.cloud/CREEDS/',
+    sourceLabel: 'CREEDS',
+    sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/CREEDS+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations',
+    sourceLabel2: 'Harmonizome',
+    gmtUrl: `${MINIO_BASE}/gmts/creeds-gene.gmt.gz`,
+    termKey: 'creeds-gene',
+  },
+  {
+    title: 'L1000-XPR (Gene Knockouts)',
+    value: '65,672 signatures',
+    info: 'Pruned, top 250 by CD coefficient',
+    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/35524556/',
+    gmtUrl: `${MINIO_BASE}/gmts/lincs-l1000-xpr.gmt.gz`,
+    note: 'See also ',
+    noteLinkText: 'L2S2',
+    noteUrl: 'https://l2s2.maayanlab.cloud/download',
+    termKey: 'lincs-l1000-xpr',
+  },
   {
     title: 'PerturbAtlas Gene Perturbations',
     value: '12,852 signatures',
@@ -431,17 +454,6 @@ const genePerturbationDatasets: Dataset[] = [
     termKey: 'perturb-atlas-mouse',
   },
   {
-    title: 'L1000-XPR (Gene Knockouts)',
-    value: '65,672 signatures',
-    info: 'Pruned, top 250 by CD coefficient',
-    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/35524556/',
-    gmtUrl: `${MINIO_BASE}/gmts/lincs-l1000-xpr.gmt.gz`,
-    note: 'See also ',
-    noteLinkText: 'L2S2',
-    noteUrl: 'https://l2s2.maayanlab.cloud/download',
-    termKey: 'lincs-l1000-xpr',
-  },
-  {
     title: 'Replogle et al. Perturb-seq',
     value: '9,207 signatures',
     info: 'K562 genome-wide, K562 essential, RPE1 essential',
@@ -450,18 +462,6 @@ const genePerturbationDatasets: Dataset[] = [
     sourceLabel: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/gmts/replogle-perturb-seq.gmt.gz`,
     termKey: 'replogle-perturb-seq',
-  },
-  {
-    title: 'CREEDS Gene Perturbations',
-    value: '4,788 signatures',
-    info: 'CREEDS + Harmonizome GEO microarray',
-    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/26673713/',
-    sourceUrl: 'https://maayanlab.cloud/CREEDS/',
-    sourceLabel: 'CREEDS',
-    sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/CREEDS+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations',
-    sourceLabel2: 'Harmonizome',
-    gmtUrl: `${MINIO_BASE}/gmts/creeds-gene.gmt.gz`,
-    termKey: 'creeds-gene',
   },
   {
     title: 'RummaGEO Gene Perturbations',
@@ -611,45 +611,6 @@ export default function DownloadClientPage() {
         >
           {showAllTermFormats ? 'Hide' : 'Show'} all term formats
         </button>
-      </div>
-
-      {/* Master GMT card */}
-      <div className="flex justify-center my-4">
-        <div className="bg-base-100 shadow-md border-2 border-neutral/20 rounded-xl px-6 py-4 max-w-xl w-full text-center">
-          <h3 className="font-bold text-lg">PerturbSeqr Combined GMT</h3>
-          <p className="text-sm text-gray-500">All datasets combined · 425,416 signatures (14 datasets, excludes Ginkgo Bioworks)</p>
-          <div className="text-sm mt-1">
-            <a href={`${MINIO_BASE}/gmts/perturbseqr-all.gmt.gz`} download className="link link-neutral">Gene Matrix Transposed</a>
-          </div>
-          <details className="mt-3 text-left" open={showAllTermFormats || undefined}>
-            <summary className="text-xs cursor-pointer text-gray-500 hover:text-gray-700 select-none text-center">
-              Term format
-            </summary>
-            <div className="mt-2 pt-2 border-t border-gray-200">
-              <TermStructureDisplay
-                structure={{
-                  example: 'LINCS L1000 CP::bortezomib::HT29::::24H::20uM up',
-                  direction: 'up',
-                  fields: [
-                    { text: 'LINCS L1000 CP', label: 'Dataset' },
-                    { text: 'bortezomib', label: 'Perturbation' },
-                    { text: 'HT29', label: 'Cell Line' },
-                    { text: '', label: 'Cell Type' },
-                    { text: '24H', label: 'Timepoint' },
-                  ],
-                  extraFields: [
-                    { text: '20uM', label: 'Concentration' },
-                    { text: '...', label: 'Dataset Extras' },
-                  ],
-                }}
-                compact
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                The combined GMT prepends the dataset name to the standard term format. Fields 1-4 (Perturbation, Cell Line, Cell Type, Timepoint) are shared across all datasets. Remaining fields vary by dataset.
-              </p>
-            </div>
-          </details>
-        </div>
       </div>
 
       <h3 className="text-lg font-medium mt-4 mb-2">Drug/Chemical Perturbation Datasets</h3>

@@ -4,8 +4,8 @@ import libraryConfig from '@/config/libraries.json'
 import { useAllLibrariesQuery } from '@/graphql'
 
 const libraries = Object.values(libraryConfig.libraries) as { displayName: string; category: string }[]
-const DRUG_PERTURBATION_LIBRARIES = libraries.filter(l => l.category === 'drug').map(l => l.displayName)
-const GENE_PERTURBATION_LIBRARIES = libraries.filter(l => l.category === 'gene').map(l => l.displayName)
+const DRUG_PERTURBATION_LIBRARIES = libraries.filter(l => l.category === 'drug').map(l => l.displayName).sort()
+const GENE_PERTURBATION_LIBRARIES = libraries.filter(l => l.category === 'gene').map(l => l.displayName).sort()
 
 /**
  * LibraryFilter component - Displays toggles to filter search by dataset/library

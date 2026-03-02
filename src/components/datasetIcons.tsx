@@ -27,9 +27,9 @@ const shortLabels: Record<string, string> = {
   'LINCS L1000 CP': 'L1000 CP',
   'LINCS L1000 XPR': 'L1000 XPR',
   'Microarrays CMap': 'CMap Arrays',
-  'NIBR DRUG-seq': 'NIBR D-seq',
+  'NIBR DRUG-seq': 'NIBR DR-seq',
   'DeepCover MoA': 'DeepCover',
-  'Ginkgo Bioworks': 'Ginkgo Bio',
+  'Ginkgo Bioworks': 'Ginkgo DR-seq',
   'Perturb Atlas Mouse': 'PA Mouse',
   'Replogle et al.': 'Replogle',
 }
@@ -39,15 +39,16 @@ const customSizes: Record<string, number> = {
   'RummaGEO Chem': 60,
   'RummaGEO Gene': 60,
   'Microarrays CMap': 100,
-  'SciPlex': 50,
+  'SciPlex': 75,
+  'NIBR DRUG-seq': 100,
 }
 const defaultSize = 80
 
-// Build per-library entries from config
+// Build per-library entries from config, sorted alphabetically by display name
 const allLibraries = Object.values(libraryConfig.libraries).map((l: any) => ({
   name: l.displayName as string,
   category: l.category as 'drug' | 'gene',
-}))
+})).sort((a, b) => a.name.localeCompare(b.name))
 
 // Export counts for use in subtitle
 export const resourceCount = new Set(allLibraries.map(l => logoMap[l.name]?.src).filter(Boolean)).size
@@ -87,8 +88,7 @@ export default function DatasetIcons({
   const renderButton = ({ name, category }: { name: string; category: 'drug' | 'gene' }) => {
     const logoInfo = logoMap[name]
     if (!logoInfo) return null
-    const isSmall = name === 'SciPlex'
-    const size = customSizes[name] || (isSmall ? 50 : defaultSize)
+    const size = customSizes[name] || defaultSize
     const label = shortLabels[name] || name
     return (
       <button
@@ -98,14 +98,14 @@ export default function DatasetIcons({
         className={`btn btn-ghost p-2 h-auto min-h-0 w-32 flex flex-col items-center justify-center transition-all rounded-lg mx-1 ${getButtonStyle(name, category)}`}
         title={name}
       >
-        <div className={`w-24 h-24 relative flex items-center justify-center ${isSmall ? 'bg-white dark:bg-gray-800 rounded-lg p-2' : ''}`}>
+        <div className="w-24 h-24 relative flex items-center justify-center">
           {logoInfo.darkSrc ? (
             <>
               <Image src={logoInfo.src} alt={name} width={size} height={size} className="object-contain max-w-full max-h-full dark:hidden" />
               <Image src={logoInfo.darkSrc} alt={name} width={size} height={size} className="object-contain max-w-full max-h-full hidden dark:block" />
             </>
           ) : (
-            <Image src={logoInfo.src} alt={name} width={size} height={size} className={`object-contain max-w-full max-h-full ${name === 'SciPlex' ? '' : 'dark:invert'}`} />
+            <Image src={logoInfo.src} alt={name} width={size} height={size} className={`object-contain max-w-full max-h-full ${name === 'SciPlex' ? '' : 'dark:invert'}`} unoptimized={logoInfo.type === 'svg'} />
           )}
         </div>
         <span className="text-xs mt-1 leading-tight text-center whitespace-nowrap">{label}</span>
