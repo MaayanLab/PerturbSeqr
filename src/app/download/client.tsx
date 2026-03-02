@@ -120,14 +120,14 @@ const termStructures: Record<string, TermStructure> = {
     ],
   },
   'ginkgo-bioworks': {
-    example: 'SC_514::A549::::24::1000 up',
+    example: 'SC_514::A549::::24h::1uM up',
     direction: 'up',
     fields: [
       { text: 'SC_514', label: 'Perturbation' },
       { text: 'A549', label: 'Cell Line' },
       { text: '', label: 'Cell Type' },
-      { text: '24', label: 'Timepoint' },
-      { text: '1000', label: 'Concentration' },
+      { text: '24h', label: 'Timepoint' },
+      { text: '1uM', label: 'Concentration' },
     ],
     extraFields: [],
   },
@@ -188,12 +188,12 @@ const termStructures: Record<string, TermStructure> = {
     ],
   },
   'perturb-atlas': {
-    example: 'CPSF6::K562::cell line::::::KD::SRP013565::10000 up',
+    example: 'CPSF6::K562::::::::KD::SRP013565::10000 up',
     direction: 'up',
     fields: [
       { text: 'CPSF6', label: 'Perturbation' },
       { text: 'K562', label: 'Cell Line' },
-      { text: 'cell line', label: 'Cell Type' },
+      { text: '', label: 'Cell Type' },
       { text: '', label: 'Timepoint' },
       { text: '', label: 'Concentration' },
     ],
