@@ -411,6 +411,15 @@ const drugPerturbationDatasets: Dataset[] = [
 // Gene Perturbation Datasets
 const genePerturbationDatasets: Dataset[] = [
   {
+    title: 'CM4AI',
+    value: '0 signatures',
+    info: '',
+    publicationUrl: '',
+    sourceUrl: 'https://cm4ai.org',
+    sourceLabel: 'CM4AI',
+    fullSignaturesUrl: 'https://figshare.com/s/ee85bb1880921326249b',
+  },
+  {
     title: 'CREEDS Gene Perturbations',
     value: '4,788 signatures',
     info: 'CREEDS + Harmonizome GEO microarray',

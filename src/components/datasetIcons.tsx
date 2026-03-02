@@ -20,6 +20,7 @@ const logoMap: Record<string, { src: string; darkSrc?: string; type: 'image' | '
   'Perturb Atlas': { src: '/images/perturbatlas-logo.png', type: 'image' },
   'Perturb Atlas Mouse': { src: '/images/perturbatlas-logo.png', type: 'image' },
   'Replogle et al.': { src: '/images/replogle-logo.svg', type: 'svg' },
+  'CM4AI': { src: '/images/cm4ai-logo.png', darkSrc: '/images/cm4ai-logo-dark.png', type: 'image' },
 }
 
 // Short display labels for buttons

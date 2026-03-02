@@ -88,6 +88,12 @@
       "category": "gene",
       "source": "https://maayanlab.cloud/Harmonizome/resource/Replogle+et+al.%2C+Cell%2C+2022",
       "sourceNote": "CRISPRi Perturb-seq gene expression profiles in K562 and RPE1 cells. Replogle et al., Cell, 2022. Reprocessed from Harmonizome."
+    },
+    "cm4ai": {
+      "displayName": "CM4AI",
+      "category": "gene",
+      "source": "https://cm4ai.org",
+      "sourceNote": "Cell Maps for AI gene perturbation signatures."
     }
   }
 }

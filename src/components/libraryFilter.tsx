@@ -76,7 +76,7 @@ export default function LibraryFilter({
    * Render a library checkbox
    */
   const renderLibraryCheckbox = (libraryName: string) => {
-    const count = signatureCounts[libraryName]
+    const count = libraryData ? (signatureCounts[libraryName] ?? 0) : undefined
     return (
       <label key={libraryName} className="flex items-center gap-2 cursor-pointer">
         <input
@@ -87,7 +87,7 @@ export default function LibraryFilter({
         />
         <span className="text-sm">
           {libraryName}
-          {count != null && <span className="text-xs text-base-content/50 ml-1">({count.toLocaleString()})</span>}
+          {count != null && <span className="text-xs text-base-content/50 ml-1">({count.toLocaleString()} signatures)</span>}
         </span>
       </label>
     )
