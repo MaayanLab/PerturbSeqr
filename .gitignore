@@ -69,5 +69,8 @@ startup_log*.md
 .python-version
 scratch/
 
+# UMAP intermediate data (large CSVs, only HTML figures needed for app)
+public/umap/csv/
+
 # Use case data files
 *.xlsx
