@@ -7,8 +7,8 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 
 export const metadata: Metadata = {
-  title: "PerturbSeqr",
-  description: "PerturbSeqr",
+  title: "Perturb-Seqr",
+  description: "Perturb-Seqr",
   keywords: [
     "big data",
     "bioinformatics",
@@ -64,11 +64,11 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "PerturbSeqr",
+    title: "Perturb-Seqr",
     description:
       "Search through 646,250 gene sets created from 12 Connectivity Mapping resources that performed massive single perturbations followed by expression experiments in human cells",
     url: "https://perturbseqr.k8s.dev.maayanlab.cloud",
-    siteName: "PerturbSeqr",
+    siteName: "Perturb-Seqr",
     images: [
       {
         url: "https://perturbseqr.k8s.dev.maayanlab.cloud/images/perturbseqr-logo.png",

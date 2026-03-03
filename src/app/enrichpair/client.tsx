@@ -183,7 +183,7 @@ function EnrichmentResults({
                           src="/images/perturbseqr-logo.png"
                           width={50}
                           height={100}
-                          alt="PerturbSeqr"
+                          alt="Perturb-Seqr"
                         ></Image>{" "}
                         computed significance for{" "}
                         {Intl.NumberFormat("en-US", {}).format(
@@ -199,7 +199,7 @@ function EnrichmentResults({
                           src="/images/perturbseqr-logo.png"
                           width={50}
                           height={100}
-                          alt="PerturbSeqr"
+                          alt="Perturb-Seqr"
                         ></Image>{" "}
                         computed significance for{" "}
                         {Intl.NumberFormat("en-US", {}).format(
@@ -215,7 +215,7 @@ function EnrichmentResults({
                           src="/images/perturbseqr-logo.png"
                           width={50}
                           height={100}
-                          alt="PerturbSeqr"
+                          alt="Perturb-Seqr"
                         ></Image>{" "}
                         found{" "}
                         {Intl.NumberFormat("en-US", {}).format(
@@ -340,40 +340,10 @@ function EnrichmentResults({
           Consensus MoAs
         </button>
 
+        {/* TODO: Re-implement KO filter using library category instead of space-in-name heuristic */}
         <button
-          onClick={() => {
-            if (queryString.ko === "false")
-              setQueryString({
-                page: "1",
-                q: rawTerm,
-                fda: "false",
-                consensus: queryString.consensus,
-                moas: "false",
-                dir: queryString.dir,
-                ko: "true",
-                sort: queryString.sort,
-                topn: queryString.topn,
-                pvaluele: queryString.pvaluele,
-              });
-            else
-              setQueryString({
-                page: "1",
-                q: rawTerm,
-                fda: queryString.fda,
-                consensus: queryString.consensus,
-                dir: queryString.dir,
-                moas: "false",
-                ko: "false",
-                sort: queryString.sort,
-                topn: queryString.topn,
-                pvaluele: queryString.pvaluele,
-              });
-          }}
-          className={
-            queryString.ko === "true"
-              ? "button btn btn-sm bg-gray-600 hover:bg-gray-800"
-              : "button btn btn-sm"
-          }
+          className="button btn btn-sm opacity-50 cursor-not-allowed"
+          disabled
         >
           CRISPR KOs
         </button>
@@ -1334,10 +1304,10 @@ function EnrichmentResults({
                               description: `${
                                 userGeneSetUp?.userGeneSet?.description ||
                                 "User up gs"
-                              } ∩ ${term || "PerturbSeqr up gs"} + ${
+                              } ∩ ${term || "Perturb-Seqr up gs"} + ${
                                 userGeneSetDown?.userGeneSet?.description ||
                                 "User down gs"
-                              } ∩ ${term || "PerturbSeqr down gs"}`,
+                              } ∩ ${term || "Perturb-Seqr down gs"}`,
                               genesUp:  genesUp,
                               genesDown:  genesDown,
                               library: libraryName,
@@ -1362,10 +1332,10 @@ function EnrichmentResults({
                               description: `${
                                 userGeneSetUp?.userGeneSet?.description ||
                                 "User up gs"
-                              } ∩ ${term || "PerturbSeqr down gs"} + ${
+                              } ∩ ${term || "Perturb-Seqr down gs"} + ${
                                 userGeneSetDown?.userGeneSet?.description ||
                                 "User down gs"
-                              } ∩ ${term || "PerturbSeqr up gs"}`,
+                              } ∩ ${term || "Perturb-Seqr up gs"}`,
                               genesUp:  genesUp,
                               genesDown:  genesDown,
                               library: libraryName,
@@ -1629,7 +1599,7 @@ export default function EnrichClientPage({
         >
           {(userGeneSetUp && userGeneSetDown) ? (userGeneSetUp?.userGeneSet?.description + " & " + userGeneSetDown?.userGeneSet?.description) : "Up & Down Gene Sets"}
           {userGeneSetUp ? (
-            <> ({nGenesIncluded} of {(userGeneSetUp?.userGeneSet?.genes?.length || 0) + (userGeneSetDown?.userGeneSet?.genes?.length || 0)} submitted genes were mapped to genes in the PerturbSeqr background)</>
+            <> ({nGenesIncluded} of {(userGeneSetUp?.userGeneSet?.genes?.length || 0) + (userGeneSetDown?.userGeneSet?.genes?.length || 0)} submitted genes were mapped to genes in the Perturb-Seqr background)</>
           ) : null}
         </label>
       </div>

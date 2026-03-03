@@ -158,13 +158,13 @@ function EnrichmentResults({
             {consensus ? (
               <>
                 After rummaging through {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.enrich?.geneSetCount || 0)} gene sets.{" "}
-                PerturbSeqr{" "}
+                Perturb-Seqr{" "}
                 <Image
                   className="inline-block rounded dark:invert"
                   src="/images/perturbseqr-logo.png"
                   width={50}
                   height={50}
-                  alt="PerturbSeqr"
+                  alt="Perturb-Seqr"
                 ></Image>{" "}
                 computed significance for{" "}
                 {Intl.NumberFormat("en-US", {}).format(
@@ -175,13 +175,13 @@ function EnrichmentResults({
               </>
             ) : moas ? <>
             After rummaging through {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.enrich?.geneSetCount || 0)} gene sets.{" "}
-                PerturbSeqr{" "}
+                Perturb-Seqr{" "}
                 <Image
                   className="inline-block rounded dark:invert"
                   src="/images/perturbseqr-logo.png"
                   width={50}
                   height={50}
-                  alt="PerturbSeqr"
+                  alt="Perturb-Seqr"
                 ></Image>{" "}
                 computed significance for{" "}
                 {Intl.NumberFormat("en-US", {}).format(
@@ -192,13 +192,13 @@ function EnrichmentResults({
             : (
               <>
                 After rummaging through {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.enrich?.geneSetCount || 0)} gene sets.{" "}
-                PerturbSeqr{" "}
+                Perturb-Seqr{" "}
                 <Image
                   className="inline-block rounded dark:invert"
                   src="/images/perturbseqr-logo.png"
                   width={50}
                   height={50}
-                  alt="PerturbSeqr"
+                  alt="Perturb-Seqr"
                 ></Image>{" "}
                 found{" "}
                 {Intl.NumberFormat("en-US", {}).format(
@@ -1242,7 +1242,7 @@ function EnrichmentResults({
                               description: `${
                                 userGeneSet?.userGeneSet?.description ||
                                 "User gene set"
-                              } & ${term || "PerturbSeqr gene set"}`,
+                              } & ${term || "Perturb-Seqr gene set"}`,
                               genes,
                               library: libraryName,
                             });
@@ -1475,7 +1475,7 @@ export default function EnrichClientPage({
         >
           {userGeneSet?.userGeneSet?.description || "Gene set"}
           {userGeneSet ? (
-            <> ({nGenesIncluded} of {userGeneSet?.userGeneSet?.genes?.length ?? "?"} submitted genes were mapped to genes in the PerturbSeqr background)</>
+            <> ({nGenesIncluded} of {userGeneSet?.userGeneSet?.genes?.length ?? "?"} submitted genes were mapped to genes in the Perturb-Seqr background)</>
           ) : null}
         </label>
         {libraryNames && libraryNames.length > 0 && (

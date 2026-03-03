@@ -39,11 +39,11 @@ function HomeContent() {
     <div className="flex flex-col items-center">
       {/* Header with stats */}
       <div className="flex items-center gap-2 mb-1">
-        <h1 className="text-4xl font-bold">PerturbSeqr</h1>
+        <h1 className="text-4xl font-bold">Perturb-Seqr</h1>
         <Image
           className="dark:invert"
           src="/images/perturbseqr-logo.png"
-          alt="PerturbSeqr logo"
+          alt="Perturb-Seqr logo"
           width={60}
           height={90}
         />

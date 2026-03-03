@@ -15,11 +15,11 @@ export default async function About() {
   return (
     <div className="prose">
       <div className="flex items-center gap-2 mb-3">
-        <h2 className="title text-xl font-medium">About PerturbSeqr</h2>
+        <h2 className="title text-xl font-medium">About Perturb-Seqr</h2>
         <Image
           className="dark:invert"
           src="/images/perturbseqr-logo.png"
-          alt="PerturbSeqr logo"
+          alt="Perturb-Seqr logo"
           width={60}
           height={90}
         />
@@ -46,10 +46,10 @@ export default async function About() {
           </p>
           <br />
           <p>
-          PerturbSeqr was developed by <a className='underline cursor' href="https://labs.icahn.mssm.edu/maayanlab/">the Ma&apos;ayan Lab.</a>
+          Perturb-Seqr was developed by <a className='underline cursor' href="https://labs.icahn.mssm.edu/maayanlab/">the Ma&apos;ayan Lab.</a>
           </p>
           <br />
-          <p className='mb-2 font-bold'>Please acknowledge PerturbSeqr in your publications by citing the following reference: </p>
+          <p className='mb-2 font-bold'>Please acknowledge Perturb-Seqr in your publications by citing the following reference: </p>
           <p className='font-bold'>[Citation placeholder]</p>
           <br/>
           <p>
@@ -84,7 +84,7 @@ export default async function About() {
           <ul className="list-disc ml-4">
             <li>
               <a className="underline" href="https://github.com/MaayanLab/PerturbSeqr" target="_blank">
-                PerturbSeqr Source Code
+                Perturb-Seqr Source Code
               </a>
             </li>
             <li>
