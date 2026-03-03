@@ -1,39 +1,38 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 
-// Dataset configuration - matches generate_umap.py LIBRARIES
+// Dataset configuration - IDs must match filenames in public/umap/figures/{id}_UMAP.html
+// Sorted alphabetically by name within each category
 const DATASETS = {
   drug: [
-    { id: 'sciplex', name: 'SciPlex', signatures: '4,604' },
-    { id: 'nibr-drug-seq', name: 'NIBR DRUG-seq', signatures: '26,316' },
-    { id: 'deepcover-moa', name: 'DeepCover MoA', signatures: '1,748' },
-    { id: 'ginkgo-bioworks', name: 'Ginkgo Bioworks', signatures: '9,310' },
+    { id: 'creeds-chem', name: 'CREEDS Chem', signatures: '1,872' },
+    { id: 'deepcovermoa', name: 'DeepCover MoA', signatures: '1,748' },
+    { id: 'ginkgo', name: 'Ginkgo Bioworks', signatures: '9,310' },
     { id: 'lincs-l1000-cp', name: 'LINCS L1000 CP', signatures: '156,926' },
-    { id: 'creeds-chem', name: 'CREEDS Chem', signatures: '1,860' },
+    { id: 'cmap-build02', name: 'Microarrays CMap', signatures: '12,200' },
+    { id: 'drugseqr', name: 'NIBR DRUG-seq', signatures: '26,316' },
+    { id: 'geo-chem', name: 'RummaGEO Chem', signatures: '1,860' },
+    { id: 'sciplex', name: 'SciPlex', signatures: '4,604' },
     { id: 'tahoe-100m', name: 'Tahoe-100M', signatures: '105,404' },
-    { id: 'microarrays-cmap', name: 'Microarrays CMap', signatures: '12,200' },
   ],
   gene: [
-    { id: 'lincs-l1000-xpr', name: 'LINCS L1000 XPR', signatures: '65,672' },
-    { id: 'perturb-atlas', name: 'Perturb Atlas', signatures: '12,852' },
-    { id: 'perturb-atlas-mouse', name: 'Perturb Atlas Mouse', signatures: '10,743' },
     { id: 'creeds-gene', name: 'CREEDS Gene', signatures: '4,788' },
-    { id: 'replogle-perturb-seq-k562-essential', name: 'Replogle et al. K562 Essential', signatures: '2,383' },
-    { id: 'replogle-perturb-seq-k562-genomewide', name: 'Replogle et al. K562 Genome-wide', signatures: '4,110' },
-    { id: 'replogle-perturb-seq-rpe1-essential', name: 'Replogle et al. RPE1 Essential', signatures: '2,714' },
-    { id: 'cm4ai', name: 'CM4AI', signatures: '0' },
+    { id: 'lincs-l1000-xpr', name: 'LINCS L1000 XPR', signatures: '65,672' },
+    { id: 'perturbatlas', name: 'Perturb Atlas', signatures: '12,852' },
+    { id: 'perturbatlas-mouse', name: 'Perturb Atlas Mouse', signatures: '10,743' },
+    { id: 'replogle', name: 'Replogle et al.', signatures: '9,207' },
+    { id: 'geo-gene', name: 'RummaGEO Gene', signatures: '4,788' },
   ],
 }
 
 export default function ExploreClientPage() {
   const [selectedDataset, setSelectedDataset] = useState<string>('sciplex')
-  const [direction, setDirection] = useState<'up' | 'dn'>('up')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const htmlPath = `/umap/figures/${selectedDataset}_${direction}_UMAP.html`
+  const htmlPath = `/umap/figures/${selectedDataset}_UMAP.html`
 
-  // Check if the UMAP file exists when dataset/direction changes
+  // Check if the UMAP file exists when dataset changes
   useEffect(() => {
     const checkFile = async () => {
       setLoading(true)
@@ -41,16 +40,16 @@ export default function ExploreClientPage() {
       try {
         const response = await fetch(htmlPath, { method: 'HEAD' })
         if (!response.ok) {
-          setError(`UMAP data not available for ${selectedDataset} (${direction})`)
+          setError(`UMAP data not available for ${selectedDataset}`)
         }
       } catch {
-        setError(`UMAP data not available for ${selectedDataset} (${direction})`)
+        setError(`UMAP data not available for ${selectedDataset}`)
       } finally {
         setLoading(false)
       }
     }
     checkFile()
-  }, [selectedDataset, direction, htmlPath])
+  }, [selectedDataset, htmlPath])
 
   return (
     <div className="prose max-w-none">
@@ -77,24 +76,6 @@ export default function ExploreClientPage() {
             </optgroup>
           </select>
         </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Direction</label>
-          <div className="btn-group">
-            <button
-              className={`btn btn-sm ${direction === 'up' ? 'bg-gray-600 hover:bg-gray-800 text-white' : ''}`}
-              onClick={() => setDirection('up')}
-            >
-              Up-regulated
-            </button>
-            <button
-              className={`btn btn-sm ${direction === 'dn' ? 'bg-gray-600 hover:bg-gray-800 text-white' : ''}`}
-              onClick={() => setDirection('dn')}
-            >
-              Down-regulated
-            </button>
-          </div>
-        </div>
       </div>
 
       {/* Visualization */}
@@ -113,10 +94,10 @@ export default function ExploreClientPage() {
 
         {!error && !loading && (
           <iframe
-            key={`${selectedDataset}-${direction}`}
+            key={selectedDataset}
             src={htmlPath}
             className="w-full h-full border-0"
-            title={`${selectedDataset} ${direction} UMAP`}
+            title={`${selectedDataset} UMAP`}
           />
         )}
       </div>
