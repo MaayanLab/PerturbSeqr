@@ -223,9 +223,8 @@ export const DATASET_URLS: Record<string, string> = {
   'ginkgo bioworks': 'https://www.ginkgobioworks.com/',
   'perturb atlas': 'https://perturbatlas.kratoss.site/#/',
   'perturb atlas mouse': 'https://perturbatlas.kratoss.site/#/',
-  'replogle k562 essential': 'https://pubmed.ncbi.nlm.nih.gov/35688146/',
-  'replogle k562 genome-wide': 'https://pubmed.ncbi.nlm.nih.gov/35688146/',
-  'replogle rpe1 essential': 'https://pubmed.ncbi.nlm.nih.gov/35688146/',
+  'replogle et al.': 'https://pubmed.ncbi.nlm.nih.gov/35688146/',
+  'cm4ai': 'https://cm4ai.org',
 }
 
 /**
