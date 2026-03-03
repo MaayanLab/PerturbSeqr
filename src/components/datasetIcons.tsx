@@ -32,7 +32,7 @@ const shortLabels: Record<string, string> = {
   'DeepCover MoA': 'DeepCover',
   'Ginkgo Bioworks': 'Ginkgo DR-seq',
   'Perturb Atlas Mouse': 'PA Mouse',
-  'Replogle et al.': 'Replogle',
+  'Replogle et al.': 'Replogle et al.',
 }
 
 // Custom logo sizes per library (matches original groupSubtitle sizing)
@@ -42,6 +42,7 @@ const customSizes: Record<string, number> = {
   'Microarrays CMap': 100,
   'SciPlex': 75,
   'NIBR DRUG-seq': 100,
+  'Replogle et al.': 200,
 }
 const defaultSize = 80
 
