@@ -91,7 +91,7 @@ export default function TermSearchClientPage(props: { searchParams?: { page?: st
           />
         </div>
         <p className="text-center text-base mb-4 max-w-2xl">
-          Search through <Stats show_gene_sets /> created from {resourceCount} Connectivity Mapping resources organized into {libraryCount} gene set libraries, {drugLibraryCount} drug perturbation and {geneLibraryCount} gene perturbation followed by expression.
+          Search through <Stats show_gene_sets bold /> created from <b>{resourceCount}</b> Connectivity Mapping resources organized into <b>{libraryCount}</b> gene set libraries, <b>{drugLibraryCount}</b> drug perturbation and <b>{geneLibraryCount}</b> gene perturbation followed by expression.
         </p>
         {/* Dataset icons filter - centered below header */}
         <DatasetIcons
