@@ -606,33 +606,23 @@ function DatasetCard({ dataset, showDownloads = true, forceShowTermFormat = fals
 }
 
 export default function DownloadClientPage() {
-  const [showAllTermFormats, setShowAllTermFormats] = React.useState(false)
-
   return (
     <div className="prose max-w-none">
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-sm font-bold m-0">
-          GMT downloads contain both up- and down-regulated gene sets in a single compressed .gmt.gz file
-        </p>
-        <button
-          className="btn btn-xs btn-outline whitespace-nowrap ml-4"
-          onClick={() => setShowAllTermFormats(prev => !prev)}
-        >
-          {showAllTermFormats ? 'Hide' : 'Show'} all term formats
-        </button>
-      </div>
+      <p className="text-sm font-bold mb-4">
+        GMT downloads contain both up- and down-regulated gene sets in a single compressed .gmt.gz file
+      </p>
 
       <h3 className="text-lg font-medium mt-4 mb-2">Drug/Chemical Perturbation Datasets</h3>
       <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-3 my-3">
         {drugPerturbationDatasets.map(dataset => (
-          <DatasetCard key={dataset.title} dataset={dataset} forceShowTermFormat={showAllTermFormats} />
+          <DatasetCard key={dataset.title} dataset={dataset} forceShowTermFormat />
         ))}
       </div>
 
       <h3 className="text-lg font-medium mt-4 mb-2">Gene Perturbation Datasets</h3>
       <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-3 my-3">
         {genePerturbationDatasets.map(dataset => (
-          <DatasetCard key={dataset.title} dataset={dataset} forceShowTermFormat={showAllTermFormats} />
+          <DatasetCard key={dataset.title} dataset={dataset} forceShowTermFormat />
         ))}
       </div>
 
