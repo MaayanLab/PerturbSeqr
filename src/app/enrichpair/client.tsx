@@ -258,7 +258,7 @@ function EnrichmentResults({
           }}
           className={
             queryString.fda === "true"
-              ? "button btn btn-sm bg-gray-600 hover:bg-gray-800"
+              ? "button btn btn-sm bg-gray-400 hover:bg-gray-500 text-gray-800"
               : "button btn btn-sm"
           }
         >
@@ -296,7 +296,7 @@ function EnrichmentResults({
           }}
           className={
             queryString.consensus === "true"
-              ? "button btn btn-sm bg-gray-600 hover:bg-gray-800"
+              ? "button btn btn-sm bg-gray-400 hover:bg-gray-500 text-gray-800"
               : "button btn btn-sm"
           }
         >
@@ -333,7 +333,7 @@ function EnrichmentResults({
           }}
           className={
             queryString.moas === "true"
-              ? "button btn btn-sm bg-gray-600 hover:bg-gray-800"
+              ? "button btn btn-sm bg-gray-400 hover:bg-gray-500 text-gray-800"
               : "button btn btn-sm"
           }
         >
@@ -355,7 +355,7 @@ function EnrichmentResults({
           <div
             className={
               (queryString.dir == "up" || queryString.sortBy == "pvalue_mimic")
-                ? "join-item px-3 py-1.5 text-sm bg-gray-600 hover:bg-gray-800 font-bold cursor-pointer"
+                ? "join-item px-3 py-1.5 text-sm bg-gray-400 hover:bg-gray-500 text-gray-800 font-bold cursor-pointer"
                 : "join-item px-3 py-1.5  bg-gray-100 cursor-pointer font-bold text-sm dark:bg-gray-900"
             }
             onClick={(evt) => {
@@ -393,7 +393,7 @@ function EnrichmentResults({
           <div
             className={
               (queryString.dir == "down" || queryString.sortBy == "pvalue_reverse")
-                ? "join-item px-3 py-1.5 text-sm bg-gray-600 hover:bg-gray-800 font-bold cursor-pointer"
+                ? "join-item px-3 py-1.5 text-sm bg-gray-400 hover:bg-gray-500 text-gray-800 font-bold cursor-pointer"
                 : "join-item px-3 py-1.5 bg-gray-100 cursor-pointer font-bold text-sm dark:bg-gray-900"
             }
             onClick={(evt) => {
