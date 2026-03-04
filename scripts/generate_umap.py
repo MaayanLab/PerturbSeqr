@@ -236,8 +236,8 @@ def process_scatterplot(
         'term': terms,
         'genes': [libdict[t] for t in terms],
     })
-    # Sort by direction for consistent legend ordering
-    df = df.sort_values(by='direction').reset_index(drop=True)
+    # Sort by cluster for consistent legend ordering
+    df = df.sort_values(by='cluster', key=lambda s: s.str.extract(r'(\d+)')[0].astype(int)).reset_index(drop=True)
 
     n_clusters = df['cluster'].nunique()
     n_up = (df['direction'] == 'up').sum()
@@ -249,16 +249,9 @@ def process_scatterplot(
 
 # Visualization Functions (Bokeh)
 
-DIRECTION_COLORS = {
-    'up': '#E74C3C',    # red
-    'down': '#3498DB',  # blue
-    'unknown': '#95A5A6',  # gray
-}
-
-
 def create_scatterplot(scatter_df: pd.DataFrame, title: str = "UMAP") -> figure:
     """
-    Create an interactive Bokeh scatterplot colored by direction (up/down).
+    Create an interactive Bokeh scatterplot colored by Leiden cluster.
 
     Args:
         scatter_df: DataFrame with x, y, direction, cluster, term, genes columns
@@ -268,7 +261,13 @@ def create_scatterplot(scatter_df: pd.DataFrame, title: str = "UMAP") -> figure:
         Bokeh figure object
     """
     df = scatter_df.copy()
-    df['color'] = df['direction'].map(DIRECTION_COLORS)
+
+    # Assign colors by cluster using Category20 palette (cycling for >20 clusters)
+    clusters = sorted(df['cluster'].unique(), key=lambda c: int(c.split()[-1]))
+    n_colors = max(3, min(20, len(clusters)))
+    palette = Category20[n_colors]
+    cluster_colors = {c: palette[i % len(palette)] for i, c in enumerate(clusters)}
+    df['color'] = df['cluster'].map(cluster_colors)
 
     tooltips = [
         ("Gene Set", "@gene_set"),
@@ -315,7 +314,7 @@ def create_scatterplot(scatter_df: pd.DataFrame, title: str = "UMAP") -> figure:
         size=4,
         source=source,
         color='colors',
-        legend_group='direction'
+        legend_group='cluster'
     )
 
     plot_emb.add_layout(plot_emb.legend[0], 'right')

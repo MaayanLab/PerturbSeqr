@@ -26,7 +26,7 @@ const DATASETS = {
 }
 
 export default function ExploreClientPage() {
-  const [selectedDataset, setSelectedDataset] = useState<string>('sciplex')
+  const [selectedDataset, setSelectedDataset] = useState<string>(DATASETS.drug[0].id)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
