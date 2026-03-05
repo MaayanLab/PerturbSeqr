@@ -555,7 +555,7 @@ async fn delete(
 // query a specific background_id, providing the bitset vector as input
 //  the result are the gene_set_ids & relevant metrics
 // this can be pretty fast since the index is saved in memory and the overlaps can be computed in parallel
-#[post("/<background_id>?<filter_term>&<overlap_ge>&<pvalue_le>&<adj_pvalue_le>&<offset>&<limit>&<filter_fda>&<sortby>&<filter_ko>&<top_n>&<library_names>", data = "<input_gene_set>")]
+#[post("/<background_id>?<filter_term>&<overlap_ge>&<pvalue_le>&<adj_pvalue_le>&<offset>&<limit>&<filter_fda>&<sortby>&<filter_ko>&<top_n>&<library_names>&<post_search_filter_library_names>", data = "<input_gene_set>")]
 async fn query(
     mut db: Connection<Postgres>,
     state: &State<PersistentState>,
@@ -572,6 +572,7 @@ async fn query(
     filter_ko: Option<bool>,
     top_n: Option<usize>,
     library_names: Option<String>,
+    post_search_filter_library_names: Option<String>,
 ) -> Result<QueryResponse, Custom<String>> {
     let background_id = {
         if background_id == "latest" {
@@ -595,6 +596,11 @@ async fn query(
 
     // Parse library_names filter (comma-separated string -> HashSet)
     let library_filter: Option<std::collections::HashSet<String>> = library_names.map(|names| {
+        names.split(',').map(|s| s.trim().to_string()).collect()
+    });
+
+    // Parse post-search library filter (filters results AFTER Fisher's, doesn't affect background)
+    let post_search_library_filter: Option<std::collections::HashSet<String>> = post_search_filter_library_names.map(|names| {
         names.split(',').map(|s| s.trim().to_string()).collect()
     });
 
@@ -1103,6 +1109,14 @@ async fn query(
                     }
                 }
             }
+            // Post-search library filter: filter by dataset name AFTER Fisher's (doesn't affect p-values)
+            if let Some(ref post_libs) = post_search_library_filter {
+                if let Some(lib_name) = bitmap.gene_set_libraries.get(gene_set_hash) {
+                    if !post_libs.contains(lib_name) {
+                        return None
+                    }
+                }
+            }
             if let Some(filter_fda) = filter_fda {
                 if filter_fda {
                     if let Some(terms) = bitmap.terms.get(gene_set_hash) {
@@ -1249,7 +1263,7 @@ async fn query(
     })
 }
 
-#[post("/pairs/<background_id>?<filter_term>&<overlap_ge>&<pvalue_le>&<adj_pvalue_le>&<offset>&<limit>&<filter_fda>&<sortby>&<filter_ko>&<top_n>&<library_names>", data = "<input_gene_sets>")]
+#[post("/pairs/<background_id>?<filter_term>&<overlap_ge>&<pvalue_le>&<adj_pvalue_le>&<offset>&<limit>&<filter_fda>&<sortby>&<filter_ko>&<top_n>&<library_names>&<post_search_filter_library_names>", data = "<input_gene_sets>")]
 async fn query_pairs(
     mut db: Connection<Postgres>,
     state: &State<PersistentState>,
@@ -1266,6 +1280,7 @@ async fn query_pairs(
     filter_ko: Option<bool>,
     top_n: Option<usize>,
     library_names: Option<String>,
+    post_search_filter_library_names: Option<String>,
 ) -> Result<PairedQueryResponse, Custom<String>> {
 
     let background_id = {
@@ -1304,6 +1319,11 @@ async fn query_pairs(
 
     // Parse library_names filter (comma-separated string -> HashSet)
     let library_filter: Option<std::collections::HashSet<String>> = library_names.map(|names| {
+        names.split(',').map(|s| s.trim().to_string()).collect()
+    });
+
+    // Parse post-search library filter (filters results AFTER Fisher's, doesn't affect background)
+    let post_search_library_filter: Option<std::collections::HashSet<String>> = post_search_filter_library_names.map(|names| {
         names.split(',').map(|s| s.trim().to_string()).collect()
     });
 
@@ -1845,7 +1865,15 @@ async fn query_pairs(
                     return None
                 } else if is_down && (result.pvalue_mimic < result.pvalue_reverse) {
                     return None
-                }     
+                }
+            }
+            // Post-search library filter: filter by dataset name AFTER Fisher's (doesn't affect p-values)
+            if let Some(ref post_libs) = post_search_library_filter {
+                if let Some(lib_name) = bitmap.gene_set_libraries.get(gene_set_hash) {
+                    if !post_libs.contains(lib_name) {
+                        return None
+                    }
+                }
             }
             if let Some(filter_fda) = filter_fda {
                 if filter_fda {

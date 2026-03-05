@@ -25,7 +25,7 @@ query FetchUserGeneSet($id: UUID!) {
 #   - topN: Top N results for consensus
 #   - pvalueLe: P-value threshold
 # Output: Enrichment results with gene sets, consensus, and MoAs
-query EnrichmentQuery($genes: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
+query EnrichmentQuery($genes: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05, $postSearchFilterLibraryNames: [String]) {
   currentBackground {
     enrich(
       genes: $genes
@@ -38,6 +38,7 @@ query EnrichmentQuery($genes: [String]!, $filterTerm: String = "", $libraryNames
       filterKo: $filterKo
       topN: $topN
       pvalueLe: $pvalueLe
+      postSearchFilterLibraryNames: $postSearchFilterLibraryNames
     ) {
       nodes {
         geneSetHash
@@ -224,7 +225,7 @@ query EnrichmentQueryMoAs($genes: [String]!, $filterTerm: String = "", $libraryN
 }
 
 
-query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
+query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05, $postSearchFilterLibraryNames: [String]) {
   currentBackground {
     pairedEnrich(
       filterTerm: $filterTerm
@@ -238,6 +239,7 @@ query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTer
       pvalueLe: $pvalueLe
       genesDown: $genesDown
       genesUp: $genesUp
+      postSearchFilterLibraryNames: $postSearchFilterLibraryNames
     ) {
       totalCount
       consensusCount
@@ -312,7 +314,7 @@ query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTer
   }
 }
 
-query PairEnrichmentQuerySingle($genesUp: [String]!, $genesDown: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
+query PairEnrichmentQuerySingle($genesUp: [String]!, $genesDown: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05, $postSearchFilterLibraryNames: [String]) {
   currentBackground {
     pairedEnrich(
       filterTerm: $filterTerm
@@ -326,6 +328,7 @@ query PairEnrichmentQuerySingle($genesUp: [String]!, $genesDown: [String]!, $fil
       pvalueLe: $pvalueLe
       genesDown: $genesDown
       genesUp: $genesUp
+      postSearchFilterLibraryNames: $postSearchFilterLibraryNames
     ) {
       totalCount
       nodes {
@@ -363,7 +366,7 @@ query PairEnrichmentQuerySingle($genesUp: [String]!, $genesDown: [String]!, $fil
   }
 }
 
-query PairEnrichmentQueryConsensus($genesUp: [String]!, $genesDown: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
+query PairEnrichmentQueryConsensus($genesUp: [String]!, $genesDown: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05, $postSearchFilterLibraryNames: [String]) {
   currentBackground {
     pairedEnrich(
       filterTerm: $filterTerm
@@ -377,6 +380,7 @@ query PairEnrichmentQueryConsensus($genesUp: [String]!, $genesDown: [String]!, $
       pvalueLe: $pvalueLe
       genesDown: $genesDown
       genesUp: $genesUp
+      postSearchFilterLibraryNames: $postSearchFilterLibraryNames
     ) {
       consensusCount
       consensus {
@@ -399,7 +403,7 @@ query PairEnrichmentQueryConsensus($genesUp: [String]!, $genesDown: [String]!, $
   }
 }
 
-query PairEnrichmentQueryMoAs($genesUp: [String]!, $genesDown: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
+query PairEnrichmentQueryMoAs($genesUp: [String]!, $genesDown: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05, $postSearchFilterLibraryNames: [String]) {
   currentBackground {
     pairedEnrich(
       filterTerm: $filterTerm
@@ -413,6 +417,7 @@ query PairEnrichmentQueryMoAs($genesUp: [String]!, $genesDown: [String]!, $filte
       pvalueLe: $pvalueLe
       genesDown: $genesDown
       genesUp: $genesUp
+      postSearchFilterLibraryNames: $postSearchFilterLibraryNames
     ) {
       moasCount
       moas {

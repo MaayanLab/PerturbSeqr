@@ -21,7 +21,11 @@ import { IoMdInformationCircleOutline } from "react-icons/io";
 import { parseTerm, getCellDisplay } from "@/utils/parseTerm";
 import { preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary, getDatasetUrl } from "@/utils/metadataLookup";
 import { useRouter } from "next/navigation";
+import libraryConfig from "@/config/libraries.json";
 
+const allLibraryDisplayNames = Object.values(libraryConfig.libraries).map((l: any) => l.displayName as string);
+const drugLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'drug').map((l: any) => l.displayName as string);
+const geneLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'gene').map((l: any) => l.displayName as string);
 const pageSize = 12;
 
 type GeneSetModalT =
@@ -101,13 +105,18 @@ function EnrichmentResults({
     ko: "false",
     topn: "10000",
     pvaluele: "0.05",
+    ds: "",
   });
   const [rawTerm, setRawTerm] = React.useState("");
   const [topNSlider, setTopNSlider] = React.useState(10000);
   const [pvalueLeSlider, setPvalueLeSlider] = React.useState(0.05);
   const [drugLookupLoaded, setDrugLookupLoaded] = React.useState(false);
+  const [datasetDropdownOpen, setDatasetDropdownOpen] = React.useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+  // Cache the unfiltered total count so post-search filtering doesn't change the headline number
+  const [unfilteredTotalCount, setUnfilteredTotalCount] = React.useState<number | null>(null);
 
-  const { page, term, fda, consensus, moas, sort, ko, topN, pvalueLe } =
+  const { page, term, fda, consensus, moas, sort, ko, topN, pvalueLe, datasetFilter } =
     React.useMemo(
       () => ({
         page: queryString.page ? +queryString.page : 1,
@@ -119,6 +128,7 @@ function EnrichmentResults({
         ko: queryString.ko === "true",
         topN: parseInt(queryString?.topn ?? "10000"),
         pvalueLe: parseFloat(queryString?.pvaluele ?? "0.05"),
+        datasetFilter: queryString.ds ? queryString.ds.split(",").filter(Boolean) : [] as string[],
       }),
       [queryString]
     );
@@ -137,13 +147,32 @@ function EnrichmentResults({
       filterKo: ko,
       topN: topN,
       pvalueLe: pvalueLe,
+      postSearchFilterLibraryNames: datasetFilter.length > 0 ? datasetFilter : null,
     },
   });
+
+  // Cache unfiltered total count when no dataset filter is active
+  React.useEffect(() => {
+    if (datasetFilter.length === 0 && enrichmentResults?.currentBackground?.pairedEnrich?.totalCount != null) {
+      setUnfilteredTotalCount(enrichmentResults.currentBackground.pairedEnrich.totalCount);
+    }
+  }, [datasetFilter.length, enrichmentResults?.currentBackground?.pairedEnrich?.totalCount]);
 
   React.useEffect(() => {
     console.log(term);
     setRawTerm(term);
   }, [term]);
+
+  // Close dataset dropdown on outside click
+  React.useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDatasetDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   // Preload drug lookup at component mount
   React.useEffect(() => {
@@ -219,7 +248,7 @@ function EnrichmentResults({
                         ></Image>{" "}
                         found{" "}
                         {Intl.NumberFormat("en-US", {}).format(
-                          enrichmentResults?.currentBackground?.pairedEnrich?.totalCount || 0
+                          unfilteredTotalCount ?? enrichmentResults?.currentBackground?.pairedEnrich?.totalCount ?? 0
                         )}{" "}
                         statistically significant matches.
                       </>
@@ -227,8 +256,196 @@ function EnrichmentResults({
                   </>
                 )}
       </h2>
+      {datasetFilter.length > 0 && !datasetFilter.includes("__none__") && (
+        <p className="text-sm text-base-content/70 mt-1">
+          Filtering to {datasetFilter.length} dataset{datasetFilter.length > 1 ? "s" : ""}: {datasetFilter.join(", ")} — showing{" "}
+          {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.pairedEnrich?.totalCount || 0)} matches.
+        </p>
+      )}
+      {datasetFilter.includes("__none__") && (
+        <p className="text-sm text-base-content/70 mt-1">
+          No datasets selected. Use the Dataset column filter to select datasets.
+        </p>
+      )}
       <div className="flex flex-col gap-2">
         <div className="flex flex-row flex-wrap items-center gap-2">
+        <div className="relative" ref={dropdownRef}>
+          <button
+            className={
+              datasetFilter.length > 0
+                ? "button btn btn-sm bg-gray-400 hover:bg-gray-500 text-gray-800"
+                : "button btn btn-sm"
+            }
+            onClick={() => setDatasetDropdownOpen(!datasetDropdownOpen)}
+          >
+            Dataset {datasetFilter.length > 0 && !datasetFilter.includes("__none__") ? `(${datasetFilter.length})` : ""}
+            <FaFilter className={`text-xs ${datasetFilter.length > 0 ? "" : "opacity-40"}`} />
+          </button>
+          {datasetDropdownOpen && (
+            <div className="absolute z-30 left-0 top-full mt-1 bg-base-100 border border-base-300 rounded shadow-lg p-2 min-w-[220px] max-h-[300px] overflow-y-auto">
+              <div className="flex gap-1 mb-1">
+                <button
+                  className="btn btn-xs"
+                  onClick={() => setQueryString({ ds: "", page: "1" })}
+                >All</button>
+                <button
+                  className="btn btn-xs"
+                  onClick={() => setQueryString({ ds: "__none__", page: "1" })}
+                >None</button>
+              </div>
+              {allLibraryDisplayNames.map((lib) => (
+                <label key={lib} className="flex items-center gap-1 cursor-pointer py-0.5 text-xs">
+                  <input
+                    type="checkbox"
+                    className="checkbox checkbox-xs"
+                    checked={datasetFilter.length === 0 ? true : datasetFilter.includes(lib)}
+                    onChange={(e) => {
+                      let next: string[];
+                      if (datasetFilter.length === 0) {
+                        next = allLibraryDisplayNames.filter((l) => l !== lib);
+                      } else if (e.target.checked) {
+                        next = datasetFilter.filter((l) => l !== "__none__").concat(lib);
+                      } else {
+                        next = datasetFilter.filter((l) => l !== lib);
+                      }
+                      if (next.length >= allLibraryDisplayNames.length) {
+                        setQueryString({ ds: "", page: "1" });
+                      } else if (next.length === 0) {
+                        setQueryString({ ds: "__none__", page: "1" });
+                      } else {
+                        setQueryString({ ds: next.join(","), page: "1" });
+                      }
+                    }}
+                  />
+                  {lib}
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div
+          id="ptype-select"
+          className="join place-content-start place-items-center"
+        >
+          <div
+            className={
+              datasetFilter.length > 0 && drugLibraryNames.every(n => datasetFilter.includes(n)) && !geneLibraryNames.some(n => datasetFilter.includes(n))
+                ? "join-item px-3 py-1.5 text-sm bg-gray-400 hover:bg-gray-500 text-gray-800 font-bold cursor-pointer"
+                : "join-item px-3 py-1.5 bg-gray-100 cursor-pointer font-bold text-sm dark:bg-gray-900"
+            }
+            onClick={() => {
+              const isDrugActive = datasetFilter.length > 0 && drugLibraryNames.every(n => datasetFilter.includes(n)) && !geneLibraryNames.some(n => datasetFilter.includes(n));
+              if (isDrugActive) {
+                setQueryString({ ds: "", page: "1" });
+              } else {
+                setQueryString({ ds: drugLibraryNames.join(","), page: "1" });
+              }
+            }}
+          >
+            DRUG
+          </div>
+          <div
+            className={
+              datasetFilter.length > 0 && geneLibraryNames.every(n => datasetFilter.includes(n)) && !drugLibraryNames.some(n => datasetFilter.includes(n))
+                ? "join-item px-3 py-1.5 text-sm bg-gray-400 hover:bg-gray-500 text-gray-800 font-bold cursor-pointer"
+                : "join-item px-3 py-1.5 bg-gray-100 cursor-pointer font-bold text-sm dark:bg-gray-900"
+            }
+            onClick={() => {
+              const isGeneActive = datasetFilter.length > 0 && geneLibraryNames.every(n => datasetFilter.includes(n)) && !drugLibraryNames.some(n => datasetFilter.includes(n));
+              if (isGeneActive) {
+                setQueryString({ ds: "", page: "1" });
+              } else {
+                setQueryString({ ds: geneLibraryNames.join(","), page: "1" });
+              }
+            }}
+          >
+            GENE
+          </div>
+        </div>
+
+        <div
+          id="dir-select"
+          className="join place-content-start place-items-center"
+        >
+          <div
+            className={
+              (queryString.dir == "up" || queryString.sortBy == "pvalue_mimic")
+                ? "join-item px-3 py-1.5 text-sm bg-gray-400 hover:bg-gray-500 text-gray-800 font-bold cursor-pointer"
+                : "join-item px-3 py-1.5  bg-gray-100 cursor-pointer font-bold text-sm dark:bg-gray-900"
+            }
+            onClick={(evt) => {
+              evt.preventDefault();
+              if (queryString.dir === "up")
+                setQueryString({
+                  page: "1",
+                  q: rawTerm,
+                  dir: "",
+                  fda: queryString.fda,
+                  consensus: queryString.consensus,
+                  moas: queryString.moas,
+                  sort: "pvalue_mimic",
+                  ko: queryString.ko,
+                  topn: queryString.topn,
+                  pvaluele: queryString.pvaluele,
+                });
+              else
+                setQueryString({
+                  page: "1",
+                  q: rawTerm,
+                  dir: "up",
+                  fda: queryString.fda,
+                  consensus: queryString.consensus,
+                  moas: queryString.moas,
+                  sort: "pvalue_mimic",
+                  ko: queryString.ko,
+                  topn: queryString.topn,
+                  pvaluele: queryString.pvaluele,
+                });
+            }}
+          >
+            MIMICKERS
+          </div>
+          <div
+            className={
+              (queryString.dir == "down" || queryString.sortBy == "pvalue_reverse")
+                ? "join-item px-3 py-1.5 text-sm bg-gray-400 hover:bg-gray-500 text-gray-800 font-bold cursor-pointer"
+                : "join-item px-3 py-1.5 bg-gray-100 cursor-pointer font-bold text-sm dark:bg-gray-900"
+            }
+            onClick={(evt) => {
+              evt.preventDefault();
+              if (queryString.dir === "down")
+                setQueryString({
+                  page: "1",
+                  q: rawTerm,
+                  dir: "",
+                  fda: queryString.fda,
+                  consensus: queryString.consensus,
+                  moas: queryString.moas,
+                  sort: "pvalue_reverse",
+                  ko: queryString.ko,
+                  topn: queryString.topn,
+                  pvaluele: queryString.pvaluele,
+                });
+              else
+                setQueryString({
+                  page: "1",
+                  q: rawTerm,
+                  dir: "down",
+                  fda: queryString.fda,
+                  consensus: queryString.consensus,
+                  moas: queryString.moas,
+                  sort: "pvalue_reverse",
+                  ko: queryString.ko,
+                  topn: queryString.topn,
+                  pvaluele: queryString.pvaluele,
+                });
+            }}
+          >
+            REVERSERS
+          </div>
+        </div>
+
         <button
           onClick={() => {
             if (queryString.fda === "false")
@@ -339,96 +556,6 @@ function EnrichmentResults({
         >
           Consensus MoAs
         </button>
-
-        {/* TODO: Re-implement KO filter using library category instead of space-in-name heuristic */}
-        <button
-          className="button btn btn-sm opacity-50 cursor-not-allowed"
-          disabled
-        >
-          CRISPR KOs
-        </button>
-
-        <div
-          id="dir-select"
-          className="join place-content-start place-items-center"
-        >
-          <div
-            className={
-              (queryString.dir == "up" || queryString.sortBy == "pvalue_mimic")
-                ? "join-item px-3 py-1.5 text-sm bg-gray-400 hover:bg-gray-500 text-gray-800 font-bold cursor-pointer"
-                : "join-item px-3 py-1.5  bg-gray-100 cursor-pointer font-bold text-sm dark:bg-gray-900"
-            }
-            onClick={(evt) => {
-              evt.preventDefault();
-              if (queryString.dir === "up")
-                setQueryString({
-                  page: "1",
-                  q: rawTerm,
-                  dir: "",
-                  fda: queryString.fda,
-                  consensus: queryString.consensus,
-                  moas: queryString.moas,
-                  sort: "pvalue_mimic",
-                  ko: queryString.ko,
-                  topn: queryString.topn,
-                  pvaluele: queryString.pvaluele,
-                });
-              else
-                setQueryString({
-                  page: "1",
-                  q: rawTerm,
-                  dir: "up",
-                  fda: queryString.fda,
-                  consensus: queryString.consensus,
-                  moas: queryString.moas,
-                  sort: "pvalue_mimic",
-                  ko: queryString.ko,
-                  topn: queryString.topn,
-                  pvaluele: queryString.pvaluele,
-                });
-            }}
-          >
-            MIMICKERS
-          </div>
-          <div
-            className={
-              (queryString.dir == "down" || queryString.sortBy == "pvalue_reverse")
-                ? "join-item px-3 py-1.5 text-sm bg-gray-400 hover:bg-gray-500 text-gray-800 font-bold cursor-pointer"
-                : "join-item px-3 py-1.5 bg-gray-100 cursor-pointer font-bold text-sm dark:bg-gray-900"
-            }
-            onClick={(evt) => {
-              evt.preventDefault();
-              if (queryString.dir === "down")
-                setQueryString({
-                  page: "1",
-                  q: rawTerm,
-                  dir: "",
-                  fda: queryString.fda,
-                  consensus: queryString.consensus,
-                  moas: queryString.moas,
-                  sort: "pvalue_reverse",
-                  ko: queryString.ko,
-                  topn: queryString.topn,
-                  pvaluele: queryString.pvaluele,
-                });
-              else
-                setQueryString({
-                  page: "1",
-                  q: rawTerm,
-                  dir: "down",
-                  fda: queryString.fda,
-                  consensus: queryString.consensus,
-                  moas: queryString.moas,
-                  sort: "pvalue_reverse",
-                  ko: queryString.ko,
-                  topn: queryString.topn,
-                  pvaluele: queryString.pvaluele,
-                });
-            }}
-          >
-            REVERSERS
-          </div>
-        </div>
         {(consensus || moas) ? (
           <div className="inline-flex items-center transition-all accent-gray-600">
             <label

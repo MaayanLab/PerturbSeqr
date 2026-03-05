@@ -19,7 +19,8 @@ CREATE OR REPLACE FUNCTION app_private.indexed_enrich(
   sortby VARCHAR DEFAULT NULL,
   filter_ko BOOLEAN DEFAULT FALSE,
   top_n INTEGER DEFAULT 10000,
-  library_names VARCHAR[] DEFAULT NULL
+  library_names VARCHAR[] DEFAULT NULL,
+  post_search_filter_library_names VARCHAR[] DEFAULT NULL
 )
 RETURNS app_public.paginated_enrich_result
 LANGUAGE plpython3u IMMUTABLE PARALLEL SAFE AS $$
@@ -40,6 +41,7 @@ LANGUAGE plpython3u IMMUTABLE PARALLEL SAFE AS $$
   if sortby: params['sortby'] = sortby
   # Pass library_names as comma-separated list if provided
   if library_names: params['library_names'] = ','.join(library_names)
+  if post_search_filter_library_names: params['post_search_filter_library_names'] = ','.join(post_search_filter_library_names)
   req = requests.post(
     f"{os.environ.get('ENRICH_URL', 'http://enrich:8000')}/{background['id']}",
     params=params,
@@ -77,7 +79,8 @@ CREATE OR REPLACE FUNCTION app_private.indexed_paired_enrich(
   sortby VARCHAR DEFAULT NULL,
   filter_ko BOOLEAN DEFAULT FALSE,
   top_n INTEGER DEFAULT 10000,
-  library_names VARCHAR[] DEFAULT NULL
+  library_names VARCHAR[] DEFAULT NULL,
+  post_search_filter_library_names VARCHAR[] DEFAULT NULL
 )
 RETURNS app_public.paginated_paired_enrich_result
 LANGUAGE plpython3u IMMUTABLE PARALLEL SAFE AS $$
@@ -98,6 +101,7 @@ LANGUAGE plpython3u IMMUTABLE PARALLEL SAFE AS $$
   if sortby: params['sortby'] = sortby
   # Pass library_names as comma-separated list if provided
   if library_names: params['library_names'] = ','.join(library_names)
+  if post_search_filter_library_names: params['post_search_filter_library_names'] = ','.join(post_search_filter_library_names)
   req = requests.post(
     f"{os.environ.get('ENRICH_URL', 'http://enrich:8000')}/pairs/{background['id']}",
     params=params,
@@ -136,7 +140,8 @@ CREATE OR REPLACE FUNCTION app_private.indexed_enrich(
   sortby VARCHAR DEFAULT NULL,
   filter_ko BOOLEAN DEFAULT FALSE,
   top_n INTEGER DEFAULT 10000,
-  library_names VARCHAR[] DEFAULT NULL
+  library_names VARCHAR[] DEFAULT NULL,
+  post_search_filter_library_names VARCHAR[] DEFAULT NULL
 )
 RETURNS app_public.paginated_enrich_result
 LANGUAGE plpython3u IMMUTABLE PARALLEL SAFE AS $$
@@ -156,6 +161,7 @@ LANGUAGE plpython3u IMMUTABLE PARALLEL SAFE AS $$
   if first: params['limit'] = first
   if sortby: params['sortby'] = sortby
   if library_names: params['library_names'] = ','.join(library_names)
+  if post_search_filter_library_names: params['post_search_filter_library_names'] = ','.join(post_search_filter_library_names)
   req = requests.post(
     f"{os.environ.get('ENRICH_URL', 'http://enrich:8000')}/{background['id']}",
     params=params,
@@ -183,7 +189,8 @@ CREATE OR REPLACE FUNCTION app_private.indexed_paired_enrich(
   sortby VARCHAR DEFAULT NULL,
   filter_ko BOOLEAN DEFAULT FALSE,
   top_n INTEGER DEFAULT 10000,
-  library_names VARCHAR[] DEFAULT NULL
+  library_names VARCHAR[] DEFAULT NULL,
+  post_search_filter_library_names VARCHAR[] DEFAULT NULL
 )
 RETURNS app_public.paginated_paired_enrich_result
 LANGUAGE plpython3u IMMUTABLE PARALLEL SAFE AS $$
@@ -203,6 +210,7 @@ LANGUAGE plpython3u IMMUTABLE PARALLEL SAFE AS $$
   if first: params['limit'] = first
   if sortby: params['sortby'] = sortby
   if library_names: params['library_names'] = ','.join(library_names)
+  if post_search_filter_library_names: params['post_search_filter_library_names'] = ','.join(post_search_filter_library_names)
   req = requests.post(
     f"{os.environ.get('ENRICH_URL', 'http://enrich:8000')}/pairs/{background['id']}",
     params=params,
