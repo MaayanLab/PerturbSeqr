@@ -51,38 +51,41 @@ function HomeContent() {
       <p className="text-center text-base mb-4 max-w-2xl">
         Search through <Stats show_gene_sets bold /> created from <b>{resourceCount}</b> Connectivity Mapping resources organized into <b>{libraryCount}</b> gene set libraries, <b>{drugLibraryCount}</b> drug perturbation and <b>{geneLibraryCount}</b> gene perturbation followed by expression.
       </p>
-      {/* Dataset icons filter - centered below header */}
-      <DatasetIcons
-        selectedLibraries={selectedLibraries}
-        onSelectionChange={setSelectedLibraries}
-      />
-      {/* Input and filter sections in horizontal row */}
-      <div className="flex flex-row gap-6 items-stretch justify-center">
-        {/* Input card */}
-        <div className="card w-[480px] shadow-2xl bg-base-100">
-          <div className="card-body">
-            {inputSingle ? (
-              <InputForm
-                setInputSingle={setInputSingle}
-                selectedLibraries={selectedLibraries}
-                initialDatasetId={datasetIds.length === 1 ? datasetIds[0] : undefined}
-              />
-            ) : (
-              <InputFormUpDown
-                setInputSingle={setInputSingle}
-                selectedLibraries={selectedLibraries}
-                initialDatasetUpId={datasetIds.length >= 2 ? datasetIds[0] : undefined}
-                initialDatasetDownId={datasetIds.length >= 2 ? datasetIds[1] : undefined}
-              />
-            )}
+      {/* Wrapper to align dataset icons with cards below */}
+      <div className="w-full max-w-[904px]">
+        {/* Dataset icons filter - centered below header */}
+        <DatasetIcons
+          selectedLibraries={selectedLibraries}
+          onSelectionChange={setSelectedLibraries}
+        />
+        {/* Input and filter sections in horizontal row */}
+        <div className="flex flex-row gap-6 items-stretch justify-center">
+          {/* Input card */}
+          <div className="card w-[480px] shadow-2xl bg-base-100">
+            <div className="card-body">
+              {inputSingle ? (
+                <InputForm
+                  setInputSingle={setInputSingle}
+                  selectedLibraries={selectedLibraries}
+                  initialDatasetId={datasetIds.length === 1 ? datasetIds[0] : undefined}
+                />
+              ) : (
+                <InputFormUpDown
+                  setInputSingle={setInputSingle}
+                  selectedLibraries={selectedLibraries}
+                  initialDatasetUpId={datasetIds.length >= 2 ? datasetIds[0] : undefined}
+                  initialDatasetDownId={datasetIds.length >= 2 ? datasetIds[1] : undefined}
+                />
+              )}
+            </div>
           </div>
-        </div>
-        {/* Library filter */}
-        <div className="w-[400px]">
-          <LibraryFilter
-            selectedLibraries={selectedLibraries}
-            onSelectionChange={setSelectedLibraries}
-          />
+          {/* Library filter */}
+          <div className="w-[400px]">
+            <LibraryFilter
+              selectedLibraries={selectedLibraries}
+              onSelectionChange={setSelectedLibraries}
+            />
+          </div>
         </div>
       </div>
     </div>

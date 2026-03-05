@@ -93,66 +93,69 @@ export default function TermSearchClientPage(props: { searchParams?: { page?: st
         <p className="text-center text-base mb-4 max-w-2xl">
           Search through <Stats show_gene_sets bold /> created from <b>{resourceCount}</b> Connectivity Mapping resources organized into <b>{libraryCount}</b> gene set libraries, <b>{drugLibraryCount}</b> drug perturbation and <b>{geneLibraryCount}</b> gene perturbation followed by expression.
         </p>
-        {/* Dataset icons filter - centered below header */}
-        <DatasetIcons
-          selectedLibraries={selectedLibraries}
-          onSelectionChange={setSelectedLibraries}
-        />
-        {/* Input and filter sections in horizontal row */}
-        <div className="flex flex-row gap-6 items-stretch justify-center">
-          {/* Input card */}
-          <div className="card w-[480px] shadow-2xl bg-base-100">
-            <div className="card-body">
-              <h1 className="text-xl">Query extracted gene set table titles to find matching gene sets</h1>
-              <form
-                className="flex flex-col items-center gap-2"
-                onSubmit={evt => {
-                  evt.preventDefault()
-                  setQueryString({
-                    page: '1',
-                    q: rawTerms,
-                    libraries: selectedLibraries.length > 0 && selectedLibraries.length < allLibraries.length ? selectedLibraries.join(',') : ''
-                  })
-                }}
-              >
-                <span className="label-text text-lg">Search Term(s)</span>
-                <input
-                  type="text"
-                  className="input input-bordered w-full"
-                  placeholder="U2OS"
-                  value={rawTerms}
-                  onChange={evt => {
-                    setRawTerms(evt.currentTarget.value)
-                  }}
-                />
-                <button
-                  type="submit"
-                  className="btn normal-case"
-                >Search gene sets</button>
-              </form>
-              <p className="prose">
-                Try an example:&nbsp;
-                {examples.flatMap((example, i) => [
-                  i > 0 ? <React.Fragment key={i}>, </React.Fragment> : null,
-                  <a
-                    key={example}
-                    className="font-bold text-sm cursor-pointer"
-                    onClick={() => {setQueryString({
+        {/* Wrapper to align dataset icons with cards below */}
+        <div className="w-full max-w-[904px]">
+          {/* Dataset icons filter - centered below header */}
+          <DatasetIcons
+            selectedLibraries={selectedLibraries}
+            onSelectionChange={setSelectedLibraries}
+          />
+          {/* Input and filter sections in horizontal row */}
+          <div className="flex flex-row gap-6 items-stretch justify-center">
+            {/* Input card */}
+            <div className="card w-[480px] shadow-2xl bg-base-100">
+              <div className="card-body">
+                <h1 className="text-xl">Query extracted gene set table titles to find matching gene sets</h1>
+                <form
+                  className="flex flex-col items-center gap-2"
+                  onSubmit={evt => {
+                    evt.preventDefault()
+                    setQueryString({
                       page: '1',
-                      q: example,
+                      q: rawTerms,
                       libraries: selectedLibraries.length > 0 && selectedLibraries.length < allLibraries.length ? selectedLibraries.join(',') : ''
-                    })}}
-                  >{example}</a>
-                ])}
-              </p>
+                    })
+                  }}
+                >
+                  <span className="label-text text-lg">Search Term(s)</span>
+                  <input
+                    type="text"
+                    className="input input-bordered w-full"
+                    placeholder="U2OS"
+                    value={rawTerms}
+                    onChange={evt => {
+                      setRawTerms(evt.currentTarget.value)
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    className="btn normal-case"
+                  >Search gene sets</button>
+                </form>
+                <p className="prose">
+                  Try an example:&nbsp;
+                  {examples.flatMap((example, i) => [
+                    i > 0 ? <React.Fragment key={i}>, </React.Fragment> : null,
+                    <a
+                      key={example}
+                      className="font-bold text-sm cursor-pointer"
+                      onClick={() => {setQueryString({
+                        page: '1',
+                        q: example,
+                        libraries: selectedLibraries.length > 0 && selectedLibraries.length < allLibraries.length ? selectedLibraries.join(',') : ''
+                      })}}
+                    >{example}</a>
+                  ])}
+                </p>
+              </div>
             </div>
-          </div>
-          {/* Library filter */}
-          <div className="w-[400px]">
-            <LibraryFilter
-              selectedLibraries={selectedLibraries}
-              onSelectionChange={setSelectedLibraries}
-            />
+            {/* Library filter */}
+            <div className="w-[400px]">
+              <LibraryFilter
+                selectedLibraries={selectedLibraries}
+                onSelectionChange={setSelectedLibraries}
+              />
+            </div>
           </div>
         </div>
       </div>
