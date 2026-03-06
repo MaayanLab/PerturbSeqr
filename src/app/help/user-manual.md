@@ -2,7 +2,7 @@
 
 > **In Progress:** Perturb-Seqr-specific documentation is in progress. The documentation below may not fully reflect the current application.
 
-**Navigation:** [Abstract](/about) | [Dataset Filtering](#dataset-filtering) | [Single Gene Set Search](#gene-set-search) | [Up & Down Gene Set Search](#up-down-gene-set-search) | [Dataset Visualizations](#dataset-visualizations) | [Term Search](#metadata-search) | [API](#api)
+**Navigation:** [Abstract](/about) | [Dataset Filtering](#dataset-filtering) | [Single Gene Set Search](#gene-set-search) | [Up & Down Gene Set Search](#up-down-gene-set-search) | [Dataset Visualizations](#dataset-visualizations) | [Term Search](#metadata-search) | [Download](#download-page) | [API](#api)
 
 ---
 
@@ -38,7 +38,7 @@ Dataset filtering selections and gene set inputs will persist as long as the use
 
 ---
 
-## 1.1 Single Gene Set Search
+## Single Gene Set Search
 
 The Gene Set Search page enables users to search the Perturb-Seqr database for gene sets that match their query gene set. Similarity to gene sets contained within the Perturb-Seqr database with the query gene set is measured with Fisher's exact test. Any significantly overlapping gene sets are returned to the user along with their accompanying metadata. User query gene sets can be pasted or typed into the input form with each gene on a new line, or the user may upload a file containing genes where the genes are listed with new line, tab, or comma separators:
 
@@ -74,7 +74,7 @@ To identify the most common mechanisms of action and their directionality simila
 
 ---
 
-## 1.2 Up & Down Gene Set Search
+## Up & Down Gene Set Search
 
 The up and down gene set search functionality enables users to search the Perturb-Seqr database for gene set signature pairs that most significantly mimic or reverse the expression of the submitted up- and down-gene set signature. A Fisher's exact test is also used to assess the significance of these results, specifically measuring a mimicker overlap (up Perturb-Seqr gene set & up user gene set + down Perturb-Seqr gene set & down user gene set) and reverser overlap (up Perturb-Seqr gene set & down user gene set + down Perturb-Seqr gene set & up user gene set). Any significantly overlapping mimicker or reverser signature is returned to the user along with their accompanying metadata. Similarly to the single gene set search, user query gene sets can be pasted or typed into the two input boxes with each gene on a new line, or the user may upload a file containing genes where the genes are listed with new line, tab, or comma separators after selecting the up & down gene set option on the input form:
 
@@ -94,7 +94,7 @@ Users can explore the unique structure and clustering of each dataset through pr
 
 ---
 
-## 1.4 Term Search
+## Term Search
 
 Perturb-Seqr also provides direct metadata search of all dataset signatures. Paginated results are returned with accompanying metadata of the returned signatures:
 
@@ -118,7 +118,7 @@ All data is available in GMT format on the Download page. The term format for ea
 
 ---
 
-## 1.5 API
+## API
 
 Perturb-Seqr provides programmatic access through a GraphQL endpoint. Users can learn more about GraphQL queries from their provided [documentation](https://graphql.org/learn/). The Perturb-Seqr [GraphQL endpoint](/graphiql) and associated Postgres database provide users with a wide range of available queries and with a user interface to test and develop these queries:
 
@@ -326,7 +326,7 @@ def enrich_perturbseqr_up_down(genes_up: list[str], genes_down: list[str], first
   enrichment = res['data']['currentBackground']['pairedEnrich']['nodes']
 
   df_consensus_pair = pd.DataFrame(consensus).rename(columns={'drug': 'perturbation',
-                                                              'pvalueUp': 'pvalueMimick',
+                                                              'pvalueUp': 'pvalueMimic',
                                                               'pvalueDown': 'pvalueReverse',
                                                               'adjPvalueUp': 'adjPvalueMimic',
                                                               'adjPvalueDown': 'adjPvalueReverse',

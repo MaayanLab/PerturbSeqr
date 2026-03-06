@@ -220,7 +220,7 @@ export const upDownGeneSetEnrich = `def enrich_perturbseqr_up_down(genes_up: lis
   enrichment = res['data']['currentBackground']['pairedEnrich']['nodes']
 
   df_consensus_pair = pd.DataFrame(consensus).rename(columns={'drug': 'perturbation',
-                                                              'pvalueUp': 'pvalueMimick',
+                                                              'pvalueUp': 'pvalueMimic',
                                                               'pvalueDown': 'pvalueReverse',
                                                               'adjPvalueUp': 'adjPvalueMimic',
                                                               'adjPvalueDown': 'adjPvalueReverse',

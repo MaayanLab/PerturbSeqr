@@ -188,7 +188,7 @@ export default function UserManual() {
           /></div>
           <hr className="my-10" />
           <h2 className="title text-xl font-medium mb-3" id="gene-set-search">
-            1.1 Single Gene Set Search
+            Single Gene Set Search
           </h2>
           <p>
           The Gene Set Search page enables users to search the Perturb-Seqr database for gene sets that match their query gene set. Similarity to gene sets contained within the Perturb-Seqr database with the query gene set is measured with Fisher&apos;s exact test. Any significantly overlapping gene sets are returned to the user along with their accompanying metadata. User query gene sets can be pasted or typed into the input form with each gene on a new line, or the user may upload a file containing genes where the genes are listed with new line, tab, or comma separators:
@@ -278,7 +278,7 @@ export default function UserManual() {
             className="title text-xl font-medium mb-3 mt-10"
             id="up-down-gene-set-search"
           >
-            1.2 Up & Down Gene Set Search
+            Up & Down Gene Set Search
           </h2>
           <p>
           The up and down gene set search functionality enables users to search the Perturb-Seqr database for gene set signature pairs that most significantly mimic or reverse the expression of the submitted up- and down-gene set signature. A Fisher&apos;s exact test is also used to assess the significance of these results, specifically measuring a mimicker overlap (up Perturb-Seqr gene set & up user gene set + down Perturb-Seqr gene set & down user gene set) and reverser overlap (up Perturb-Seqr gene set & down user gene set + down Perturb-Seqr gene set & up user gene set). Any significantly overlapping mimicker or reverser signature is returned to the user along with their accompanying metadata. Similarly to the single gene set search, user query gene sets can be pasted or typed into the two input boxes with each gene on a new line, or the user may upload a file containing genes where the genes are listed with new line, tab, or comma separators after selecting the up & down gene set option on the input form:
@@ -332,7 +332,7 @@ export default function UserManual() {
             className="title text-xl font-medium mb-3 mt-10"
             id="metadata-search"
           >
-            1.4 Term Search
+            Term Search
           </h2>
           Perturb-Seqr also provides direct metadata search of all dataset signatures. Paginated results are returned with accompanying metadata of the returned signatures:
           <Image
@@ -387,7 +387,7 @@ export default function UserManual() {
           <br></br>
           <br></br>
           <h2 className="title text-xl font-medium mb-3 mt-10" id="api">
-            1.5 API
+            API
           </h2>
           <p>
             Perturb-Seqr provides programmatic access through a GraphQL endpoint.
