@@ -1,4 +1,17 @@
-
+#!/usr/bin/env -S uv run
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "pandas>=1.5.0",
+#     "numpy>=1.21.0",
+#     "bokeh>=3.0.0",
+#     "scipy>=1.9.0",
+#     "statsmodels>=0.13.0",
+#     "tqdm>=4.60.0",
+#     "maayanlab-bioinformatics @ git+https://github.com/MaayanLab/maayanlab-bioinformatics.git@python3.14-compat",
+#     "pyenrichr",
+# ]
+# ///
 """
 GO BP Enrichment for gene perturbation gene set libraries.
 
