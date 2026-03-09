@@ -418,13 +418,9 @@ def process_all_libraries(
         save_html: Whether to save Bokeh HTML visualizations
     """
     large_libraries = {"lincs-l1000-cp", "lincs-l1000-xpr"}
-    skip = {"creeds-gene"}
     for library_name in LIBRARIES.keys():
         if skip_large and library_name in large_libraries:
             print(f"\nSkipping large library: {library_name}")
-            continue
-        if library_name in skip:
-            print(f"\nSkipping {library_name}")   
             continue
         try:
             process_library(
