@@ -71,6 +71,6 @@ scratch/
 
 # UMAP intermediate data (large CSVs, only HTML figures needed for app)
 public/umap/csv/
-
+public/umap/enrich/
 # Use case data files
 *.xlsx

@@ -29,6 +29,7 @@ from collections import OrderedDict
 from pathlib import Path
 from os import path, mkdir
 import re
+from textwrap import wrap
 
 from maayanlab_bioinformatics.parse.gmt import gmt_read_dict
 import pyenrichr as pye
@@ -41,6 +42,9 @@ from bokeh.models import LinearColorMapper, HoverTool, ColumnDataSource
 from bokeh.plotting import figure, save
 from bokeh.palettes import Viridis256
 from bokeh.io import output_file
+from bokeh.transform import factor_cmap
+from bokeh.palettes import Category20
+
 
 # Configuration
 
@@ -246,14 +250,13 @@ def calculate_specificity(top_terms_df:pd.DataFrame):
     return results
 
 # Visualization
-def create_scatterplot(scatter_df: pd.DataFrame, enrich_df: pd.DataFrame, term:str) -> figure:
+def create_scatterplot_term(scatter_df: pd.DataFrame, enrich_df: pd.DataFrame, term:str) -> figure:
     """
     Create an interactive Bokeh scatterplot colored by term enrichment -log10(p-value)
-
     Args:
         scatter_df: DataFrame with x, y, direction, cluster, term, genes columns
+        enrich_df: Dataframe with -log10(p-values) for term
         title: Plot title
-
     Returns:
         Bokeh figure object
     """
@@ -324,6 +327,87 @@ def create_scatterplot(scatter_df: pd.DataFrame, enrich_df: pd.DataFrame, term:s
 
     return plot_emb
 
+def create_scatterplot(scatter_df: pd.DataFrame, top_terms_df: pd.DataFrame, title: str = "UMAP") -> figure:
+    """
+    Create an interactive Bokeh scatterplot colored by 10 most commonly enriched GO terms
+    Args:
+        scatter_df: DataFrame with x, y, direction, cluster, term, genes columns
+        top_terms_df: DataFrame with most enriched GO term for each signature
+        title: Plot title
+    Returns:
+        Bokeh figure object
+    """
+    df = scatter_df.copy()
+    df = df.merge(top_terms_df[['term','top_go_term']], how='left', on='term')
+    top10 = df.value_counts('top_go_term').index.values[:10]
+    df['top_go_term'] = df['top_go_term'].apply(lambda x: x if x in top10 else 'Other')
+    df['wrapped_go'] = df['top_go_term'].apply(lambda x: "\n".join(wrap(str(x), 20)))
+    
+    # reorder so "other" plotted first
+    category_counts = df.groupby('top_go_term').size().reset_index(name='count')
+    category_counts = category_counts.sort_values('count', ascending=False)
+    df = df.merge(category_counts, how='left', on='top_go_term')
+    df = df.sort_values('count', ascending=False)
+
+    # Color mapping
+    n_colors = len(top10)
+    palette = Category20[n_colors]
+    term_colors = {c: palette[i % len(palette)] for i, c in enumerate(top10)}
+    term_colors['Other'] = '#CCCCCC'
+    df['color'] = df['top_go_term'].map(term_colors)
+    tooltips = [
+        ("Gene Set", "@gene_set"),
+        ("Direction", "@direction"),
+        ("Cluster", "@cluster"),
+        ("GO Term", "@go_term_hover")
+    ]
+    hover_emb = HoverTool(tooltips=tooltips)
+    tools_emb = [hover_emb, 'pan', 'wheel_zoom', 'reset', 'save']
+    plot_emb = figure(
+        sizing_mode='stretch_both',
+        tools=tools_emb,
+        title=title
+    )
+
+    source = ColumnDataSource(
+        data=dict(
+            x=df['x'],
+            y=df['y'],
+            gene_set=df['term'],
+            colors=df['color'],
+            direction=df['direction'],
+            go_term = df['wrapped_go'],
+            go_term_hover = df['top_go_term'],
+            cluster=df['cluster']
+        )
+    )
+    
+    # Hide axis labels and grid lines
+    plot_emb.xaxis.major_tick_line_color = None
+    plot_emb.xaxis.minor_tick_line_color = None
+    plot_emb.yaxis.major_tick_line_color = None
+    plot_emb.yaxis.minor_tick_line_color = None
+    plot_emb.xaxis.major_label_text_font_size = '0pt'
+    plot_emb.yaxis.major_label_text_font_size = '0pt'
+
+    plot_emb.output_backend = "svg"
+
+    plot_emb.xaxis.axis_label = "UMAP_1"
+    plot_emb.yaxis.axis_label = "UMAP_2"
+
+    plot_emb.scatter(
+        'x',
+        'y',
+        source=source,
+        size=4,
+        color='colors',
+        legend_group='go_term'
+    )
+
+    # Legend formatting
+    plot_emb.add_layout(plot_emb.legend[0],'right')
+    return plot_emb
+
 # Main Processing Functions
 
 def process_library(
@@ -377,7 +461,6 @@ def process_library(
     
     scatter_df = get_scatter(library_name)
     top_terms_df = label_top_terms(enrich_pmat, scatter_df)
-    # top_terms_df.to_csv(f"{OUTPUT_DIR}/test/{library_name}.csv", index=False)
 
     # Calculate term specficity
     csv_path = ENRICHMENT_DIR / f"{library_name}_specificity.csv"
@@ -394,9 +477,7 @@ def process_library(
     # Save HTML visualization
     if save_html:
         html_path = FIGURE_DIR / f"{library_name}_UMAP.html"
-        top_term = results.sort_values('fdr', ascending=True)['term'].iloc[0]
-        top_term_enrichment = get_enrichment_data(enrich_pmat, top_term)
-        plot = create_scatterplot(scatter_df, top_term_enrichment, top_term)
+        plot = create_scatterplot(scatter_df, top_terms_df, title=f"{library_name} UMAP")
         output_file(filename=str(html_path), title=f"{library_name} UMAP")
         save(plot)
         print(f"\tSaved HTML: {html_path}")
