@@ -423,7 +423,7 @@ export default function UserManual() {
           </div>
           <br />
           <p>
-          Additionally, up- and down-gene set enrichment analysis queries can be performed in Python against all Perturb-Seqr signatures using the requests library as follows:
+          Additionally, up and down gene set enrichment analysis queries can be performed in Python against all Perturb-Seqr signatures using the requests library as follows:
           </p>
           <div className="text-gray bg-slate-300 dark:bg-slate-700 text-xs font-mono mt-5 p-5 rounded-lg box-content sm:max-w-xl sm:overflow-scroll md:max-w-xl lg:max-w-3xl xl:max-w-full">
             <button className="float-right" onClick={() => navigator.clipboard.writeText(upDownGeneSetEnrich)}><FaCopy/></button>
@@ -477,6 +477,18 @@ export default function UserManual() {
             </Link>
             .
           </p>
+          <div className="text-center mt-8 mb-4">
+            <a
+              href="#"
+              className="text-sm underline cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            >
+              Back to top
+            </a>
+          </div>
         </div>
       </div>
     </div>

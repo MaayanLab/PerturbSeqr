@@ -238,7 +238,7 @@ def enrich_perturbseqr_single_set(geneset: list, first=1000, library_names=None)
     return df_enrichment, df_consensus
 ```
 
-Additionally, up- and down-gene set enrichment analysis queries can be performed in Python against all Perturb-Seqr signatures using the requests library as follows:
+Additionally, up and down gene set enrichment analysis queries can be performed in Python against all Perturb-Seqr signatures using the requests library as follows:
 
 ```python
 def enrich_perturbseqr_up_down(genes_up: list[str], genes_down: list[str], first=100):
