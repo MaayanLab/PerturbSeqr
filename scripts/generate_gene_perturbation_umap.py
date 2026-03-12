@@ -70,7 +70,7 @@ MIN_SET_SIZE = 5
 LIBRARIES = {
     # Gene perturbations
     "lincs-l1000-xpr": ("gene", "lincs-l1000-xpr"),
-    "perturbatlas": ("gene", "perturb-atlas"),
+    "perturbatlas-human": ("gene", "perturb-atlas-human"),
     "perturbatlas-mouse": ("gene", "perturb-atlas-mouse"),
     "creeds-gene": ("gene", "creeds-gene"),
     "geo-gene": ("gene", "rummageo-gene"),

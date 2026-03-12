@@ -18,7 +18,7 @@ const DATASETS = {
   gene: [
     { id: 'creeds-gene', name: 'CREEDS Gene', signatures: '4,788' },
     { id: 'lincs-l1000-xpr', name: 'LINCS L1000 XPR', signatures: '65,672' },
-    { id: 'perturbatlas', name: 'Perturb Atlas', signatures: '12,852' },
+    { id: 'perturbatlas-human', name: 'Perturb Atlas Human', signatures: '12,852' },
     { id: 'perturbatlas-mouse', name: 'Perturb Atlas Mouse', signatures: '10,743' },
     { id: 'replogle', name: 'Replogle et al.', signatures: '9,207' },
     { id: 'geo-gene', name: 'RummaGEO Gene', signatures: '4,788' },

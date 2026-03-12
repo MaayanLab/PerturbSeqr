@@ -69,7 +69,7 @@ export default async function About() {
             <strong>Gene Perturbation Datasets:</strong>
           </p>
           <ul className="list-disc ml-4">
-            <li><a className="underline" href="https://perturbatlas.kratoss.site/#/" target="_blank">Perturb Atlas Gene Perturbations</a> (<a className="underline" href="https://maayanlab.cloud/Harmonizome/dataset/PerturbAtlas+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations" target="_blank">Harmonizome</a>)</li>
+            <li><a className="underline" href="https://perturbatlas.kratoss.site/#/" target="_blank">Perturb Atlas Human Gene Perturbations</a> (<a className="underline" href="https://maayanlab.cloud/Harmonizome/dataset/PerturbAtlas+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations" target="_blank">Harmonizome</a>)</li>
             <li><a className="underline" href="https://perturbatlas.kratoss.site/#/" target="_blank">Perturb Atlas Mouse Gene Perturbations</a> (<a className="underline" href="https://maayanlab.cloud/Harmonizome/dataset/PerturbAtlas+Signatures+of+Differentially+Expressed+Genes+for+Mouse+Gene+Perturbations" target="_blank">Harmonizome</a>)</li>
             <li><a className="underline" href="https://maayanlab.cloud/sigcom-lincs/#/Download" target="_blank">LINCS L1000 Gene Knockouts</a> (<a className="underline" href="https://l2s2.maayanlab.cloud/download" target="_blank">L2S2</a>)</li>
             <li><a className="underline" href="https://pubmed.ncbi.nlm.nih.gov/35688146/" target="_blank">Replogle Perturb-seq</a> K562 Genome-wide (<a className="underline" href="https://maayanlab.cloud/Harmonizome/dataset/Replogle+et+al.,+Cell,+2022+K562+Genome-wide+Perturb-seq+Gene+Perturbation+Signatures" target="_blank">Harmonizome</a>)</li>

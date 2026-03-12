@@ -126,7 +126,7 @@ MINIO_FILE_MAPPING = {
     "ginkgo-bioworks.gmt.gz": "ginkgo-bioworks",
     # Gene Perturbation
     "lincs-l1000-xpr.gmt.gz": "lincs-l1000-xpr",
-    "perturb-atlas.gmt.gz": "perturb-atlas",
+    "perturb-atlas-human.gmt.gz": "perturb-atlas-human",
     "perturb-atlas-mouse.gmt.gz": "perturb-atlas-mouse",
     "replogle-perturb-seq.gmt.gz": "replogle-perturb-seq",
     "creeds-gene.gmt.gz": "creeds-gene",

@@ -59,8 +59,8 @@
       "displayName": "Ginkgo Bioworks",
       "category": "drug"
     },
-    "perturb-atlas": {
-      "displayName": "Perturb Atlas",
+    "perturb-atlas-human": {
+      "displayName": "Perturb Atlas Human",
       "category": "gene",
       "source": "https://maayanlab.cloud/Harmonizome/dataset/PerturbAtlas+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations",
       "sourceNote": "Gene expression profiles following genetic perturbation (KD/KO/OE/Mut). Zhang et al. 2024 Nucleic Acids Res. Reprocessed from Harmonizome."

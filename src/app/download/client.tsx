@@ -187,7 +187,7 @@ const termStructures: Record<string, TermStructure> = {
       { text: '1', label: 'Group 2' },
     ],
   },
-  'perturb-atlas': {
+  'perturb-atlas-human': {
     example: 'CPSF6::K562::::::::KD::SRP013565::10000 up',
     direction: 'up',
     fields: [
@@ -321,7 +321,7 @@ const drugPerturbationDatasets: Dataset[] = [
     title: 'CREEDS Drug Perturbations',
     value: '1,860 signatures',
     info: 'CREEDS + Harmonizome GEO microarray',
-    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/26673713/',
+    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/27667448/',
     sourceUrl: 'https://maayanlab.cloud/CREEDS/',
     sourceLabel: 'CREEDS',
     sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/CREEDS+Signatures+of+Differentially+Expressed+Genes+for+Drugs',
@@ -423,7 +423,7 @@ const genePerturbationDatasets: Dataset[] = [
     title: 'CREEDS Gene Perturbations',
     value: '4,788 signatures',
     info: 'CREEDS + Harmonizome GEO microarray',
-    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/26673713/',
+    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/27667448/',
     sourceUrl: 'https://maayanlab.cloud/CREEDS/',
     sourceLabel: 'CREEDS',
     sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/CREEDS+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations',
@@ -443,14 +443,14 @@ const genePerturbationDatasets: Dataset[] = [
     termKey: 'lincs-l1000-xpr',
   },
   {
-    title: 'PerturbAtlas Gene Perturbations',
+    title: 'PerturbAtlas Human Gene Perturbations',
     value: '12,852 signatures',
     info: '',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/39351872/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/PerturbAtlas+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations',
     sourceLabel: 'Harmonizome',
-    gmtUrl: `${MINIO_BASE}/gmts/perturb-atlas.gmt.gz`,
-    termKey: 'perturb-atlas',
+    gmtUrl: `${MINIO_BASE}/gmts/perturb-atlas-human.gmt.gz`,
+    termKey: 'perturb-atlas-human',
   },
   {
     title: 'PerturbAtlas Mouse Gene Perturbations',
@@ -533,7 +533,7 @@ const metadataDatasets: Dataset[] = [
 
 // --- Components ---
 
-function DatasetCard({ dataset, showDownloads = true, forceShowTermFormat = false }: { dataset: Dataset, showDownloads?: boolean, forceShowTermFormat?: boolean }) {
+function DatasetCard({ dataset, showDownloads = true }: { dataset: Dataset, showDownloads?: boolean }) {
   const structure = dataset.termKey ? termStructures[dataset.termKey] : null
 
   return (
@@ -592,14 +592,10 @@ function DatasetCard({ dataset, showDownloads = true, forceShowTermFormat = fals
         </p>
       )}
       {structure && (
-        <details className="mt-1.5" open={forceShowTermFormat || undefined}>
-          <summary className="text-xs cursor-pointer text-gray-500 hover:text-gray-700 select-none">
-            Term format
-          </summary>
-          <div className="mt-1.5 pt-1.5 border-t border-gray-200">
-            <TermStructureDisplay structure={structure} compact />
-          </div>
-        </details>
+        <div className="mt-1.5 pt-1.5 border-t border-gray-200">
+          <p className="text-xs font-semibold text-gray-500 mb-1">Signature Term Format</p>
+          <TermStructureDisplay structure={structure} compact />
+        </div>
       )}
     </div>
   )
@@ -615,14 +611,14 @@ export default function DownloadClientPage() {
       <h3 className="text-lg font-medium mt-4 mb-2">Drug/Chemical Perturbation Datasets</h3>
       <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-3 my-3">
         {drugPerturbationDatasets.map(dataset => (
-          <DatasetCard key={dataset.title} dataset={dataset} forceShowTermFormat />
+          <DatasetCard key={dataset.title} dataset={dataset} />
         ))}
       </div>
 
       <h3 className="text-lg font-medium mt-4 mb-2">Gene Perturbation Datasets</h3>
       <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-3 my-3">
         {genePerturbationDatasets.map(dataset => (
-          <DatasetCard key={dataset.title} dataset={dataset} forceShowTermFormat />
+          <DatasetCard key={dataset.title} dataset={dataset} />
         ))}
       </div>
 

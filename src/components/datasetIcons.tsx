@@ -17,7 +17,7 @@ const logoMap: Record<string, { src: string; darkSrc?: string; type: 'image' | '
   'RummaGEO Chem': { src: '/images/rummageo-logo.png', type: 'image' },
   'RummaGEO Gene': { src: '/images/rummageo-logo.png', type: 'image' },
   'Ginkgo Bioworks': { src: '/images/ginkgo-logo.png', type: 'image' },
-  'Perturb Atlas': { src: '/images/perturbatlas-logo.png', type: 'image' },
+  'Perturb Atlas Human': { src: '/images/perturbatlas-logo.png', type: 'image' },
   'Perturb Atlas Mouse': { src: '/images/perturbatlas-logo.png', type: 'image' },
   'Replogle et al.': { src: '/images/replogle-logo.svg', type: 'svg' },
   'CM4AI': { src: '/images/cm4ai-logo.png', darkSrc: '/images/cm4ai-logo-dark.png', type: 'image' },
@@ -31,6 +31,7 @@ const shortLabels: Record<string, string> = {
   'NIBR DRUG-seq': 'NIBR DR-seq',
   'DeepCover MoA': 'DeepCover',
   'Ginkgo Bioworks': 'Ginkgo DR-seq',
+  'Perturb Atlas Human': 'PA Human',
   'Perturb Atlas Mouse': 'PA Mouse',
   'Replogle et al.': 'Replogle et al.',
 }

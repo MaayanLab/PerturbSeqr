@@ -221,7 +221,7 @@ export const DATASET_URLS: Record<string, string> = {
   'rummageo chem': 'https://rummageo.com',
   'rummageo gene': 'https://rummageo.com',
   'ginkgo bioworks': 'https://www.ginkgobioworks.com/',
-  'perturb atlas': 'https://perturbatlas.kratoss.site/#/',
+  'perturb atlas human': 'https://perturbatlas.kratoss.site/#/',
   'perturb atlas mouse': 'https://perturbatlas.kratoss.site/#/',
   'replogle et al.': 'https://pubmed.ncbi.nlm.nih.gov/35688146/',
   'cm4ai': 'https://cm4ai.org',
