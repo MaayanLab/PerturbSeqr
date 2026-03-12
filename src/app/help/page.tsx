@@ -120,7 +120,7 @@ export default function UserManual() {
             className="border rounded-lg mx-auto my-4"
           /></div>
           <p>
-            All search features are accompanied by dataset filtering, enabling users to select which drug and gene perturbation datasets are included in the underlying enrichment analysis, directly affecting the background gene set library and resulting statistical comparisons. Submitting the same gene set with different datasets selected will produce distinct enrichment results, reflecting that you are running a distinct Connectivity Mapping query. Once submitting either of the examples, a results table will be returned sorted by the most significantly overlapping gene sets or signatures. From here, you can apply additional filtering for FDA-approved drugs, for the directionality of the gene sets or signatures, as well as identify consensus mechanisms of action (MoAs), and consensus compounds seen across cell lines, time points and concentrations:
+            All search features are accompanied by dataset filtering, enabling users to select which drug and gene perturbation datasets are included in the underlying enrichment analysis, directly affecting the background gene set library and resulting statistical comparisons. Submitting the same gene set with different datasets selected will produce distinct enrichment results, reflecting that you are running a distinct Connectivity Mapping query. Once submitting either of the examples, a results table will be returned sorted by the most significantly overlapping gene sets. From here, you can apply additional filtering for FDA-approved drugs, for the directionality of the gene sets, as well as identify consensus mechanisms of action (MoAs), and consensus compounds seen across cell lines, time points and concentrations:
           </p>
           <div className="flex flex-row">
           <Image
@@ -202,7 +202,7 @@ export default function UserManual() {
             className="border rounded-lg mx-auto my-4"
           />
           <p>
-          Paginated results are returned with the total number of gene sets which the query was compared to and the number of those gene sets which were significantly enriched. Enrichment statistics are provided on the right side of the table. The user may explore the metadata associated with the signatures on each results page, by clicking on the icon next to the compound or gene perturbation, or on the underlined cell line:
+          Paginated results are returned with the total number of gene sets which the query was compared to and the number of those gene sets which were significantly enriched. Enrichment statistics are provided on the right side of the table. The user may explore the metadata associated with the gene sets on each results page, by clicking on the icon next to the compound or gene perturbation, or on the underlined cell line:
           </p>
           <Image
             src="/images/gene-set-search-2.png"
@@ -243,7 +243,7 @@ export default function UserManual() {
           />
 
           <p>
-          Users may additionally filter results by the direction of the signature, FDA approved drugs, drug or gene perturbation type, and dataset with the buttons above the table:
+          Users may additionally filter results by the direction of the gene set, FDA approved drugs, drug or gene perturbation type, and dataset with the buttons above the table:
           </p>
           <Image
             src="/images/gene-set-search-6.png"
@@ -253,7 +253,7 @@ export default function UserManual() {
             className="border rounded-lg mx-auto my-4"
           />
            <p>
-          To generate consensus results, selecting the consensus perturbations button at the top of the table will compute significant compounds and gene perturbations using the Fisher&apos;s exact test, taking into account the number of significant and insignificant signatures corresponding to that perturbation. P-values for the direction of the signature are then generated for each significant consensus perturbation using the number of significant up and down, and insignificant up and down terms for that perturbation:
+          To generate consensus results, selecting the consensus perturbations button at the top of the table will compute significant compounds and gene perturbations using the Fisher&apos;s exact test, taking into account the number of significant and insignificant gene sets corresponding to that perturbation. P-values for the direction of the gene set are then generated for each significant consensus perturbation using the number of significant up and down, and insignificant up and down terms for that perturbation:
           </p>
           <Image
             src="/images/gene-set-search-7.png"
@@ -263,7 +263,7 @@ export default function UserManual() {
             className="border rounded-lg mx-auto my-4"
           />
             <p>
-          To identify the most common mechanisms of action and their directionality similar to the consensus compound feature, the consensus mechanism of action button can be selected. This will compute the number of significant and insignificant signatures corresponding to that mechanism of action and generate p-values for the direction of the signature using the number of significant up and down, and insignificant up and down terms for that mechanism of action:
+          To identify the most common mechanisms of action and their directionality similar to the consensus compound feature, the consensus mechanism of action button can be selected. This will compute the number of significant and insignificant gene sets corresponding to that mechanism of action and generate p-values for the direction of the gene set using the number of significant up and down, and insignificant up and down terms for that mechanism of action:
           </p>
           <Image
             src="/images/gene-set-search-8.png"
@@ -281,7 +281,7 @@ export default function UserManual() {
             Up & Down Gene Set Search
           </h2>
           <p>
-          The up and down gene set search functionality enables users to search the Perturb-Seqr database for gene set signature pairs that most significantly mimic or reverse the expression of the submitted up- and down-gene set signature. A Fisher&apos;s exact test is also used to assess the significance of these results, specifically measuring a mimicker overlap (up Perturb-Seqr gene set & up user gene set + down Perturb-Seqr gene set & down user gene set) and reverser overlap (up Perturb-Seqr gene set & down user gene set + down Perturb-Seqr gene set & up user gene set). Any significantly overlapping mimicker or reverser signature is returned to the user along with their accompanying metadata. Similarly to the single gene set search, user query gene sets can be pasted or typed into the two input boxes with each gene on a new line, or the user may upload a file containing genes where the genes are listed with new line, tab, or comma separators after selecting the up & down gene set option on the input form:
+          The up and down gene set search functionality enables users to search the Perturb-Seqr database for gene set pairs that most significantly mimic or reverse the expression of the submitted up and down gene sets. A Fisher&apos;s exact test is also used to assess the significance of these results, specifically measuring a mimicker overlap (up Perturb-Seqr gene set & up user gene set + down Perturb-Seqr gene set & down user gene set) and reverser overlap (up Perturb-Seqr gene set & down user gene set + down Perturb-Seqr gene set & up user gene set). Any significantly overlapping mimicker or reverser gene set is returned to the user along with their accompanying metadata. Similarly to the single gene set search, user query gene sets can be pasted or typed into the two input boxes with each gene on a new line, or the user may upload a file containing genes where the genes are listed with new line, tab, or comma separators after selecting the up & down gene set option on the input form:
           </p>
           <div className="flex flex-row">
           <Image
@@ -334,7 +334,7 @@ export default function UserManual() {
           >
             Term Search
           </h2>
-          Perturb-Seqr also provides direct metadata search of all dataset signatures. Paginated results are returned with accompanying metadata of the returned signatures:
+          Perturb-Seqr also provides direct metadata search of all dataset gene sets. Paginated results are returned with accompanying metadata of the returned gene sets:
           <Image
             src="/images/metadata-search-1.png"
             width={600}
@@ -423,7 +423,7 @@ export default function UserManual() {
           </div>
           <br />
           <p>
-          Additionally, up and down gene set enrichment analysis queries can be performed in Python against all Perturb-Seqr signatures using the requests library as follows:
+          Additionally, up and down gene set enrichment analysis queries can be performed in Python against all Perturb-Seqr gene sets using the requests library as follows:
           </p>
           <div className="text-gray bg-slate-300 dark:bg-slate-700 text-xs font-mono mt-5 p-5 rounded-lg box-content sm:max-w-xl sm:overflow-scroll md:max-w-xl lg:max-w-3xl xl:max-w-full">
             <button className="float-right" onClick={() => navigator.clipboard.writeText(upDownGeneSetEnrich)}><FaCopy/></button>
