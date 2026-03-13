@@ -7,19 +7,116 @@ import TermDownloadButton from '@/components/termDownloadButton';
 import { parseTerm, getCellDisplay } from '@/utils/parseTerm';
 import { preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary, getDatasetUrl } from '@/utils/metadataLookup';
 import Image from 'next/image';
-
+import { FaFilter } from 'react-icons/fa';
+import libraryConfig from '@/config/libraries.json';
 
 const pageSize = 10
+const drugLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'drug').map((l: any) => l.displayName as string)
+const geneLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'gene').map((l: any) => l.displayName as string)
+const FILTER_SEP = '|'
+
+function parseFilter(value: string | null | undefined): string[] {
+  if (!value) return []
+  return value.split(FILTER_SEP)
+}
+
+function FilterDropdown({ label, allValues, filterValues, queryKey, setQs, hasSearch = true }: {
+  label: string
+  allValues: string[]
+  filterValues: string[]
+  queryKey: string
+  setQs: (updates: Record<string, string>) => void
+  hasSearch?: boolean
+}) {
+  const [open, setOpen] = React.useState(false)
+  const [search, setSearch] = React.useState('')
+  const ref = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false)
+        setSearch('')
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const displayed = hasSearch && search
+    ? allValues.filter(v => v.toLowerCase().includes(search.toLowerCase()))
+    : allValues
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        className={filterValues.length > 0 ? "btn btn-sm bg-gray-400 hover:bg-gray-500 text-gray-800" : "btn btn-sm"}
+        onClick={() => setOpen(!open)}
+      >
+        {label} {filterValues.length > 0 && !filterValues.includes("__none__") ? `(${filterValues.length}/${allValues.length})` : `(${allValues.length})`}
+        <FaFilter className={`text-xs ${filterValues.length > 0 ? "" : "opacity-40"}`} />
+      </button>
+      {open && (
+        <div className="absolute z-30 left-0 top-full mt-1 bg-base-100 border border-base-300 rounded shadow-lg p-2 min-w-[220px]">
+          {hasSearch && (
+            <input
+              type="text"
+              className="input input-bordered input-xs w-full mb-1"
+              placeholder={`Search ${label.toLowerCase()}\u2026`}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              autoFocus
+            />
+          )}
+          <div className="flex gap-1 mb-1">
+            <button className="btn btn-xs" onClick={() => setQs({ [queryKey]: "", page: "1" })}>All</button>
+            <button className="btn btn-xs" onClick={() => setQs({ [queryKey]: "__none__", page: "1" })}>None</button>
+          </div>
+          <div className="max-h-[260px] overflow-y-auto">
+            {displayed.map(val => (
+              <label key={val} className="flex items-center gap-1 cursor-pointer py-0.5 text-xs">
+                <input
+                  type="checkbox"
+                  className="checkbox checkbox-xs"
+                  checked={filterValues.length === 0 ? true : filterValues.includes(val)}
+                  onChange={(e) => {
+                    let next: string[]
+                    if (filterValues.length === 0) {
+                      next = allValues.filter(l => l !== val)
+                    } else if (e.target.checked) {
+                      next = filterValues.filter(l => l !== "__none__").concat(val)
+                    } else {
+                      next = filterValues.filter(l => l !== val)
+                    }
+                    if (next.length >= allValues.length) {
+                      setQs({ [queryKey]: "", page: "1" })
+                    } else if (next.length === 0) {
+                      setQs({ [queryKey]: "__none__", page: "1" })
+                    } else {
+                      setQs({ [queryKey]: next.join(FILTER_SEP), page: "1" })
+                    }
+                  }}
+                />
+                {val}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" | undefined; term?: string | null | undefined; id?: any; nGeneIds?: number | null | undefined; library?: { name?: string | null } | null }[] }) {
-  const [queryString, setQueryString] = useQsState({ page: '1', f: '' })
-  const { page, searchTerm, tableSearch } = React.useMemo(() => ({ page: queryString.page ? +queryString.page : 1, searchTerm: queryString.q ?? '', tableSearch: queryString.f || '' }), [queryString])
+  const [queryString, setQueryString] = useQsState({ page: '1', search: '', dataset: '', cellLine: '', moa: '', timepoint: '', concentration: '', direction: '' })
+  const { page, searchTerm, tableSearch } = React.useMemo(() => ({ page: queryString.page ? +queryString.page : 1, searchTerm: queryString.q ?? '', tableSearch: queryString.search || '' }), [queryString])
 
-  const dataFiltered = React.useMemo(() =>
-    terms.filter(el => {
-      return (el?.term?.toLowerCase().includes(tableSearch.toLowerCase()))
-    }),
-  [terms, tableSearch])
+  const datasetFilter = React.useMemo(() => parseFilter(queryString.dataset), [queryString.dataset])
+  const cellLineFilter = React.useMemo(() => parseFilter(queryString.cellLine), [queryString.cellLine])
+  const moaFilter = React.useMemo(() => parseFilter(queryString.moa), [queryString.moa])
+  const timepointFilter = React.useMemo(() => parseFilter(queryString.timepoint), [queryString.timepoint])
+  const concentrationFilter = React.useMemo(() => parseFilter(queryString.concentration), [queryString.concentration])
+  const dirFilter = queryString.direction || ''
 
   const [geneSetId, setGeneSetId] = React.useState(terms[0].id)
   const [currTerm, setCurrTerm] = React.useState(terms[0].term)
@@ -27,55 +124,187 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
   const [showModal, setShowModal] = React.useState(false)
   const [drugLookupLoaded, setDrugLookupLoaded] = React.useState(false)
 
-  // Preload drug lookup for libraries in the results
   React.useEffect(() => {
-    preloadDrugLookup().then(() => {
-      setDrugLookupLoaded(true)
-    })
+    preloadDrugLookup().then(() => setDrugLookupLoaded(true))
   }, [terms])
+
+  // Precompute parsed data for all terms (avoids re-parsing in table body)
+  const parsedTerms = React.useMemo(() => {
+    return terms.map(el => {
+      const term = el.term || ''
+      const libraryName = el.library?.name || ''
+      const parsed = parseTerm(term)
+      const isGenePert = isGenePerturbationLibrary(libraryName)
+      const perturbation = parsed.perturbation || parsed.raw || ''
+      const drugInfo = !isGenePert && drugLookupLoaded
+        ? (getDrugInfo(perturbation) || getDrugInfo(parsed.extras[0] || ''))
+        : null
+      const dir = parsed.direction || ''
+      const dirDisplay = dir === 'up' ? 'Up' : (dir === 'down' || dir === 'dn') ? 'Down' : 'N/A'
+      return {
+        ...el,
+        _dataset: libraryName,
+        _cellLine: getCellDisplay(parsed) || 'N/A',
+        _timepoint: parsed.timepoint || 'N/A',
+        _concentration: parsed.concentration || 'N/A',
+        _direction: dir,
+        _dirDisplay: dirDisplay,
+        _moa: (!isGenePert && drugInfo?.moa) ? drugInfo.moa : 'N/A',
+        _perturbation: perturbation,
+        _isGenePert: isGenePert,
+        _drugInfo: drugInfo,
+        _parsed: parsed,
+        _perturbationUrl: getPerturbationUrl(perturbation, libraryName),
+        _perturbationLinkTitle: getPerturbationLinkTitle(libraryName),
+      }
+    })
+  }, [terms, drugLookupLoaded])
+
+  // Extract unique sorted values for each filter dimension
+  const allDatasets = React.useMemo(() => Array.from(new Set(parsedTerms.map(t => t._dataset))).sort((a, b) => a.localeCompare(b)), [parsedTerms])
+  const allCellLines = React.useMemo(() => Array.from(new Set(parsedTerms.map(t => t._cellLine))).sort((a, b) => a.localeCompare(b)), [parsedTerms])
+  const allMoas = React.useMemo(() => Array.from(new Set(parsedTerms.map(t => t._moa))).sort((a, b) => a.localeCompare(b)), [parsedTerms])
+  const allTimepoints = React.useMemo(() => Array.from(new Set(parsedTerms.map(t => t._timepoint))).sort((a, b) => a.localeCompare(b)), [parsedTerms])
+  const allConcentrations = React.useMemo(() => Array.from(new Set(parsedTerms.map(t => t._concentration))).sort((a, b) => a.localeCompare(b)), [parsedTerms])
+
+  // Apply all filters
+  const dataFiltered = React.useMemo(() =>
+    parsedTerms.filter(el => {
+      if (!el.term?.toLowerCase().includes(tableSearch.toLowerCase())) return false
+      if (datasetFilter.length > 0) { if (datasetFilter.includes('__none__')) return false; if (!datasetFilter.includes(el._dataset)) return false }
+      if (cellLineFilter.length > 0) { if (cellLineFilter.includes('__none__')) return false; if (!cellLineFilter.includes(el._cellLine)) return false }
+      if (moaFilter.length > 0) { if (moaFilter.includes('__none__')) return false; if (!moaFilter.includes(el._moa)) return false }
+      if (timepointFilter.length > 0) { if (timepointFilter.includes('__none__')) return false; if (!timepointFilter.includes(el._timepoint)) return false }
+      if (concentrationFilter.length > 0) { if (concentrationFilter.includes('__none__')) return false; if (!concentrationFilter.includes(el._concentration)) return false }
+      if (dirFilter === 'up' && el._dirDisplay !== 'Up') return false
+      if (dirFilter === 'down' && el._dirDisplay !== 'Down') return false
+      return true
+    }),
+  [parsedTerms, tableSearch, datasetFilter, cellLineFilter, moaFilter, timepointFilter, concentrationFilter, dirFilter])
 
   const genesQuery = useGeneSetGenesByIdQuery({
     variables: { id: geneSetId }
   })
 
+  const anyFilterActive = datasetFilter.length > 0 || cellLineFilter.length > 0 || moaFilter.length > 0 || timepointFilter.length > 0 || concentrationFilter.length > 0 || !!dirFilter
+
   return (
     <>
       <GeneSetModal geneset={genesQuery?.data?.geneSet?.genes.nodes} term={currTerm} dataset={currDataset} showModal={showModal} setShowModal={setShowModal}></GeneSetModal>
-      <div className='border m-5 mt-1'>
-
-      <div className='join flex flex-row place-content-end items-center pt-3 pr-3'>
-          <span className="label-text text-base">Search:&nbsp;</span>
-          <input
-            type="text"
-            className="input input-bordered"
-            value={tableSearch}
-            onChange={evt => {
-              setQueryString({ page: '1', f: evt.currentTarget.value, q: queryString.q })
-            }}
-          />
-          <div className="tooltip" data-tip="Search results">
-            <button
-              type="submit"
-              className="btn join-item"
-            >&#x1F50D;</button>
-          </div>
-          <div className="tooltip" data-tip="Clear search">
-            <button
-              type="reset"
-              className="btn join-item"
-              onClick={evt => {
-                setQueryString({ page: '1', f: '' })
+      {/* Filter bar — above the table, matching enrich page layout */}
+      <div className="flex flex-col gap-2 mx-5">
+        <div className="flex flex-row flex-wrap items-center gap-2">
+          <FilterDropdown label="Dataset" allValues={allDatasets} filterValues={datasetFilter} queryKey="dataset" setQs={setQueryString} />
+          <div
+            id="ptype-select"
+            className="join place-content-start place-items-center"
+          >
+            <div
+              className={
+                datasetFilter.length > 0 && drugLibraryNames.every(n => datasetFilter.includes(n)) && !geneLibraryNames.some(n => datasetFilter.includes(n))
+                  ? "join-item px-3 py-1.5 text-sm bg-gray-400 hover:bg-gray-500 text-gray-800 font-bold cursor-pointer"
+                  : "join-item px-3 py-1.5 bg-gray-100 cursor-pointer font-bold text-sm dark:bg-gray-900"
+              }
+              onClick={() => {
+                const isDrugActive = datasetFilter.length > 0 && drugLibraryNames.every(n => datasetFilter.includes(n)) && !geneLibraryNames.some(n => datasetFilter.includes(n))
+                if (isDrugActive) {
+                  setQueryString({ dataset: "", page: "1" })
+                } else {
+                  setQueryString({ dataset: drugLibraryNames.join(FILTER_SEP), page: "1" })
+                }
               }}
-            >&#x232B;</button>
+            >
+              DRUG
+            </div>
+            <div
+              className={
+                datasetFilter.length > 0 && geneLibraryNames.every(n => datasetFilter.includes(n)) && !drugLibraryNames.some(n => datasetFilter.includes(n))
+                  ? "join-item px-3 py-1.5 text-sm bg-gray-400 hover:bg-gray-500 text-gray-800 font-bold cursor-pointer"
+                  : "join-item px-3 py-1.5 bg-gray-100 cursor-pointer font-bold text-sm dark:bg-gray-900"
+              }
+              onClick={() => {
+                const isGeneActive = datasetFilter.length > 0 && geneLibraryNames.every(n => datasetFilter.includes(n)) && !drugLibraryNames.some(n => datasetFilter.includes(n))
+                if (isGeneActive) {
+                  setQueryString({ dataset: "", page: "1" })
+                } else {
+                  setQueryString({ dataset: geneLibraryNames.join(FILTER_SEP), page: "1" })
+                }
+              }}
+            >
+              GENE
+            </div>
           </div>
-          <div className="tooltip" data-tip="Download results">
-            <TermDownloadButton dataFiltered={dataFiltered} filterTerm={searchTerm || ""} />
+          <div
+            id="dir-select"
+            className="join place-content-start place-items-center"
+          >
+            <div
+              className={
+                dirFilter === "up"
+                  ? "join-item px-3 py-1.5 text-sm bg-gray-400 hover:bg-gray-500 text-gray-800 font-bold cursor-pointer"
+                  : "join-item px-3 py-1.5 bg-gray-100 cursor-pointer font-bold text-sm dark:bg-gray-900"
+              }
+              onClick={() => setQueryString({ direction: dirFilter === "up" ? "" : "up", page: "1" })}
+            >
+              UP
+            </div>
+            <div
+              className={
+                dirFilter === "down"
+                  ? "join-item px-3 py-1.5 text-sm bg-gray-400 hover:bg-gray-500 text-gray-800 font-bold cursor-pointer"
+                  : "join-item px-3 py-1.5 bg-gray-100 cursor-pointer font-bold text-sm dark:bg-gray-900"
+              }
+              onClick={() => setQueryString({ direction: dirFilter === "down" ? "" : "down", page: "1" })}
+            >
+              DOWN
+            </div>
+          </div>
+          <FilterDropdown label="Cell Line" allValues={allCellLines} filterValues={cellLineFilter} queryKey="cellLine" setQs={setQueryString} />
+          <FilterDropdown label="MOA" allValues={allMoas} filterValues={moaFilter} queryKey="moa" setQs={setQueryString} />
+          <FilterDropdown label="Timepoint" allValues={allTimepoints} filterValues={timepointFilter} queryKey="timepoint" setQs={setQueryString} />
+          <FilterDropdown label="Concentration" allValues={allConcentrations} filterValues={concentrationFilter} queryKey="concentration" setQs={setQueryString} />
+        </div>
+        {anyFilterActive && (
+          <p className="text-sm text-base-content/70">
+            Showing {Intl.NumberFormat("en-US", {}).format(dataFiltered.length)} of {Intl.NumberFormat("en-US", {}).format(parsedTerms.length)} results.
+          </p>
+        )}
+      </div>
+      <div className='border m-5 mt-1 overflow-x-auto'>
+      <div className='flex flex-row flex-wrap place-content-end items-center pt-3 pr-3 gap-2'>
+          <div className='join flex flex-row items-center'>
+            <span className="label-text text-base">Search:&nbsp;</span>
+            <input
+              type="text"
+              className="input input-bordered"
+              value={tableSearch}
+              onChange={evt => {
+                setQueryString({ page: '1', search: evt.currentTarget.value, q: queryString.q })
+              }}
+            />
+            <div className="tooltip" data-tip="Search results">
+              <button
+                type="submit"
+                className="btn join-item"
+              >&#x1F50D;</button>
+            </div>
+            <div className="tooltip" data-tip="Clear search">
+              <button
+                type="reset"
+                className="btn join-item"
+                onClick={evt => {
+                  setQueryString({ page: '1', search: '' })
+                }}
+              >&#x232B;</button>
+            </div>
+            <div className="tooltip" data-tip="Download results">
+              <TermDownloadButton dataFiltered={dataFiltered} filterTerm={searchTerm || ""} />
+            </div>
           </div>
         </div>
         <table className="table table-sm">
           <thead>
             <tr>
-              {/* Dataset column - extracted from term prefix before colon */}
               <th>Dataset</th>
               <th>Term</th>
               <th>Perturbation</th>
@@ -90,74 +319,49 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
           <tbody>
             {dataFiltered?.slice((page-1) * pageSize, page * pageSize).map(el => {
               if (!el) return null
-              const term = el.term
-              const libraryName = el.library?.name || ''
-              const parsed = term ? parseTerm(term) : parseTerm('')
-              const dataset = libraryName
-              const direction = parsed.direction || ''
-              const perturbation = parsed.perturbation || parsed.raw || ''
-              const cellLine = getCellDisplay(parsed) || 'N/A'
-              const timepoint = parsed.timepoint || 'N/A'
-              const concentration = parsed.concentration || 'N/A'
-
-              // Check if this is a gene or drug perturbation library
-              const isGenePert = isGenePerturbationLibrary(libraryName)
-
-              // Drug lookup for MOA and links (only relevant for drug perturbations)
-              // Try perturbation name, then NSN code (for DRUGseqr)
-              const drugInfo = !isGenePert && drugLookupLoaded
-                ? (getDrugInfo(perturbation) || getDrugInfo(parsed.extras[0] || ''))
-                : null
-              const perturbationUrl = getPerturbationUrl(perturbation, libraryName)
-              const perturbationLinkTitle = getPerturbationLinkTitle(libraryName)
-
               return (
                   <tr key={el?.term}>
-                    {/* Dataset column - shows library/dataset name with link to source */}
                     <td className="font-medium max-w-[120px]">
-                      {getDatasetUrl(dataset) ? (
+                      {getDatasetUrl(el._dataset) ? (
                         <a
-                          href={getDatasetUrl(dataset)!}
+                          href={getDatasetUrl(el._dataset)!}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="link link-neutral hover:link-hover truncate block"
-                          title={`View ${dataset} source`}
+                          title={`View ${el._dataset} source`}
                         >
-                          {dataset}
+                          {el._dataset}
                         </a>
                       ) : (
-                        <span className="truncate block" title={dataset}>{dataset}</span>
+                        <span className="truncate block" title={el._dataset}>{el._dataset}</span>
                       )}
                     </td>
                     <td>
-                    {term}
+                    {el.term}
                   </td>
                   <td className="max-w-[130px]">
-                    {/* Perturbation with appropriate link (PubChem for drugs, NCBI Gene for genes) */}
                     <div>
                       <a
-                        href={perturbationUrl}
+                        href={el._perturbationUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="link link-neutral hover:link-hover truncate block"
-                        title={perturbation}
+                        title={el._perturbation}
                       >
-                        {perturbation}
+                        {el._perturbation}
                       </a>
-                      {/* Show CID for drug perturbations */}
-                      {!isGenePert && drugInfo?.cid && (
+                      {!el._isGenePert && el._drugInfo?.cid && (
                         <div className="text-xs text-gray-500">
-                          <span title="PubChem Compound ID">PCID:</span> {drugInfo.cid}
+                          <span title="PubChem Compound ID">PCID:</span> {el._drugInfo.cid}
                         </div>
                       )}
                     </div>
                   </td>
                   <td className="max-w-[150px]">
-                    {/* MOA with source attribution (only for drug perturbations) */}
-                    {!isGenePert && drugInfo?.moa ? (
+                    {!el._isGenePert && el._drugInfo?.moa ? (
                       <div className="text-sm">
-                        <span className="line-clamp-2" title={drugInfo.moa}>
-                          {drugInfo.moa}
+                        <span className="line-clamp-2" title={el._drugInfo.moa}>
+                          {el._drugInfo.moa}
                         </span>
                       </div>
                     ) : (
@@ -165,16 +369,16 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
                     )}
                   </td>
                   <td className="max-w-[100px]">
-                    {cellLine && cellLine !== 'N/A' ? (
+                    {el._cellLine && el._cellLine !== 'N/A' ? (
                       <a
                         className="link link-neutral hover:link-hover cursor-pointer truncate block"
-                        title={cellLine}
+                        title={el._cellLine}
                         onClick={async (evt) => {
                           evt.preventDefault();
                           const res = await fetch("/enrich/depmapcl", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ cellLine }),
+                            body: JSON.stringify({ cellLine: el._cellLine }),
                           });
                           const resJson = await res.json();
                           const suggestedCellLines = resJson.filter(
@@ -188,20 +392,20 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
                           }
                         }}
                       >
-                        {cellLine}
+                        {el._cellLine}
                       </a>
                     ) : (
-                      <span className="text-gray-400">{cellLine}</span>
+                      <span className="text-gray-400">{el._cellLine}</span>
                     )}
                   </td>
                   <td className="max-w-[70px]">
-                    {timepoint === 'N/A' ? <span className="text-gray-400">N/A</span> : <span className="truncate block" title={timepoint}>{timepoint}</span>}
+                    {el._timepoint === 'N/A' ? <span className="text-gray-400">N/A</span> : <span className="truncate block" title={el._timepoint}>{el._timepoint}</span>}
                   </td>
                   <td className="max-w-[80px]">
-                    {concentration === 'N/A' ? <span className="text-gray-400">N/A</span> : <span className="truncate block" title={concentration}>{concentration}</span>}
+                    {el._concentration === 'N/A' ? <span className="text-gray-400">N/A</span> : <span className="truncate block" title={el._concentration}>{el._concentration}</span>}
                   </td>
                   <td>
-                    {direction === "up" ? (
+                    {el._direction === "up" ? (
                       <Image
                         className="inline-block rounded"
                         src="/images/up.png"
@@ -209,7 +413,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
                         height={15}
                         alt="Up"
                       />
-                    ) : direction === "down" || direction === "dn" ? (
+                    ) : el._direction === "down" || el._direction === "dn" ? (
                       <Image
                         className="inline-block rounded"
                         src="/images/down.png"
