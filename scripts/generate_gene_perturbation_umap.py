@@ -10,6 +10,7 @@
 #     "tqdm>=4.60.0",
 #     "maayanlab-bioinformatics @ git+https://github.com/MaayanLab/maayanlab-bioinformatics.git@python3.14-compat",
 #     "pyenrichr",
+#     "goatools",
 # ]
 # ///
 """
@@ -497,7 +498,7 @@ def process_library(
     print('\tRetrieving top enriched terms...')
     
     scatter_df = get_scatter(library_name)
-    
+
     # identify broad GO terms in enrichment results
     id_pattern = r"GO:\d+"
     go_id_dict = {re.search(id_pattern, id).group():id for id in enrich_pmat.index.values}
