@@ -45,6 +45,8 @@ from bokeh.io import output_file
 from bokeh.transform import factor_cmap
 from bokeh.palettes import Category20
 
+# broad GO term macro
+from goatools.anno.broad_gos import NS2GOS
 
 # Configuration
 
@@ -173,20 +175,24 @@ def run_fishers(query_lib:dict, target_lib:dict) -> pd.DataFrame:
     enr_pmat = pye.enrichment.consolidate(enr_results)
     return enr_pmat
 
-def label_top_terms(enr_pmat: pd.DataFrame, scatter_df: pd.DataFrame):
+def label_top_terms(enr_pmat: pd.DataFrame, scatter_df: pd.DataFrame, to_drop: list):
     """
     Labels each signature with it's top enriched term
     Args:
         enr_pmat: dataframe of Fisher's p-values
         scatter_df: UMAP embeddings for each signature
+        to_drop: terms to filter out of enrichment results (broad GO terms)
     Returns:
         Dataframe with each signatures top enriched term
     """
     top_go_terms = {}
+    top_p_vals = []
     for col in enr_pmat.columns:
-        top_term = enr_pmat.loc[:,col].sort_values(ascending=True).index.values[0]
-        top_go_terms[col] = top_term
-    top_terms_df = pd.DataFrame({'term':top_go_terms.keys(), 'top_go_term':top_go_terms.values()})
+        top_term = enr_pmat.loc[:,col].sort_values(ascending=True).index.values
+        filtered_terms = [t for t in top_term if t not in to_drop]
+        top_go_terms[col] = filtered_terms[0]
+        top_p_vals.append(enr_pmat.loc[filtered_terms[0],col])
+    top_terms_df = pd.DataFrame({'term':top_go_terms.keys(), 'top_go_term':top_go_terms.values(), 'p_value':top_p_vals})
     top_terms_df = top_terms_df.merge(scatter_df[['term','cluster']], how='left', on='term')
     return top_terms_df
 
@@ -250,6 +256,23 @@ def calculate_specificity(top_terms_df:pd.DataFrame):
     return results
 
 # Visualization
+def compute_outliers(scatter_df:pd.DataFrame, n_std:int=3):
+    '''
+    Add outlier column to scatter_df that denotes signatures
+    over n_std from the mean UMAP coordinates
+    Args:
+        scatter_df: UMAP embeddings for each signature
+        n_std: # of SD used to classify outliers
+    Directly updates scatter_df
+    '''
+    x = np.array(scatter_df['x'].to_list())
+    y = np.array(scatter_df['y'].to_list())
+    x_min, x_mu, x_std, x_max = np.min(x), np.mean(x), np.std(x), np.max(x)
+    x_lo, x_hi = max(x_min, x_mu - x_std*n_std), min(x_max, x_mu + x_std*n_std)
+    y_min, y_mu, y_std, y_max = np.min(y), np.mean(y), np.std(y), np.max(y)
+    y_lo, y_hi = max(y_min, y_mu - y_std*n_std), min(y_max, y_mu + y_std*n_std)
+    scatter_df['outlier'] = scatter_df.apply(lambda row: ~((row['x']>=x_lo)&(row['x']<=x_hi)&(row['y']>=y_lo)&(row['y']<=y_hi)), axis = 1)
+
 def create_scatterplot_term(scatter_df: pd.DataFrame, enrich_df: pd.DataFrame, term:str) -> figure:
     """
     Create an interactive Bokeh scatterplot colored by term enrichment -log10(p-value)
@@ -327,7 +350,7 @@ def create_scatterplot_term(scatter_df: pd.DataFrame, enrich_df: pd.DataFrame, t
 
     return plot_emb
 
-def create_scatterplot(scatter_df: pd.DataFrame, top_terms_df: pd.DataFrame, title: str = "UMAP") -> figure:
+def create_scatterplot(scatter_df: pd.DataFrame, top_terms_df: pd.DataFrame, specific_terms_df: pd.DataFrame, title: str = "UMAP") -> figure:
     """
     Create an interactive Bokeh scatterplot colored by 10 most commonly enriched GO terms
     Args:
@@ -337,29 +360,41 @@ def create_scatterplot(scatter_df: pd.DataFrame, top_terms_df: pd.DataFrame, tit
     Returns:
         Bokeh figure object
     """
+    # remove outleirs
+    compute_outliers(scatter_df, 3)
     df = scatter_df.copy()
-    df = df.merge(top_terms_df[['term','top_go_term']], how='left', on='term')
-    top10 = df.value_counts('top_go_term').index.values[:10]
-    df['top_go_term'] = df['top_go_term'].apply(lambda x: x if x in top10 else 'Other')
-    df['wrapped_go'] = df['top_go_term'].apply(lambda x: "\n".join(wrap(str(x), 20)))
-    
-    # reorder so "other" plotted first
-    category_counts = df.groupby('top_go_term').size().reset_index(name='count')
+    df = df[~df['outlier']]
+    # add signature and cluster GO term labels
+    top_terms_df['enr_p_value'] = top_terms_df['p_value']
+    df = df.merge(top_terms_df[['term','top_go_term','enr_p_value']], how='left', on='term')
+    df = df.merge(specific_terms_df, how='left', on='cluster')
+    # classify terms for signatures not enriched for cluster's most specific term as 'Other'
+    df['color_go_term'] = df.apply(lambda row: row['top_go_term'] if row['top_go_term']==row['cluster_go_term'] else 'Other', axis=1)
+    # classify terms for signatures with no evidence for enrichment against any GO terms as 'No Enrichment'
+    df['color_go_term'] = df.apply(lambda row: 'No Enrichment' if row['enr_p_value']==1 else row['color_go_term'] , axis=1)
+    # wrapped term for legend label
+    df['wrapped_go'] = df['color_go_term'].apply(lambda x: "\n".join(wrap(str(x), 20)))
+    # reorder for plotting
+    category_counts = df.groupby('color_go_term').size().reset_index(name='count')
     category_counts = category_counts.sort_values('count', ascending=False)
-    df = df.merge(category_counts, how='left', on='top_go_term')
+    df = df.merge(category_counts, how='left', on='color_go_term')
     df = df.sort_values('count', ascending=False)
 
     # Color mapping
-    n_colors = len(top10)
+    n_colors = max(3, min(20, df['color_go_term'].nunique() - 2))
     palette = Category20[n_colors]
-    term_colors = {c: palette[i % len(palette)] for i, c in enumerate(top10)}
+    term_colors = {c: palette[i % len(palette)] for i, c in enumerate(df['wrapped_go'].unique())}
     term_colors['Other'] = '#CCCCCC'
-    df['color'] = df['top_go_term'].map(term_colors)
+    term_colors['No Enrichment'] = "#8F8F8F"
+    df['color'] = df['wrapped_go'].map(term_colors)
+    df['alpha'] = df['color_go_term'].apply(lambda x: 0.5 if x in ['No Enrichment','Other'] else 1)
+    
     tooltips = [
         ("Gene Set", "@gene_set"),
         ("Direction", "@direction"),
         ("Cluster", "@cluster"),
-        ("GO Term", "@go_term_hover")
+        ("GO Term", "@go_term_hover"),
+        ("Enrichment P-Value", "@enr_p_value")
     ]
     hover_emb = HoverTool(tooltips=tooltips)
     tools_emb = [hover_emb, 'pan', 'wheel_zoom', 'reset', 'save']
@@ -378,7 +413,9 @@ def create_scatterplot(scatter_df: pd.DataFrame, top_terms_df: pd.DataFrame, tit
             direction=df['direction'],
             go_term = df['wrapped_go'],
             go_term_hover = df['top_go_term'],
-            cluster=df['cluster']
+            cluster=df['cluster'],
+            alphas=df['alpha'],
+            enr_p_value=df['enr_p_value']
         )
     )
     
@@ -401,7 +438,9 @@ def create_scatterplot(scatter_df: pd.DataFrame, top_terms_df: pd.DataFrame, tit
         source=source,
         size=4,
         color='colors',
-        legend_group='go_term'
+        legend_group='go_term',
+        fill_alpha='alphas',
+        line_alpha='alphas'
     )
 
     # Legend formatting
@@ -443,12 +482,10 @@ def process_library(
             print(f"\tLarge library detected ({len(lib_dict)} sets), adjusting parameters...")
             n_neighbors = min(n_neighbors, 15)
 
-        # Retrieve top enriched GO term for signature
-        
+        # Retrieve top enriched GO term for signature        
         target_lib = load_target_library(TARGET_LIB)
         # Fisher's test
         enrich_pmat = run_fishers(lib_dict, target_lib)
-
         # Save CSV
         enrich_pmat.to_csv(csv_path)
         print(f"\tSaved CSV: {csv_path}")
@@ -460,7 +497,13 @@ def process_library(
     print('\tRetrieving top enriched terms...')
     
     scatter_df = get_scatter(library_name)
-    top_terms_df = label_top_terms(enrich_pmat, scatter_df)
+    
+    # identify broad GO terms in enrichment results
+    id_pattern = r"GO:\d+"
+    go_id_dict = {re.search(id_pattern, id).group():id for id in enrich_pmat.index.values}
+    to_drop = [go_id_dict[id] for id in NS2GOS['BP'] if id in go_id_dict]
+
+    top_terms_df = label_top_terms(enrich_pmat, scatter_df, to_drop)
 
     # Calculate term specficity
     csv_path = ENRICHMENT_DIR / f"{library_name}_specificity.csv"
@@ -473,11 +516,19 @@ def process_library(
         print(f"\tLoading {csv_path}...")
         results = pd.read_csv(csv_path)
 
-   
+    cluster_specific_terms_df = results.sort_values('fdr', ascending=True)\
+        .groupby('cluster')\
+            .agg('first')\
+                .reset_index()\
+                    .rename(columns={'term':'cluster_go_term','count':'sig_count'})
+    
     # Save HTML visualization
     if save_html:
         html_path = FIGURE_DIR / f"{library_name}_UMAP.html"
-        plot = create_scatterplot(scatter_df, top_terms_df, title=f"{library_name} UMAP")
+        plot = create_scatterplot(scatter_df,
+                                  top_terms_df,
+                                  cluster_specific_terms_df,
+                                  title=f"{library_name} UMAP")
         output_file(filename=str(html_path), title=f"{library_name} UMAP")
         save(plot)
         print(f"\tSaved HTML: {html_path}")
