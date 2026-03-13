@@ -61,7 +61,7 @@ services:
     build: enrich
     image: johnkgardner/perturbseqr-enrich:${IMAGE_TAG:-0.0.1}
     x-kubernetes:
-      imagePullPolicy: IfNotPresent
+      imagePullPolicy: Always
     deploy:
       resources:
         reservations:
@@ -80,7 +80,7 @@ services:
     build: .
     image: johnkgardner/perturbseqr-app:${IMAGE_TAG:-0.0.1}
     x-kubernetes:
-      imagePullPolicy: IfNotPresent
+      imagePullPolicy: Always
     environment:
       - PUBLIC_URL=https://perturbseqr.k8s.dev.maayanlab.cloud
       - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@perturbseqr-postgres/${POSTGRES_DB:-postgres}
@@ -123,14 +123,17 @@ services:
       perturbseqr-postgres:
         condition: service_healthy
     command: ["up"]
+    profiles: [jobs]
 
   ingest:
     build:
       context: .
       dockerfile: ingest/Dockerfile
     image: johnkgardner/perturbseqr-ingest:${IMAGE_TAG:-0.0.1}
+    x-kubernetes:
+      imagePullPolicy: Always
     environment:
-      - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@perturbseqr-postgres/${POSTGRES_DB:-postgres}
+      - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@perturbseqr-postgres/${POSTGRES_DB:-postgres}?sslmode=disable
       - MINIO_ENDPOINT=perturbseqr-minio:9000
       - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minio}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
@@ -142,6 +145,7 @@ services:
       perturbseqr-minio:
         condition: service_healthy
     entrypoint: ["/app/ingest-entrypoint.sh"]
+    profiles: [jobs]
 
 volumes:
   perturbseqr-data:
