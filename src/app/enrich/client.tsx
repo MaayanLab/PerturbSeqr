@@ -16,6 +16,8 @@ import useQsState from "@/utils/useQsState";
 import Stats from "@/components/stats";
 import Image from "next/image";
 import GeneSetModal from "@/components/geneSetModal";
+import SignaturesModal from "@/components/signaturesModal";
+import type { ContributingSignature } from "@/components/signaturesModal";
 import { FaFilter, FaSortUp } from "react-icons/fa6";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { parseTerm, getCellDisplay } from "@/utils/parseTerm";
@@ -26,6 +28,75 @@ import libraryConfig from "@/config/libraries.json";
 const allLibraryDisplayNames = Object.values(libraryConfig.libraries).map((l: any) => l.displayName as string);
 const drugLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'drug').map((l: any) => l.displayName as string);
 const geneLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'gene').map((l: any) => l.displayName as string);
+
+function TagFilterButton({ label, value, onApply }: { label: string; value: string; onApply: (v: string) => void }) {
+  const [open, setOpen] = React.useState(false);
+  const [draft, setDraft] = React.useState("");
+  const ref = React.useRef<HTMLDivElement>(null);
+  const tags = React.useMemo(() => value ? value.split(",").filter(Boolean) : [], [value]);
+
+  React.useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const addTag = () => {
+    const trimmed = draft.trim();
+    if (trimmed && !tags.includes(trimmed)) {
+      onApply([...tags, trimmed].join(","));
+    }
+    setDraft("");
+  };
+  const removeTag = (tag: string) => {
+    const next = tags.filter((t) => t !== tag);
+    onApply(next.join(","));
+  };
+  const clearAll = () => { onApply(""); setDraft(""); };
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        className={tags.length > 0 ? "btn btn-sm bg-gray-400 hover:bg-gray-500 text-gray-800" : "btn btn-sm"}
+        onClick={() => setOpen(!open)}
+      >
+        {label} {tags.length > 0 ? `(${tags.length})` : ""}
+        <FaFilter className={`text-xs ${tags.length > 0 ? "" : "opacity-40"}`} />
+      </button>
+      {open && (
+        <div className="absolute z-30 left-0 top-full mt-1 bg-base-100 border border-base-300 rounded shadow-lg p-2 min-w-[220px]">
+          <div className="flex gap-1 mb-2">
+            <input
+              type="text"
+              className="input input-bordered input-xs flex-1"
+              placeholder={`Add ${label.toLowerCase()}…`}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }}
+              autoFocus
+            />
+            <button className="btn btn-xs btn-primary" onClick={addTag}>Add</button>
+          </div>
+          {tags.length > 0 && (
+            <>
+              <div className="flex flex-wrap gap-1 mb-1">
+                {tags.map((tag) => (
+                  <span key={tag} className="badge badge-sm gap-1">
+                    {tag}
+                    <button className="cursor-pointer" onClick={() => removeTag(tag)}>×</button>
+                  </span>
+                ))}
+              </div>
+              <button className="btn btn-xs mt-1" onClick={clearAll}>Clear All</button>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const pageSize = 12;
 
@@ -86,12 +157,16 @@ function EnrichmentResults({
     topn: "10000",
     pvaluele: "0.05",
     ds: "",
+    filterCellLine: "",
+    filterTimepoint: "",
+    filterConcentration: "",
   });
   const [rawTerm, setRawTerm] = React.useState("");
   const [topNSlider, setTopNSlider] = React.useState(10000);
   const [pvalueLeSlider, setPvalueLeSlider] = React.useState(0.05);
   const [drugLookupLoaded, setDrugLookupLoaded] = React.useState(false);
   const [datasetDropdownOpen, setDatasetDropdownOpen] = React.useState(false);
+  const [sigModalData, setSigModalData] = React.useState<{ signatures: ContributingSignature[]; drug: string } | null>(null);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   // Cache the unfiltered total count so post-search filtering doesn't change the headline number
   const [unfilteredTotalCount, setUnfilteredTotalCount] = React.useState<number | null>(null);
@@ -127,17 +202,20 @@ function EnrichmentResults({
       topN: topN,
       pvalueLe: pvalueLe,
       postSearchFilterLibraryNames: datasetFilter.length > 0 ? datasetFilter : null,
+      filterCellLine: queryString.filterCellLine || null,
+      filterTimepoint: queryString.filterTimepoint || null,
+      filterConcentration: queryString.filterConcentration || null,
     },
   });
 
   console.log(enrichmentResults)
 
-  // Cache unfiltered total count when no dataset filter is active
+  // Cache unfiltered total count when no post-search filters are active
   React.useEffect(() => {
-    if (datasetFilter.length === 0 && enrichmentResults?.currentBackground?.enrich?.totalCount != null) {
+    if (datasetFilter.length === 0 && !fda && !queryString.dir && !queryString.filterCellLine && !queryString.filterTimepoint && !queryString.filterConcentration && enrichmentResults?.currentBackground?.enrich?.totalCount != null) {
       setUnfilteredTotalCount(enrichmentResults.currentBackground.enrich.totalCount);
     }
-  }, [datasetFilter.length, enrichmentResults?.currentBackground?.enrich?.totalCount]);
+  }, [datasetFilter.length, fda, queryString.dir, queryString.filterCellLine, queryString.filterTimepoint, queryString.filterConcentration, enrichmentResults?.currentBackground?.enrich?.totalCount]);
 
   React.useEffect(() => {
     console.log(term);
@@ -240,12 +318,25 @@ function EnrichmentResults({
           </>
         )}
       </h2>
-      {datasetFilter.length > 0 && !datasetFilter.includes("__none__") && (
-        <p className="text-sm text-base-content/70 mt-1">
-          Filtering to {datasetFilter.length} dataset{datasetFilter.length > 1 ? "s" : ""}: {datasetFilter.join(", ")} — showing{" "}
-          {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.enrich?.totalCount || 0)} matches.
-        </p>
-      )}
+      {(() => {
+        const filters: string[] = [];
+        if (datasetFilter.length > 0 && !datasetFilter.includes("__none__"))
+          filters.push(`${datasetFilter.length} dataset${datasetFilter.length > 1 ? "s" : ""}`);
+        if (fda) filters.push("FDA approved");
+        if (queryString.dir === "up") filters.push("up-regulated");
+        if (queryString.dir === "down") filters.push("down-regulated");
+        if (queryString.filterCellLine) filters.push(`cell line: ${queryString.filterCellLine.split(",").filter(Boolean).join(", ")}`);
+        if (queryString.filterTimepoint) filters.push(`timepoint: ${queryString.filterTimepoint.split(",").filter(Boolean).join(", ")}`);
+        if (queryString.filterConcentration) filters.push(`concentration: ${queryString.filterConcentration.split(",").filter(Boolean).join(", ")}`);
+        if (filters.length > 0)
+          return (
+            <p className="text-sm text-base-content/70 mt-1">
+              Filtering by {filters.join(", ")} — showing{" "}
+              {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.enrich?.totalCount || 0)} matches.
+            </p>
+          );
+        return null;
+      })()}
       {datasetFilter.includes("__none__") && (
         <p className="text-sm text-base-content/70 mt-1">
           No datasets selected. Use the Dataset column filter to select datasets.
@@ -270,11 +361,11 @@ function EnrichmentResults({
               <div className="flex gap-1 mb-1">
                 <button
                   className="btn btn-xs"
-                  onClick={() => setQueryString({ ds: "", page: "1" })}
+                  onClick={() => setQueryString({ ...queryString, ds: "", page: "1" })}
                 >All</button>
                 <button
                   className="btn btn-xs"
-                  onClick={() => setQueryString({ ds: "__none__", page: "1" })}
+                  onClick={() => setQueryString({ ...queryString, ds: "__none__", page: "1" })}
                 >None</button>
               </div>
               {allLibraryDisplayNames.map((lib) => (
@@ -293,11 +384,11 @@ function EnrichmentResults({
                         next = datasetFilter.filter((l) => l !== lib);
                       }
                       if (next.length >= allLibraryDisplayNames.length) {
-                        setQueryString({ ds: "", page: "1" });
+                        setQueryString({ ...queryString, ds: "", page: "1" });
                       } else if (next.length === 0) {
-                        setQueryString({ ds: "__none__", page: "1" });
+                        setQueryString({ ...queryString, ds: "__none__", page: "1" });
                       } else {
-                        setQueryString({ ds: next.join(","), page: "1" });
+                        setQueryString({ ...queryString, ds: next.join(","), page: "1" });
                       }
                     }}
                   />
@@ -321,9 +412,9 @@ function EnrichmentResults({
             onClick={() => {
               const isDrugActive = datasetFilter.length > 0 && drugLibraryNames.every(n => datasetFilter.includes(n)) && !geneLibraryNames.some(n => datasetFilter.includes(n));
               if (isDrugActive) {
-                setQueryString({ ds: "", page: "1" });
+                setQueryString({ ...queryString, ds: "", page: "1" });
               } else {
-                setQueryString({ ds: drugLibraryNames.join(","), page: "1" });
+                setQueryString({ ...queryString, ds: drugLibraryNames.join(","), page: "1" });
               }
             }}
           >
@@ -338,9 +429,9 @@ function EnrichmentResults({
             onClick={() => {
               const isGeneActive = datasetFilter.length > 0 && geneLibraryNames.every(n => datasetFilter.includes(n)) && !drugLibraryNames.some(n => datasetFilter.includes(n));
               if (isGeneActive) {
-                setQueryString({ ds: "", page: "1" });
+                setQueryString({ ...queryString, ds: "", page: "1" });
               } else {
-                setQueryString({ ds: geneLibraryNames.join(","), page: "1" });
+                setQueryString({ ...queryString, ds: geneLibraryNames.join(","), page: "1" });
               }
             }}
           >
@@ -580,8 +671,13 @@ function EnrichmentResults({
               <FaFilter />
             </button>
           </div>
-        </div> : 
+        </div> :
         <></>}
+        {!consensus && !moas && <>
+        <TagFilterButton label="Cell Line" value={queryString.filterCellLine ?? ""} onApply={(v) => setQueryString({ ...queryString, page: "1", filterCellLine: v })} />
+        <TagFilterButton label="Timepoint" value={queryString.filterTimepoint ?? ""} onApply={(v) => setQueryString({ ...queryString, page: "1", filterTimepoint: v })} />
+        <TagFilterButton label="Concentration" value={queryString.filterConcentration ?? ""} onApply={(v) => setQueryString({ ...queryString, page: "1", filterConcentration: v })} />
+        </>}
         </div>
         <form
           id="search-form"
@@ -906,7 +1002,10 @@ function EnrichmentResults({
                   (enrichmentResult, genesetIndex) => {
                     var perturbation = enrichmentResult?.drug;
                     const cid = enrichmentResult?.cid;
-                    if (perturbation?.includes(" ") && !moas)
+                    const libs = enrichmentResult?.libraries?.filter(Boolean) as string[] || [];
+                    // Determine if gene perturbation by checking if ALL contributing libraries are gene category
+                    const isGeneKO = libs.length > 0 && libs.every(lib => geneLibraryNames.includes(lib));
+                    if (isGeneKO && !moas)
                       perturbation = perturbation + " KO";
                     // Use direct PubChem link if CID available, otherwise search
                     const pubchemUrl = cid
@@ -915,7 +1014,7 @@ function EnrichmentResults({
                     return (
                       <tr key={genesetIndex}>
                         <td>
-                          {moas ? <span style={{textTransform: 'capitalize'}}>{perturbation}</span> : !perturbation?.includes("KO") ? (
+                          {moas ? <span style={{textTransform: 'capitalize'}}>{perturbation}</span> : !isGeneKO ? (
                             <div>
                               {perturbation}
                               <a
@@ -1006,11 +1105,21 @@ function EnrichmentResults({
                           )}
                         </td>
                         <td>
-                          {enrichmentResult?.countSignificant} (
-                          {enrichmentResult?.countUpSignificant} Up,{" "}
-                          {(enrichmentResult?.countSignificant || 0) -
-                            (enrichmentResult?.countUpSignificant || 0)}{" "}
-                          Down)
+                          <button
+                            className="link link-hover text-blue-500"
+                            onClick={() => {
+                              setSigModalData({
+                                signatures: (enrichmentResult?.contributingSignatures as ContributingSignature[]) || [],
+                                drug: enrichmentResult?.drug || "",
+                              });
+                            }}
+                          >
+                            {enrichmentResult?.countSignificant} (
+                            {enrichmentResult?.countUpSignificant} Up,{" "}
+                            {(enrichmentResult?.countSignificant || 0) -
+                              (enrichmentResult?.countUpSignificant || 0)}{" "}
+                            Down)
+                          </button>
                         </td>
                         <td>{enrichmentResult?.countInsignificant}</td>
                         <td>{enrichmentResult?.pvalueUp?.toPrecision(3)}</td>
@@ -1450,6 +1559,12 @@ function EnrichmentResults({
           )}
         </div>
       ) : null}
+      <SignaturesModal
+        signatures={sigModalData?.signatures}
+        drug={sigModalData?.drug || ""}
+        showModal={!!sigModalData}
+        setShowModal={(show) => { if (!show) setSigModalData(null); }}
+      />
     </div>
   );
 }

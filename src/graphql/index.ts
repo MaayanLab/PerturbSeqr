@@ -71,9 +71,12 @@ export type Background = Node & {
 
 export type BackgroundEnrichArgs = {
   adjPvalueLe?: InputMaybe<Scalars['Float']['input']>;
+  filterCellLine?: InputMaybe<Scalars['String']['input']>;
+  filterConcentration?: InputMaybe<Scalars['String']['input']>;
   filterFda?: InputMaybe<Scalars['Boolean']['input']>;
   filterKo?: InputMaybe<Scalars['Boolean']['input']>;
   filterTerm?: InputMaybe<Scalars['String']['input']>;
+  filterTimepoint?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   genes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   libraryNames?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
@@ -99,9 +102,12 @@ export type BackgroundOverlapArgs = {
 
 export type BackgroundPairedEnrichArgs = {
   adjPvalueLe?: InputMaybe<Scalars['Float']['input']>;
+  filterCellLine?: InputMaybe<Scalars['String']['input']>;
+  filterConcentration?: InputMaybe<Scalars['String']['input']>;
   filterFda?: InputMaybe<Scalars['Boolean']['input']>;
   filterKo?: InputMaybe<Scalars['Boolean']['input']>;
   filterTerm?: InputMaybe<Scalars['String']['input']>;
+  filterTimepoint?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   genesDown?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   genesUp?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
@@ -193,10 +199,12 @@ export type ConsensusResult = {
   adjPvalueUp?: Maybe<Scalars['Float']['output']>;
   approved?: Maybe<Scalars['Boolean']['output']>;
   cid?: Maybe<Scalars['String']['output']>;
+  contributingSignatures?: Maybe<Scalars['JSON']['output']>;
   countInsignificant?: Maybe<Scalars['Int']['output']>;
   countSignificant?: Maybe<Scalars['Int']['output']>;
   countUpSignificant?: Maybe<Scalars['Int']['output']>;
   drug?: Maybe<Scalars['String']['output']>;
+  libraries?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   oddsRatio?: Maybe<Scalars['Float']['output']>;
   oddsRatioDown?: Maybe<Scalars['Float']['output']>;
   oddsRatioUp?: Maybe<Scalars['Float']['output']>;
@@ -1116,10 +1124,13 @@ export type EnrichmentQueryQueryVariables = Exact<{
   topN?: InputMaybe<Scalars['Int']['input']>;
   pvalueLe?: InputMaybe<Scalars['Float']['input']>;
   postSearchFilterLibraryNames?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+  filterCellLine?: InputMaybe<Scalars['String']['input']>;
+  filterTimepoint?: InputMaybe<Scalars['String']['input']>;
+  filterConcentration?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type EnrichmentQueryQuery = { __typename?: 'Query', currentBackground?: { __typename?: 'Background', enrich?: { __typename?: 'PaginatedEnrichResult', totalCount?: number | null, consensusCount?: number | null, moasCount?: number | null, geneSetCount?: number | null, nodes?: Array<{ __typename?: 'EnrichResult', geneSetHash?: any | null, pvalue?: number | null, adjPvalue?: number | null, oddsRatio?: number | null, nOverlap?: number | null, geneSets: { __typename?: 'GeneSetsConnection', totalCount: number, nodes: Array<{ __typename?: 'GeneSet', id: any, term: string, description?: string | null, nGeneIds: number, library?: { __typename?: 'GeneSetLibrary', name: string } | null, geneSetFdaCountsById: { __typename?: 'GeneSetFdaCountsConnection', nodes: Array<{ __typename?: 'GeneSetFdaCount', approved?: boolean | null, count?: number | null, moa?: string | null }> } }> } } | null> | null, consensus?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null } | null> | null, moas?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null } | null> | null } | null } | null };
+export type EnrichmentQueryQuery = { __typename?: 'Query', currentBackground?: { __typename?: 'Background', enrich?: { __typename?: 'PaginatedEnrichResult', totalCount?: number | null, consensusCount?: number | null, moasCount?: number | null, geneSetCount?: number | null, nodes?: Array<{ __typename?: 'EnrichResult', geneSetHash?: any | null, pvalue?: number | null, adjPvalue?: number | null, oddsRatio?: number | null, nOverlap?: number | null, geneSets: { __typename?: 'GeneSetsConnection', totalCount: number, nodes: Array<{ __typename?: 'GeneSet', id: any, term: string, description?: string | null, nGeneIds: number, library?: { __typename?: 'GeneSetLibrary', name: string } | null, geneSetFdaCountsById: { __typename?: 'GeneSetFdaCountsConnection', nodes: Array<{ __typename?: 'GeneSetFdaCount', approved?: boolean | null, count?: number | null, moa?: string | null }> } }> } } | null> | null, consensus?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null, libraries?: Array<string | null> | null, contributingSignatures?: any | null } | null> | null, moas?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null, libraries?: Array<string | null> | null, contributingSignatures?: any | null } | null> | null } | null } | null };
 
 export type EnrichmentQuerySingleQueryVariables = Exact<{
   genes: Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>;
@@ -1151,7 +1162,7 @@ export type EnrichmentQueryConsensusQueryVariables = Exact<{
 }>;
 
 
-export type EnrichmentQueryConsensusQuery = { __typename?: 'Query', currentBackground?: { __typename?: 'Background', enrich?: { __typename?: 'PaginatedEnrichResult', consensusCount?: number | null, consensus?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null } | null> | null } | null } | null };
+export type EnrichmentQueryConsensusQuery = { __typename?: 'Query', currentBackground?: { __typename?: 'Background', enrich?: { __typename?: 'PaginatedEnrichResult', consensusCount?: number | null, consensus?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null, libraries?: Array<string | null> | null, contributingSignatures?: any | null } | null> | null } | null } | null };
 
 export type EnrichmentQueryMoAsQueryVariables = Exact<{
   genes: Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>;
@@ -1167,7 +1178,7 @@ export type EnrichmentQueryMoAsQueryVariables = Exact<{
 }>;
 
 
-export type EnrichmentQueryMoAsQuery = { __typename?: 'Query', currentBackground?: { __typename?: 'Background', enrich?: { __typename?: 'PaginatedEnrichResult', moasCount?: number | null, moas?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null } | null> | null } | null } | null };
+export type EnrichmentQueryMoAsQuery = { __typename?: 'Query', currentBackground?: { __typename?: 'Background', enrich?: { __typename?: 'PaginatedEnrichResult', moasCount?: number | null, moas?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null, libraries?: Array<string | null> | null, contributingSignatures?: any | null } | null> | null } | null } | null };
 
 export type PairEnrichmentQueryQueryVariables = Exact<{
   genesUp: Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>;
@@ -1182,10 +1193,13 @@ export type PairEnrichmentQueryQueryVariables = Exact<{
   topN?: InputMaybe<Scalars['Int']['input']>;
   pvalueLe?: InputMaybe<Scalars['Float']['input']>;
   postSearchFilterLibraryNames?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+  filterCellLine?: InputMaybe<Scalars['String']['input']>;
+  filterTimepoint?: InputMaybe<Scalars['String']['input']>;
+  filterConcentration?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type PairEnrichmentQueryQuery = { __typename?: 'Query', currentBackground?: { __typename?: 'Background', pairedEnrich?: { __typename?: 'PaginatedPairedEnrichResult', totalCount?: number | null, consensusCount?: number | null, moasCount?: number | null, geneSetCount?: number | null, consensus?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null } | null> | null, moas?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null } | null> | null, nodes?: Array<{ __typename?: 'PairedEnrichResult', adjPvalueMimic?: number | null, adjPvalueReverse?: number | null, geneSetHashDown?: any | null, geneSetHashUp?: any | null, mimickerOverlap?: number | null, oddsRatioMimic?: number | null, oddsRatioReverse?: number | null, pvalueMimic?: number | null, pvalueReverse?: number | null, reverserOverlap?: number | null, geneSet: { __typename?: 'GeneSetsConnection', nodes: Array<{ __typename?: 'GeneSet', description?: string | null, id: any, nGeneIds: number, term: string, library?: { __typename?: 'GeneSetLibrary', name: string } | null, geneSetFdaCountsById: { __typename?: 'GeneSetFdaCountsConnection', nodes: Array<{ __typename?: 'GeneSetFdaCount', count?: number | null, approved?: boolean | null, moa?: string | null }> } }> } } | null> | null } | null } | null };
+export type PairEnrichmentQueryQuery = { __typename?: 'Query', currentBackground?: { __typename?: 'Background', pairedEnrich?: { __typename?: 'PaginatedPairedEnrichResult', totalCount?: number | null, consensusCount?: number | null, moasCount?: number | null, geneSetCount?: number | null, consensus?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null, libraries?: Array<string | null> | null, contributingSignatures?: any | null } | null> | null, moas?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null, libraries?: Array<string | null> | null, contributingSignatures?: any | null } | null> | null, nodes?: Array<{ __typename?: 'PairedEnrichResult', adjPvalueMimic?: number | null, adjPvalueReverse?: number | null, geneSetHashDown?: any | null, geneSetHashUp?: any | null, mimickerOverlap?: number | null, oddsRatioMimic?: number | null, oddsRatioReverse?: number | null, pvalueMimic?: number | null, pvalueReverse?: number | null, reverserOverlap?: number | null, geneSet: { __typename?: 'GeneSetsConnection', nodes: Array<{ __typename?: 'GeneSet', description?: string | null, id: any, nGeneIds: number, term: string, library?: { __typename?: 'GeneSetLibrary', name: string } | null, geneSetFdaCountsById: { __typename?: 'GeneSetFdaCountsConnection', nodes: Array<{ __typename?: 'GeneSetFdaCount', count?: number | null, approved?: boolean | null, moa?: string | null }> } }> } } | null> | null } | null } | null };
 
 export type PairEnrichmentQuerySingleQueryVariables = Exact<{
   genesUp: Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>;
@@ -1221,7 +1235,7 @@ export type PairEnrichmentQueryConsensusQueryVariables = Exact<{
 }>;
 
 
-export type PairEnrichmentQueryConsensusQuery = { __typename?: 'Query', currentBackground?: { __typename?: 'Background', pairedEnrich?: { __typename?: 'PaginatedPairedEnrichResult', consensusCount?: number | null, consensus?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null } | null> | null } | null } | null };
+export type PairEnrichmentQueryConsensusQuery = { __typename?: 'Query', currentBackground?: { __typename?: 'Background', pairedEnrich?: { __typename?: 'PaginatedPairedEnrichResult', consensusCount?: number | null, consensus?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null, libraries?: Array<string | null> | null, contributingSignatures?: any | null } | null> | null } | null } | null };
 
 export type PairEnrichmentQueryMoAsQueryVariables = Exact<{
   genesUp: Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>;
@@ -1239,7 +1253,7 @@ export type PairEnrichmentQueryMoAsQueryVariables = Exact<{
 }>;
 
 
-export type PairEnrichmentQueryMoAsQuery = { __typename?: 'Query', currentBackground?: { __typename?: 'Background', pairedEnrich?: { __typename?: 'PaginatedPairedEnrichResult', moasCount?: number | null, moas?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null } | null> | null } | null } | null };
+export type PairEnrichmentQueryMoAsQuery = { __typename?: 'Query', currentBackground?: { __typename?: 'Background', pairedEnrich?: { __typename?: 'PaginatedPairedEnrichResult', moasCount?: number | null, moas?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null, libraries?: Array<string | null> | null, contributingSignatures?: any | null } | null> | null } | null } | null };
 
 export type AllLibrariesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1398,7 +1412,7 @@ export type FetchUserGeneSetQueryHookResult = ReturnType<typeof useFetchUserGene
 export type FetchUserGeneSetLazyQueryHookResult = ReturnType<typeof useFetchUserGeneSetLazyQuery>;
 export type FetchUserGeneSetQueryResult = Apollo.QueryResult<FetchUserGeneSetQuery, FetchUserGeneSetQueryVariables>;
 export const EnrichmentQueryDocument = gql`
-    query EnrichmentQuery($genes: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05, $postSearchFilterLibraryNames: [String]) {
+    query EnrichmentQuery($genes: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05, $postSearchFilterLibraryNames: [String], $filterCellLine: String, $filterTimepoint: String, $filterConcentration: String) {
   currentBackground {
     enrich(
       genes: $genes
@@ -1412,6 +1426,9 @@ export const EnrichmentQueryDocument = gql`
       topN: $topN
       pvalueLe: $pvalueLe
       postSearchFilterLibraryNames: $postSearchFilterLibraryNames
+      filterCellLine: $filterCellLine
+      filterTimepoint: $filterTimepoint
+      filterConcentration: $filterConcentration
     ) {
       nodes {
         geneSetHash
@@ -1459,6 +1476,8 @@ export const EnrichmentQueryDocument = gql`
         pvalueDown
         adjPvalueDown
         oddsRatioDown
+        libraries
+        contributingSignatures
       }
       moas {
         drug
@@ -1476,6 +1495,8 @@ export const EnrichmentQueryDocument = gql`
         pvalueDown
         adjPvalueDown
         oddsRatioDown
+        libraries
+        contributingSignatures
       }
     }
   }
@@ -1505,6 +1526,9 @@ export const EnrichmentQueryDocument = gql`
  *      topN: // value for 'topN'
  *      pvalueLe: // value for 'pvalueLe'
  *      postSearchFilterLibraryNames: // value for 'postSearchFilterLibraryNames'
+ *      filterCellLine: // value for 'filterCellLine'
+ *      filterTimepoint: // value for 'filterTimepoint'
+ *      filterConcentration: // value for 'filterConcentration'
  *   },
  * });
  */
@@ -1632,6 +1656,8 @@ export const EnrichmentQueryConsensusDocument = gql`
         pvalueDown
         adjPvalueDown
         oddsRatioDown
+        libraries
+        contributingSignatures
       }
       consensusCount
     }
@@ -1706,6 +1732,8 @@ export const EnrichmentQueryMoAsDocument = gql`
         pvalueDown
         adjPvalueDown
         oddsRatioDown
+        libraries
+        contributingSignatures
       }
       moasCount
     }
@@ -1750,7 +1778,7 @@ export type EnrichmentQueryMoAsQueryHookResult = ReturnType<typeof useEnrichment
 export type EnrichmentQueryMoAsLazyQueryHookResult = ReturnType<typeof useEnrichmentQueryMoAsLazyQuery>;
 export type EnrichmentQueryMoAsQueryResult = Apollo.QueryResult<EnrichmentQueryMoAsQuery, EnrichmentQueryMoAsQueryVariables>;
 export const PairEnrichmentQueryDocument = gql`
-    query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05, $postSearchFilterLibraryNames: [String]) {
+    query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05, $postSearchFilterLibraryNames: [String], $filterCellLine: String, $filterTimepoint: String, $filterConcentration: String) {
   currentBackground {
     pairedEnrich(
       filterTerm: $filterTerm
@@ -1765,6 +1793,9 @@ export const PairEnrichmentQueryDocument = gql`
       genesDown: $genesDown
       genesUp: $genesUp
       postSearchFilterLibraryNames: $postSearchFilterLibraryNames
+      filterCellLine: $filterCellLine
+      filterTimepoint: $filterTimepoint
+      filterConcentration: $filterConcentration
     ) {
       totalCount
       consensusCount
@@ -1786,6 +1817,8 @@ export const PairEnrichmentQueryDocument = gql`
         pvalueDown
         adjPvalueDown
         oddsRatioDown
+        libraries
+        contributingSignatures
       }
       moas {
         drug
@@ -1803,6 +1836,8 @@ export const PairEnrichmentQueryDocument = gql`
         pvalueDown
         adjPvalueDown
         oddsRatioDown
+        libraries
+        contributingSignatures
       }
       nodes {
         adjPvalueMimic
@@ -1864,6 +1899,9 @@ export const PairEnrichmentQueryDocument = gql`
  *      topN: // value for 'topN'
  *      pvalueLe: // value for 'pvalueLe'
  *      postSearchFilterLibraryNames: // value for 'postSearchFilterLibraryNames'
+ *      filterCellLine: // value for 'filterCellLine'
+ *      filterTimepoint: // value for 'filterTimepoint'
+ *      filterConcentration: // value for 'filterConcentration'
  *   },
  * });
  */
@@ -2003,6 +2041,8 @@ export const PairEnrichmentQueryConsensusDocument = gql`
         pvalueDown
         adjPvalueDown
         oddsRatioDown
+        libraries
+        contributingSignatures
       }
     }
   }
@@ -2081,6 +2121,8 @@ export const PairEnrichmentQueryMoAsDocument = gql`
         pvalueDown
         adjPvalueDown
         oddsRatioDown
+        libraries
+        contributingSignatures
       }
     }
   }
