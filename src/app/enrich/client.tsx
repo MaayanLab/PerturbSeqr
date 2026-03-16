@@ -1042,7 +1042,7 @@ function EnrichmentResults({
                               {perturbation}
                               <a
                                 className="underline cursor-pointer mx-2"
-                                href={`https://maayanlab.cloud/Harmonizome/gene/${perturbation.replace(
+                                href={`https://maayanlab.cloud/Harmonizome/gene/${perturbation?.replace(
                                   " KO",
                                   ""
                                 )}`}
@@ -1058,7 +1058,7 @@ function EnrichmentResults({
                               </a>
                               <a
                                 className="underline cursor-pointer"
-                                href={`https://maayanlab.cloud/prismexp/g/${perturbation.replace(
+                                href={`https://maayanlab.cloud/prismexp/g/${perturbation?.replace(
                                   " KO",
                                   ""
                                 )}`}
@@ -1121,7 +1121,19 @@ function EnrichmentResults({
                             Down)
                           </button>
                         </td>
-                        <td>{enrichmentResult?.countInsignificant}</td>
+                        <td>
+                          <button
+                            className="link link-hover text-blue-500"
+                            onClick={() => {
+                              setSigModalData({
+                                signatures: (enrichmentResult?.contributingSignatures as ContributingSignature[]) || [],
+                                drug: enrichmentResult?.drug || "",
+                              });
+                            }}
+                          >
+                            {enrichmentResult?.countInsignificant}
+                          </button>
+                        </td>
                         <td>{enrichmentResult?.pvalueUp?.toPrecision(3)}</td>
                         <td>{enrichmentResult?.adjPvalueUp?.toPrecision(3)}</td>
                         <td>{enrichmentResult?.oddsRatioUp?.toPrecision(3)}</td>
