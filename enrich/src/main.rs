@@ -227,7 +227,6 @@ struct ContributingSignature {
     term: String,
     library: String,
     pvalue: f64,
-    significant: bool,
 }
 
 #[derive(Serialize, Debug)]
@@ -801,14 +800,12 @@ async fn query(
                             term: gene_set_term.clone(),
                             library: current_lib.clone(),
                             pvalue: result.pvalue,
-                            significant: true,
                         });
                         if !moa.is_empty() {
                             moa_contributing_sigs.entry(moa.clone()).or_default().push(ContributingSignature {
                                 term: gene_set_term.clone(),
                                 library: current_lib.clone(),
                                 pvalue: result.pvalue,
-                                significant: true,
                             });
                         }
 
@@ -822,50 +819,6 @@ async fn query(
                         moa_entry.0 += 1; // Increment significant count
                         if gene_set_term.contains(" up") {
                             moa_entry.2 += 1;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // Collect insignificant contributing signatures by scanning all bitmap terms
-    // and finding gene sets for each drug that weren't in the significant results
-    {
-        let sig_hashes: std::collections::HashSet<usize> = results.iter().take(top_n).map(|r| r.index).collect();
-        for (idx, (gene_set_hash, _gene_set)) in bitmap.values.iter().enumerate() {
-            if sig_hashes.contains(&idx) {
-                continue; // Already collected as significant
-            }
-            // Skip gene sets not in the post-search library filter
-            if let Some(ref post_libs) = post_search_library_filter {
-                if let Some(lib_name) = bitmap.gene_set_libraries.get(gene_set_hash) {
-                    if !post_libs.contains(lib_name) {
-                        continue;
-                    }
-                }
-            }
-            let current_lib = bitmap.gene_set_libraries.get(gene_set_hash).cloned().unwrap_or_default();
-            if let Some(terms) = bitmap.terms.get(gene_set_hash) {
-                for (_gene_set_id, gene_set_term, _description, _fda_approved, _count, pert, moa, cid) in terms {
-                    if !pert.is_empty() {
-                        let group_key = if !cid.is_empty() { cid.clone() } else { pert.clone() };
-                        // Only collect for drugs we already know about (that had at least one significant result)
-                        if drug_significance_counts.contains_key(&group_key) {
-                            drug_contributing_sigs.entry(group_key.clone()).or_default().push(ContributingSignature {
-                                term: gene_set_term.clone(),
-                                library: current_lib.clone(),
-                                pvalue: 1.0, // No enrichment p-value available for insignificant
-                                significant: false,
-                            });
-                        }
-                        if !moa.is_empty() && moa_signifigance_counts.contains_key(moa) {
-                            moa_contributing_sigs.entry(moa.clone()).or_default().push(ContributingSignature {
-                                term: gene_set_term.clone(),
-                                library: current_lib.clone(),
-                                pvalue: 1.0,
-                                significant: false,
-                            });
                         }
                     }
                 }
@@ -1699,14 +1652,12 @@ async fn query_pairs(
                             term: gene_set_term.clone(),
                             library: current_lib.clone(),
                             pvalue: result.pvalue_mimic,
-                            significant: true,
                         });
                         if !moa.is_empty() {
                             moa_contributing_sigs.entry(moa.clone()).or_default().push(ContributingSignature {
                                 term: gene_set_term.clone(),
                                 library: current_lib.clone(),
                                 pvalue: result.pvalue_mimic,
-                                significant: true,
                             });
                         }
 
@@ -1724,47 +1675,6 @@ async fn query_pairs(
                             }
                         }
 
-                    }
-                }
-            }
-        }
-    }
-
-    // Collect insignificant contributing signatures for paired query
-    {
-        let sig_hashes: std::collections::HashSet<usize> = results.iter().take(top_n).map(|r| r.index_up).collect();
-        for (idx, (gene_set_hash, _gene_set)) in bitmap.values.iter().enumerate() {
-            if sig_hashes.contains(&idx) {
-                continue;
-            }
-            if let Some(ref post_libs) = post_search_library_filter {
-                if let Some(lib_name) = bitmap.gene_set_libraries.get(gene_set_hash) {
-                    if !post_libs.contains(lib_name) {
-                        continue;
-                    }
-                }
-            }
-            let current_lib = bitmap.gene_set_libraries.get(gene_set_hash).cloned().unwrap_or_default();
-            if let Some(terms) = bitmap.terms.get(gene_set_hash) {
-                for (_gene_set_id, gene_set_term, _description, _fda_approved, _count, pert, moa, cid) in terms {
-                    if !pert.is_empty() {
-                        let group_key = if !cid.is_empty() { cid.clone() } else { pert.clone() };
-                        if drug_significance_counts.contains_key(&group_key) {
-                            drug_contributing_sigs.entry(group_key.clone()).or_default().push(ContributingSignature {
-                                term: gene_set_term.clone(),
-                                library: current_lib.clone(),
-                                pvalue: 1.0,
-                                significant: false,
-                            });
-                        }
-                        if !moa.is_empty() && moa_signifigance_counts.contains_key(moa) {
-                            moa_contributing_sigs.entry(moa.clone()).or_default().push(ContributingSignature {
-                                term: gene_set_term.clone(),
-                                library: current_lib.clone(),
-                                pvalue: 1.0,
-                                significant: false,
-                            });
-                        }
                     }
                 }
             }
