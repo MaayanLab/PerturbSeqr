@@ -1042,7 +1042,7 @@ function EnrichmentResults({
                               {perturbation}
                               <a
                                 className="underline cursor-pointer mx-2"
-                                href={`https://maayanlab.cloud/Harmonizome/gene/${perturbation.replace(
+                                href={`https://maayanlab.cloud/Harmonizome/gene/${perturbation?.replace(
                                   " KO",
                                   ""
                                 )}`}
@@ -1058,7 +1058,7 @@ function EnrichmentResults({
                               </a>
                               <a
                                 className="underline cursor-pointer"
-                                href={`https://maayanlab.cloud/prismexp/g/${perturbation.replace(
+                                href={`https://maayanlab.cloud/prismexp/g/${perturbation?.replace(
                                   " KO",
                                   ""
                                 )}`}

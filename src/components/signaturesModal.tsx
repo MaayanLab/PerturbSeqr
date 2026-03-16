@@ -21,10 +21,7 @@ export default function SignaturesModal({
 }) {
   const ref = React.useRef<HTMLDialogElement>(null);
 
-  const sorted = React.useMemo(
-    () => signatures ? [...signatures].sort((a, b) => a.pvalue - b.pvalue) : [],
-    [signatures]
-  );
+  const sorted = signatures ?? [];
 
   React.useEffect(() => {
     if (!ref.current) return;

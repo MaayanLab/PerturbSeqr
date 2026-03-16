@@ -616,7 +616,7 @@ async fn query(
         names.split(',').map(|s| s.trim().to_string()).collect()
     });
 
-    // Parse field filters (comma-separated multi-value, case-insensitive)
+    // Parse field filter query params from the frontend dropdowns (comma-separated multi-value, case-insensitive) into HashSets for O(1) lookup
     let filter_cell_lines: Option<std::collections::HashSet<String>> = filter_cell_line.map(|names| {
         names.split(',').map(|s| s.trim().to_lowercase()).collect()
     });
@@ -751,16 +751,21 @@ async fn query(
     let mut drug_significance_counts: HashMap<String, (usize, usize, usize, bool)> = HashMap::new();
     let mut drug_counts: HashMap<String, (usize, bool)> = HashMap::new();
     let mut moa_signifigance_counts: HashMap<String, (usize, usize, usize)> = HashMap::new();
-    // Track group_key → (display_name, cid, libraries) for output
-    let mut drug_info: HashMap<String, (String, Option<String>, std::collections::HashSet<String>)> = HashMap::new();
+    // Maps each group_key to its output metadata: (display_name, cid, contributing_libraries).
+    // group_key is PubChem CID when available, otherwise the raw perturbation name — this groups
+    // synonyms (e.g., "vorinostat" and "SAHA" with the same CID) into a single consensus entry.
+    let mut all_drug_metadata: HashMap<String, (String, Option<String>, std::collections::HashSet<String>)> = HashMap::new();
     let mut drug_contributing_sigs: HashMap<String, Vec<ContributingSignature>> = HashMap::new();
     let mut moa_contributing_sigs: HashMap<String, Vec<ContributingSignature>> = HashMap::new();
 
     for result in (*results).iter().take(top_n) {
         if let Some((gene_set_hash, _gene_set)) = bitmap.values.get(result.index) {
-            // Skip gene sets not in the post-search library filter (for consensus too)
+            // Post-search library filter: user selected specific datasets in the frontend dropdown.
+            // Enrichment runs against all libraries, but consensus only counts gene sets from selected ones.
             if let Some(ref post_libs) = post_search_library_filter {
+                // Look up which library this gene set belongs to
                 if let Some(lib_name) = bitmap.gene_set_libraries.get(gene_set_hash) {
+                    // Skip this gene set if its library wasn't selected
                     if !post_libs.contains(lib_name) {
                         continue;
                     }
@@ -787,12 +792,12 @@ async fn query(
                         }
 
                         // Track display name, CID, and contributing libraries for this group_key
-                        let info = drug_info.entry(group_key.clone()).or_insert_with(|| {
+                        let drug_metadata_entry = all_drug_metadata.entry(group_key.clone()).or_insert_with(|| {
                             let cid_opt = if !cid.is_empty() { Some(cid.clone()) } else { None };
                             (pert.clone(), cid_opt, std::collections::HashSet::new())
                         });
                         if !current_lib.is_empty() {
-                            info.2.insert(current_lib.clone());
+                            drug_metadata_entry.2.insert(current_lib.clone()); // .2 = contributing_libraries HashSet in (display_name, cid, libraries)
                         }
 
                         // Collect contributing signatures for drug consensus
@@ -863,8 +868,8 @@ async fn query(
     let mut consensus_results: Vec<DrugConsensusResult> = drug_significance_counts
         .par_iter() // Use Rayon parallel iterator
         .map(|(group_key, (count_sig, count_insig, sig_up, approved))| {
-            // Lookup display name, CID, and libraries from drug_info
-            let (display_name, cid, libs) = drug_info.get(group_key)
+            // Lookup display name, CID, and libraries from all_drug_metadata
+            let (display_name, cid, libs) = all_drug_metadata.get(group_key)
                 .map(|(name, cid, libs)| (name.clone(), cid.clone(), libs.iter().cloned().collect::<Vec<_>>()))
                 .unwrap_or_else(|| (group_key.clone(), None, vec![]));
             let sigs = drug_contributing_sigs.get(group_key).cloned().unwrap_or_default();
@@ -1421,7 +1426,7 @@ async fn query_pairs(
         names.split(',').map(|s| s.trim().to_string()).collect()
     });
 
-    // Parse field filters (comma-separated multi-value, case-insensitive)
+    // Parse field filter query params from the frontend dropdowns (comma-separated multi-value, case-insensitive) into HashSets for O(1) lookup
     let filter_cell_lines: Option<std::collections::HashSet<String>> = filter_cell_line.map(|names| {
         names.split(',').map(|s| s.trim().to_lowercase()).collect()
     });
@@ -1604,16 +1609,21 @@ async fn query_pairs(
     let mut drug_significance_counts: HashMap<String, (usize, usize, usize, bool)> = HashMap::new();
     let mut drug_counts: HashMap<String, (usize, bool)> = HashMap::new();
     let mut moa_signifigance_counts: HashMap<String, (usize, usize, usize)> = HashMap::new();
-    // Track group_key → (display_name, cid, libraries) for output
-    let mut drug_info: HashMap<String, (String, Option<String>, std::collections::HashSet<String>)> = HashMap::new();
+    // Maps each group_key to its output metadata: (display_name, cid, contributing_libraries).
+    // group_key is PubChem CID when available, otherwise the raw perturbation name — this groups
+    // synonyms (e.g., "vorinostat" and "SAHA" with the same CID) into a single consensus entry.
+    let mut all_drug_metadata: HashMap<String, (String, Option<String>, std::collections::HashSet<String>)> = HashMap::new();
     let mut drug_contributing_sigs: HashMap<String, Vec<ContributingSignature>> = HashMap::new();
     let mut moa_contributing_sigs: HashMap<String, Vec<ContributingSignature>> = HashMap::new();
 
     for result in (*results).iter().take(top_n) {
         if let Some((gene_set_hash, _gene_set)) = bitmap.values.get(result.index_up) {
-            // Skip gene sets not in the post-search library filter (for consensus too)
+            // Post-search library filter: user selected specific datasets in the frontend dropdown.
+            // Enrichment runs against all libraries, but consensus only counts gene sets from selected ones.
             if let Some(ref post_libs) = post_search_library_filter {
+                // Look up which library this gene set belongs to
                 if let Some(lib_name) = bitmap.gene_set_libraries.get(gene_set_hash) {
+                    // Skip this gene set if its library wasn't selected
                     if !post_libs.contains(lib_name) {
                         continue;
                     }
@@ -1640,12 +1650,12 @@ async fn query_pairs(
                         }
 
                         // Track display name, CID, and contributing libraries for this group_key
-                        let info = drug_info.entry(group_key.clone()).or_insert_with(|| {
+                        let drug_metadata_entry = all_drug_metadata.entry(group_key.clone()).or_insert_with(|| {
                             let cid_opt = if !cid.is_empty() { Some(cid.clone()) } else { None };
                             (pert.clone(), cid_opt, std::collections::HashSet::new())
                         });
                         if !current_lib.is_empty() {
-                            info.2.insert(current_lib.clone());
+                            drug_metadata_entry.2.insert(current_lib.clone()); // .2 = contributing_libraries HashSet in (display_name, cid, libraries)
                         }
 
                         drug_contributing_sigs.entry(group_key.clone()).or_default().push(ContributingSignature {
@@ -1703,8 +1713,8 @@ async fn query_pairs(
     let mut consensus_results: Vec<DrugConsensusResult> = drug_significance_counts
         .par_iter() // Use Rayon parallel iterator
         .map(|(group_key, (count_sig, count_insig, sig_up, approved))| {
-            // Lookup display name, CID, and libraries from drug_info
-            let (display_name, cid, libs) = drug_info.get(group_key)
+            // Lookup display name, CID, and libraries from all_drug_metadata
+            let (display_name, cid, libs) = all_drug_metadata.get(group_key)
                 .map(|(name, cid, libs)| (name.clone(), cid.clone(), libs.iter().cloned().collect::<Vec<_>>()))
                 .unwrap_or_else(|| (group_key.clone(), None, vec![]));
             let sigs = drug_contributing_sigs.get(group_key).cloned().unwrap_or_default();
