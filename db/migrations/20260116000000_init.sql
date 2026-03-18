@@ -48,7 +48,9 @@ CREATE TYPE app_public.consensus_result AS (
   approved BOOLEAN,
   odds_ratio DOUBLE PRECISION,
   pvalue DOUBLE PRECISION,
-  adj_pvalue DOUBLE PRECISION
+  adj_pvalue DOUBLE PRECISION,
+  libraries VARCHAR[],
+  contributing_signatures JSON
 );
 
 CREATE TYPE app_public.paginated_enrich_result AS (
