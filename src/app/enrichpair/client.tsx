@@ -16,6 +16,8 @@ import useQsState from "@/utils/useQsState";
 import Stats from "@/components/stats";
 import Image from "next/image";
 import GeneSetModal from "@/components/geneSetModal";
+import SignaturesModal from "@/components/signaturesModal";
+import type { ContributingSignature } from "@/components/signaturesModal";
 import { FaFilter, FaSortUp } from "react-icons/fa6";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { parseTerm, getCellDisplay } from "@/utils/parseTerm";
@@ -26,6 +28,7 @@ import libraryConfig from "@/config/libraries.json";
 const allLibraryDisplayNames = Object.values(libraryConfig.libraries).map((l: any) => l.displayName as string);
 const drugLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'drug').map((l: any) => l.displayName as string);
 const geneLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'gene').map((l: any) => l.displayName as string);
+
 const pageSize = 12;
 
 type GeneSetModalT =
@@ -112,6 +115,7 @@ function EnrichmentResults({
   const [pvalueLeSlider, setPvalueLeSlider] = React.useState(0.05);
   const [drugLookupLoaded, setDrugLookupLoaded] = React.useState(false);
   const [datasetDropdownOpen, setDatasetDropdownOpen] = React.useState(false);
+  const [sigModalData, setSigModalData] = React.useState<{ signatures: ContributingSignature[]; drug: string } | null>(null);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   // Cache the unfiltered total count so post-search filtering doesn't change the headline number
   const [unfilteredTotalCount, setUnfilteredTotalCount] = React.useState<number | null>(null);
@@ -151,17 +155,13 @@ function EnrichmentResults({
     },
   });
 
-  // Cache unfiltered total count when no dataset filter is active
+  // Cache unfiltered total count when no post-search filters are active
   React.useEffect(() => {
-    if (datasetFilter.length === 0 && enrichmentResults?.currentBackground?.pairedEnrich?.totalCount != null) {
+    if (datasetFilter.length === 0 && !fda && !queryString.dir && enrichmentResults?.currentBackground?.pairedEnrich?.totalCount != null) {
       setUnfilteredTotalCount(enrichmentResults.currentBackground.pairedEnrich.totalCount);
     }
-  }, [datasetFilter.length, enrichmentResults?.currentBackground?.pairedEnrich?.totalCount]);
+  }, [datasetFilter.length, fda, queryString.dir, enrichmentResults?.currentBackground?.pairedEnrich?.totalCount]);
 
-  React.useEffect(() => {
-    console.log(term);
-    setRawTerm(term);
-  }, [term]);
 
   // Close dataset dropdown on outside click
   React.useEffect(() => {
@@ -256,12 +256,22 @@ function EnrichmentResults({
                   </>
                 )}
       </h2>
-      {datasetFilter.length > 0 && !datasetFilter.includes("__none__") && (
-        <p className="text-sm text-base-content/70 mt-1">
-          Filtering to {datasetFilter.length} dataset{datasetFilter.length > 1 ? "s" : ""}: {datasetFilter.join(", ")} — showing{" "}
-          {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.pairedEnrich?.totalCount || 0)} matches.
-        </p>
-      )}
+      {(() => {
+        const filters: string[] = [];
+        if (datasetFilter.length > 0 && !datasetFilter.includes("__none__"))
+          filters.push(`${datasetFilter.length} dataset${datasetFilter.length > 1 ? "s" : ""}`);
+        if (fda) filters.push("FDA approved");
+        if (queryString.dir === "up") filters.push("mimickers");
+        if (queryString.dir === "down") filters.push("reversers");
+        if (filters.length > 0)
+          return (
+            <p className="text-sm text-base-content/70 mt-1">
+              Filtering by {filters.join(", ")} — showing{" "}
+              {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.pairedEnrich?.totalCount || 0)} matches.
+            </p>
+          );
+        return null;
+      })()}
       {datasetFilter.includes("__none__") && (
         <p className="text-sm text-base-content/70 mt-1">
           No datasets selected. Use the Dataset column filter to select datasets.
@@ -379,7 +389,7 @@ function EnrichmentResults({
               if (queryString.dir === "up")
                 setQueryString({
                   page: "1",
-                  q: rawTerm,
+                  q: queryString.q,
                   dir: "",
                   fda: queryString.fda,
                   consensus: queryString.consensus,
@@ -392,7 +402,7 @@ function EnrichmentResults({
               else
                 setQueryString({
                   page: "1",
-                  q: rawTerm,
+                  q: queryString.q,
                   dir: "up",
                   fda: queryString.fda,
                   consensus: queryString.consensus,
@@ -417,7 +427,7 @@ function EnrichmentResults({
               if (queryString.dir === "down")
                 setQueryString({
                   page: "1",
-                  q: rawTerm,
+                  q: queryString.q,
                   dir: "",
                   fda: queryString.fda,
                   consensus: queryString.consensus,
@@ -430,7 +440,7 @@ function EnrichmentResults({
               else
                 setQueryString({
                   page: "1",
-                  q: rawTerm,
+                  q: queryString.q,
                   dir: "down",
                   fda: queryString.fda,
                   consensus: queryString.consensus,
@@ -451,7 +461,7 @@ function EnrichmentResults({
             if (queryString.fda === "false")
               setQueryString({
                 page: "1",
-                q: rawTerm,
+                q: queryString.q,
                 fda: "true",
                 consensus: queryString.consensus,
                 dir: queryString.dir,
@@ -463,7 +473,7 @@ function EnrichmentResults({
             else
               setQueryString({
                 page: "1",
-                q: rawTerm,
+                q: queryString.q,
                 fda: "false",
                 dir: queryString.dir,
                 consensus: queryString.consensus,
@@ -487,7 +497,7 @@ function EnrichmentResults({
             if (queryString.consensus === "false")
               setQueryString({
                 page: "1",
-                q: rawTerm,
+                q: queryString.q,
                 fda: queryString.fda,
                 consensus: "true",
                 moas: "false",
@@ -500,7 +510,7 @@ function EnrichmentResults({
             else
               setQueryString({
                 page: "1",
-                q: rawTerm,
+                q: queryString.q,
                 fda: queryString.fda,
                 consensus: "false",
                 moas: "false",
@@ -524,7 +534,7 @@ function EnrichmentResults({
             if (queryString.moas === "false")
               setQueryString({
                 page: "1",
-                q: rawTerm,
+                q: queryString.q,
                 fda: queryString.fda,
                 consensus: "false",
                 moas: "true",
@@ -537,7 +547,7 @@ function EnrichmentResults({
             else
               setQueryString({
                 page: "1",
-                q: rawTerm,
+                q: queryString.q,
                 fda: queryString.fda,
                 consensus: "false",
                 moas: "false",
@@ -585,7 +595,7 @@ function EnrichmentResults({
                 onClick={() => {
                   setQueryString({
                     page: "1",
-                    q: rawTerm,
+                    q: queryString.q,
                     dir: queryString.dir,
                     fda: queryString.fda,
                     consensus: queryString.consensus,
@@ -608,57 +618,67 @@ function EnrichmentResults({
           className="join flex flex-row place-content-end place-items-center overflow-visible"
           onSubmit={(evt) => {
             evt.preventDefault();
+            const trimmed = rawTerm.trim();
+            if (!trimmed) return;
+            const existing = term ? term.split(",").map(s => s.trim()).filter(Boolean) : [];
+            if (!existing.includes(trimmed)) {
+              existing.push(trimmed);
+            }
             setQueryString({
               page: "1",
-              q: rawTerm,
-              fda: queryString.fda,
-              consensus: queryString.consensus,
-              moas: queryString.moas,
-              dir: queryString.dir,
-              ko: queryString.ko,
-              sort: queryString.sort,
-              topn: queryString.topn,
-              pvaluele: queryString.pvaluele,
+              q: existing.join(","),
             });
+            setRawTerm("");
           }}
         >
           <input
             type="text"
             className="input input-bordered join-item"
+            placeholder="Filter by cell line, drug, gene..."
             value={rawTerm}
             onChange={(evt) => {
               setRawTerm(evt.currentTarget.value);
             }}
           />
-          <div className="tooltip" data-tip="Search results">
+          <div className="tooltip" data-tip="Add filter">
             <button type="submit" className="btn join-item">
               &#x1F50D;
             </button>
           </div>
-          <div className="tooltip" data-tip="Clear search">
-            <button
-              type="reset"
-              className="btn join-item"
-              onClick={(evt) => {
-                setQueryString({
-                  page: "1",
-                  q: "",
-                  fda: queryString.fda,
-                  consensus: queryString.consensus,
-                  moas: queryString.moas,
-                  dir: queryString.dir,
-                  ko: queryString.ko,
-                  sort: queryString.sort,
-                  topn: queryString.topn,
-                  pvaluele: queryString.pvaluele,
-                });
-              }}
-            >
-              &#x232B;
-            </button>
-          </div>
           <DownloadButtonPair queryString={queryString} datasetDown={datasetDown} datasetUp={datasetUp}></DownloadButtonPair>
         </form>
+        <div className="border border-base-300 rounded-lg p-3 mt-2 min-h-[2.75rem] bg-base-200/50">
+          {term ? (
+            <div className="flex flex-wrap gap-1.5 items-center">
+              <span className="text-xs text-base-content/50 mr-1">Active filters:</span>
+              {term.split(",").map(s => s.trim()).filter(Boolean).map((tag) => (
+                <span key={tag} className="badge badge-neutral gap-1">
+                  {tag}
+                  <button
+                    className="cursor-pointer hover:text-primary-content/70"
+                    onClick={() => {
+                      const next = term.split(",").map(s => s.trim()).filter(t => t !== tag).join(",");
+                      setQueryString({ page: "1", q: next });
+                    }}
+                  >
+                    &times;
+                  </button>
+                </span>
+              ))}
+              <button
+                className="badge badge-ghost badge-sm cursor-pointer"
+                onClick={() => {
+                  setQueryString({ page: "1", q: "" });
+                  setRawTerm("");
+                }}
+              >
+                Clear all
+              </button>
+            </div>
+          ) : (
+            <span className="text-xs text-base-content/40">No active filters. Use the search bar to filter by cell line, drug, gene, etc.</span>
+          )}
+        </div>
       </div>
       <div className="overflow-x-auto -mx-8 md:-mx-24 px-2">
         {consensus || moas ? (
@@ -700,7 +720,7 @@ function EnrichmentResults({
                       onClick={() =>
                         setQueryString({
                           page: "1",
-                          q: rawTerm,
+                          q: queryString.q,
                           fda: queryString.fda,
                           dir: queryString.dir,
                           sort: "pvalue_up",
@@ -725,7 +745,7 @@ function EnrichmentResults({
                       onClick={() =>
                         setQueryString({
                           page: "1",
-                          q: rawTerm,
+                          q: queryString.q,
                           fda: queryString.fda,
                           dir: queryString.dir,
                           sort: "adj_pvalue_up",
@@ -747,7 +767,7 @@ function EnrichmentResults({
                       onClick={() =>
                         setQueryString({
                           page: "1",
-                          q: rawTerm,
+                          q: queryString.q,
                           fda: queryString.fda,
                           dir: queryString.dir,
                           sort: "odds_ratio_up",
@@ -777,7 +797,7 @@ function EnrichmentResults({
                       onClick={() =>
                         setQueryString({
                           page: "1",
-                          q: rawTerm,
+                          q: queryString.q,
                           fda: queryString.fda,
                           dir: queryString.dir,
                           sort: "pvalue_down",
@@ -802,7 +822,7 @@ function EnrichmentResults({
                       onClick={() =>
                         setQueryString({
                           page: "1",
-                          q: rawTerm,
+                          q: queryString.q,
                           fda: queryString.fda,
                           dir: queryString.dir,
                           sort: "adj_pvalue_down",
@@ -824,7 +844,7 @@ function EnrichmentResults({
                       onClick={() =>
                         setQueryString({
                           page: "1",
-                          q: rawTerm,
+                          q: queryString.q,
                           fda: queryString.fda,
                           dir: queryString.dir,
                           sort: "odds_ratio_down",
@@ -852,7 +872,7 @@ function EnrichmentResults({
                       onClick={() =>
                         setQueryString({
                           page: "1",
-                          q: rawTerm,
+                          q: queryString.q,
                           fda: queryString.fda,
                           dir: queryString.dir,
                           sort: "odds_ratio",
@@ -880,7 +900,7 @@ function EnrichmentResults({
                       onClick={() =>
                         setQueryString({
                           page: "1",
-                          q: rawTerm,
+                          q: queryString.q,
                           fda: queryString.fda,
                           dir: queryString.dir,
                           sort: "pvalue",
@@ -919,15 +939,18 @@ function EnrichmentResults({
                   )?.flatMap(
                   (enrichmentResult, genesetIndex) => {
                     var perturbation = enrichmentResult?.drug;
-                    const isKO = perturbation?.includes(" ");
-                    if (isKO && !moas)
+                    const cid = enrichmentResult?.cid;
+                    const libs = enrichmentResult?.libraries?.filter(Boolean) as string[] || [];
+                    // Determine if gene perturbation by checking if ALL contributing libraries are gene category
+                    const isGeneKO = libs.length > 0 && libs.every(lib => geneLibraryNames.includes(lib));
+                    if (isGeneKO && !moas)
                       perturbation = perturbation + " KO";
                     // Get drug info for CID display (only for non-KO perturbations)
-                    const consensusDrugInfo = !isKO && !moas && drugLookupLoaded ? getDrugInfo(perturbation || '') : null;
+                    const consensusDrugInfo = !isGeneKO && !moas && drugLookupLoaded ? getDrugInfo(perturbation || '') : null;
                     return (
                       <tr key={genesetIndex}>
                         <td>
-                        {moas ? <span style={{textTransform: 'capitalize'}}>{perturbation}</span> : !perturbation?.includes("KO") ? (
+                        {moas ? <span style={{textTransform: 'capitalize'}}>{perturbation}</span> : !isGeneKO ? (
                             <div>
                               <div>
                                 {perturbation}
@@ -957,7 +980,7 @@ function EnrichmentResults({
                               {perturbation}
                               <a
                                 className="underline cursor-pointer mx-2"
-                                href={`https://maayanlab.cloud/Harmonizome/gene/${perturbation.replace(
+                                href={`https://maayanlab.cloud/Harmonizome/gene/${perturbation?.replace(
                                   " KO",
                                   ""
                                 )}`}
@@ -973,7 +996,7 @@ function EnrichmentResults({
                               </a>
                               <a
                                 className="underline cursor-pointer"
-                                href={`https://maayanlab.cloud/prismexp/g/${perturbation.replace(
+                                href={`https://maayanlab.cloud/prismexp/g/${perturbation?.replace(
                                   " KO",
                                   ""
                                 )}`}
@@ -1020,11 +1043,21 @@ function EnrichmentResults({
                           )}
                         </td>
                         <td>
-                          {enrichmentResult?.countSignificant} (
-                          {enrichmentResult?.countUpSignificant} Up,{" "}
-                          {(enrichmentResult?.countSignificant || 0) -
-                            (enrichmentResult?.countUpSignificant || 0)}{" "}
-                          Down)
+                          <button
+                            className="link link-hover text-blue-500"
+                            onClick={() => {
+                              setSigModalData({
+                                signatures: (enrichmentResult?.contributingSignatures as ContributingSignature[]) || [],
+                                drug: enrichmentResult?.drug || "",
+                              });
+                            }}
+                          >
+                            {enrichmentResult?.countSignificant} (
+                            {enrichmentResult?.countUpSignificant} Up,{" "}
+                            {(enrichmentResult?.countSignificant || 0) -
+                              (enrichmentResult?.countUpSignificant || 0)}{" "}
+                            Down)
+                          </button>
                         </td>
                         <td>{enrichmentResult?.countInsignificant}</td>
                         <td>{enrichmentResult?.pvalueUp?.toPrecision(3)}</td>
@@ -1115,7 +1148,7 @@ function EnrichmentResults({
                     onClick={() =>
                       setQueryString({
                         page: "1",
-                        q: rawTerm,
+                        q: queryString.q,
                         fda: queryString.fda,
                         dir: queryString.dir,
                         sort: "odds_ratio_mimic",
@@ -1140,7 +1173,7 @@ function EnrichmentResults({
                     onClick={() =>
                       setQueryString({
                         page: "1",
-                        q: rawTerm,
+                        q: queryString.q,
                         fda: queryString.fda,
                         dir: queryString.dir,
                         sort: "pvalue_mimic",
@@ -1165,7 +1198,7 @@ function EnrichmentResults({
                     onClick={() =>
                       setQueryString({
                         page: "1",
-                        q: rawTerm,
+                        q: queryString.q,
                         fda: queryString.fda,
                         dir: queryString.dir,
                         sort: "adj_pvalue_mimic",
@@ -1189,7 +1222,7 @@ function EnrichmentResults({
                     onClick={() =>
                       setQueryString({
                         page: "1",
-                        q: rawTerm,
+                        q: queryString.q,
                         fda: queryString.fda,
                         dir: queryString.dir,
                         sort: "odds_ratio_reverse",
@@ -1215,7 +1248,7 @@ function EnrichmentResults({
                     onClick={() =>
                       setQueryString({
                         page: "1",
-                        q: rawTerm,
+                        q: queryString.q,
                         fda: queryString.fda,
                         dir: queryString.dir,
                         sort: "pvalue_reverse",
@@ -1240,7 +1273,7 @@ function EnrichmentResults({
                     onClick={() =>
                       setQueryString({
                         page: "1",
-                        q: rawTerm,
+                        q: queryString.q,
                         fda: queryString.fda,
                         dir: queryString.dir,
                         sort: "adj_pvalue_reverse",
@@ -1532,6 +1565,12 @@ function EnrichmentResults({
           )}
         </div>
       ) : null}
+      <SignaturesModal
+        signatures={sigModalData?.signatures}
+        drug={sigModalData?.drug || ""}
+        showModal={!!sigModalData}
+        setShowModal={(show) => { if (!show) setSigModalData(null); }}
+      />
     </div>
   );
 }

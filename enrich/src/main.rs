@@ -222,6 +222,13 @@ struct PairedQueryResult {
     adj_pvalue_reverse: f64,
 }
 
+#[derive(Serialize, Debug, Clone)]
+struct ContributingSignature {
+    term: String,
+    library: String,
+    pvalue: f64,
+}
+
 #[derive(Serialize, Debug)]
 struct DrugConsensusResult {
     drug: String,
@@ -239,6 +246,8 @@ struct DrugConsensusResult {
     odds_ratio: f64,
     pvalue: f64,
     adj_pvalue: f64,
+    libraries: Vec<String>,  // library names that contributed to this consensus result
+    contributing_signatures: Vec<ContributingSignature>,
 }
 
 struct QueryResponse {
@@ -728,11 +737,27 @@ async fn query(
     let mut drug_significance_counts: HashMap<String, (usize, usize, usize, bool)> = HashMap::new();
     let mut drug_counts: HashMap<String, (usize, bool)> = HashMap::new();
     let mut moa_signifigance_counts: HashMap<String, (usize, usize, usize)> = HashMap::new();
-    // Track group_key → (display_name, cid) for output
-    let mut drug_info: HashMap<String, (String, Option<String>)> = HashMap::new();
+    // Maps each group_key to its output metadata: (display_name, cid, contributing_libraries).
+    // group_key is PubChem CID when available, otherwise the raw perturbation name — this groups
+    // synonyms (e.g., "vorinostat" and "SAHA" with the same CID) into a single consensus entry.
+    let mut all_drug_metadata: HashMap<String, (String, Option<String>, std::collections::HashSet<String>)> = HashMap::new();
+    let mut drug_contributing_sigs: HashMap<String, Vec<ContributingSignature>> = HashMap::new();
+    let mut moa_contributing_sigs: HashMap<String, Vec<ContributingSignature>> = HashMap::new();
 
     for result in (*results).iter().take(top_n) {
         if let Some((gene_set_hash, _gene_set)) = bitmap.values.get(result.index) {
+            // Post-search library filter: user selected specific datasets in the frontend dropdown.
+            // Enrichment runs against all libraries, but consensus only counts gene sets from selected ones.
+            if let Some(ref post_libs) = post_search_library_filter {
+                // Look up which library this gene set belongs to
+                if let Some(lib_name) = bitmap.gene_set_libraries.get(gene_set_hash) {
+                    // Skip this gene set if its library wasn't selected
+                    if !post_libs.contains(lib_name) {
+                        continue;
+                    }
+                }
+            }
+            let current_lib = bitmap.gene_set_libraries.get(gene_set_hash).cloned().unwrap_or_default();
             if let Some(terms) = bitmap.terms.get(gene_set_hash) {
                 // Iterate over the terms for the current gene set
                 for (_gene_set_id, gene_set_term, _description, fda_approved, count, pert, moa, cid) in terms {
@@ -752,12 +777,28 @@ async fn query(
                             entry.2 += 1;
                         }
 
-                        // Track display name and CID for this group_key
-                        // Keep first seen name as display name
-                        drug_info.entry(group_key.clone()).or_insert_with(|| {
+                        // Track display name, CID, and contributing libraries for this group_key
+                        let drug_metadata_entry = all_drug_metadata.entry(group_key.clone()).or_insert_with(|| {
                             let cid_opt = if !cid.is_empty() { Some(cid.clone()) } else { None };
-                            (pert.clone(), cid_opt)
+                            (pert.clone(), cid_opt, std::collections::HashSet::new())
                         });
+                        if !current_lib.is_empty() {
+                            drug_metadata_entry.2.insert(current_lib.clone()); // .2 = contributing_libraries HashSet in (display_name, cid, libraries)
+                        }
+
+                        // Collect contributing signatures for drug consensus
+                        drug_contributing_sigs.entry(group_key.clone()).or_default().push(ContributingSignature {
+                            term: gene_set_term.clone(),
+                            library: current_lib.clone(),
+                            pvalue: result.pvalue,
+                        });
+                        if !moa.is_empty() {
+                            moa_contributing_sigs.entry(moa.clone()).or_default().push(ContributingSignature {
+                                term: gene_set_term.clone(),
+                                library: current_lib.clone(),
+                                pvalue: result.pvalue,
+                            });
+                        }
 
                         // Insert the drug's total count into `drug_counts` if it's not already present
                         if !drug_counts.contains_key(&group_key) {
@@ -813,10 +854,11 @@ async fn query(
     let mut consensus_results: Vec<DrugConsensusResult> = drug_significance_counts
         .par_iter() // Use Rayon parallel iterator
         .map(|(group_key, (count_sig, count_insig, sig_up, approved))| {
-            // Lookup display name and CID from drug_info
-            let (display_name, cid) = drug_info.get(group_key)
-                .map(|(name, cid)| (name.clone(), cid.clone()))
-                .unwrap_or_else(|| (group_key.clone(), None));
+            // Lookup display name, CID, and libraries from all_drug_metadata
+            let (display_name, cid, libs) = all_drug_metadata.get(group_key)
+                .map(|(name, cid, libs)| (name.clone(), cid.clone(), libs.iter().cloned().collect::<Vec<_>>()))
+                .unwrap_or_else(|| (group_key.clone(), None, vec![]));
+            let sigs = drug_contributing_sigs.get(group_key).cloned().unwrap_or_default();
 
             // Construct the 2x2 contingency table
             let a = *count_sig; // Drug appears in significant results
@@ -847,7 +889,9 @@ async fn query(
                     approved: *approved,
                     odds_ratio: 0.0,
                     pvalue: 1.0,
-                    adj_pvalue: 1.0, // Placeholder for now
+                    adj_pvalue: 1.0,
+                    libraries: libs.clone(),
+                    contributing_signatures: sigs.clone(),
                 }
             }
 
@@ -885,7 +929,9 @@ async fn query(
                     approved: *approved,
                     odds_ratio: 0.0,
                     pvalue: 1.0,
-                    adj_pvalue: 1.0, // Placeholder for now
+                    adj_pvalue: 1.0,
+                    libraries: libs.clone(),
+                    contributing_signatures: sigs.clone(),
                 }
             }
 
@@ -904,7 +950,9 @@ async fn query(
                 approved: *approved,
                 odds_ratio: odds_ratio,
                 pvalue: p_value,
-                adj_pvalue: 1.0, // Placeholder for now
+                adj_pvalue: 1.0,
+                libraries: libs,
+                contributing_signatures: sigs,
             }
         })
     .collect(); // Collect the results into a vector
@@ -937,6 +985,7 @@ async fn query(
     let mut moa_consensus_results: Vec<DrugConsensusResult> = moa_signifigance_counts
     .par_iter() // Use Rayon parallel iterator
     .map(|(moa, (count_sig, count_insig, sig_up))| {
+        let sigs = moa_contributing_sigs.get(moa).cloned().unwrap_or_default();
         // Construct the 2x2 contingency table
         let a = *count_sig; // Drug appears in significant results
         let b = *count_insig; // Drug appears in insignificant results
@@ -966,7 +1015,9 @@ async fn query(
                 approved: false,
                 odds_ratio: 0.0,
                 pvalue: 1.0,
-                adj_pvalue: 1.0, // Placeholder for now
+                adj_pvalue: 1.0,
+                libraries: vec![],
+                contributing_signatures: sigs.clone(),
             }
         }
 
@@ -991,7 +1042,7 @@ async fn query(
         if p_value.is_nan() || p_value.is_infinite() || p_value_up.is_nan() || p_value_up.is_infinite() || p_value_down.is_nan() || p_value_down.is_infinite() {
             return DrugConsensusResult {
                 drug: moa.clone(),
-                cid: None,  // MOAs don't have CIDs
+                cid: None,
                 count_significant: *count_sig,
                 count_insignificant: *count_insig,
                 count_up_significant: *sig_up,
@@ -1004,13 +1055,15 @@ async fn query(
                 approved: false,
                 odds_ratio: 0.0,
                 pvalue: 1.0,
-                adj_pvalue: 1.0, // Placeholder for now
+                adj_pvalue: 1.0,
+                libraries: vec![],
+                contributing_signatures: sigs.clone(),
             }
         }
 
         DrugConsensusResult {
             drug: moa.clone(),
-            cid: None,  // MOAs don't have CIDs
+            cid: None,
             count_significant: *count_sig,
             count_insignificant: *count_insig,
             count_up_significant: *sig_up,
@@ -1023,7 +1076,9 @@ async fn query(
             approved: false,
             odds_ratio: odds_ratio,
             pvalue: p_value,
-            adj_pvalue: 1.0, // Placeholder for now
+            adj_pvalue: 1.0,
+            libraries: vec![],
+            contributing_signatures: sigs,
         }
     })
     .collect(); // Collect the results into a vector
@@ -1063,8 +1118,17 @@ async fn query(
         let is_up = filter_term.contains(" up");
         let is_down = filter_term.contains(" down");
         let filter_term_clean = filter_term.replace(" up", "").replace(" down", "").trim().to_lowercase();
-        consensus_results.retain(|result| result.drug.contains(&filter_term_clean));
-        moa_consensus_results.retain(|result| result.drug.contains(&filter_term_clean));
+        let filter_terms: Vec<String> = filter_term_clean.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+        if !filter_terms.is_empty() {
+            consensus_results.retain(|result| {
+                let drug_lower = result.drug.to_lowercase();
+                filter_terms.iter().any(|ft| drug_lower.contains(ft))
+            });
+            moa_consensus_results.retain(|result| {
+                let drug_lower = result.drug.to_lowercase();
+                filter_terms.iter().any(|ft| drug_lower.contains(ft))
+            });
+        }
 
         if is_up {
             consensus_results.retain(|result| result.pvalue_up < result.pvalue_down);
@@ -1080,7 +1144,7 @@ async fn query(
             consensus_results.retain(|result| result.drug.contains(" "));
         }
     }
-    
+
     consensus_results.sort_unstable_by(|a, b| a.pvalue_up.partial_cmp(&b.pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
 
     let consensus_len = consensus_results.len();
@@ -1097,6 +1161,7 @@ async fn query(
                 let is_up = filter_term.contains(" up");
                 let is_down = filter_term.contains(" down");
                 let filter_term_clean = filter_term.replace(" up", "").replace(" down", "").trim().to_lowercase();
+                let filter_terms: Vec<String> = filter_term_clean.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
                 if let Some(terms) = bitmap.terms.get(gene_set_hash) {
                     if is_up && !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)|  gene_set_term.to_lowercase().contains(" up")) {
                         return None
@@ -1104,7 +1169,10 @@ async fn query(
                     else if is_down && !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)|  gene_set_term.to_lowercase().contains(" down")) {
                         return None
                     }
-                    else if !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)| gene_set_term.to_lowercase().contains(&filter_term_clean)) {
+                    else if !filter_terms.is_empty() && !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)| {
+                        let term_lower = gene_set_term.to_lowercase();
+                        filter_terms.iter().any(|ft| term_lower.contains(ft))
+                    }) {
                         return None
                     }
                 }
@@ -1499,11 +1567,27 @@ async fn query_pairs(
     let mut drug_significance_counts: HashMap<String, (usize, usize, usize, bool)> = HashMap::new();
     let mut drug_counts: HashMap<String, (usize, bool)> = HashMap::new();
     let mut moa_signifigance_counts: HashMap<String, (usize, usize, usize)> = HashMap::new();
-    // Track group_key → (display_name, cid) for output
-    let mut drug_info: HashMap<String, (String, Option<String>)> = HashMap::new();
+    // Maps each group_key to its output metadata: (display_name, cid, contributing_libraries).
+    // group_key is PubChem CID when available, otherwise the raw perturbation name — this groups
+    // synonyms (e.g., "vorinostat" and "SAHA" with the same CID) into a single consensus entry.
+    let mut all_drug_metadata: HashMap<String, (String, Option<String>, std::collections::HashSet<String>)> = HashMap::new();
+    let mut drug_contributing_sigs: HashMap<String, Vec<ContributingSignature>> = HashMap::new();
+    let mut moa_contributing_sigs: HashMap<String, Vec<ContributingSignature>> = HashMap::new();
 
     for result in (*results).iter().take(top_n) {
         if let Some((gene_set_hash, _gene_set)) = bitmap.values.get(result.index_up) {
+            // Post-search library filter: user selected specific datasets in the frontend dropdown.
+            // Enrichment runs against all libraries, but consensus only counts gene sets from selected ones.
+            if let Some(ref post_libs) = post_search_library_filter {
+                // Look up which library this gene set belongs to
+                if let Some(lib_name) = bitmap.gene_set_libraries.get(gene_set_hash) {
+                    // Skip this gene set if its library wasn't selected
+                    if !post_libs.contains(lib_name) {
+                        continue;
+                    }
+                }
+            }
+            let current_lib = bitmap.gene_set_libraries.get(gene_set_hash).cloned().unwrap_or_default();
             if let Some(terms) = bitmap.terms.get(gene_set_hash) {
                 // Iterate over the terms for the current gene set
                 for (_gene_set_id, gene_set_term, _description, fda_approved, count, pert, moa, cid) in terms {
@@ -1523,11 +1607,27 @@ async fn query_pairs(
                             entry.2 += 1;
                         }
 
-                        // Track display name and CID for this group_key
-                        drug_info.entry(group_key.clone()).or_insert_with(|| {
+                        // Track display name, CID, and contributing libraries for this group_key
+                        let drug_metadata_entry = all_drug_metadata.entry(group_key.clone()).or_insert_with(|| {
                             let cid_opt = if !cid.is_empty() { Some(cid.clone()) } else { None };
-                            (pert.clone(), cid_opt)
+                            (pert.clone(), cid_opt, std::collections::HashSet::new())
                         });
+                        if !current_lib.is_empty() {
+                            drug_metadata_entry.2.insert(current_lib.clone()); // .2 = contributing_libraries HashSet in (display_name, cid, libraries)
+                        }
+
+                        drug_contributing_sigs.entry(group_key.clone()).or_default().push(ContributingSignature {
+                            term: gene_set_term.clone(),
+                            library: current_lib.clone(),
+                            pvalue: result.pvalue_mimic,
+                        });
+                        if !moa.is_empty() {
+                            moa_contributing_sigs.entry(moa.clone()).or_default().push(ContributingSignature {
+                                term: gene_set_term.clone(),
+                                library: current_lib.clone(),
+                                pvalue: result.pvalue_mimic,
+                            });
+                        }
 
                         // Insert the drug's total count into `drug_counts` if it's not already present
                         if !drug_counts.contains_key(&group_key) {
@@ -1571,10 +1671,11 @@ async fn query_pairs(
     let mut consensus_results: Vec<DrugConsensusResult> = drug_significance_counts
         .par_iter() // Use Rayon parallel iterator
         .map(|(group_key, (count_sig, count_insig, sig_up, approved))| {
-            // Lookup display name and CID from drug_info
-            let (display_name, cid) = drug_info.get(group_key)
-                .map(|(name, cid)| (name.clone(), cid.clone()))
-                .unwrap_or_else(|| (group_key.clone(), None));
+            // Lookup display name, CID, and libraries from all_drug_metadata
+            let (display_name, cid, libs) = all_drug_metadata.get(group_key)
+                .map(|(name, cid, libs)| (name.clone(), cid.clone(), libs.iter().cloned().collect::<Vec<_>>()))
+                .unwrap_or_else(|| (group_key.clone(), None, vec![]));
+            let sigs = drug_contributing_sigs.get(group_key).cloned().unwrap_or_default();
 
             // Construct the 2x2 contingency table
             let a = *count_sig; // Drug appears in significant results
@@ -1605,7 +1706,9 @@ async fn query_pairs(
                     approved: *approved,
                     odds_ratio: 0.0,
                     pvalue: 1.0,
-                    adj_pvalue: 1.0, // Placeholder for now
+                    adj_pvalue: 1.0,
+                    libraries: libs.clone(),
+                    contributing_signatures: sigs.clone(),
                 }
             }
 
@@ -1643,7 +1746,9 @@ async fn query_pairs(
                     approved: *approved,
                     odds_ratio: 0.0,
                     pvalue: 1.0,
-                    adj_pvalue: 1.0, // Placeholder for now
+                    adj_pvalue: 1.0,
+                    libraries: libs.clone(),
+                    contributing_signatures: sigs.clone(),
                 }
             }
 
@@ -1662,7 +1767,9 @@ async fn query_pairs(
                 approved: *approved,
                 odds_ratio: odds_ratio,
                 pvalue: p_value,
-                adj_pvalue: 1.0, // Placeholder for now
+                adj_pvalue: 1.0,
+                libraries: libs,
+                contributing_signatures: sigs,
             }
         })
     .collect(); // Collect the results into a vector
@@ -1695,6 +1802,7 @@ async fn query_pairs(
     let mut moa_consensus_results: Vec<DrugConsensusResult> = moa_signifigance_counts
     .par_iter() // Use Rayon parallel iterator
     .map(|(moa, (count_sig, count_insig, sig_up))| {
+        let sigs = moa_contributing_sigs.get(moa).cloned().unwrap_or_default();
         // Construct the 2x2 contingency table
         let a = *count_sig; // Drug appears in significant results
         let b = *count_insig; // Drug appears in insignificant results
@@ -1724,7 +1832,9 @@ async fn query_pairs(
                 approved: false,
                 odds_ratio: 0.0,
                 pvalue: 1.0,
-                adj_pvalue: 1.0, // Placeholder for now
+                adj_pvalue: 1.0,
+                libraries: vec![],
+                contributing_signatures: sigs.clone(),
             }
         }
 
@@ -1749,7 +1859,7 @@ async fn query_pairs(
         if p_value.is_nan() || p_value.is_infinite() || p_value_up.is_nan() || p_value_up.is_infinite() || p_value_down.is_nan() || p_value_down.is_infinite() {
             return DrugConsensusResult {
                 drug: moa.clone(),
-                cid: None,  // MOAs don't have CIDs
+                cid: None,
                 count_significant: *count_sig,
                 count_insignificant: *count_insig,
                 count_up_significant: *sig_up,
@@ -1762,13 +1872,15 @@ async fn query_pairs(
                 approved: false,
                 odds_ratio: 0.0,
                 pvalue: 1.0,
-                adj_pvalue: 1.0, // Placeholder for now
+                adj_pvalue: 1.0,
+                libraries: vec![],
+                contributing_signatures: sigs.clone(),
             }
         }
 
         DrugConsensusResult {
             drug: moa.clone(),
-            cid: None,  // MOAs don't have CIDs
+            cid: None,
             count_significant: *count_sig,
             count_insignificant: *count_insig,
             count_up_significant: *sig_up,
@@ -1781,7 +1893,9 @@ async fn query_pairs(
             approved: false,
             odds_ratio: odds_ratio,
             pvalue: p_value,
-            adj_pvalue: 1.0, // Placeholder for now
+            adj_pvalue: 1.0,
+            libraries: vec![],
+            contributing_signatures: sigs,
         }
     })
     .collect(); // Collect the results into a vector
@@ -1821,8 +1935,17 @@ async fn query_pairs(
         let is_up = filter_term.contains(" up");
         let is_down = filter_term.contains(" down");
         let filter_term_clean = filter_term.replace(" up", "").replace(" down", "").trim().to_lowercase();
-        consensus_results.retain(|result| result.drug.contains(&filter_term_clean));
-        moa_consensus_results.retain(|result| result.drug.contains(&filter_term_clean));
+        let filter_terms: Vec<String> = filter_term_clean.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+        if !filter_terms.is_empty() {
+            consensus_results.retain(|result| {
+                let drug_lower = result.drug.to_lowercase();
+                filter_terms.iter().any(|ft| drug_lower.contains(ft))
+            });
+            moa_consensus_results.retain(|result| {
+                let drug_lower = result.drug.to_lowercase();
+                filter_terms.iter().any(|ft| drug_lower.contains(ft))
+            });
+        }
 
         if is_up {
             consensus_results.retain(|result| result.pvalue_up < result.pvalue_down);
@@ -1838,7 +1961,7 @@ async fn query_pairs(
             consensus_results.retain(|result| result.drug.contains(" "));
         }
     }
-    
+
     // Sort results by adjusted p-value
     consensus_results.sort_unstable_by(|a, b| a.pvalue_up.partial_cmp(&b.pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
 
@@ -1855,10 +1978,14 @@ async fn query_pairs(
             let (gene_set_hash, _gene_set) = bitmap.values.get(result.index_up)?;
             if let Some(filter_term) = &filter_term {
                 let filter_term_clean = filter_term.replace(" up", "").replace(" down", "").trim().to_lowercase();
+                let filter_terms: Vec<String> = filter_term_clean.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
                 let is_up = filter_term.contains(" up");
                 let is_down = filter_term.contains(" down");
                 if let Some(terms) = bitmap.terms.get(gene_set_hash) {
-                    if !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)| gene_set_term.to_lowercase().contains(&filter_term_clean)) {
+                    if !filter_terms.is_empty() && !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)| {
+                        let term_lower = gene_set_term.to_lowercase();
+                        filter_terms.iter().any(|ft| term_lower.contains(ft))
+                    }) {
                         return None
                     }
                 } else if is_up && (result.pvalue_mimic > result.pvalue_reverse) {

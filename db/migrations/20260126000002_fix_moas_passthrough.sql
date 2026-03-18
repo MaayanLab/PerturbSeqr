@@ -24,7 +24,7 @@ CREATE OR REPLACE FUNCTION app_private.indexed_enrich(
 )
 RETURNS app_public.paginated_enrich_result
 LANGUAGE plpython3u IMMUTABLE PARALLEL SAFE AS $$
-  import os, requests
+  import os, json, requests
   params = dict(
     overlap_ge=overlap_ge,
     pvalue_le=pvalue_le,
@@ -39,7 +39,6 @@ LANGUAGE plpython3u IMMUTABLE PARALLEL SAFE AS $$
   if offset: params['offset'] = offset
   if first: params['limit'] = first
   if sortby: params['sortby'] = sortby
-  # Pass library_names as comma-separated list if provided
   if library_names: params['library_names'] = ','.join(library_names)
   if post_search_filter_library_names: params['post_search_filter_library_names'] = ','.join(post_search_filter_library_names)
   req = requests.post(
@@ -53,6 +52,12 @@ LANGUAGE plpython3u IMMUTABLE PARALLEL SAFE AS $$
   consensus_count = content_range_parts[2]
   moas_count = content_range_parts[3] if len(content_range_parts) > 3 else 0
   gene_set_count = content_range_parts[4] if len(content_range_parts) > 4 else 0
+  for item in response_json.get('consensus', []):
+    if 'contributing_signatures' in item:
+      item['contributing_signatures'] = json.dumps(item['contributing_signatures'])
+  for item in response_json.get('moas', []):
+    if 'contributing_signatures' in item:
+      item['contributing_signatures'] = json.dumps(item['contributing_signatures'])
   return dict(
     nodes=response_json['results'],
     consensus=response_json['consensus'],
@@ -84,7 +89,7 @@ CREATE OR REPLACE FUNCTION app_private.indexed_paired_enrich(
 )
 RETURNS app_public.paginated_paired_enrich_result
 LANGUAGE plpython3u IMMUTABLE PARALLEL SAFE AS $$
-  import os, requests
+  import os, json, requests
   params = dict(
     overlap_ge=overlap_ge,
     pvalue_le=pvalue_le,
@@ -99,7 +104,6 @@ LANGUAGE plpython3u IMMUTABLE PARALLEL SAFE AS $$
   if offset: params['offset'] = offset
   if first: params['limit'] = first
   if sortby: params['sortby'] = sortby
-  # Pass library_names as comma-separated list if provided
   if library_names: params['library_names'] = ','.join(library_names)
   if post_search_filter_library_names: params['post_search_filter_library_names'] = ','.join(post_search_filter_library_names)
   req = requests.post(
@@ -113,6 +117,12 @@ LANGUAGE plpython3u IMMUTABLE PARALLEL SAFE AS $$
   consensus_count = content_range_parts[2]
   moas_count = content_range_parts[3] if len(content_range_parts) > 3 else 0
   gene_set_count = content_range_parts[4] if len(content_range_parts) > 4 else 0
+  for item in response_json.get('consensus', []):
+    if 'contributing_signatures' in item:
+      item['contributing_signatures'] = json.dumps(item['contributing_signatures'])
+  for item in response_json.get('moas', []):
+    if 'contributing_signatures' in item:
+      item['contributing_signatures'] = json.dumps(item['contributing_signatures'])
   return dict(
     nodes=response_json['results'],
     consensus=response_json['consensus'],

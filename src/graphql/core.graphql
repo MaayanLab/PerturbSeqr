@@ -86,6 +86,8 @@ query EnrichmentQuery($genes: [String]!, $filterTerm: String = "", $libraryNames
         pvalueDown
         adjPvalueDown
         oddsRatioDown
+        libraries
+        contributingSignatures
       }
       moas {
         drug
@@ -103,6 +105,8 @@ query EnrichmentQuery($genes: [String]!, $filterTerm: String = "", $libraryNames
         pvalueDown
         adjPvalueDown
         oddsRatioDown
+        libraries
+        contributingSignatures
       }
     }
   }
@@ -182,6 +186,8 @@ query EnrichmentQueryConsensus($genes: [String]!, $filterTerm: String = "", $lib
           pvalueDown
           adjPvalueDown
           oddsRatioDown
+          libraries
+          contributingSignatures
         }
       consensusCount
       }
@@ -218,6 +224,8 @@ query EnrichmentQueryMoAs($genes: [String]!, $filterTerm: String = "", $libraryN
           pvalueDown
           adjPvalueDown
           oddsRatioDown
+          libraries
+          contributingSignatures
         }
         moasCount
       }
@@ -261,6 +269,8 @@ query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTer
         pvalueDown
         adjPvalueDown
         oddsRatioDown
+        libraries
+        contributingSignatures
       }
       moas {
         drug
@@ -278,6 +288,8 @@ query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTer
         pvalueDown
         adjPvalueDown
         oddsRatioDown
+        libraries
+        contributingSignatures
       }
       nodes {
         adjPvalueMimic
@@ -398,6 +410,8 @@ query PairEnrichmentQueryConsensus($genesUp: [String]!, $genesDown: [String]!, $
         pvalueDown
         adjPvalueDown
         oddsRatioDown
+        libraries
+        contributingSignatures
       }
     }
   }
@@ -436,6 +450,8 @@ query PairEnrichmentQueryMoAs($genesUp: [String]!, $genesDown: [String]!, $filte
         pvalueDown
         adjPvalueDown
         oddsRatioDown
+        libraries
+        contributingSignatures
       }
     }
   }
