@@ -34,8 +34,6 @@ echo ""
 
 # Step 1: Run dbmate migrations
 echo "=== Step 1: Running database migrations ==="
-curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
-chmod +x /usr/local/bin/dbmate
 dbmate --migrations-dir /app/migrations up || echo "Migrations already applied or no new migrations"
 echo ""
 
