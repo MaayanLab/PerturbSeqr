@@ -65,7 +65,7 @@ export default function Footer() {
         <ul>
           <li>
             <Link
-              href="https://www.apache.org/licenses/LICENSE-2.0.txt"
+              href="https://github.com/MaayanLab/PerturbSeqr/blob/main/LICENSE"
               target="_blank"
             >
               License
