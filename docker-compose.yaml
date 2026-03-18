@@ -1,26 +1,10 @@
-# PerturbSeek Docker Compose Configuration
-#
-# Persistent services: postgres, minio, enrich, app
-# Job containers: minio-setup, dbmate, ingest (run with `docker compose run --rm <job>`)
-#
-# Usage:
-#   docker compose up -d                          # Start persistent services
-#   docker compose run --rm minio-setup           # Create bucket + set public policy
-#   docker compose cp db/data/gmts perturbseqr-minio:/data/  # Copy GMT files to MinIO
-#   docker compose run --rm ingest                # Run migrations + ingest data
-#   docker compose down -v                        # Full reset (removes volumes)
-
 services:
-  # === Persistent Services ===
-
   perturbseqr-postgres:
     build: db
-    image: johnkgardner/perturbseqr-postgres:${IMAGE_TAG:-0.0.1}
+    image: johnkgardner/perturbseqr-postgres:0.0.1
     shm_size: 1Gb
     environment:
-      - POSTGRES_DB=${POSTGRES_DB:-postgres}
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_PASSWORD
       - ENRICH_URL=http://perturbseqr-enrich:8000
     ports:
       - 5432:5432
@@ -34,10 +18,11 @@ services:
 
   perturbseqr-minio:
     image: quay.io/minio/minio
+    pull_policy: missing
     command: server /data --console-address ":9001"
     environment:
-      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minio}
-      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD
     ports:
       - target: 9000
         published: 9000
@@ -59,7 +44,7 @@ services:
 
   perturbseqr-enrich:
     build: enrich
-    image: johnkgardner/perturbseqr-enrich:${IMAGE_TAG:-0.0.1}
+    image: johnkgardner/perturbseqr-enrich:0.0.1
     x-kubernetes:
       imagePullPolicy: Always
     deploy:
@@ -67,7 +52,7 @@ services:
         reservations:
           memory: 5Gb
     environment:
-      - 'ROCKET_DATABASES={postgres={url="postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@perturbseqr-postgres/${POSTGRES_DB:-postgres}"}}'
+      - ROCKET_DATABASES={postgres={url="postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres"}}
     ports:
       - 8000:8000
     volumes:
@@ -78,17 +63,15 @@ services:
 
   perturbseqr-app:
     build: .
-    image: johnkgardner/perturbseqr-app:${IMAGE_TAG:-0.0.1}
+    image: johnkgardner/perturbseqr-app:0.0.1
     x-kubernetes:
       imagePullPolicy: Always
     environment:
       - PUBLIC_URL=https://perturbseqr.k8s.dev.maayanlab.cloud
-      - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@perturbseqr-postgres/${POSTGRES_DB:-postgres}
-      - AUTHORIZATION_HEADER=$AUTHORIZATION_HEADER
+      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres
       - NODE_ENV=production
       - ENRICH_URL=http://perturbseqr-enrich:8000
-      - NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
-      - NEXT_PUBLIC_MINIO_URL=${NEXT_PUBLIC_MINIO_URL:-https://s3.perturbseqr.k8s.dev.maayanlab.cloud}
+      - NEXT_PUBLIC_MINIO_URL=https://s3.perturbseqr.k8s.dev.maayanlab.cloud
       - MINIO_ENDPOINT=perturbseqr-minio:9000
     ports:
       - target: 3000
@@ -100,14 +83,12 @@ services:
       perturbseqr-postgres:
         condition: service_healthy
 
-  # === Job Containers (run with `docker compose run --rm <job>`) ===
-
   minio-setup:
     build: minio
-    image: johnkgardner/perturbseqr-minio-setup:${IMAGE_TAG:-0.0.1}
+    image: johnkgardner/perturbseqr-minio-setup:0.0.1
     environment:
-      - S3_URL=http://${MINIO_ROOT_USER:-minio}:${MINIO_ROOT_PASSWORD}@perturbseqr-minio:9000/gmts
-      - PUBLIC_S3_URL=${NEXT_PUBLIC_MINIO_URL:-http://localhost:9000}/gmts
+      - S3_URL=http://minio:${MINIO_ROOT_PASSWORD}@perturbseqr-minio:9000/gmts
+      - PUBLIC_S3_URL=https://s3.perturbseqr.k8s.dev.maayanlab.cloud/gmts
     depends_on:
       perturbseqr-minio:
         condition: service_healthy
@@ -118,7 +99,7 @@ services:
     volumes:
       - ./db/migrations:/db/migrations:ro
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@perturbseqr-postgres/${POSTGRES_DB:-postgres}?sslmode=disable
+      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres?sslmode=disable
     depends_on:
       perturbseqr-postgres:
         condition: service_healthy
@@ -129,14 +110,14 @@ services:
     build:
       context: .
       dockerfile: ingest/Dockerfile
-    image: johnkgardner/perturbseqr-ingest:${IMAGE_TAG:-0.0.1}
+    image: johnkgardner/perturbseqr-ingest:0.0.1
     x-kubernetes:
       imagePullPolicy: Always
     environment:
-      - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@perturbseqr-postgres/${POSTGRES_DB:-postgres}?sslmode=disable
+      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres?sslmode=disable
       - MINIO_ENDPOINT=perturbseqr-minio:9000
-      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minio}
-      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD
       - MINIO_SECURE=false
       - ENRICH_URL=http://perturbseqr-enrich:8000
     depends_on:
