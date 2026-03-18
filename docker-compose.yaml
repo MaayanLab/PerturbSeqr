@@ -78,7 +78,7 @@ services:
         published: 3000
         x-kubernetes:
           annotations:
-            maayanlab.cloud/ingress: perturbseqr.k8s.dev.maayanlab.cloud
+            maayanlab.cloud/ingress: https://perturbseqr.k8s.dev.maayanlab.cloud
     depends_on:
       perturbseqr-postgres:
         condition: service_healthy
