@@ -71,12 +71,9 @@ export type Background = Node & {
 
 export type BackgroundEnrichArgs = {
   adjPvalueLe?: InputMaybe<Scalars['Float']['input']>;
-  filterCellLine?: InputMaybe<Scalars['String']['input']>;
-  filterConcentration?: InputMaybe<Scalars['String']['input']>;
   filterFda?: InputMaybe<Scalars['Boolean']['input']>;
   filterKo?: InputMaybe<Scalars['Boolean']['input']>;
   filterTerm?: InputMaybe<Scalars['String']['input']>;
-  filterTimepoint?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   genes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   libraryNames?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
@@ -102,12 +99,9 @@ export type BackgroundOverlapArgs = {
 
 export type BackgroundPairedEnrichArgs = {
   adjPvalueLe?: InputMaybe<Scalars['Float']['input']>;
-  filterCellLine?: InputMaybe<Scalars['String']['input']>;
-  filterConcentration?: InputMaybe<Scalars['String']['input']>;
   filterFda?: InputMaybe<Scalars['Boolean']['input']>;
   filterKo?: InputMaybe<Scalars['Boolean']['input']>;
   filterTerm?: InputMaybe<Scalars['String']['input']>;
-  filterTimepoint?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   genesDown?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   genesUp?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
@@ -1124,9 +1118,6 @@ export type EnrichmentQueryQueryVariables = Exact<{
   topN?: InputMaybe<Scalars['Int']['input']>;
   pvalueLe?: InputMaybe<Scalars['Float']['input']>;
   postSearchFilterLibraryNames?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
-  filterCellLine?: InputMaybe<Scalars['String']['input']>;
-  filterTimepoint?: InputMaybe<Scalars['String']['input']>;
-  filterConcentration?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -1193,9 +1184,6 @@ export type PairEnrichmentQueryQueryVariables = Exact<{
   topN?: InputMaybe<Scalars['Int']['input']>;
   pvalueLe?: InputMaybe<Scalars['Float']['input']>;
   postSearchFilterLibraryNames?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
-  filterCellLine?: InputMaybe<Scalars['String']['input']>;
-  filterTimepoint?: InputMaybe<Scalars['String']['input']>;
-  filterConcentration?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -1412,7 +1400,7 @@ export type FetchUserGeneSetQueryHookResult = ReturnType<typeof useFetchUserGene
 export type FetchUserGeneSetLazyQueryHookResult = ReturnType<typeof useFetchUserGeneSetLazyQuery>;
 export type FetchUserGeneSetQueryResult = Apollo.QueryResult<FetchUserGeneSetQuery, FetchUserGeneSetQueryVariables>;
 export const EnrichmentQueryDocument = gql`
-    query EnrichmentQuery($genes: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05, $postSearchFilterLibraryNames: [String], $filterCellLine: String, $filterTimepoint: String, $filterConcentration: String) {
+    query EnrichmentQuery($genes: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05, $postSearchFilterLibraryNames: [String]) {
   currentBackground {
     enrich(
       genes: $genes
@@ -1426,9 +1414,6 @@ export const EnrichmentQueryDocument = gql`
       topN: $topN
       pvalueLe: $pvalueLe
       postSearchFilterLibraryNames: $postSearchFilterLibraryNames
-      filterCellLine: $filterCellLine
-      filterTimepoint: $filterTimepoint
-      filterConcentration: $filterConcentration
     ) {
       nodes {
         geneSetHash
@@ -1526,9 +1511,6 @@ export const EnrichmentQueryDocument = gql`
  *      topN: // value for 'topN'
  *      pvalueLe: // value for 'pvalueLe'
  *      postSearchFilterLibraryNames: // value for 'postSearchFilterLibraryNames'
- *      filterCellLine: // value for 'filterCellLine'
- *      filterTimepoint: // value for 'filterTimepoint'
- *      filterConcentration: // value for 'filterConcentration'
  *   },
  * });
  */
@@ -1778,7 +1760,7 @@ export type EnrichmentQueryMoAsQueryHookResult = ReturnType<typeof useEnrichment
 export type EnrichmentQueryMoAsLazyQueryHookResult = ReturnType<typeof useEnrichmentQueryMoAsLazyQuery>;
 export type EnrichmentQueryMoAsQueryResult = Apollo.QueryResult<EnrichmentQueryMoAsQuery, EnrichmentQueryMoAsQueryVariables>;
 export const PairEnrichmentQueryDocument = gql`
-    query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05, $postSearchFilterLibraryNames: [String], $filterCellLine: String, $filterTimepoint: String, $filterConcentration: String) {
+    query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05, $postSearchFilterLibraryNames: [String]) {
   currentBackground {
     pairedEnrich(
       filterTerm: $filterTerm
@@ -1793,9 +1775,6 @@ export const PairEnrichmentQueryDocument = gql`
       genesDown: $genesDown
       genesUp: $genesUp
       postSearchFilterLibraryNames: $postSearchFilterLibraryNames
-      filterCellLine: $filterCellLine
-      filterTimepoint: $filterTimepoint
-      filterConcentration: $filterConcentration
     ) {
       totalCount
       consensusCount
@@ -1899,9 +1878,6 @@ export const PairEnrichmentQueryDocument = gql`
  *      topN: // value for 'topN'
  *      pvalueLe: // value for 'pvalueLe'
  *      postSearchFilterLibraryNames: // value for 'postSearchFilterLibraryNames'
- *      filterCellLine: // value for 'filterCellLine'
- *      filterTimepoint: // value for 'filterTimepoint'
- *      filterConcentration: // value for 'filterConcentration'
  *   },
  * });
  */

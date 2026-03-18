@@ -564,7 +564,7 @@ async fn delete(
 // query a specific background_id, providing the bitset vector as input
 //  the result are the gene_set_ids & relevant metrics
 // this can be pretty fast since the index is saved in memory and the overlaps can be computed in parallel
-#[post("/<background_id>?<filter_term>&<overlap_ge>&<pvalue_le>&<adj_pvalue_le>&<offset>&<limit>&<filter_fda>&<sortby>&<filter_ko>&<top_n>&<library_names>&<post_search_filter_library_names>&<filter_cell_line>&<filter_timepoint>&<filter_concentration>", data = "<input_gene_set>")]
+#[post("/<background_id>?<filter_term>&<overlap_ge>&<pvalue_le>&<adj_pvalue_le>&<offset>&<limit>&<filter_fda>&<sortby>&<filter_ko>&<top_n>&<library_names>&<post_search_filter_library_names>", data = "<input_gene_set>")]
 async fn query(
     mut db: Connection<Postgres>,
     state: &State<PersistentState>,
@@ -582,9 +582,6 @@ async fn query(
     top_n: Option<usize>,
     library_names: Option<String>,
     post_search_filter_library_names: Option<String>,
-    filter_cell_line: Option<String>,
-    filter_timepoint: Option<String>,
-    filter_concentration: Option<String>,
 ) -> Result<QueryResponse, Custom<String>> {
     let background_id = {
         if background_id == "latest" {
@@ -614,17 +611,6 @@ async fn query(
     // Parse post-search library filter (filters results AFTER Fisher's, doesn't affect background)
     let post_search_library_filter: Option<std::collections::HashSet<String>> = post_search_filter_library_names.map(|names| {
         names.split(',').map(|s| s.trim().to_string()).collect()
-    });
-
-    // Parse field filter query params from the frontend dropdowns (comma-separated multi-value, case-insensitive) into HashSets for O(1) lookup
-    let filter_cell_lines: Option<std::collections::HashSet<String>> = filter_cell_line.map(|names| {
-        names.split(',').map(|s| s.trim().to_lowercase()).collect()
-    });
-    let filter_timepoints: Option<std::collections::HashSet<String>> = filter_timepoint.map(|names| {
-        names.split(',').map(|s| s.trim().to_lowercase()).collect()
-    });
-    let filter_concentrations: Option<std::collections::HashSet<String>> = filter_concentration.map(|names| {
-        names.split(',').map(|s| s.trim().to_lowercase()).collect()
     });
 
     // Compute filtered background and gene set count based on selected libraries
@@ -1132,8 +1118,17 @@ async fn query(
         let is_up = filter_term.contains(" up");
         let is_down = filter_term.contains(" down");
         let filter_term_clean = filter_term.replace(" up", "").replace(" down", "").trim().to_lowercase();
-        consensus_results.retain(|result| result.drug.contains(&filter_term_clean));
-        moa_consensus_results.retain(|result| result.drug.contains(&filter_term_clean));
+        let filter_terms: Vec<String> = filter_term_clean.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+        if !filter_terms.is_empty() {
+            consensus_results.retain(|result| {
+                let drug_lower = result.drug.to_lowercase();
+                filter_terms.iter().any(|ft| drug_lower.contains(ft))
+            });
+            moa_consensus_results.retain(|result| {
+                let drug_lower = result.drug.to_lowercase();
+                filter_terms.iter().any(|ft| drug_lower.contains(ft))
+            });
+        }
 
         if is_up {
             consensus_results.retain(|result| result.pvalue_up < result.pvalue_down);
@@ -1149,7 +1144,7 @@ async fn query(
             consensus_results.retain(|result| result.drug.contains(" "));
         }
     }
-    
+
     consensus_results.sort_unstable_by(|a, b| a.pvalue_up.partial_cmp(&b.pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
 
     let consensus_len = consensus_results.len();
@@ -1166,6 +1161,7 @@ async fn query(
                 let is_up = filter_term.contains(" up");
                 let is_down = filter_term.contains(" down");
                 let filter_term_clean = filter_term.replace(" up", "").replace(" down", "").trim().to_lowercase();
+                let filter_terms: Vec<String> = filter_term_clean.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
                 if let Some(terms) = bitmap.terms.get(gene_set_hash) {
                     if is_up && !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)|  gene_set_term.to_lowercase().contains(" up")) {
                         return None
@@ -1173,7 +1169,10 @@ async fn query(
                     else if is_down && !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)|  gene_set_term.to_lowercase().contains(" down")) {
                         return None
                     }
-                    else if !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)| gene_set_term.to_lowercase().contains(&filter_term_clean)) {
+                    else if !filter_terms.is_empty() && !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)| {
+                        let term_lower = gene_set_term.to_lowercase();
+                        filter_terms.iter().any(|ft| term_lower.contains(ft))
+                    }) {
                         return None
                     }
                 }
@@ -1185,33 +1184,6 @@ async fn query(
                         return None
                     }
                 }
-            }
-            // Field filters: cell line, timepoint, concentration
-            // Uses contains matching (like the search bar) on the parsed field
-            // Term format: perturbation::cellLine::cellType::timepoint::concentration up|down
-            if filter_cell_lines.is_some() || filter_timepoints.is_some() || filter_concentrations.is_some() {
-                let dominated = if let Some(terms) = bitmap.terms.get(gene_set_hash) {
-                    !terms.iter().any(|(_gene_set_id, gene_set_term, _desc, _fda, _count, _pert, _moa, _cid)| {
-                        let body = gene_set_term.trim_end_matches(" up").trim_end_matches(" down").trim_end_matches(" dn");
-                        let parts: Vec<&str> = body.split("::").collect();
-                        let cell_line = parts.get(1).unwrap_or(&"").to_lowercase();
-                        let timepoint = parts.get(3).unwrap_or(&"").to_lowercase();
-                        let concentration = parts.get(4).unwrap_or(&"").to_lowercase();
-                        if let Some(ref filter) = filter_cell_lines {
-                            if cell_line.is_empty() || !filter.iter().any(|f| cell_line.contains(f.as_str())) { return false; }
-                        }
-                        if let Some(ref filter) = filter_timepoints {
-                            if timepoint.is_empty() || !filter.iter().any(|f| timepoint.contains(f.as_str())) { return false; }
-                        }
-                        if let Some(ref filter) = filter_concentrations {
-                            if concentration.is_empty() || !filter.iter().any(|f| concentration.contains(f.as_str())) { return false; }
-                        }
-                        true
-                    })
-                } else {
-                    true // no terms = can't match, filter it out
-                };
-                if dominated { return None; }
             }
             if let Some(filter_fda) = filter_fda {
                 if filter_fda {
@@ -1359,7 +1331,7 @@ async fn query(
     })
 }
 
-#[post("/pairs/<background_id>?<filter_term>&<overlap_ge>&<pvalue_le>&<adj_pvalue_le>&<offset>&<limit>&<filter_fda>&<sortby>&<filter_ko>&<top_n>&<library_names>&<post_search_filter_library_names>&<filter_cell_line>&<filter_timepoint>&<filter_concentration>", data = "<input_gene_sets>")]
+#[post("/pairs/<background_id>?<filter_term>&<overlap_ge>&<pvalue_le>&<adj_pvalue_le>&<offset>&<limit>&<filter_fda>&<sortby>&<filter_ko>&<top_n>&<library_names>&<post_search_filter_library_names>", data = "<input_gene_sets>")]
 async fn query_pairs(
     mut db: Connection<Postgres>,
     state: &State<PersistentState>,
@@ -1377,9 +1349,6 @@ async fn query_pairs(
     top_n: Option<usize>,
     library_names: Option<String>,
     post_search_filter_library_names: Option<String>,
-    filter_cell_line: Option<String>,
-    filter_timepoint: Option<String>,
-    filter_concentration: Option<String>,
 ) -> Result<PairedQueryResponse, Custom<String>> {
 
     let background_id = {
@@ -1424,17 +1393,6 @@ async fn query_pairs(
     // Parse post-search library filter (filters results AFTER Fisher's, doesn't affect background)
     let post_search_library_filter: Option<std::collections::HashSet<String>> = post_search_filter_library_names.map(|names| {
         names.split(',').map(|s| s.trim().to_string()).collect()
-    });
-
-    // Parse field filter query params from the frontend dropdowns (comma-separated multi-value, case-insensitive) into HashSets for O(1) lookup
-    let filter_cell_lines: Option<std::collections::HashSet<String>> = filter_cell_line.map(|names| {
-        names.split(',').map(|s| s.trim().to_lowercase()).collect()
-    });
-    let filter_timepoints: Option<std::collections::HashSet<String>> = filter_timepoint.map(|names| {
-        names.split(',').map(|s| s.trim().to_lowercase()).collect()
-    });
-    let filter_concentrations: Option<std::collections::HashSet<String>> = filter_concentration.map(|names| {
-        names.split(',').map(|s| s.trim().to_lowercase()).collect()
     });
 
     // Compute filtered background and gene set count based on selected libraries
@@ -1977,8 +1935,17 @@ async fn query_pairs(
         let is_up = filter_term.contains(" up");
         let is_down = filter_term.contains(" down");
         let filter_term_clean = filter_term.replace(" up", "").replace(" down", "").trim().to_lowercase();
-        consensus_results.retain(|result| result.drug.contains(&filter_term_clean));
-        moa_consensus_results.retain(|result| result.drug.contains(&filter_term_clean));
+        let filter_terms: Vec<String> = filter_term_clean.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+        if !filter_terms.is_empty() {
+            consensus_results.retain(|result| {
+                let drug_lower = result.drug.to_lowercase();
+                filter_terms.iter().any(|ft| drug_lower.contains(ft))
+            });
+            moa_consensus_results.retain(|result| {
+                let drug_lower = result.drug.to_lowercase();
+                filter_terms.iter().any(|ft| drug_lower.contains(ft))
+            });
+        }
 
         if is_up {
             consensus_results.retain(|result| result.pvalue_up < result.pvalue_down);
@@ -1994,7 +1961,7 @@ async fn query_pairs(
             consensus_results.retain(|result| result.drug.contains(" "));
         }
     }
-    
+
     // Sort results by adjusted p-value
     consensus_results.sort_unstable_by(|a, b| a.pvalue_up.partial_cmp(&b.pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
 
@@ -2011,10 +1978,14 @@ async fn query_pairs(
             let (gene_set_hash, _gene_set) = bitmap.values.get(result.index_up)?;
             if let Some(filter_term) = &filter_term {
                 let filter_term_clean = filter_term.replace(" up", "").replace(" down", "").trim().to_lowercase();
+                let filter_terms: Vec<String> = filter_term_clean.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
                 let is_up = filter_term.contains(" up");
                 let is_down = filter_term.contains(" down");
                 if let Some(terms) = bitmap.terms.get(gene_set_hash) {
-                    if !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)| gene_set_term.to_lowercase().contains(&filter_term_clean)) {
+                    if !filter_terms.is_empty() && !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)| {
+                        let term_lower = gene_set_term.to_lowercase();
+                        filter_terms.iter().any(|ft| term_lower.contains(ft))
+                    }) {
                         return None
                     }
                 } else if is_up && (result.pvalue_mimic > result.pvalue_reverse) {
@@ -2030,32 +2001,6 @@ async fn query_pairs(
                         return None
                     }
                 }
-            }
-            // Field filters: cell line, timepoint, concentration
-            // Uses contains matching (like the search bar) on the parsed field
-            if filter_cell_lines.is_some() || filter_timepoints.is_some() || filter_concentrations.is_some() {
-                let dominated = if let Some(terms) = bitmap.terms.get(gene_set_hash) {
-                    !terms.iter().any(|(_gene_set_id, gene_set_term, _desc, _fda, _count, _pert, _moa, _cid)| {
-                        let body = gene_set_term.trim_end_matches(" up").trim_end_matches(" down").trim_end_matches(" dn");
-                        let parts: Vec<&str> = body.split("::").collect();
-                        let cell_line = parts.get(1).unwrap_or(&"").to_lowercase();
-                        let timepoint = parts.get(3).unwrap_or(&"").to_lowercase();
-                        let concentration = parts.get(4).unwrap_or(&"").to_lowercase();
-                        if let Some(ref filter) = filter_cell_lines {
-                            if cell_line.is_empty() || !filter.iter().any(|f| cell_line.contains(f.as_str())) { return false; }
-                        }
-                        if let Some(ref filter) = filter_timepoints {
-                            if timepoint.is_empty() || !filter.iter().any(|f| timepoint.contains(f.as_str())) { return false; }
-                        }
-                        if let Some(ref filter) = filter_concentrations {
-                            if concentration.is_empty() || !filter.iter().any(|f| concentration.contains(f.as_str())) { return false; }
-                        }
-                        true
-                    })
-                } else {
-                    true // no terms = can't match, filter it out
-                };
-                if dominated { return None; }
             }
             if let Some(filter_fda) = filter_fda {
                 if filter_fda {
