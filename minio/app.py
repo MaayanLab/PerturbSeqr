@@ -7,8 +7,8 @@ from minio import Minio
 dotenv.load_dotenv()
 
 # Parse S3_URL: http://user:pass@host:port/bucket
-S3_URL = os.environ.get('S3_URL', 'http://minio:minioadmin@localhost:9000/data')
-PUBLIC_S3_URL = os.environ.get('PUBLIC_S3_URL', 'http://localhost:9000/data')
+S3_URL = os.environ['S3_URL']
+PUBLIC_S3_URL = os.environ['PUBLIC_S3_URL']
 
 parsed = urlparse(S3_URL)
 bucket = parsed.path.lstrip('/')
