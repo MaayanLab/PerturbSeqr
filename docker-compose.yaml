@@ -68,7 +68,7 @@ services:
 
   perturbseqr-app:
     build: .
-    image: johnkgardner/perturbseqr-app:0.2.29
+    image: maayanlab/perturbseqr-app:0.2.29
     pull_policy: if_not_present
     platform: linux/amd64
     environment:
