@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 """
 Canonicalize all GMT term formats into a single unified format.
 
@@ -299,12 +300,89 @@ def transform_replogle(term: str) -> str:
     return canonical + direction
 
 
+def clean_perturb_atlas_cell(val: str) -> tuple[str, str]:
+    """Extract (cell_line, cell_type) from Perturb Atlas cell_line values.
+
+    Returns a real cell line name in cell_line only when a recognizable name
+    (uppercase/alphanumeric code like K562, MDA-MB-231) can be extracted.
+    Descriptive values (macrophage, human umbilical vein endothelial cells,
+    skin, liver, etc.) go to cell_type.
+    """
+    if not val:
+        return "", ""
+    val = val.replace("\\,", ",").strip()
+
+    # No spaces and no parens -> check if it looks like a cell line name
+    if " " not in val and "(" not in val:
+        if _is_cell_line_name(val):
+            return val, ""
+        return "", val
+
+    # Pattern: 'NAME (description)' or 'NAME(description)'
+    m = re.match(r"^([A-Z0-9][A-Za-z0-9\-\.\/\+\#]*)\s*\(([^)]+)\)\s*$", val)
+    if m and _is_cell_line_name(m.group(1)):
+        return m.group(1), m.group(2)
+
+    # Pattern: 'description (NAME)' — trailing parenthetical cell line
+    m = re.search(r"\(([A-Z0-9][A-Za-z0-9\-\.\/\+\#]*)\)\s*$", val)
+    if m and _is_cell_line_name(m.group(1)):
+        return m.group(1), val[: m.start()].strip()
+
+    # Pattern: '... cell line(s) NAME'
+    m = re.search(
+        r"\bcell\s+lines?\s+([A-Z0-9][A-Za-z0-9\-\.\/\+\#]*)\s*$", val, re.I
+    )
+    if m and _is_cell_line_name(m.group(1)):
+        return m.group(1), val[: m.start()].strip()
+
+    # Pattern: '... cell(s) NAME'
+    m = re.search(r"\bcells?\s+([A-Z0-9][A-Za-z0-9\-\.\/\+\#]*)\s*$", val)
+    if m and _is_cell_line_name(m.group(1)):
+        return m.group(1), val[: m.start(1)].strip()
+
+    # Pattern: trailing uppercase cell line name (2+ chars)
+    m = re.search(r"\s([A-Z][A-Z0-9\-\.\/]+)\s*$", val)
+    if m and _is_cell_line_name(m.group(1)):
+        desc = re.sub(r"^\((.+)\)$", r"\1", val[: m.start()].strip()).strip()
+        return m.group(1), desc
+
+    # Pattern: first word is cell line code + rest
+    m = re.match(r"^([A-Z0-9][A-Za-z0-9\-\.]*)\s+(.+)$", val)
+    if m and _is_cell_line_name(m.group(1)):
+        name, rest = m.group(1), m.group(2)
+        # Short non-biological qualifier → compound cell line name
+        if len(rest) <= 15 and not _PERTURB_ATLAS_BIO_RE.search(rest):
+            return val, ""
+        return name, rest
+
+    return "", val
+
+
+# Helpers for clean_perturb_atlas_cell
+_PERTURB_ATLAS_BIO_RE = re.compile(
+    r"\b(?:cells?|cancer|tumor|tumour|carcinoma|kidney|brain|liver|lung|breast"
+    r"|colon|blood|tissue|skin|muscle|bone|fibroblast|macrophage|epithelial"
+    r"|endothelial|stem|embryo\w*|primary|organoid)\b",
+    re.I,
+)
+
+
+def _is_cell_line_name(name: str) -> bool:
+    """Check if a string looks like a cell line name (e.g. K562, MDA-MB-231)."""
+    return bool(
+        re.match(r"^[A-Z0-9][A-Za-z0-9\-\.\/\+\#]*$", name)
+        and 2 <= len(name) <= 20
+        and re.search(r"[A-Za-z]", name)
+        and "cell" not in name.lower()
+    )
+
+
 def transform_perturb_atlas(term: str, metadata: dict) -> str:
     """Perturb_10000_KD_CPSF6_SRP013565 up -> CPSF6::{cellLine}::{cellType}::::::KD::SRP013565::10000 up
 
-    Only places the cell value in the cellLine position when the metadata
-    cell_type annotation is "cell line".  Otherwise the value goes into the
-    cellType position so it doesn't inflate unique-cell-line counts.
+    Extracts a recognizable cell line name (e.g. K562, MDA-MB-231) from the
+    metadata cell_line field.  Descriptive values that aren't real cell line
+    names (e.g. macrophage, liver) go into the cellType position instead.
     """
     body, direction = strip_direction(term)
     parts = body.split("_")
@@ -313,11 +391,7 @@ def transform_perturb_atlas(term: str, metadata: dict) -> str:
         lookup_key = f"{prefix}-{id_}"
         meta = metadata.get(lookup_key, {})
         cell_val = meta.get("cell_line") or ""
-        cell_type_annotation = (meta.get("cell_type") or "").strip().lower()
-        if cell_type_annotation == "cell line":
-            cell_line, cell_type = cell_val, ""
-        else:
-            cell_line, cell_type = "", cell_val
+        cell_line, cell_type = clean_perturb_atlas_cell(cell_val)
         canonical = D.join([perturbation, cell_line, cell_type, "", "", pert_type, dataset, id_])
     else:
         canonical = body

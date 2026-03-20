@@ -13,7 +13,7 @@ import {
     PairEnrichmentQueryMoAsQuery,
   } from "@/graphql";
   import { getClient } from "@/lib/apollo/client";
-  import { parseTerm, getCellDisplay } from "@/utils/parseTerm";
+  import { parseTerm } from "@/utils/parseTerm";
   
 
 export async function* paginatedNodeGenerator(genes: string[], term: string, filterFda: boolean, filterKo: boolean, topN: number = 1000, sort: string, maxTotal: number = 100000) {
@@ -51,7 +51,7 @@ export async function* paginatedNodeGenerator(genes: string[], term: string, fil
             drug: parsed.perturbation,
             perturbationId: parsed.perturbation,
             concentration: parsed.concentration || "N/A",
-            cellLine: getCellDisplay(parsed),
+            cellLine: parsed.cellLine || 'N/A',
             timepoint: parsed.timepoint,
             batch: parsed.extras[0] || '',
             direction: parsed.direction,
@@ -235,7 +235,7 @@ export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: 
 
           yield {
             perturbation: parsed.perturbation,
-            cellLine: getCellDisplay(parsed),
+            cellLine: parsed.cellLine || 'N/A',
             timepoint: parsed.timepoint,
             concentration: parsed.concentration || "N/A",
             batch: parsed.extras[0] || '',
