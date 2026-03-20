@@ -67,7 +67,10 @@ services:
         condition: service_healthy
 
   perturbseqr-app:
-    build: .
+    build:
+      context: .
+      args:
+        - NEXT_PUBLIC_MINIO_URL=${PROD_PUBLIC_S3_URL}
     image: maayanlab/perturbseqr-app:0.2.30
     pull_policy: if_not_present
     platform: linux/amd64
