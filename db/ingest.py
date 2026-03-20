@@ -188,7 +188,7 @@ def main():
             print("Discovering GMT files from MinIO...")
             minio_files = discover_minio_gmt_files()
             if not minio_files:
-                return print("No GMT files found in MinIO bucket 'gmts'")
+                return print("No GMT files found in MinIO bucket 'data'")
             print(f"Found {len(minio_files)} GMT files in MinIO:\n")
             for obj_name, lib in minio_files:
                 print(f"  {obj_name:<50} -> library={lib}")

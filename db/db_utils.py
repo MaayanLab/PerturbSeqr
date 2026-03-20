@@ -150,7 +150,7 @@ def get_minio_client() -> "Minio":
     return Minio(endpoint, access_key=access_key, secret_key=secret_key, secure=secure)
 
 
-def discover_minio_gmt_files(bucket: str = "gmts") -> list[tuple[str, str]]:
+def discover_minio_gmt_files(bucket: str = "data") -> list[tuple[str, str]]:
     """Discover all GMT files in MinIO bucket. Returns [(object_name, library), ...]."""
     client = get_minio_client()
 
@@ -163,7 +163,7 @@ def discover_minio_gmt_files(bucket: str = "gmts") -> list[tuple[str, str]]:
     return sorted(files, key=lambda x: x[0])
 
 
-def download_minio_gmt_file(object_name: str, bucket: str = "gmts") -> Path:
+def download_minio_gmt_file(object_name: str, bucket: str = "data") -> Path:
     """Download a GMT file from MinIO to a temp directory. Returns the local path."""
     client = get_minio_client()
 

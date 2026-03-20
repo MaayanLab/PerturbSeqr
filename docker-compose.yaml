@@ -87,8 +87,8 @@ services:
     build: minio
     image: johnkgardner/perturbseqr-minio-setup:0.0.1
     environment:
-      - S3_URL=http://minio:${MINIO_ROOT_PASSWORD}@perturbseqr-minio:9000/gmts
-      - PUBLIC_S3_URL=https://s3.perturbseqr.k8s.dev.maayanlab.cloud/gmts
+      - S3_URL=http://minio:${MINIO_ROOT_PASSWORD}@perturbseqr-minio:9000/data
+      - PUBLIC_S3_URL=https://s3.perturbseqr.k8s.dev.maayanlab.cloud/data
     depends_on:
       perturbseqr-minio:
         condition: service_healthy
