@@ -71,7 +71,7 @@ services:
       context: .
       args:
         - NEXT_PUBLIC_MINIO_URL=${PROD_PUBLIC_S3_URL}
-    image: maayanlab/perturbseqr-app:0.2.30
+    image: maayanlab/perturbseqr-app:0.2.31
     pull_policy: if_not_present
     platform: linux/amd64
     environment:
