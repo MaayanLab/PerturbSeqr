@@ -2,7 +2,7 @@ services:
   perturbseqr-postgres:
     build: db
     image: johnkgardner/perturbseqr-postgres:0.0.1
-    pull_policy: missing
+    pull_policy: if_not_present
     shm_size: 1Gb
     environment:
       - POSTGRES_PASSWORD
@@ -19,7 +19,7 @@ services:
 
   perturbseqr-minio:
     image: quay.io/minio/minio
-    pull_policy: missing
+    pull_policy: if_not_present
     command: server /data --console-address ":9001"
     environment:
       - MINIO_ROOT_USER=minio
@@ -48,7 +48,7 @@ services:
   perturbseqr-enrich:
     build: enrich
     image: johnkgardner/perturbseqr-enrich:0.0.1
-    pull_policy: missing
+    pull_policy: if_not_present
     deploy:
       resources:
         reservations:
@@ -66,7 +66,7 @@ services:
   perturbseqr-app:
     build: .
     image: johnkgardner/perturbseqr-app:0.0.1
-    pull_policy: missing
+    pull_policy: if_not_present
     environment:
       - PUBLIC_URL=https://perturbseqr.maayanlab.cloud
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres
@@ -87,7 +87,7 @@ services:
   minio-setup:
     build: minio
     image: johnkgardner/perturbseqr-minio-setup:0.0.1
-    pull_policy: missing
+    pull_policy: if_not_present
     environment:
       - S3_URL=${PROD_S3_URL}
       - PUBLIC_S3_URL=${PROD_PUBLIC_S3_URL}
@@ -113,7 +113,7 @@ services:
       context: .
       dockerfile: ingest/Dockerfile
     image: johnkgardner/perturbseqr-ingest:0.0.1
-    pull_policy: missing
+    pull_policy: if_not_present
     environment:
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres?sslmode=disable
       - MINIO_ENDPOINT=perturbseqr-minio:9000
