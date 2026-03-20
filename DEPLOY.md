@@ -15,7 +15,7 @@ kube-compose up
 After `kube-compose up`, create the MinIO bucket, upload GMT files, then run ingest.
 
 ```bash
-# Create gmts bucket
+# Create data bucket
 COMPOSE_PROFILES=jobs kube-compose run minio-setup
 ```
 
@@ -29,7 +29,7 @@ COMPOSE_PROFILES=jobs kube-compose run minio-setup
 #endpoint = https://s3.perturbseqr.maayanlab.cloud
 
 # upload .gmt.gz files to gmts bucket
-rclone copyto --progress gmts perturbseqr:gmts/
+rclone copyto --progress gmts perturbseqr:data/
 ```
 
 ```bash
