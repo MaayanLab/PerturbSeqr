@@ -1,6 +1,6 @@
 {
-  "name": "perturbseek",
-  "version": "0.2.31",
+  "name": "perturbseqr",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "concurrently \"next dev\" \"npm run generate -- --watch ./src/graphql/**/*.graphql\"",
