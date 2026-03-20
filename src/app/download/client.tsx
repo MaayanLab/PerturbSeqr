@@ -2,7 +2,8 @@
 import React from 'react'
 
 // MinIO base URL for GMT downloads
-const MINIO_BASE = process.env.NEXT_PUBLIC_MINIO_URL || 'https://s3.perturbseqr.k8s.dev.maayanlab.cloud'
+const MINIO_BASE = process.env.NEXT_PUBLIC_MINIO_URL
+if (typeof MINIO_BASE === 'undefined') throw new Error('Please configure NEXT_PUBLIC_MINIO_URL')
 
 // --- Term structure types and colors ---
 
@@ -314,7 +315,7 @@ const drugPerturbationDatasets: Dataset[] = [
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/17008526/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/CMAP+Signatures+of+Differentially+Expressed+Genes+for+Small+Molecules',
     sourceLabel: 'Harmonizome',
-    gmtUrl: `${MINIO_BASE}/data/microarrays-cmap.gmt.gz`,
+    gmtUrl: `${MINIO_BASE}/microarrays-cmap.gmt.gz`,
     termKey: 'microarrays-cmap',
   },
   {
@@ -326,7 +327,7 @@ const drugPerturbationDatasets: Dataset[] = [
     sourceLabel: 'CREEDS',
     sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/CREEDS+Signatures+of+Differentially+Expressed+Genes+for+Drugs',
     sourceLabel2: 'Harmonizome',
-    gmtUrl: `${MINIO_BASE}/data/creeds-chem.gmt.gz`,
+    gmtUrl: `${MINIO_BASE}/creeds-chem.gmt.gz`,
     termKey: 'creeds-chem',
   },
   {
@@ -336,7 +337,7 @@ const drugPerturbationDatasets: Dataset[] = [
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/36593396/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/DeepCoverMOA+Drug+Mechanisms+of+Action',
     sourceLabel: 'Harmonizome',
-    gmtUrl: `${MINIO_BASE}/data/deepcover-moa.gmt.gz`,
+    gmtUrl: `${MINIO_BASE}/deepcover-moa.gmt.gz`,
     termKey: 'deepcover-moa',
   },
   {
@@ -354,7 +355,7 @@ const drugPerturbationDatasets: Dataset[] = [
     value: '156,926 signatures',
     info: 'Pruned, top 250 by CD coefficient',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/35524556/',
-    gmtUrl: `${MINIO_BASE}/data/lincs-l1000-cp.gmt.gz`,
+    gmtUrl: `${MINIO_BASE}/lincs-l1000-cp.gmt.gz`,
     note: 'See also ',
     noteLinkText: 'L2S2',
     noteUrl: 'https://l2s2.maayanlab.cloud/download',
@@ -367,7 +368,7 @@ const drugPerturbationDatasets: Dataset[] = [
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/35508359/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/NIBR+DRUG-seq+U2OS+MoA+Box+Gene+Expression+Profiles',
     sourceLabel: 'Harmonizome',
-    gmtUrl: `${MINIO_BASE}/data/nibr-drug-seq.gmt.gz`,
+    gmtUrl: `${MINIO_BASE}/nibr-drug-seq.gmt.gz`,
     note: 'See also ',
     noteLinkText: 'DRUGseqr',
     noteUrl: 'https://drugseqr.maayanlab.cloud/download',
@@ -380,7 +381,7 @@ const drugPerturbationDatasets: Dataset[] = [
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/38645198/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/RummaGEO+Drug+Perturbation+Signatures',
     sourceLabel: 'Harmonizome',
-    gmtUrl: `${MINIO_BASE}/data/rummageo-chem.gmt.gz`,
+    gmtUrl: `${MINIO_BASE}/rummageo-chem.gmt.gz`,
     note: 'See also ',
     noteLinkText: 'RummaGEO',
     noteUrl: 'https://rummageo.com',
@@ -393,7 +394,7 @@ const drugPerturbationDatasets: Dataset[] = [
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/31806696/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/Sci-Plex+Drug+Perturbation+Signatures',
     sourceLabel: 'Harmonizome',
-    gmtUrl: `${MINIO_BASE}/data/sciplex.gmt.gz`,
+    gmtUrl: `${MINIO_BASE}/sciplex.gmt.gz`,
     termKey: 'sciplex',
   },
   {
@@ -403,7 +404,7 @@ const drugPerturbationDatasets: Dataset[] = [
     publicationUrl: 'https://www.biorxiv.org/content/10.1101/2025.02.20.639398v3',
     sourceUrl: 'https://huggingface.co/datasets/tahoebio/Tahoe-100M',
     sourceLabel: 'Hugging Face',
-    gmtUrl: `${MINIO_BASE}/data/tahoe-100m.gmt.gz`,
+    gmtUrl: `${MINIO_BASE}/tahoe-100m.gmt.gz`,
     termKey: 'tahoe-100m',
   },
 ]
@@ -428,7 +429,7 @@ const genePerturbationDatasets: Dataset[] = [
     sourceLabel: 'CREEDS',
     sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/CREEDS+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations',
     sourceLabel2: 'Harmonizome',
-    gmtUrl: `${MINIO_BASE}/data/creeds-gene.gmt.gz`,
+    gmtUrl: `${MINIO_BASE}/creeds-gene.gmt.gz`,
     termKey: 'creeds-gene',
   },
   {
@@ -436,7 +437,7 @@ const genePerturbationDatasets: Dataset[] = [
     value: '65,672 signatures',
     info: 'Pruned, top 250 by CD coefficient',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/35524556/',
-    gmtUrl: `${MINIO_BASE}/data/lincs-l1000-xpr.gmt.gz`,
+    gmtUrl: `${MINIO_BASE}/lincs-l1000-xpr.gmt.gz`,
     note: 'See also ',
     noteLinkText: 'L2S2',
     noteUrl: 'https://l2s2.maayanlab.cloud/download',
@@ -449,7 +450,7 @@ const genePerturbationDatasets: Dataset[] = [
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/39351872/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/PerturbAtlas+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations',
     sourceLabel: 'Harmonizome',
-    gmtUrl: `${MINIO_BASE}/data/perturb-atlas-human.gmt.gz`,
+    gmtUrl: `${MINIO_BASE}/perturb-atlas-human.gmt.gz`,
     termKey: 'perturb-atlas-human',
   },
   {
@@ -459,7 +460,7 @@ const genePerturbationDatasets: Dataset[] = [
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/39351872/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/PerturbAtlas+Signatures+of+Differentially+Expressed+Genes+for+Mouse+Gene+Perturbations',
     sourceLabel: 'Harmonizome',
-    gmtUrl: `${MINIO_BASE}/data/perturb-atlas-mouse.gmt.gz`,
+    gmtUrl: `${MINIO_BASE}/perturb-atlas-mouse.gmt.gz`,
     termKey: 'perturb-atlas-mouse',
   },
   {
@@ -469,7 +470,7 @@ const genePerturbationDatasets: Dataset[] = [
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/35688146/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/Replogle+et+al.,+Cell,+2022+K562+Genome-wide+Perturb-seq+Gene+Perturbation+Signatures',
     sourceLabel: 'Harmonizome',
-    gmtUrl: `${MINIO_BASE}/data/replogle-perturb-seq.gmt.gz`,
+    gmtUrl: `${MINIO_BASE}/replogle-perturb-seq.gmt.gz`,
     termKey: 'replogle-perturb-seq',
   },
   {
@@ -479,7 +480,7 @@ const genePerturbationDatasets: Dataset[] = [
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/38645198/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/RummaGEO+Gene+Perturbation+Signatures',
     sourceLabel: 'Harmonizome',
-    gmtUrl: `${MINIO_BASE}/data/rummageo-gene.gmt.gz`,
+    gmtUrl: `${MINIO_BASE}/rummageo-gene.gmt.gz`,
     note: 'See also ',
     noteLinkText: 'RummaGEO',
     noteUrl: 'https://rummageo.com',

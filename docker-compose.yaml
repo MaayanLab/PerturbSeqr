@@ -72,7 +72,7 @@ services:
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres
       - NODE_ENV=production
       - ENRICH_URL=http://perturbseqr-enrich:8000
-      - NEXT_PUBLIC_MINIO_URL=https://s3.perturbseqr.maayanlab.cloud
+      - NEXT_PUBLIC_MINIO_URL=${PROD_PUBLIC_S3_URL}
       - MINIO_ENDPOINT=perturbseqr-minio:9000
     ports:
       - target: 3000
@@ -89,8 +89,8 @@ services:
     image: johnkgardner/perturbseqr-minio-setup:0.0.1
     pull_policy: missing
     environment:
-      - S3_URL=http://minio:${MINIO_ROOT_PASSWORD}@perturbseqr-minio:9000/gmts
-      - PUBLIC_S3_URL=https://s3.perturbseqr.maayanlab.cloud/gmts
+      - S3_URL=${PROD_S3_URL}
+      - PUBLIC_S3_URL=${PROD_PUBLIC_S3_URL}
     depends_on:
       perturbseqr-minio:
         condition: service_healthy
