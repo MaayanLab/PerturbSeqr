@@ -65,7 +65,7 @@ services:
 
   perturbseqr-app:
     build: .
-    image: johnkgardner/perturbseqr-app:0.0.1
+    image: johnkgardner/perturbseqr-app:0.2.29
     pull_policy: if_not_present
     environment:
       - PUBLIC_URL=https://perturbseqr.maayanlab.cloud
