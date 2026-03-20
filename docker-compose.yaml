@@ -1,0 +1,148 @@
+services:
+  perturbseqr-postgres:
+    build: db
+    image: johnkgardner/perturbseqr-postgres:0.0.1
+    pull_policy: missing
+    shm_size: 1Gb
+    environment:
+      - POSTGRES_PASSWORD
+      - ENRICH_URL=http://perturbseqr-enrich:8000
+    ports:
+      - 5432:5432
+    volumes:
+      - perturbseqr-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  perturbseqr-minio:
+    image: quay.io/minio/minio
+    pull_policy: missing
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD
+    ports:
+      - target: 9000
+        published: 9000
+        x-kubernetes:
+          annotations:
+            maayanlab.cloud/ingress: https://s3.perturbseqr.maayanlab.cloud
+            nginx.ingress.kubernetes.io/proxy-body-size: '0'
+      - target: 9001
+        published: 9001
+        x-kubernetes:
+          annotations:
+            maayanlab.cloud/ingress: https://console.s3.perturbseqr.maayanlab.cloud
+            nginx.ingress.kubernetes.io/proxy-body-size: '0'
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  perturbseqr-enrich:
+    build: enrich
+    image: johnkgardner/perturbseqr-enrich:0.0.1
+    pull_policy: missing
+    deploy:
+      resources:
+        reservations:
+          memory: 5Gb
+    environment:
+      - ROCKET_DATABASES={postgres={url="postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres"}}
+    ports:
+      - 8000:8000
+    volumes:
+      - enrich-data:/data
+    depends_on:
+      perturbseqr-postgres:
+        condition: service_healthy
+
+  perturbseqr-app:
+    build: .
+    image: johnkgardner/perturbseqr-app:0.0.1
+    pull_policy: missing
+    environment:
+      - PUBLIC_URL=https://perturbseqr.maayanlab.cloud
+      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres
+      - NODE_ENV=production
+      - ENRICH_URL=http://perturbseqr-enrich:8000
+      - NEXT_PUBLIC_MINIO_URL=https://s3.perturbseqr.maayanlab.cloud
+      - MINIO_ENDPOINT=perturbseqr-minio:9000
+    ports:
+      - target: 3000
+        published: 3000
+        x-kubernetes:
+          annotations:
+            maayanlab.cloud/ingress: https://perturbseqr.maayanlab.cloud
+    depends_on:
+      perturbseqr-postgres:
+        condition: service_healthy
+
+  minio-setup:
+    build: minio
+    image: johnkgardner/perturbseqr-minio-setup:0.0.1
+    pull_policy: missing
+    environment:
+      - S3_URL=http://minio:${MINIO_ROOT_PASSWORD}@perturbseqr-minio:9000/gmts
+      - PUBLIC_S3_URL=https://s3.perturbseqr.maayanlab.cloud/gmts
+    depends_on:
+      perturbseqr-minio:
+        condition: service_healthy
+    profiles: [jobs]
+
+  dbmate:
+    image: ghcr.io/amacneil/dbmate
+    volumes:
+      - ./db/migrations:/db/migrations:ro
+    environment:
+      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres?sslmode=disable
+    depends_on:
+      perturbseqr-postgres:
+        condition: service_healthy
+    command: ["up"]
+    profiles: [jobs]
+
+  ingest:
+    build:
+      context: .
+      dockerfile: ingest/Dockerfile
+    image: johnkgardner/perturbseqr-ingest:0.0.1
+    pull_policy: missing
+    environment:
+      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres?sslmode=disable
+      - MINIO_ENDPOINT=perturbseqr-minio:9000
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD
+      - MINIO_SECURE=false
+      - ENRICH_URL=http://perturbseqr-enrich:8000
+    depends_on:
+      perturbseqr-postgres:
+        condition: service_healthy
+      perturbseqr-minio:
+        condition: service_healthy
+    entrypoint: ["/app/ingest-entrypoint.sh"]
+    profiles: [jobs]
+
+volumes:
+  perturbseqr-data:
+    x-kubernetes:
+      size: 50Gi
+      class: gp2
+  enrich-data:
+    x-kubernetes:
+      size: 10Gi
+      class: gp2
+  minio-data:
+    x-kubernetes:
+      size: 5Gi
+      class: gp2
+
+x-kubernetes:
+  name: perturbseqr
+  namespace: perturbseqr
