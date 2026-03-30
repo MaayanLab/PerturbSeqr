@@ -27,16 +27,16 @@ export async function* paginatedNodeGenerator(genes: string[], term: string, fil
           genes,
           filterTerm: term,
           filterFda,
-          sort,
+          sortBy: sort,
           filterKo,
           offset,
           first: pageSize,
           topN,
         },
       });
-  
+
       if (error) throw new Error(error.message);
-  
+
       const nodes = data.currentBackground?.enrich?.nodes;
       if (!nodes || nodes.length === 0) break;
   
@@ -96,15 +96,15 @@ export async function* paginatedConsensusGenerator(
           filterTerm: term,
           filterFda,
           filterKo,
-          sort,
+          sortBy: sort,
           offset,
           first: pageSize,
           topN,
         },
       });
-  
+
       if (error) throw new Error(error.message);
-  
+
       const enrich = data.currentBackground?.enrich;
       const nodes = enrich?.consensus ?? [];
       if (totalCount === null) totalCount = enrich?.consensusCount ?? 0;
@@ -158,15 +158,15 @@ export async function* paginatedMoAsGenerator(
           filterTerm: term,
           filterFda,
           filterKo,
-          sort,
+          sortBy: sort,
           offset,
           first: pageSize,
           topN,
         },
       });
-  
+
       if (error) throw new Error(error.message);
-  
+
       const enrich = data.currentBackground?.enrich;
       const nodes = enrich?.moas ?? [];
       if (totalCount === null) totalCount = enrich?.moasCount ?? 0;
@@ -213,16 +213,16 @@ export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: 
           genesDown,
           filterTerm: term,
           filterFda,
-          sort,
+          sortBy: sort,
           filterKo,
           offset,
           first: pageSize,
           topN,
         },
       });
-  
+
       if (error) throw new Error(error.message);
-  
+
       const nodes = data.currentBackground?.pairedEnrich?.nodes;
       if (!nodes || nodes.length === 0) break;
   
@@ -283,15 +283,15 @@ export async function* paginatedPairConsensusGenerator(
           filterTerm: term,
           filterFda,
           filterKo,
-          sort,
+          sortBy: sort,
           offset,
           first: pageSize,
           topN,
         },
       });
-  
+
       if (error) throw new Error(error.message);
-  
+
       const enrich = data.currentBackground?.pairedEnrich;
       const nodes = enrich?.consensus ?? [];
       if (totalCount === null) totalCount = enrich?.consensusCount ?? 0;
@@ -347,15 +347,15 @@ export async function* paginatedPairMoAsGenerator(
           filterTerm: term,
           filterFda,
           filterKo,
-          sort,
+          sortBy: sort,
           offset,
           first: pageSize,
           topN,
         },
       });
-  
+
       if (error) throw new Error(error.message);
-  
+
       const enrich = data.currentBackground?.pairedEnrich;
       const nodes = enrich?.moas ?? [];
       if (totalCount === null) totalCount = enrich?.moasCount ?? 0;
