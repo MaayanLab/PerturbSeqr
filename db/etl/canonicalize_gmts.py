@@ -378,11 +378,15 @@ def _is_cell_line_name(name: str) -> bool:
 
 
 def transform_perturb_atlas(term: str, metadata: dict) -> str:
-    """Perturb_10000_KD_CPSF6_SRP013565 up -> CPSF6::{cellLine}::{cellType}::::::KD::SRP013565::10000 up
+    """Perturb_10000_KD_CPSF6_SRP013565 up -> CPSF6::::{cellType}::::::KD::SRP013565::10000 up
 
-    Extracts a recognizable cell line name (e.g. K562, MDA-MB-231) from the
-    metadata cell_line field.  Descriptive values that aren't real cell line
-    names (e.g. macrophage, liver) go into the cellType position instead.
+    Cell info comes from perturbatlas_metadata.json (db/data/metadata/), sourced
+    from the PerturbAtlas database (https://perturbatlas.kratoss.site). Each entry
+    has a 'cell_line' value (e.g. "HeLa", "colorectal cancer cell DLD-1") and a
+    'cell_type' category (e.g. "cell line", "primary cell"). The cell_line values
+    are too inconsistent to reliably place in the cell line column, so for now
+    everything goes into cell type. TODO: build a curated mapping from these
+    values to clean cell line names.
     """
     body, direction = strip_direction(term)
     parts = body.split("_")
@@ -391,8 +395,8 @@ def transform_perturb_atlas(term: str, metadata: dict) -> str:
         lookup_key = f"{prefix}-{id_}"
         meta = metadata.get(lookup_key, {})
         cell_val = meta.get("cell_line") or ""
-        cell_line, cell_type = clean_perturb_atlas_cell(cell_val)
-        canonical = D.join([perturbation, cell_line, cell_type, "", "", pert_type, dataset, id_])
+        cell_val = cell_val.replace("\\,", ",").strip()
+        canonical = D.join([perturbation, "", cell_val, "", "", pert_type, dataset, id_])
     else:
         canonical = body
     return canonical + direction
