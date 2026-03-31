@@ -645,7 +645,7 @@ function EnrichmentResults({
               &#x1F50D;
             </button>
           </div>
-          <DownloadButtonPair queryString={queryString} datasetDown={datasetDown} datasetUp={datasetUp}></DownloadButtonPair>
+          <DownloadButtonPair queryString={queryString} datasetDown={datasetDown} datasetUp={datasetUp} libraryNames={libraryNames}></DownloadButtonPair>
         </form>
         <div className="border border-base-300 rounded-lg p-3 mt-2 min-h-[2.75rem] bg-base-200/50">
           {term ? (

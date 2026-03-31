@@ -624,7 +624,7 @@ function EnrichmentResults({
               &#x1F50D;
             </button>
           </div>
-          <DownloadButton queryString={queryString}></DownloadButton>
+          <DownloadButton queryString={queryString} libraryNames={libraryNames}></DownloadButton>
         </form>
         <div className="border border-base-300 rounded-lg p-3 mt-2 min-h-[2.75rem] bg-base-200/50">
           {term ? (
