@@ -1,7 +1,7 @@
 services:
   perturbseqr-postgres:
     build: db
-    image: johnkgardner/perturbseqr-postgres:0.0.1
+    image: johnkgardner/perturbseqr-postgres:0.1.0
     pull_policy: if_not_present
     platform: linux/amd64
     shm_size: 1Gb
@@ -49,7 +49,7 @@ services:
 
   perturbseqr-enrich:
     build: enrich
-    image: johnkgardner/perturbseqr-enrich:0.0.1
+    image: johnkgardner/perturbseqr-enrich:0.1.0
     pull_policy: if_not_present
     platform: linux/amd64
     deploy:
@@ -71,7 +71,7 @@ services:
       context: .
       args:
         - NEXT_PUBLIC_MINIO_URL=${PROD_PUBLIC_S3_URL}
-    image: maayanlab/perturbseqr-app:0.2.31
+    image: maayanlab/perturbseqr-app:0.2.32
     pull_policy: if_not_present
     platform: linux/amd64
     environment:
@@ -93,7 +93,7 @@ services:
 
   minio-setup:
     build: minio
-    image: johnkgardner/perturbseqr-minio-setup:0.0.1
+    image: johnkgardner/perturbseqr-minio-setup:0.1.0
     pull_policy: if_not_present
     platform: linux/amd64
     environment:
@@ -120,7 +120,7 @@ services:
     build:
       context: .
       dockerfile: ingest/Dockerfile
-    image: johnkgardner/perturbseqr-ingest:0.0.1
+    image: johnkgardner/perturbseqr-ingest:0.1.0
     pull_policy: if_not_present
     platform: linux/amd64
     environment:
