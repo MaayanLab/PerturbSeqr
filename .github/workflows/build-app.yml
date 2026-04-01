@@ -7,6 +7,15 @@ on:
         description: 'Image tag'
         required: true
         default: '0.1.0'
+      environment:
+        description: 'Which image(s) to build'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - dev
+          - prod
 
 jobs:
   build:
@@ -33,6 +42,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push app image (prod)
+        if: inputs.environment == 'prod' || inputs.environment == 'both'
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -47,6 +57,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Build and push app image (dev)
+        if: inputs.environment == 'dev' || inputs.environment == 'both'
         uses: docker/build-push-action@v5
         with:
           context: .

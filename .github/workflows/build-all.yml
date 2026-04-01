@@ -57,8 +57,6 @@ jobs:
           tags: |
             ghcr.io/maayanlab/perturbseqr-app:${{ github.event.inputs.tag }}-dev
             johnkgardner/perturbseqr-app:${{ github.event.inputs.tag }}-dev
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
   build-enrich:
     runs-on: ubuntu-latest
