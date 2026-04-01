@@ -1,7 +1,7 @@
 export const singleGeneEnrich = `import requests
 import pandas as pd
 
-url = "https://perturbseqr.com/graphql"
+url = "https://perturbseqr.maayanlab.cloud/graphql"
 
 def enrich_perturbseqr_single_set(geneset: list, first=1000, library_names=None):
     variables = {
