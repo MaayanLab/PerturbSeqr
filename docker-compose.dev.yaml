@@ -63,7 +63,7 @@ services:
 
   perturbseqr-app:
     build: .
-    image: johnkgardner/perturbseqr-app:0.1.0
+    image: johnkgardner/perturbseqr-app:0.1.0-dev
     x-kubernetes:
       imagePullPolicy: Always
     environment:
