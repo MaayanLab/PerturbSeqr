@@ -23,6 +23,11 @@ export async function GET(request: Request) {
   const sort = searchParams.get("sort") || "pvalue";
   const topN = searchParams.get("topn") || "10000";
   const maxTotal = searchParams.get("maxTotal") || "100000";
+  const pvalueLe = searchParams.get("pvaluele") || "0.05";
+  const ds = searchParams.get("ds") || "";
+  const dsArray = ds ? ds.split(",").filter(Boolean) : null;
+  const libraries = searchParams.get("libraries") || "";
+  const librariesArray = libraries ? libraries.split(",").filter(Boolean) : null;
 
   console.log(datasetUp, datasetDown)
 
@@ -122,24 +127,26 @@ export async function GET(request: Request) {
       } else {
         return new Response(
           streamTsv(
-            [  
+            [
+              "dataset",
               "perturbation",
+              "perturbationId",
               "cellLine",
               "timepoint",
               "concentration",
-              "batch",
-              "perturbationId",
+              "signatureCount",
+              "moa",
+              "fdaApproved",
+              "geneSetSizeUp",
+              "geneSetSizeDown",
               "nMimicOverlap",
+              "oddsRatioMimic",
               "pvalueMimic",
               "adjPvalueMimic",
               "nReverseOverlap",
+              "oddsRatioReverse",
               "pvalueReverse",
               "adjPvalueReverse",
-              "geneSetSizeUp",
-              "geneSetSizeDown",
-              "moa",
-              "fdaApproved",
-              "signatureCount"
             ],
             paginatedPairNodeGenerator(
               genesUp,
@@ -149,7 +156,10 @@ export async function GET(request: Request) {
               filterKo === "true",
               parseInt(topN),
               sort,
-              parseInt(maxTotal)
+              parseInt(maxTotal),
+              parseFloat(pvalueLe),
+              dsArray,
+              librariesArray
             ),
             (item) => item
           ),

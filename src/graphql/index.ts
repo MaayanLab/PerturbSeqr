@@ -1134,6 +1134,7 @@ export type EnrichmentQuerySingleQueryVariables = Exact<{
   filterKo?: InputMaybe<Scalars['Boolean']['input']>;
   topN?: InputMaybe<Scalars['Int']['input']>;
   pvalueLe?: InputMaybe<Scalars['Float']['input']>;
+  postSearchFilterLibraryNames?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
 }>;
 
 
@@ -1526,7 +1527,7 @@ export type EnrichmentQueryQueryHookResult = ReturnType<typeof useEnrichmentQuer
 export type EnrichmentQueryLazyQueryHookResult = ReturnType<typeof useEnrichmentQueryLazyQuery>;
 export type EnrichmentQueryQueryResult = Apollo.QueryResult<EnrichmentQueryQuery, EnrichmentQueryQueryVariables>;
 export const EnrichmentQuerySingleDocument = gql`
-    query EnrichmentQuerySingle($genes: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05) {
+    query EnrichmentQuerySingle($genes: [String]!, $filterTerm: String = "", $libraryNames: [String], $offset: Int = 0, $first: Int = 10, $filterFda: Boolean = false, $sortBy: String = "", $filterKo: Boolean = false, $topN: Int = 10000, $pvalueLe: Float = 0.05, $postSearchFilterLibraryNames: [String]) {
   currentBackground {
     enrich(
       genes: $genes
@@ -1539,6 +1540,7 @@ export const EnrichmentQuerySingleDocument = gql`
       filterKo: $filterKo
       topN: $topN
       pvalueLe: $pvalueLe
+      postSearchFilterLibraryNames: $postSearchFilterLibraryNames
     ) {
       nodes {
         geneSetHash
@@ -1593,6 +1595,7 @@ export const EnrichmentQuerySingleDocument = gql`
  *      filterKo: // value for 'filterKo'
  *      topN: // value for 'topN'
  *      pvalueLe: // value for 'pvalueLe'
+ *      postSearchFilterLibraryNames: // value for 'postSearchFilterLibraryNames'
  *   },
  * });
  */

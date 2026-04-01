@@ -96,7 +96,7 @@ export default function RootLayout({
   jsonld,
 }: {
   children: React.ReactNode;
-  jsonld?: React.ReactNode;
+  jsonld: React.ReactNode;
 }) {
   return (
     <html lang="en" style={{ minWidth: "580px" }}>

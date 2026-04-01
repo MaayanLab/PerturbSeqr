@@ -32,15 +32,31 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push app image
+      - name: Build and push app image (prod)
         uses: docker/build-push-action@v5
         with:
           context: .
           platforms: linux/amd64
           push: true
+          build-args: |
+            NEXT_PUBLIC_MINIO_URL=https://s3.perturbseqr.maayanlab.cloud/data
           tags: |
             ghcr.io/maayanlab/perturbseqr-app:${{ github.event.inputs.tag }}
             johnkgardner/perturbseqr-app:${{ github.event.inputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push app image (dev)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          build-args: |
+            NEXT_PUBLIC_MINIO_URL=https://s3.perturbseqr.k8s.dev.maayanlab.cloud/data
+          tags: |
+            ghcr.io/maayanlab/perturbseqr-app:${{ github.event.inputs.tag }}-dev
+            johnkgardner/perturbseqr-app:${{ github.event.inputs.tag }}-dev
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

@@ -20,6 +20,11 @@ export async function GET(request: Request) {
   const dir = searchParams.get("dir") || "";
   const topN = searchParams.get("topn") || "1000";
   const maxTotal = searchParams.get("maxTotal") || "100000";
+  const pvalueLe = searchParams.get("pvaluele") || "0.05";
+  const ds = searchParams.get("ds") || "";
+  const dsArray = ds ? ds.split(",").filter(Boolean) : null;
+  const libraries = searchParams.get("libraries") || "";
+  const librariesArray = libraries ? libraries.split(",").filter(Boolean) : null;
 
   const { data: userGeneSet, error: userGeneSetError } =
     await getClient().query<FetchUserGeneSetQuery>({
@@ -103,12 +108,12 @@ export async function GET(request: Request) {
       return new Response(
         streamTsv(
           [
+            "dataset",
             "drug",
             "perturbationId",
             "concentration",
             "cellLine",
             "timepoint",
-            "batch",
             "direction",
             "geneSetSize",
             "moa",
@@ -127,7 +132,10 @@ export async function GET(request: Request) {
             filterKo === "true",
             parseInt(topN),
             sort,
-            parseInt(maxTotal)
+            parseInt(maxTotal),
+            parseFloat(pvalueLe),
+            dsArray,
+            librariesArray
           ),
           (item) => item
         ),

@@ -16,10 +16,10 @@ import {
   import { parseTerm } from "@/utils/parseTerm";
   
 
-export async function* paginatedNodeGenerator(genes: string[], term: string, filterFda: boolean, filterKo: boolean, topN: number = 1000, sort: string, maxTotal: number = 100000) {
+export async function* paginatedNodeGenerator(genes: string[], term: string, filterFda: boolean, filterKo: boolean, topN: number = 1000, sort: string, maxTotal: number = 100000, pvalueLe: number = 0.05, postSearchFilterLibraryNames: string[] | null = null, libraryNames: string[] | null = null) {
     const pageSize = 500;
     let offset = 0;
-  
+
     while (true) {
       const { data, error } = await getClient().query<EnrichmentQuerySingleQuery>({
         query: EnrichmentQuerySingleDocument,
@@ -32,6 +32,9 @@ export async function* paginatedNodeGenerator(genes: string[], term: string, fil
           offset,
           first: pageSize,
           topN,
+          pvalueLe,
+          postSearchFilterLibraryNames,
+          libraryNames,
         },
       });
 
@@ -39,7 +42,7 @@ export async function* paginatedNodeGenerator(genes: string[], term: string, fil
 
       const nodes = data.currentBackground?.enrich?.nodes;
       if (!nodes || nodes.length === 0) break;
-  
+
       for (const node of nodes) {
         if (!node) continue;
         for (const geneSet of node.geneSets.nodes) {
@@ -48,12 +51,12 @@ export async function* paginatedNodeGenerator(genes: string[], term: string, fil
           const parsed = parseTerm(geneSet.term);
 
           yield {
+            dataset: geneSet.library?.name || '',
             drug: parsed.perturbation,
-            perturbationId: parsed.perturbation,
+            perturbationId: '',
             concentration: parsed.concentration || "N/A",
             cellLine: parsed.cellLine || 'N/A',
             timepoint: parsed.timepoint,
-            batch: parsed.extras[0] || '',
             direction: parsed.direction,
             geneSetSize: geneSet.nGeneIds,
             moa: geneSet.geneSetFdaCountsById.nodes[0]?.moa,
@@ -67,7 +70,7 @@ export async function* paginatedNodeGenerator(genes: string[], term: string, fil
           };
         }
       }
-  
+
       if (nodes.length < pageSize) break;
       offset += pageSize;
 
@@ -201,10 +204,10 @@ export async function* paginatedMoAsGenerator(
 }
 
 
-export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: string[], term: string, filterFda: boolean, filterKo: boolean, topN: number = 1000, sort: string, maxTotal: number = 100000) {
+export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: string[], term: string, filterFda: boolean, filterKo: boolean, topN: number = 1000, sort: string, maxTotal: number = 100000, pvalueLe: number = 0.05, postSearchFilterLibraryNames: string[] | null = null, libraryNames: string[] | null = null) {
     const pageSize = 500;
     let offset = 0;
-  
+
     while (true) {
       const { data, error } = await getClient().query<PairEnrichmentQuerySingleQuery>({
         query: PairEnrichmentQuerySingleDocument,
@@ -218,6 +221,9 @@ export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: 
           offset,
           first: pageSize,
           topN,
+          pvalueLe,
+          postSearchFilterLibraryNames,
+          libraryNames,
         },
       });
 
@@ -225,35 +231,39 @@ export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: 
 
       const nodes = data.currentBackground?.pairedEnrich?.nodes;
       if (!nodes || nodes.length === 0) break;
-  
+
       for (const node of nodes) {
         if (!node) continue;
-        const geneSet = node.geneSet.nodes[0];
-          if (!geneSet) continue;
-          const fdaInfo = geneSet.geneSetFdaCountsById.nodes[0];
-          const parsed = parseTerm(geneSet.term);
+        const geneSetUp = node.geneSet.nodes.find((x: any) => x.term.includes(" up"));
+        const geneSetDown = node.geneSet.nodes.find((x: any) => x.term.includes(" down"));
+        const geneSet = geneSetUp || geneSetDown;
+        if (!geneSet) continue;
+        const fdaInfo = geneSet.geneSetFdaCountsById.nodes[0];
+        const parsed = parseTerm(geneSet.term);
 
-          yield {
-            perturbation: parsed.perturbation,
-            cellLine: parsed.cellLine || 'N/A',
-            timepoint: parsed.timepoint,
-            concentration: parsed.concentration || "N/A",
-            batch: parsed.extras[0] || '',
-            perturbationId: parsed.perturbation,
-            nMimicOverlap: node.mimickerOverlap,
-            pvalueMimic: node.pvalueMimic,
-            adjPvalueMimic: node.adjPvalueMimic,
-            nReverseOverlap: node.reverserOverlap,
-            pvalueReverse: node.pvalueReverse,
-            adjPvalueReverse: node.adjPvalueReverse,
-            geneSetSizeUp: geneSet.nGeneIds,
-            geneSetSizeDown: geneSet.nGeneIds,
-            moa: geneSet.geneSetFdaCountsById.nodes[0]?.moa,
-            fdaApproved: fdaInfo?.approved?.toString() || "",
-            signatureCount: geneSet.geneSetFdaCountsById.nodes[0]?.count || 0,
-          };
+        yield {
+          dataset: geneSet.library?.name || '',
+          perturbation: parsed.perturbation,
+          perturbationId: '',
+          cellLine: parsed.cellLine || 'N/A',
+          timepoint: parsed.timepoint,
+          concentration: parsed.concentration || "N/A",
+          signatureCount: geneSet.geneSetFdaCountsById.nodes[0]?.count || 0,
+          moa: geneSet.geneSetFdaCountsById.nodes[0]?.moa,
+          fdaApproved: fdaInfo?.approved?.toString() || "",
+          geneSetSizeUp: geneSetUp?.nGeneIds ?? '',
+          geneSetSizeDown: geneSetDown?.nGeneIds ?? '',
+          nMimicOverlap: node.mimickerOverlap,
+          oddsRatioMimic: node.oddsRatioMimic,
+          pvalueMimic: node.pvalueMimic,
+          adjPvalueMimic: node.adjPvalueMimic,
+          nReverseOverlap: node.reverserOverlap,
+          oddsRatioReverse: node.oddsRatioReverse,
+          pvalueReverse: node.pvalueReverse,
+          adjPvalueReverse: node.adjPvalueReverse,
+        };
       }
-  
+
       if (nodes.length < pageSize) break;
       offset += pageSize;
 
