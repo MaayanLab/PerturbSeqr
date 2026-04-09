@@ -178,7 +178,12 @@ def transform_tahoe(term: str, organ_map: dict) -> str:
 
 def transform_nibr(term: str) -> str:
     """Diphenidol_AF-80-QK39_batchid1_0.01uM_24h up -> Diphenidol::U2OS::::24h::0.01uM::AF-80-QK39::batchid1 up
-    Oprea1_571617_OC-41-DF58_batchid1_0.01uM_24h up -> Oprea1::U2OS::::24h::0.01uM::571617_OC-41-DF58::batchid1 up"""
+    Oprea1_571617_OC-41-DF58_batchid1_0.01uM_24h up -> Oprea1::U2OS::::24h::0.01uM::571617_OC-41-DF58::batchid1 up
+
+    Some NIBR entries have no human-readable name (only an NSN code). For those
+    we fall back to using the NSN code as the perturbation name so the entry
+    remains identifiable rather than collapsing into an empty string.
+    """
     body, direction = strip_direction(term)
     parts = body.split("_")
     # Standard: perturbation_nsn_batch_concentration_timepoint (5 parts)
@@ -186,12 +191,14 @@ def transform_nibr(term: str) -> str:
     if len(parts) == 6:
         perturbation, nsn1, nsn2, batch, concentration, timepoint = parts
         nsn = f"{nsn1}_{nsn2}"
-        canonical = D.join([perturbation, "U2OS", "", timepoint, concentration, nsn, batch])
     elif len(parts) >= 5:
         perturbation, nsn, batch, concentration, timepoint = parts[0], parts[1], parts[2], parts[3], parts[4]
-        canonical = D.join([perturbation, "U2OS", "", timepoint, concentration, nsn, batch])
     else:
-        canonical = body
+        return body + direction  # too malformed to recover
+    # Fall back to NSN as the perturbation name when human name is missing
+    if not perturbation:
+        perturbation = nsn
+    canonical = D.join([perturbation, "U2OS", "", timepoint, concentration, nsn, batch])
     return canonical + direction
 
 
