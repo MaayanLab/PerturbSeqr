@@ -1,0 +1,23 @@
+[project]
+name = "predict"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "ipykernel>=7.2.0",
+    "jupyter>=1.1.1",
+    "maayanlab-bioinformatics",
+    "matplotlib>=3.10.8",
+    "matplotlib-venn>=1.1.2",
+    "numpy>=2.4.4",
+    "pandas>=3.0.2",
+    "pubchempy>=1.0.5",
+    "pyarrow>=23.0.1",
+    "requests>=2.33.1",
+    "scikit-learn>=1.8.0",
+    "scipy>=1.17.1",
+]
+
+[tool.uv.sources]
+maayanlab-bioinformatics = { git = "https://github.com/MaayanLab/maayanlab-bioinformatics.git", rev = "python3.14-compat" }
