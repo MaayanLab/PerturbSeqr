@@ -137,15 +137,26 @@ def clean_rummageo_cell(val: str) -> tuple[str, str]:
 
 
 def transform_lincs_l1000_cp(term: str) -> str:
-    """ABY001_A375_XH_A13_afatinib_10uM up -> afatinib::A375::::XH::10uM::ABY001::A13 up"""
+    """ABY001_A375_XH_A13_afatinib_10uM up -> afatinib::A375::::XH::10uM::ABY001::A13 up
+
+    Standard L1000 terms have 6 underscore-separated fields:
+        batch_cellLine_timepoint_well_perturbation_concentration
+    A small number of entries have only 5 fields (missing concentration). For
+    those we still canonicalize, leaving the concentration field empty.
+    """
     body, direction = strip_direction(term)
     parts = body.split("_")
     if len(parts) >= 6:
-        batch, cell_line, timepoint, batch2, perturbation = parts[0], parts[1], parts[2], parts[3], parts[4]
-        concentration = parts[5] if len(parts) > 5 else ""
-        canonical = D.join([perturbation, cell_line, "", timepoint, concentration, batch, batch2])
+        batch, cell_line, timepoint, well, perturbation = parts[:5]
+        concentration = parts[5]
+    elif len(parts) == 5:
+        # Missing concentration; canonicalize with empty concentration field
+        batch, cell_line, timepoint, well, perturbation = parts
+        concentration = ""
     else:
-        canonical = body  # fallback
+        canonical = body  # too malformed to recover
+        return canonical + direction
+    canonical = D.join([perturbation, cell_line, "", timepoint, concentration, batch, well])
     return canonical + direction
 
 
