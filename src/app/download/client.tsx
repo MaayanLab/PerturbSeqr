@@ -1,5 +1,6 @@
 'use client'
 import React from 'react'
+import { useAllLibrariesQuery } from '@/graphql'
 
 // MinIO base URL for GMT downloads
 const MINIO_BASE = process.env.NEXT_PUBLIC_MINIO_URL
@@ -290,9 +291,14 @@ const termStructures: Record<string, TermStructure> = {
 
 type FullSignature = { url: string; label: string }
 
+// Datasets either pull their signature count live from the database (via
+// libraryName, looked up against geneSetLibraries) or display a static `value`
+// (for metadata cards or placeholders like CM4AI that aren't in the DB).
+// Do not set both: the DB is the single source of truth when libraryName is set.
 type Dataset = {
   title: string
-  value: string
+  libraryName?: string  // matches app_public.gene_set_library.name for live count lookup
+  value?: string        // static display text; omit when libraryName is set
   info: React.ReactNode
   publicationUrl: string
   publicationUrl2?: string
@@ -313,7 +319,7 @@ type Dataset = {
 const drugPerturbationDatasets: Dataset[] = [
   {
     title: 'CMAP Build 02',
-    value: '12,200 signatures',
+    libraryName: 'Microarrays CMap',
     info: '',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/17008526/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/CMAP+Signatures+of+Differentially+Expressed+Genes+for+Small+Molecules',
@@ -328,7 +334,7 @@ const drugPerturbationDatasets: Dataset[] = [
   },
   {
     title: 'CREEDS Drug Perturbations',
-    value: '1,860 signatures',
+    libraryName: 'CREEDS Chem',
     info: 'CREEDS + Harmonizome GEO microarray',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/27667448/',
     sourceUrl: 'https://maayanlab.cloud/CREEDS/',
@@ -343,7 +349,7 @@ const drugPerturbationDatasets: Dataset[] = [
   },
   {
     title: 'DeepCoverMOA',
-    value: '1,748 signatures',
+    libraryName: 'DeepCover MoA',
     info: '',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/36593396/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/DeepCoverMOA+Drug+Mechanisms+of+Action',
@@ -356,7 +362,7 @@ const drugPerturbationDatasets: Dataset[] = [
   },
   {
     title: 'Ginkgo Bioworks',
-    value: '9,310 signatures',
+    libraryName: 'Ginkgo Bioworks',
     info: '',
     publicationUrl: 'https://www.ginkgobioworks.com/',
     sourceUrl: 'https://huggingface.co/ginkgo-datapoints',
@@ -366,7 +372,7 @@ const drugPerturbationDatasets: Dataset[] = [
   },
   {
     title: 'L1000-CP (Chemical Perturbations)',
-    value: '156,926 signatures',
+    libraryName: 'LINCS L1000 CP',
     info: 'Pruned, top 250 by CD coefficient',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/35524556/',
     gmtUrl: `${MINIO_BASE}/lincs-l1000-cp.gmt.gz`,
@@ -381,7 +387,7 @@ const drugPerturbationDatasets: Dataset[] = [
   },
   {
     title: 'Novartis/DRUG-seq U2OS MoABox Dataset',
-    value: '26,316 signatures',
+    libraryName: 'NIBR DRUG-seq',
     info: '',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/35508359/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/NIBR+DRUG-seq+U2OS+MoA+Box+Gene+Expression+Profiles',
@@ -398,7 +404,7 @@ const drugPerturbationDatasets: Dataset[] = [
   },
   {
     title: 'RummaGEO Drug Perturbations',
-    value: '5,345 signatures',
+    libraryName: 'RummaGEO Chem',
     info: '',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/38645198/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/RummaGEO+Drug+Perturbation+Signatures',
@@ -414,7 +420,7 @@ const drugPerturbationDatasets: Dataset[] = [
   },
   {
     title: 'Sci-Plex Drug Perturbations',
-    value: '4,604 signatures',
+    libraryName: 'SciPlex',
     info: '',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/31806696/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/Sci-Plex+Drug+Perturbation+Signatures',
@@ -427,7 +433,7 @@ const drugPerturbationDatasets: Dataset[] = [
   },
   {
     title: 'Tahoe 100M',
-    value: '105,404 signatures',
+    libraryName: 'Tahoe-100M',
     info: <><a href="https://huggingface.co/datasets/tahoebio/Tahoe-100M/viewer/pseudobulk_differential_expression" target="_blank" rel="noopener noreferrer" className="link link-neutral">Pseudobulk DESeq2</a>, padj ≤ 0.05, top 100 by log2FC, per-concentration</>,
     publicationUrl: 'https://www.biorxiv.org/content/10.1101/2025.02.20.639398v3',
     sourceUrl: 'https://huggingface.co/datasets/tahoebio/Tahoe-100M',
@@ -456,7 +462,7 @@ const genePerturbationDatasets: Dataset[] = [
   },
   {
     title: 'CREEDS Gene Perturbations',
-    value: '4,788 signatures',
+    libraryName: 'CREEDS Gene',
     info: 'CREEDS + Harmonizome GEO microarray',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/27667448/',
     sourceUrl: 'https://maayanlab.cloud/CREEDS/',
@@ -471,7 +477,7 @@ const genePerturbationDatasets: Dataset[] = [
   },
   {
     title: 'L1000-XPR (Gene Knockouts)',
-    value: '65,672 signatures',
+    libraryName: 'LINCS L1000 XPR',
     info: 'Pruned, top 250 by CD coefficient',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/35524556/',
     gmtUrl: `${MINIO_BASE}/lincs-l1000-xpr.gmt.gz`,
@@ -486,7 +492,7 @@ const genePerturbationDatasets: Dataset[] = [
   },
   {
     title: 'PerturbAtlas Human Gene Perturbations',
-    value: '12,852 signatures',
+    libraryName: 'Perturb Atlas Human',
     info: '',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/39351872/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/PerturbAtlas+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations',
@@ -499,7 +505,7 @@ const genePerturbationDatasets: Dataset[] = [
   },
   {
     title: 'PerturbAtlas Mouse Gene Perturbations',
-    value: '10,743 signatures',
+    libraryName: 'Perturb Atlas Mouse',
     info: '',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/39351872/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/PerturbAtlas+Signatures+of+Differentially+Expressed+Genes+for+Mouse+Gene+Perturbations',
@@ -512,7 +518,7 @@ const genePerturbationDatasets: Dataset[] = [
   },
   {
     title: 'Replogle et al. Perturb-seq',
-    value: '9,207 signatures',
+    libraryName: 'Replogle et al.',
     info: 'K562 genome-wide, K562 essential, RPE1 essential',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/35688146/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/Replogle+et+al.,+Cell,+2022+K562+Genome-wide+Perturb-seq+Gene+Perturbation+Signatures',
@@ -527,7 +533,7 @@ const genePerturbationDatasets: Dataset[] = [
   },
   {
     title: 'RummaGEO Gene Perturbations',
-    value: '7,960 signatures',
+    libraryName: 'RummaGEO Gene',
     info: '',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/38645198/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/RummaGEO+Gene+Perturbation+Signatures',
@@ -589,13 +595,16 @@ const metadataDatasets: Dataset[] = [
 
 // --- Components ---
 
-function DatasetCard({ dataset, showDownloads = true }: { dataset: Dataset, showDownloads?: boolean }) {
+function DatasetCard({ dataset, showDownloads = true, liveCount }: { dataset: Dataset, showDownloads?: boolean, liveCount?: number }) {
   const structure = dataset.termKey ? termStructures[dataset.termKey] : null
+  const displayValue = dataset.libraryName
+    ? (liveCount != null ? `${liveCount.toLocaleString()} signatures` : '…')
+    : dataset.value
 
   return (
     <div className="bg-base-100 shadow-sm border rounded-lg px-3 py-2">
       <h3 className="font-medium text-sm leading-tight">{dataset.title}</h3>
-      <p className="text-xs text-gray-500 leading-tight">{dataset.value}{dataset.info && <> · {dataset.info}</>}</p>
+      <p className="text-xs text-gray-500 leading-tight">{displayValue}{dataset.info && <> · {dataset.info}</>}</p>
       <div className="text-xs leading-tight mt-1">
         {dataset.publicationUrl ? (
           dataset.publicationUrl2 ? (
@@ -668,6 +677,11 @@ function DatasetCard({ dataset, showDownloads = true }: { dataset: Dataset, show
 }
 
 export default function DownloadClientPage() {
+  const { data } = useAllLibrariesQuery()
+  const counts = Object.fromEntries(
+    data?.geneSetLibraries?.nodes.map(n => [n.name, n.geneSetsByLibraryId.totalCount]) ?? []
+  )
+
   return (
     <div className="prose max-w-none">
       <p className="text-sm font-bold mb-4">
@@ -677,14 +691,14 @@ export default function DownloadClientPage() {
       <h3 className="text-lg font-medium mt-4 mb-2">Drug/Chemical Perturbation Datasets</h3>
       <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-3 my-3">
         {drugPerturbationDatasets.map(dataset => (
-          <DatasetCard key={dataset.title} dataset={dataset} />
+          <DatasetCard key={dataset.title} dataset={dataset} liveCount={dataset.libraryName ? counts[dataset.libraryName] : undefined} />
         ))}
       </div>
 
       <h3 className="text-lg font-medium mt-4 mb-2">Gene Perturbation Datasets</h3>
       <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-3 my-3">
         {genePerturbationDatasets.map(dataset => (
-          <DatasetCard key={dataset.title} dataset={dataset} />
+          <DatasetCard key={dataset.title} dataset={dataset} liveCount={dataset.libraryName ? counts[dataset.libraryName] : undefined} />
         ))}
       </div>
 
