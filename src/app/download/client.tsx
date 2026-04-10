@@ -364,7 +364,7 @@ const drugPerturbationDatasets: Dataset[] = [
     title: 'Ginkgo Bioworks',
     libraryName: 'Ginkgo Bioworks',
     info: '',
-    publicationUrl: 'https://www.ginkgobioworks.com/',
+    publicationUrl: 'https://datapoints.ginkgo.bio/dataset-access',
     sourceUrl: 'https://huggingface.co/ginkgo-datapoints',
     sourceLabel: 'Hugging Face',
     note: 'Data used under license',
@@ -452,7 +452,7 @@ const genePerturbationDatasets: Dataset[] = [
     title: 'CM4AI',
     value: '0 signatures',
     info: '',
-    publicationUrl: '',
+    publicationUrl: 'https://www.biorxiv.org/content/10.1101/2024.11.03.621734v2',
     sourceUrl: 'https://cm4ai.org',
     sourceLabel: 'CM4AI',
     fullSignatures: [
