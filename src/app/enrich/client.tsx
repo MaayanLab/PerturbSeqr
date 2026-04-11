@@ -1604,6 +1604,7 @@ export default function EnrichClientPage({
       <div className="flex flex-row gap-2 alert">
         <button
           className="btn btn-sm btn-outline"
+          title="Return to input form with your current gene set and library selections"
           onClick={() => {
             const params = new URLSearchParams()
             params.set('dataset', dataset)
@@ -1613,7 +1614,7 @@ export default function EnrichClientPage({
             router.push(`/?${params.toString()}`)
           }}
         >
-          ← Back
+          ← Recompute
         </button>
         <span className="prose">Input:</span>
         <label
