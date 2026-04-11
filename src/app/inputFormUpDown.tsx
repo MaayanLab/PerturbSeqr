@@ -173,7 +173,7 @@ export default function InputFormUpDown({setInputSingle, selectedLibraries = [],
         </div>
         <span className={classNames("loading", "w-6", { 'hidden': !loading })}></span>
         <div className={classNames("alert alert-error", { 'hidden': !error })}>{error?.message ?? null}</div>
-        <button className="btn mx-auto" type="submit" disabled={(genesUp.length < 1 || genesDown.length < 1)}>Submit</button>
+        <button className="btn btn-neutral mx-auto" type="submit" disabled={(genesUp.length < 1 || genesDown.length < 1)}>Submit</button>
         <button className="btn btn-outline btn-sm mx-auto mt-1" type="button" disabled={genesUp.length < 1 && genesDown.length < 1} onClick={() => { setRawGenesUp(''); setRawGenesDown(''); if (fileInputUpRef.current) fileInputUpRef.current.value = ''; if (fileInputDownRef.current) fileInputDownRef.current.value = '' }}>Clear</button>
       </form>
       <button className='btn btn-outline text-xs p-2' onClick={() => setInputSingle(true)}>SWITCH TO SINGLE SET INPUT</button>

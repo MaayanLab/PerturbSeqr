@@ -118,7 +118,7 @@ export default function InputForm({setInputSingle, selectedLibraries = [], initi
             type="file"
             onChange={(e) => {handleFileChosen(e.target.files?.[0] || null)}}/>
         <span className='mx-auto'>{genes.length} gene(s) entered</span>
-        <button className="btn mx-auto" type="submit" disabled={genes.length < 1 || genes.length > 3000}  data-tooltip-target="tooltip">Submit</button>
+        <button className="btn btn-neutral mx-auto" type="submit" disabled={genes.length < 1 || genes.length > 3000}  data-tooltip-target="tooltip">Submit</button>
         <button className="btn btn-outline btn-sm mx-auto mt-1" type="button" disabled={genes.length < 1} onClick={() => { setRawGenes(''); if (fileInputRef.current) fileInputRef.current.value = '' }}>Clear</button>
         <span className={classNames("loading", "w-6", { 'hidden': !loading })}></span>
         <div className={classNames("alert alert-error", { 'hidden': !error })}>{error?.message ?? null}</div>

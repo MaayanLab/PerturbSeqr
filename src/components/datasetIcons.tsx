@@ -77,7 +77,7 @@ export default function DatasetIcons({
   const getButtonStyle = (name: string, category: 'drug' | 'gene') => {
     const hasAnySelection = selectedLibraries.length > 0
     const isSelected = selectedLibraries.includes(name)
-    const categoryBg = category === 'drug' ? 'bg-cyan-200 dark:bg-cyan-900' : 'bg-fuchsia-200 dark:bg-fuchsia-900'
+    const categoryBg = category === 'drug' ? 'bg-cyan-300 dark:bg-cyan-800' : 'bg-fuchsia-100 dark:bg-fuchsia-900'
 
     if (!hasAnySelection) {
       return categoryBg
