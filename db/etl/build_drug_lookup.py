@@ -19,10 +19,13 @@ Usage:
   uv run db/build_drug_lookup.py --download  # Re-download Drug Repurposing Hub
 """
 
-import csv, json, time, argparse
+import csv, json, time, argparse, sys
 from pathlib import Path
 from collections import Counter
 from uuid import UUID
+
+# Add db/ (parent dir) to path for shared modules
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import requests
 from tqdm import tqdm
