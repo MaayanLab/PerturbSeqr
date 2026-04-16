@@ -78,3 +78,7 @@ impl DenseBitVec {
 pub fn compute_overlap(a: &DenseBitVec, b: &SparseBitVec) -> u32 {
     b.v.iter().map(|i| a.v[*i as usize] as u32).sum()
 }
+
+pub fn intersect_count(a: &DenseBitVec, b: &DenseBitVec) -> u32 {
+    a.v.iter().zip(b.v.iter()).map(|(x, y)| (x & y) as u32).sum()
+}

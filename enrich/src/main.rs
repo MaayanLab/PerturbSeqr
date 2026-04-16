@@ -27,7 +27,7 @@ use std::time::Instant;
 
 use fastfisher::FastFisher;
 use async_rwlockhashmap::RwLockHashMap;
-use bitvec::{SparseBitVec,DenseBitVec,compute_overlap};
+use bitvec::{SparseBitVec,DenseBitVec,compute_overlap,intersect_count};
 
 /**
  * Without this alternative allocator, very large chunks of memory do not get released back to the OS causing a large memory footprint over time.
@@ -86,6 +86,8 @@ struct Bitmap {
     // Library filtering support (see optimization docs above)
     gene_set_libraries: HashMap<Uuid, String>,             // gene_set_hash -> library_name
     library_backgrounds: HashMap<String, DenseBitVec>,     // library_name -> genes in that library
+    #[serde(default)]
+    library_n_background: HashMap<String, u32>,
     library_gene_set_indices: HashMap<String, Vec<usize>>, // library_name -> indices into values (O(1) lookup for filtering)
     full_background: DenseBitVec,                          // all genes (for no-filter case)
 }
@@ -106,6 +108,7 @@ impl Bitmap {
             moa_counts: HashMap::new(),
             gene_set_libraries: HashMap::new(),
             library_backgrounds: HashMap::new(),
+            library_n_background: HashMap::new(),
             library_gene_set_indices: HashMap::new(),
             full_background: DenseBitVec::empty(0),
         }
@@ -177,6 +180,7 @@ struct PersistentState {
 }
 
 // The response data, containing the ids, and relevant metrics
+#[derive(Clone)]
 struct PartialQueryResult {
     index: usize,
     n_overlap: u32,
@@ -185,16 +189,17 @@ struct PartialQueryResult {
     adj_pvalue: f64,
 }
 
+#[derive(Clone)]
 struct PartialPairResult {
     index: usize,
-    index_up: usize,      
-    index_down: usize,    
-    mimicker_overlap: u32, 
-    reverser_overlap: u32, 
+    index_up: usize,
+    index_down: usize,
+    mimicker_overlap: u32,
+    reverser_overlap: u32,
     odds_ratio_mimic: f64,
-    odds_ratio_reverse: f64, 
-    pvalue_mimic: f64, 
-    adj_pvalue_mimic: f64, 
+    odds_ratio_reverse: f64,
+    pvalue_mimic: f64,
+    adj_pvalue_mimic: f64,
     pvalue_reverse: f64,
     adj_pvalue_reverse: f64,
 }
@@ -354,12 +359,17 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
     }
 
     // Try to load from disk
-    if let Ok(bitmap) = load_index(&background_id) {
+    if let Ok(mut bitmap) = load_index(&background_id) {
         let start = Instant::now();
         // Extend fisher table to handle this background
         {
             let mut fisher = state.fisher.write().await;
             fisher.extend_to(bitmap.columns.len() * 4);
+        }
+        if bitmap.library_n_background.is_empty() && !bitmap.library_backgrounds.is_empty() {
+            for (lib_name, lib_bg) in bitmap.library_backgrounds.iter() {
+                bitmap.library_n_background.insert(lib_name.clone(), lib_bg.count_ones() as u32);
+            }
         }
         state.bitmaps.insert(background_id, bitmap).await;
         *state.latest.write().await = Some(background_id);
@@ -452,6 +462,7 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
             }
             // Also add to full background
             full_background.union_mut(&lib_background);
+            bitmap.library_n_background.insert(lib_name.clone(), lib_background.count_ones() as u32);
             bitmap.library_backgrounds.insert(lib_name.clone(), lib_background);
         }
         bitmap.full_background = full_background;
@@ -613,54 +624,27 @@ async fn query(
         names.split(',').map(|s| s.trim().to_string()).collect()
     });
 
-    // Compute filtered background and gene set count based on selected libraries
-    // Also collect the indices to iterate (optimization: only iterate matching libraries)
-    let (n_background, filtered_background, gene_set_count, filtered_indices) = if let Some(ref libs) = library_filter {
-        // OR together the backgrounds of selected libraries
-        let mut combined = DenseBitVec::empty(bitmap.columns.len());
-        let mut indices: Vec<usize> = Vec::new();
-        for lib_name in libs {
-            if let Some(lib_bg) = bitmap.library_backgrounds.get(lib_name) {
-                combined.union_mut(lib_bg);
-            }
-            // Collect indices for this library (O(1) lookup instead of O(n) iteration)
-            if let Some(lib_indices) = bitmap.library_gene_set_indices.get(lib_name) {
-                indices.extend(lib_indices.iter().copied());
-            }
-        }
-        let gs_count = indices.len();
-        (combined.count_ones() as u32, Some(combined), gs_count, Some(indices))
-    } else {
-        // No filter - use full background and all gene sets
-        (bitmap.full_background.count_ones() as u32, None, bitmap.values.len(), None)
-    };
-    // Debug: log query parameters
-    println!("[{}] query: n_background={}, gene_set_count={}, input_genes={}",
-             background_id, n_background, gene_set_count, input_gene_set.n);
+    let library_n_user: HashMap<String, u32> = bitmap.library_backgrounds.iter()
+        .map(|(name, lib_bg)| (name.clone(), intersect_count(&input_gene_set, lib_bg)))
+        .collect();
+    println!("[{}] query: input_genes={}, libraries={}",
+             background_id, input_gene_set.n, library_n_user.len());
     let background_query = Arc::new(BackgroundQuery { background_id, input_gene_set });
 
-    // Only use cache if no library filter is applied (cache doesn't account for library filter)
-    let use_cache = library_filter.is_none();
-
     let results = {
-        let cached_results = if use_cache {
-            state.cache.get(&background_query).await
-        } else {
-            None
-        };
+        let cached_results = state.cache.get(&background_query).await;
 
         if let Some(results) = cached_results {
             results.value().clone()
         } else {
-            // Parallel overlap computation
-            // OPTIMIZATION: When library filter is active, iterate only pre-indexed gene sets
-            // instead of all 1.8M gene sets. Complexity: O(M) instead of O(N) where M << N
-            let n_user_gene_id = background_query.input_gene_set.n as u32;
             let fisher = state.fisher.read().await;
 
-            // Helper closure for computing enrichment result
             let compute_result = |index: usize| -> Option<PartialQueryResult> {
-                let (_, gene_set) = &bitmap.values[index];
+                let (gene_set_uuid, gene_set) = &bitmap.values[index];
+                let lib_name = bitmap.gene_set_libraries.get(gene_set_uuid)?;
+                let n_background = *bitmap.library_n_background.get(lib_name)?;
+                let n_user_gene_id = *library_n_user.get(lib_name)?;
+
                 let n_overlap = compute_overlap(&background_query.input_gene_set, gene_set) as u32;
                 if n_overlap < overlap_ge {
                     return None;
@@ -678,58 +662,57 @@ async fn query(
                 Some(PartialQueryResult { index, n_overlap, odds_ratio, pvalue, adj_pvalue: 1.0 })
             };
 
-            let mut results: Vec<_> = if let Some(ref indices) = filtered_indices {
-                // FAST PATH: Iterate only gene sets in selected libraries
-                // Complexity: O(M) where M = gene sets in selected libraries
-                indices.par_iter()
-                    .filter_map(|&index| compute_result(index))
-                    .collect()
-            } else {
-                // NO FILTER: Iterate all gene sets
-                // Complexity: O(N) where N = total gene sets
-                (0..bitmap.values.len())
-                    .into_par_iter()
-                    .filter_map(|index| compute_result(index))
-                    .collect()
-            };
+            let mut results: Vec<_> = (0..bitmap.values.len())
+                .into_par_iter()
+                .filter_map(|index| compute_result(index))
+                .collect();
+
             let pre_adj_count = results.len();
-            // Compute adj_pvalues using Benjamini-Hochberg.
-            // When library filtering is active, use compact indexing so BH only corrects
-            // over the filtered gene sets, not the entire database.
-            if library_filter.is_some() {
-                let pvalues: Vec<f64> = results.iter().map(|r| r.pvalue).collect();
-                let adj_pvalues = adjust(&pvalues, Procedure::BenjaminiHochberg);
-                for (i, result) in results.iter_mut().enumerate() {
-                    result.adj_pvalue = adj_pvalues[i];
-                }
-                results.retain(|result| result.adj_pvalue <= adj_pvalue_le);
-            } else {
-                let mut pvalues = vec![1.0; bitmap.values.len()];
-                for result in &results {
-                    pvalues[result.index] = result.pvalue;
-                }
-                let adj_pvalues = adjust(&pvalues, Procedure::BenjaminiHochberg);
-                results.retain_mut(|result| {
-                    if let Some(adj_pvalue) = adj_pvalues.get(result.index) {
-                        result.adj_pvalue = *adj_pvalue;
-                    }
-                    result.adj_pvalue <= adj_pvalue_le
-                });
+            let mut pvalues = vec![1.0; bitmap.values.len()];
+            for result in &results {
+                pvalues[result.index] = result.pvalue;
             }
+            let adj_pvalues = adjust(&pvalues, Procedure::BenjaminiHochberg);
+            results.retain_mut(|result| {
+                if let Some(adj_pvalue) = adj_pvalues.get(result.index) {
+                    result.adj_pvalue = *adj_pvalue;
+                }
+                result.adj_pvalue <= adj_pvalue_le
+            });
             let post_adj_count = results.len();
             println!("[{}] filter stats: {} passed pvalue, {} passed adj_pvalue", background_id, pre_adj_count, post_adj_count);
             results.sort_unstable_by(|a, b| a.pvalue.partial_cmp(&b.pvalue).unwrap_or(std::cmp::Ordering::Equal));
             let results = Arc::new(results);
 
-            // Only cache if no library filter (cache key doesn't include library filter)
-            if use_cache {
-                state.cache.insert(background_query, results.clone(), 30000).await;
-            }
+            state.cache.insert(background_query, results.clone(), 30000).await;
 
             let duration = start.elapsed();
-            println!("[{}] {} genes enriched in {:?} (library_filter: {})", background_id, n_user_gene_id, duration, !use_cache);
+            println!("[{}] enriched in {:?}", background_id, duration);
             results
         }
+    };
+
+    let results: Arc<Vec<PartialQueryResult>> = if let Some(ref libs) = library_filter {
+        let filtered: Vec<PartialQueryResult> = results.iter()
+            .filter(|r| {
+                bitmap.values.get(r.index)
+                    .and_then(|(uuid, _)| bitmap.gene_set_libraries.get(uuid))
+                    .map_or(false, |lib| libs.contains(lib))
+            })
+            .cloned()
+            .collect();
+        Arc::new(filtered)
+    } else {
+        results
+    };
+
+    let gene_set_count: usize = if let Some(ref libs) = library_filter {
+        libs.iter()
+            .filter_map(|lib| bitmap.library_gene_set_indices.get(lib))
+            .map(|idxs| idxs.len())
+            .sum()
+    } else {
+        bitmap.values.len()
     };
 
     // CID-based consensus grouping: use CID as group key when available, fall back to perturbation name
@@ -1122,11 +1105,11 @@ async fn query(
         if !filter_terms.is_empty() {
             consensus_results.retain(|result| {
                 let drug_lower = result.drug.to_lowercase();
-                filter_terms.iter().any(|ft| drug_lower.contains(ft))
+                filter_terms.iter().all(|ft| drug_lower.contains(ft))
             });
             moa_consensus_results.retain(|result| {
                 let drug_lower = result.drug.to_lowercase();
-                filter_terms.iter().any(|ft| drug_lower.contains(ft))
+                filter_terms.iter().all(|ft| drug_lower.contains(ft))
             });
         }
 
@@ -1171,7 +1154,7 @@ async fn query(
                     }
                     else if !filter_terms.is_empty() && !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)| {
                         let term_lower = gene_set_term.to_lowercase();
-                        filter_terms.iter().any(|ft| term_lower.contains(ft))
+                        filter_terms.iter().all(|ft| term_lower.contains(ft))
                     }) {
                         return None
                     }
@@ -1395,71 +1378,29 @@ async fn query_pairs(
         names.split(',').map(|s| s.trim().to_string()).collect()
     });
 
-    // Compute filtered background and gene set count based on selected libraries
-    let (n_background, gene_set_count) = if let Some(ref libs) = library_filter {
-        // OR together the backgrounds of selected libraries
-        let mut combined = DenseBitVec::empty(bitmap.columns.len());
-        for lib_name in libs {
-            if let Some(lib_bg) = bitmap.library_backgrounds.get(lib_name) {
-                combined.union_mut(lib_bg);
-            }
-        }
-        // Count signature pairs that match the library filter (both up and down must match)
-        let pair_count = bitmap.signature_pairs.pairs.iter()
-            .filter(|(up_idx, down_idx)| {
-                let up_hash = &bitmap.values[*up_idx].0;
-                let down_hash = &bitmap.values[*down_idx].0;
-                let up_matches = bitmap.gene_set_libraries.get(up_hash)
-                    .map(|lib| libs.contains(lib))
-                    .unwrap_or(false);
-                let down_matches = bitmap.gene_set_libraries.get(down_hash)
-                    .map(|lib| libs.contains(lib))
-                    .unwrap_or(false);
-                up_matches && down_matches
-            })
-            .count();
-        (combined.count_ones() as u32, pair_count)
-    } else {
-        // No filter - use full background and all pairs
-        (bitmap.full_background.count_ones() as u32, bitmap.signature_pairs.pairs.len())
-    };
+    let library_n_user_up: HashMap<String, u32> = bitmap.library_backgrounds.iter()
+        .map(|(name, lib_bg)| (name.clone(), intersect_count(&input_gene_set_up, lib_bg)))
+        .collect();
+    let library_n_user_down: HashMap<String, u32> = bitmap.library_backgrounds.iter()
+        .map(|(name, lib_bg)| (name.clone(), intersect_count(&input_gene_set_down, lib_bg)))
+        .collect();
 
-    let n_user_gene_id = input_gene_set_up.n as u32 + input_gene_set_down.n as u32;
-
-    // Only use cache if no library filter is applied
-    let use_cache = library_filter.is_none();
-
-    println!("[{}] Computing mimickers and reversers (library_filter: {})", background_id, !use_cache);
+    println!("[{}] Computing mimickers and reversers", background_id);
     let start = Instant::now();
     let background_query = Arc::new(BackgroundQueryPair { background_id, input_gene_set_up, input_gene_set_down });
     let mut results = {
-        let cached_results = if use_cache {
-            state.cachepair.get(&background_query).await
-        } else {
-            None
-        };
+        let cached_results = state.cachepair.get(&background_query).await;
         if let Some(results) = cached_results {
             results.value().clone()
         } else {
             let mut results: Vec<_> = bitmap.signature_pairs.pairs.par_iter().enumerate()
             .filter_map(|(index, (up_idx, down_idx))| {
-                // Filter by library if library_filter is set (both up and down must match)
-                if let Some(ref libs) = library_filter {
-                    let up_hash = &bitmap.values[*up_idx].0;
-                    let down_hash = &bitmap.values[*down_idx].0;
-                    let up_matches = bitmap.gene_set_libraries.get(up_hash)
-                        .map(|lib| libs.contains(lib))
-                        .unwrap_or(false);
-                    let down_matches = bitmap.gene_set_libraries.get(down_hash)
-                        .map(|lib| libs.contains(lib))
-                        .unwrap_or(false);
-                    if !up_matches || !down_matches {
-                        return None;  // Skip pairs not in selected libraries
-                    }
-                }
+                let (up_hash, gene_set_up) = &bitmap.values[*up_idx];
+                let (_down_hash, gene_set_down) = &bitmap.values[*down_idx];
 
-                let gene_set_up = &bitmap.values[*up_idx].1;
-                let gene_set_down = &bitmap.values[*down_idx].1;
+                let lib_name = bitmap.gene_set_libraries.get(up_hash)?;
+                let n_background = *bitmap.library_n_background.get(lib_name)?;
+                let n_user_gene_id = *library_n_user_up.get(lib_name)? + *library_n_user_down.get(lib_name)?;
 
                 // Compute four different overlaps
                 let overlap_up_up = compute_overlap(&background_query.input_gene_set_up, &gene_set_up) as u32;
@@ -1482,9 +1423,8 @@ async fn query_pairs(
                 let c_mimic = (gene_set_up.v.len() + gene_set_down.v.len()) as u32 - a_mimic;
                 let d_mimic = n_background - b_mimic - c_mimic + a_mimic;
 
-                
                 let pvalue_mimic = fisher.get_p_value(a_mimic as usize, b_mimic as usize, c_mimic as usize, d_mimic as usize);
-                
+
                 // Compute Fisher test for reverser
                 let a_reverse = reverser_overlap;
                 let b_reverse = n_user_gene_id - a_reverse;
@@ -1516,51 +1456,62 @@ async fn query_pairs(
             })
             .collect();
 
-            // Compute adj_pvalues using Benjamini-Hochberg.
-            // When library filtering is active, use compact indexing so BH only corrects
-            // over the filtered gene sets, not the entire database.
-            if library_filter.is_some() {
-                let pvalues_mimic: Vec<f64> = results.iter().map(|r| r.pvalue_mimic).collect();
-                let pvalues_reverse: Vec<f64> = results.iter().map(|r| r.pvalue_reverse).collect();
-                let adj_pvalues_mimic = adjust(&pvalues_mimic, Procedure::BenjaminiHochberg);
-                let adj_pvalues_reverse = adjust(&pvalues_reverse, Procedure::BenjaminiHochberg);
-                for (i, result) in results.iter_mut().enumerate() {
-                    result.adj_pvalue_mimic = adj_pvalues_mimic[i];
-                    result.adj_pvalue_reverse = adj_pvalues_reverse[i];
-                }
-                results.retain(|result| result.adj_pvalue_mimic <= adj_pvalue_le || result.adj_pvalue_reverse <= adj_pvalue_le);
-            } else {
-                let mut pvalues_mimic = vec![1.0; bitmap.values.len()];
-                let mut pvalues_reverse = vec![1.0; bitmap.values.len()];
-                for result in &results {
-                    pvalues_mimic[result.index] = result.pvalue_mimic;
-                    pvalues_reverse[result.index] = result.pvalue_reverse;
-                }
-                let adj_pvalues_mimic = adjust(&pvalues_mimic, Procedure::BenjaminiHochberg);
-                let adj_pvalues_reverse = adjust(&pvalues_reverse, Procedure::BenjaminiHochberg);
-                results.retain_mut(|result| {
-                    if let Some(adj_pvalue_mimic) = adj_pvalues_mimic.get(result.index) {
-                        result.adj_pvalue_mimic = *adj_pvalue_mimic;
-                    }
-                    if let Some(adj_pvalue_reverse) = adj_pvalues_reverse.get(result.index) {
-                        result.adj_pvalue_reverse = *adj_pvalue_reverse;
-                    }
-                    result.adj_pvalue_mimic <= adj_pvalue_le || result.adj_pvalue_reverse <= adj_pvalue_le
-                });
+            let mut pvalues_mimic = vec![1.0; bitmap.values.len()];
+            let mut pvalues_reverse = vec![1.0; bitmap.values.len()];
+            for result in &results {
+                pvalues_mimic[result.index] = result.pvalue_mimic;
+                pvalues_reverse[result.index] = result.pvalue_reverse;
             }
+            let adj_pvalues_mimic = adjust(&pvalues_mimic, Procedure::BenjaminiHochberg);
+            let adj_pvalues_reverse = adjust(&pvalues_reverse, Procedure::BenjaminiHochberg);
+            results.retain_mut(|result| {
+                if let Some(adj_pvalue_mimic) = adj_pvalues_mimic.get(result.index) {
+                    result.adj_pvalue_mimic = *adj_pvalue_mimic;
+                }
+                if let Some(adj_pvalue_reverse) = adj_pvalues_reverse.get(result.index) {
+                    result.adj_pvalue_reverse = *adj_pvalue_reverse;
+                }
+                result.adj_pvalue_mimic <= adj_pvalue_le || result.adj_pvalue_reverse <= adj_pvalue_le
+            });
             results.sort_unstable_by(|a, b| a.pvalue_mimic.partial_cmp(&b.pvalue_mimic).unwrap_or(std::cmp::Ordering::Equal));
 
             let results = Arc::new(results);
-
-            // Only cache if no library filter (cache key doesn't include library filter)
-            if use_cache {
-                state.cachepair.insert(background_query, results.clone(), 30000).await;
-            }
+            state.cachepair.insert(background_query, results.clone(), 30000).await;
 
             let duration = start.elapsed();
-            println!("[{}] {} up and down genes enriched in {:?} (library_filter: {})", background_id, n_user_gene_id, duration, !use_cache);
+            println!("[{}] enriched pairs in {:?}", background_id, duration);
             results
         }
+    };
+
+    if let Some(ref libs) = library_filter {
+        let filtered: Vec<PartialPairResult> = results.iter()
+            .filter(|r| {
+                let up_lib = bitmap.values.get(r.index_up)
+                    .and_then(|(uuid, _)| bitmap.gene_set_libraries.get(uuid));
+                let down_lib = bitmap.values.get(r.index_down)
+                    .and_then(|(uuid, _)| bitmap.gene_set_libraries.get(uuid));
+                up_lib.map_or(false, |l| libs.contains(l)) && down_lib.map_or(false, |l| libs.contains(l))
+            })
+            .cloned()
+            .collect();
+        results = Arc::new(filtered);
+    }
+
+    let gene_set_count: usize = if let Some(ref libs) = library_filter {
+        bitmap.signature_pairs.pairs.iter()
+            .filter(|(up_idx, down_idx)| {
+                let up_hash = &bitmap.values[*up_idx].0;
+                let down_hash = &bitmap.values[*down_idx].0;
+                let up_matches = bitmap.gene_set_libraries.get(up_hash)
+                    .map(|lib| libs.contains(lib)).unwrap_or(false);
+                let down_matches = bitmap.gene_set_libraries.get(down_hash)
+                    .map(|lib| libs.contains(lib)).unwrap_or(false);
+                up_matches && down_matches
+            })
+            .count()
+    } else {
+        bitmap.signature_pairs.pairs.len()
     };
 
     // CID-based consensus grouping for paired query
@@ -1939,11 +1890,11 @@ async fn query_pairs(
         if !filter_terms.is_empty() {
             consensus_results.retain(|result| {
                 let drug_lower = result.drug.to_lowercase();
-                filter_terms.iter().any(|ft| drug_lower.contains(ft))
+                filter_terms.iter().all(|ft| drug_lower.contains(ft))
             });
             moa_consensus_results.retain(|result| {
                 let drug_lower = result.drug.to_lowercase();
-                filter_terms.iter().any(|ft| drug_lower.contains(ft))
+                filter_terms.iter().all(|ft| drug_lower.contains(ft))
             });
         }
 
@@ -1984,7 +1935,7 @@ async fn query_pairs(
                 if let Some(terms) = bitmap.terms.get(gene_set_hash) {
                     if !filter_terms.is_empty() && !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)| {
                         let term_lower = gene_set_term.to_lowercase();
-                        filter_terms.iter().any(|ft| term_lower.contains(ft))
+                        filter_terms.iter().all(|ft| term_lower.contains(ft))
                     }) {
                         return None
                     }
