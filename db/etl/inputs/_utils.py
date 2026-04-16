@@ -21,10 +21,6 @@ Canonical-format helpers
 
 Outputs: GMT in canonical perturbation::cellLine::cellType::timepoint::concentration[::extras] up|down
 format at db/data/{drug,gene}_perturbation/<dataset>.gmt.gz.
-
-Pipeline: shared helpers, not directly runnable. Imported by per-dataset downloaders
-that run as ETL stage 0 (input acquisition); their outputs are validated by
-format_verification.py (now a test) and consumed by ingest + standardize_names.
 """
 import gzip
 import json
@@ -53,7 +49,7 @@ HARMONIZOME_BASE = "https://maayanlab.cloud/static/hdfs/harmonizome/data"
 CREEDS_BASE = "https://maayanlab.cloud/CREEDS/download"
 
 # Canonical term format constants
-D = "::"           # field delimiter
+DELIMITER = "::"           # field delimiter
 
 
 def strip_direction(term: str) -> tuple[str, str]:
@@ -62,8 +58,6 @@ def strip_direction(term: str) -> tuple[str, str]:
         if term.endswith(suffix):
             return term[: -len(suffix)], suffix
     return term, ""
-
-
 
 
 def append_to_description(upstream: str, addition: str) -> str:
@@ -217,10 +211,11 @@ def standardize_gmt(intermediate_path: Path, final_path: Path,
 # ============================================================================
 # Every ETL dataset should route DEGs through this filter.
 #
-# Output gene-name contract: uppercase, current HGNC Official Symbol, protein-coding only.
+# Output gene-name contract: uppercase, and present in NCBI gene_info for a PC gene
+# (either the Symbol itself or any synonym). Gene set members pass through verbatim —
+# no alias-to-current-Symbol rename. 
 #
-# Species handling: human + mouse only. 
-# Mouse DEGs go through MGI homology to land on current human PC Symbols. 
+# Species: human + mouse. Mouse DEGs go through MGI homology to the human ortholog.
 # Everything else (rat, zebrafish, unknown) is dropped.
 
 _HUMAN_ALIASES = {"homo sapiens", "human"}
@@ -228,63 +223,78 @@ _MOUSE_ALIASES = {"mus musculus", "mouse"}
 
 
 @lru_cache(maxsize=4)
-def _pc_alias_map(organism: str, cache_dir: Path) -> dict[str, str]:
-    """{alias → current Symbol} (UPPERCASE) for PC genes. Ambiguous aliases (NCBI
-    synonyms pointing to multiple Symbols) are dropped unless the alias IS itself
-    one of those Symbols (rummageo convention). See scratch/HGNC_PREV_SYMBOL_RESCUE.md
-    for an HGNC-based ambiguity-rescue we evaluated and could re-enable later."""
+def _protein_coding_genes(organism: str, cache_dir: Path) -> frozenset[str]:
+    """UPPERCASE Symbol ∪ synonyms for every protein-coding gene of `organism`."""
     from maayanlab_bioinformatics.harmonization.ncbi_genes import ncbi_genes_fetch
     df = ncbi_genes_fetch(organism=organism, cache_dir=str(cache_dir))
+    out = set()
+    for _, row in df.iterrows():
+        out.add(row["Symbol"].upper())
+        out.update(s.upper() for s in row["All_synonyms"])
+    return frozenset(out)
+
+
+@lru_cache(maxsize=4)
+def _non_protein_coding_genes(organism: str, cache_dir: Path) -> frozenset[str]:
+    """UPPERCASE Symbol ∪ synonyms for every NON-protein-coding gene (lncRNA, pseudogene, etc.)."""
+    from maayanlab_bioinformatics.harmonization.ncbi_genes import ncbi_genes_fetch
+    df = ncbi_genes_fetch(organism=organism,
+                          filters=lambda d: d["type_of_gene"] != "protein-coding",
+                          cache_dir=str(cache_dir))
+    out = set()
+    for _, row in df.iterrows():
+        out.add(row["Symbol"].upper())
+        out.update(s.upper() for s in row["All_synonyms"])
+    return frozenset(out)
+
+
+@lru_cache(maxsize=2)
+def _mouse_to_human_ortholog(cache_dir: Path) -> dict[str, str]:
+    """{mouse gene (UPPER) → human Symbol (UPPER)} via MGI homology. Ambiguous mouse
+    synonyms (mapping to multiple mouse Symbols) drop — orthology needs an unambiguous source."""
+    from maayanlab_bioinformatics.harmonization import mouse_human_homologs
+    from maayanlab_bioinformatics.harmonization.ncbi_genes import ncbi_genes_fetch
+
+    mouse_df = ncbi_genes_fetch(organism="Mammalia/Mus_musculus", cache_dir=str(cache_dir))
     pairs = [(s.upper(), row["Symbol"].upper())
-             for _, row in df.iterrows()
+             for _, row in mouse_df.iterrows()
              for s in row["All_synonyms"]]
-    counts = Counter(alias for alias, _ in pairs)
-    return {alias: sym for alias, sym in pairs if counts[alias] == 1 or alias == sym}
+    counts = Counter(a for a, _ in pairs)
+    mouse_alias_to_sym = {a: s for a, s in pairs if counts[a] == 1 or a == s}
+
+    mgi = mouse_human_homologs(uppercase=True)  # columns: mouse, human (both UPPER)
+    mouse_sym_to_human = dict(zip(mgi["mouse"], mgi["human"]))
+    human_pc = _protein_coding_genes("Mammalia/Homo_sapiens", cache_dir)
+    return {alias: h for alias, m_sym in mouse_alias_to_sym.items()
+            if (h := mouse_sym_to_human.get(m_sym)) in human_pc}
 
 
 def filter_to_human_pc(
     gmt: dict[str, list[str]], parse_organism, cache_dir: Path,
 ) -> dict[str, list[str]]:
-    """Filter every term's DEG list to human protein-coding symbols.
-
-      - Human DEGs: alias → current human PC Symbol (resolves annotation drift).
-      - Mouse DEGs: mouse alias → current mouse Symbol → human (MGI) → current human PC Symbol.
-      - Any other organism (rat, zebrafish, unknown, …): signature dropped.
-        Only ~10 CREEDS rat sigs hit this in practice; uniform drop avoids species-specific
-        special cases while preventing e.g. rat `Actb` from silently surviving as human ACTB.
-      - Non-PC DEGs drop implicitly (maps only contain PC entries).
-      - Per-term DEGs are deduped; terms left empty after mapping are dropped.
-
-    `parse_organism(gmt_key) -> str` returns the organism for that term.
-    """
-    from maayanlab_bioinformatics.harmonization import mouse_human_homologs
-
+    """Keep human gene set members unless they're known non-PC. Unknown human symbols
+    (retired placeholders like LOC*/FLJ*/KIAA*/MGC*/C*orf*) pass through verbatim so no
+    information is silently lost. Translate mouse genes to their human ortholog via MGI.
+    Drop other organisms entirely. Per-term DEGs are uppercased + deduped; terms empty
+    after filter drop."""
     print("  Loading NCBI gene_info + MGI homologs (cached after first run)...")
-    human_pc = _pc_alias_map("Mammalia/Homo_sapiens", cache_dir)
-    mouse_pc = _pc_alias_map("Mammalia/Mus_musculus", cache_dir)
-    mgi = mouse_human_homologs(uppercase=True)  # columns: mouse, human (both UPPER)
-    mouse_sym_to_human = dict(zip(mgi["mouse"], mgi["human"]))
-
-    # Compose: mouse alias → current mouse Symbol → human Symbol → current human PC Symbol.
-    # Drop alias if any link is missing.
-    mouse_to_human_pc = {
-        alias: h for alias, mouse_sym in mouse_pc.items()
-        if (h := human_pc.get(mouse_sym_to_human.get(mouse_sym)))
-    }
-    print(f"    Human PC aliases: {len(human_pc):,} | Mouse→human: {len(mouse_to_human_pc):,}")
+    human_non_pc = _non_protein_coding_genes("Mammalia/Homo_sapiens", cache_dir)
+    mouse_to_human = _mouse_to_human_ortholog(cache_dir)
+    print(f"    Human non-PC (drop set): {len(human_non_pc):,} | Mouse→human ortholog: {len(mouse_to_human):,}")
 
     out: dict[str, list[str]] = {}
     n_unsupported = n_empty = 0
     for key, genes in gmt.items():
         org = parse_organism(key).strip().lower()
         if org in _HUMAN_ALIASES:
-            lookup = human_pc
+            mapped = list(dict.fromkeys(g for g_raw in genes
+                                        if (g := g_raw.upper()) and g not in human_non_pc))
         elif org in _MOUSE_ALIASES:
-            lookup = mouse_to_human_pc
+            mapped = list(dict.fromkeys(h for g in genes
+                                        if (h := mouse_to_human.get(g.upper()))))
         else:
             n_unsupported += 1
             continue
-        mapped = list(dict.fromkeys(s for g in genes if (s := lookup.get(g.upper()))))
         if mapped:
             out[key] = mapped
         else:
