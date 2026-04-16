@@ -51,7 +51,7 @@ from goatools.anno.broad_gos import NS2GOS
 BASE_DIR = Path(__file__).parent.parent / "db" / "data"
 DRUG_DIR = BASE_DIR / "drug_perturbation"
 GENE_DIR = BASE_DIR / "gene_perturbation"
-
+MOA_DIR =  Path(__file__).parent.parent / "public" / "metadata"
 # Output directories
 OUTPUT_DIR = Path(__file__).parent.parent / "public" / "umap"
 ENRICHMENT_DIR = OUTPUT_DIR / "enrich"
@@ -73,7 +73,37 @@ LIBRARIES = {
     "creeds-gene": ("gene", "creeds-gene"),
     "geo-gene": ("gene", "rummageo-gene"),
     "replogle": ("gene", "replogle-perturb-seq"),
+    # Drug perturbations
+    "sciplex": ("drug", "sciplex"),
+    "drugseqr": ("drug", "nibr-drug-seq"),
+    "deepcovermoa": ("drug", "deepcover-moa"),
+    "ginkgo": ("drug", "ginkgo-bioworks"),
+    "lincs-l1000-cp": ("drug", "lincs-l1000-cp"),
+    "creeds-chem": ("drug", "creeds-chem"),
+    "tahoe-100m": ("drug", "tahoe-100m"),
+    "cmap-build02": ("drug", "microarrays-cmap"),
+    "geo-chem": ("drug", "rummageo-chem"),
 }
+
+GENE_LIBS = [
+    "lincs-l1000-xpr",
+    "perturbatlas-human",
+    "perturbatlas-mouse",
+    "creeds-gene",
+    "geo-gene",
+    "replogle"
+    ]
+DRUG_LIBS = [
+    "sciplex",
+    "drugseqr",
+    "deepcovermoa",
+    "ginkgo",
+    "lincs-l1000-cp",
+    "creeds-chem",
+    "tahoe-100m",
+    "cmap-build02",
+    "geo-chem"
+]   
 
 
 # GMT Loading Functions
@@ -206,6 +236,35 @@ def get_enrichment_data(pmat_df: pd.DataFrame, term:str) -> pd.DataFrame:
     term_enr_df['log10_pval'] = np.log10(term_enr_df['p-value'])*-1
     return term_enr_df
 
+## MOA Retrieval Functions ##
+
+def drug_lookup():
+    """
+    Returns drug lookup from drug_lookup.json
+    """
+    return pd.read_json(f'{MOA_DIR}/drug_lookup.json').to_dict().get
+
+def add_moa(df:pd.DataFrame, drug_lookup:function):
+    """
+    Adds MOA column to scatter dataframe using drug_lookup
+    Args:
+        df: scatterplot dataframe
+        drug_lookup: lookup function to retreive drug information
+    Returns:
+        scatterplot dataframe with column 'moa'
+    """
+    import re
+    def pert_lower(term):
+        pert = term.split('::')[0].lower()
+        if pert == '':
+            pert = term.split('::')[5].lower()
+        return pert
+    df['pert_lower'] = df['term'].apply(pert_lower)
+    df['moa'] = df['pert_lower'].apply(lambda x: drug_lookup(x, None))
+    df['moa'] = df['moa'].apply(lambda x: x['moa'] if pd.notna(x) else x)
+    df['moa'] = df['moa'].apply(lambda x: re.split(r'[|;]', x)[0] if pd.notna(x) else x)
+    return df
+
 # Cluster / Term Specificity Calculations
 
 def calculate_specificity(top_terms_df:pd.DataFrame):
@@ -269,15 +328,85 @@ def compute_outliers(scatter_df:pd.DataFrame, n_std:int=3):
     y_lo, y_hi = max(y_min, y_mu - y_std*n_std), min(y_max, y_mu + y_std*n_std)
     scatter_df['outlier'] = scatter_df.apply(lambda row: ~((row['x']>=x_lo)&(row['x']<=x_hi)&(row['y']>=y_lo)&(row['y']<=y_hi)), axis = 1)
 
-def create_scatterplot(scatter_df: pd.DataFrame, top_terms_df: pd.DataFrame, specific_terms_df: pd.DataFrame, title: str = "UMAP"):
+
+def create_drug_scatterplot(scatter_df: pd.DataFrame, title: str = "UMAP"):
+    """
+    Create scatter plot colored by MOA for paper figures
+    Args:
+        scatter_df: DataFrame with x, y, direction, cluster, term, genes columns
+        title: Plot title
+    Saves png image    
+    """
+    # remove outleirs
+    compute_outliers(scatter_df, 3)
+    df = scatter_df.copy()
+    df = df[~df['outlier']]
+    # fill NaN moa
+    df['moa'] = df['moa'].apply(lambda x: 'Not Found' if pd.isna(x) else x)
+    # set moa not in top_common to other
+    category_counts = df.groupby('moa').size().reset_index(name='count')
+    top_common = category_counts[category_counts['moa'] != 'Not Found'].moa.to_list()[:20]
+    df['moa'] = df['moa'].apply(lambda x: x if x in top_common + ['Not Found'] else 'Other')
+    # wrapped moa for label
+    df['wrapped_moa'] = df['moa'].apply(lambda x: "\n".join(wrap(str(x), 20)))
+    # reorder for plotting
+    category_counts = df.groupby('moa').size().reset_index(name='count')
+    df = df.merge(category_counts, how='left', on='moa')
+    df = df.sort_values('count', ascending=False)
+
+    # Color mapping
+    n_colors = max(3, min(20, len(top_common)))
+    palette = sns.color_palette("tab20", n_colors).as_hex() 
+    term_colors = {c: palette[i % len(palette)] for i, c in enumerate(df['wrapped_moa'].unique())}
+    term_colors['Not Found'] = '#CCCCCC'
+    term_colors['Other'] = '#997570'
+    
+    df['color'] = df['wrapped_moa'].map(term_colors)
+    # alphabetize legend labels
+    hue_order= sorted([m for m in term_colors.keys() if m not in ['Not Found','Other']])
+
+    hue_order = hue_order + ['Other','Not Found']
+    
+    sns.set_theme(
+    context='paper',
+    style='whitegrid',
+        rc={
+            "axes.titlesize": 14,
+            "axes.labelsize": 12,
+            "xtick.labelsize": 10,
+            "ytick.labelsize": 10
+        }
+    )
+    fig = plt.figure(figsize=(10,10))
+    ax = sns.scatterplot(
+        data=df.sort_values('count', ascending=False),
+        x='x',
+        y='y',
+        alpha = 0.6,
+        hue='wrapped_moa',
+        hue_order=hue_order,
+        palette=term_colors,
+        edgecolor=None,
+        s=7
+    )
+    plt.title(title.split(' ')[0].capitalize())
+    ax.get_legend().set_title('')
+    
+    plt.legend(loc='upper left', bbox_to_anchor=(1,1), markerscale=3, shadow=False, frameon=False, fontsize=8)
+    plt.xlabel('UMAP 1')
+    plt.ylabel('UMAP 2')
+    fig.savefig(f"{FIGURE_DIR}/{title}.png", dpi=500, bbox_inches='tight')
+    plt.close(fig)
+
+
+def create_gene_scatterplot(scatter_df: pd.DataFrame, top_terms_df: pd.DataFrame, specific_terms_df: pd.DataFrame, title: str = "UMAP"):
     """
     Create an interactive Bokeh scatterplot colored by 10 most commonly enriched GO terms
     Args:
         scatter_df: DataFrame with x, y, direction, cluster, term, genes columns
         top_terms_df: DataFrame with most enriched GO term for each signature
         title: Plot title
-    Returns:
-        Bokeh figure object
+    Saves png image
     """
     # remove outleirs
     compute_outliers(scatter_df, 3)
@@ -371,71 +500,82 @@ def process_library(
     ENRICHMENT_DIR.mkdir(parents=True, exist_ok=True)
     csv_path = ENRICHMENT_DIR / f"{library_name}.csv"
     
-    if run_enrichment:
-        print(f"\n{'='*60}")
-        print(f"Processing: {library_name}")
-        print(f"{'='*60}")
+    if library_name in GENE_LIBS:
+        if run_enrichment:
+            print(f"\n{'='*60}")
+            print(f"Processing: {library_name}")
+            print(f"{'='*60}")
 
-        # Load library (combined up+down)
-        lib_dict = get_library(library_name)
+            # Load library (combined up+down)
+            lib_dict = get_library(library_name)
 
-        # Adjust parameters for very large libraries
-        if len(lib_dict) > 100000:
-            print(f"\tLarge library detected ({len(lib_dict)} sets), adjusting parameters...")
-            n_neighbors = min(n_neighbors, 15)
+            # Adjust parameters for very large libraries
+            if len(lib_dict) > 100000:
+                print(f"\tLarge library detected ({len(lib_dict)} sets), adjusting parameters...")
+                n_neighbors = min(n_neighbors, 15)
 
-        # Retrieve top enriched GO term for signature        
-        target_lib = load_target_library(TARGET_LIB)
-        # Fisher's test
-        enrich_pmat = run_fishers(lib_dict, target_lib)
-        # Save CSV
-        enrich_pmat.to_csv(csv_path)
-        print(f"\tSaved CSV: {csv_path}")
+            # Retrieve top enriched GO term for signature        
+            target_lib = load_target_library(TARGET_LIB)
+            # Fisher's test
+            enrich_pmat = run_fishers(lib_dict, target_lib)
+            # Save CSV
+            enrich_pmat.to_csv(csv_path)
+            print(f"\tSaved CSV: {csv_path}")
 
-    else:
-        print(f"\tLoading {csv_path}...")
-        enrich_pmat = pd.read_csv(csv_path, index_col='term')
-    
-    print('\tRetrieving top enriched terms...')
+        else:
+            print(f"\tLoading {csv_path}...")
+            enrich_pmat = pd.read_csv(csv_path, index_col='term')
+        print('\tRetrieving top enriched terms...')
     
     scatter_df = get_scatter(library_name)
 
-    # identify broad GO terms in enrichment results
-    id_pattern = r"GO:\d+"
-    go_id_dict = {re.search(id_pattern, id).group():id for id in enrich_pmat.index.values}
-    to_drop = [go_id_dict[id] for id in NS2GOS['BP'] if id in go_id_dict]
+    if library_name in GENE_LIBS:
+        # identify broad GO terms in enrichment results
+        id_pattern = r"GO:\d+"
+        go_id_dict = {re.search(id_pattern, id).group():id for id in enrich_pmat.index.values}
+        to_drop = [go_id_dict[id] for id in NS2GOS['BP'] if id in go_id_dict]
 
-    top_terms_df = label_top_terms(enrich_pmat, scatter_df, to_drop)
+        top_terms_df = label_top_terms(enrich_pmat, scatter_df, to_drop)
 
-    # Calculate term specficity
-    csv_path = ENRICHMENT_DIR / f"{library_name}_specificity.csv"
-    if run_specificity:
-        print('\tCalculating specificity of terms to clusters...')
-        results = calculate_specificity(top_terms_df)
-        results.to_csv(csv_path, index=False)
-        print(f"\tSaved CSV: {csv_path}")
+        # Calculate term specficity
+        csv_path = ENRICHMENT_DIR / f"{library_name}_specificity.csv"
+        if run_specificity:
+            print('\tCalculating specificity of terms to clusters...')
+            results = calculate_specificity(top_terms_df)
+            results.to_csv(csv_path, index=False)
+            print(f"\tSaved CSV: {csv_path}")
+        else:
+            print(f"\tLoading {csv_path}...")
+            results = pd.read_csv(csv_path)
+
+        cluster_specific_terms_df = results.sort_values('fdr', ascending=True)\
+            .groupby('cluster')\
+                .agg('first')\
+                    .reset_index()\
+                        .rename(columns={'term':'cluster_go_term','count':'sig_count'})
     else:
-        print(f"\tLoading {csv_path}...")
-        results = pd.read_csv(csv_path)
-
-    cluster_specific_terms_df = results.sort_values('fdr', ascending=True)\
-        .groupby('cluster')\
-            .agg('first')\
-                .reset_index()\
-                    .rename(columns={'term':'cluster_go_term','count':'sig_count'})
-    
+        lookup = drug_lookup()
+        scatter_df = add_moa(scatter_df, lookup)
     # Save UMAP visualization
     if save_umap:
-        create_scatterplot(scatter_df,
-                                  top_terms_df,
-                                  cluster_specific_terms_df,
-                                  title=f"{library_name} UMAP")
+        if library_name in GENE_LIBS:
+            create_gene_scatterplot(scatter_df,
+                                    top_terms_df,
+                                    cluster_specific_terms_df,
+                                    title=f"{library_name} UMAP")
+            print(f"Saved: {library_name} UMAP")
+        else:
+            create_drug_scatterplot(scatter_df,
+                                    title = f"{library_name} UMAP")
+            print(f"Saved: {library_name} UMAP")
 
     return
 
 
 def process_all_libraries(
     skip_large: bool = False,
+    skip_gene: bool = False,
+    skip_drug: bool = False,
     run_enrichment: bool = False,
     run_specificity: bool = False,
     save_umap: bool=False
@@ -448,9 +588,16 @@ def process_all_libraries(
         save_html: Whether to save Bokeh HTML visualizations
     """
     large_libraries = {"lincs-l1000-cp", "lincs-l1000-xpr"}
+    
     for library_name in LIBRARIES.keys():
         if skip_large and library_name in large_libraries:
             print(f"\nSkipping large library: {library_name}")
+            continue
+        if skip_gene and library_name in GENE_LIBS:
+            print(f"\nSkipping gene library: {library_name}")
+            continue
+        if skip_drug and library_name in DRUG_LIBS:
+            print(f"\nSkipping drug library: {library_name}")
             continue
         try:
             process_library(
@@ -486,6 +633,8 @@ Examples:
     python generate_gene_perturbation_umap.py                          # Process all libraries
     python generate_gene_perturbation_umap.py --library sciplex        # Process specific library
     python generate_gene_perturbation_umap.py --skip-large             # Skip L1000-CP and L1000-XPR
+    python generate_gene_perturbation_umap.py --skip-gene              # Skip gene perturbation libraries
+    python generate_gene_perturbation_umap.py --skip-drug              # Skip drug perturbation libraries
     python generate_gene_perturbation_umap.py --list                   # List available libraries
     python generate_gene_perturbation_umap.py --skip-enrichment # Skip enrichment analysis 
         """
@@ -502,23 +651,30 @@ Examples:
         help="Skip large libraries (L1000-CP, L1000-XPR)"
     )
     parser.add_argument(
+        "--skip-gene",
+        action="store_true",
+        help="Skip gene perturbation libraries"
+    )
+    parser.add_argument(
+        "--skip-drug",
+        action="store_true",
+        help="Skip drug perturbation libraries"
+    )
+    parser.add_argument(
         "--list",
         action="store_true",
         help="List available libraries and exit"
     )
-
     parser.add_argument(
         "--skip-enrichment",
         action="store_true",
         help="Don't generate new UMAP embeddings and use saved embeddings"
     )
-
     parser.add_argument(
         "--skip-cluster-enrichment",
         action="store_true",
         help="Don't calculate cluster term enrichment and use saved results"
     )
-
     parser.add_argument(
         "--no-umap",
         action="store_true",
@@ -544,6 +700,8 @@ Examples:
     else:
         process_all_libraries(
             skip_large=args.skip_large,
+            skip_gene=args.skip_gene,
+            skip_drug=args.skip_drug,
             run_enrichment= not args.skip_enrichment,
             run_specificity = not args.skip_cluster_enrichment,
             save_umap = not args.no_umap
