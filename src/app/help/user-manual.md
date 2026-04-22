@@ -12,11 +12,11 @@ The Perturb-Seqr web application is a comprehensive Connectivity Mapping search 
 
 ![Getting Started 1](/images/getting-started-1.png) ![Getting Started 2](/images/getting-started-2.png)
 
-All search features are accompanied by dataset filtering, enabling users to select which drug and gene perturbation datasets are included in the underlying enrichment analysis, directly affecting the background gene set library and resulting statistical comparisons. Submitting the same gene set with different datasets selected will produce distinct enrichment results, reflecting that you are running a distinct Connectivity Mapping query. Once submitting either of the examples, a results table will be returned sorted by the most significantly overlapping gene sets. From here, you can apply additional filtering for FDA-approved drugs, for the directionality of the gene sets, as well as identify consensus mechanisms of action (MoAs), and consensus compounds seen across cell lines, time points and concentrations:
+All search features are accompanied by dataset filtering, enabling users to select which drug and gene perturbation datasets are included in their results. Each gene set's p-value is computed against its own dataset-specific background (the union of all genes appearing in that dataset's gene sets), ensuring that statistical comparisons are internally consistent and that p-values are reproducible regardless of which datasets are selected. Once submitting either of the examples, a results table will be returned sorted by the most significantly overlapping gene sets. From here, you can apply additional filtering for FDA-approved drugs, for the directionality of the gene sets, as well as identify consensus mechanisms of action (MoAs), and consensus compounds seen across cell lines, time points and concentrations:
 
 ![Gene Set Search Results](/images/gene-set-search-2.png) ![Up/Down Gene Set Search Results](/images/gene-set-search-11.png)
 
-Additionally, users can apply post-query dataset filtering that does not change the underlying enrichment analysis, but helps users narrow down results of interest.
+Additionally, users can apply post-query dataset filtering on the results page to further narrow down results of interest.
 
 ![Gene Set Search Results](/images/post-search-dataset-dropdown.png)
 
@@ -30,7 +30,7 @@ On search pages, users can toggle individual datasets on or off to control which
 
 ![Dataset Filtering](/images/dataset-icons.gif)
 
-As described in the Getting Started section, filtering datasets prior to search directly affects the underlying enrichment analysis. The selected datasets define the background gene set library used in the statistical comparisons.
+Dataset filtering controls which datasets' results are displayed. Each gene set is always tested against its own dataset-specific background, so p-values remain stable regardless of which datasets are selected. This means the same gene set will always receive the same p-value whether viewed alone or alongside other datasets.
 
 Dataset filtering selections and gene set inputs will persist as long as the user navigates back using the "BACK" button on the results page.
 
@@ -124,7 +124,7 @@ Perturb-Seqr provides programmatic access through a GraphQL endpoint. Users can 
 
 ![GraphiQL](/images/api-1.png)
 
-For example, enrichment analysis queries can be performed in Python against the Perturb-Seqr gene sets using the requests library as follows. The optional `library_names` parameter restricts the background gene set library to specific datasets, directly affecting the statistical comparisons:
+For example, enrichment analysis queries can be performed in Python against the Perturb-Seqr gene sets using the requests library as follows. The optional `library_names` parameter filters results to specific datasets:
 
 ```python
 import requests
