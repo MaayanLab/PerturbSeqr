@@ -411,6 +411,10 @@ const drugPerturbationDatasets: Dataset[] = [
     gmtUrl: `${MINIO_BASE}/rummageo-chem.gmt.gz`,
     fullSignatures: [
       { url: `${MINIO_BASE}/rummageo-chem-full.txt.gz`, label: 'Discretized Matrix' },
+      { url: `${MINIO_BASE}/rummageo-human-de-aligned.txt.gz`, label: 'Human Limma-Voom logFC' },
+      { url: `${MINIO_BASE}/rummageo-mouse-de-aligned.txt.gz`, label: 'Mouse Limma-Voom logFC' },
+      { url: `${MINIO_BASE}/rummageo-human-de-aligned.h5ad`, label: 'Human DE h5ad (logFC + t + adj.P.Val)' },
+      { url: `${MINIO_BASE}/rummageo-mouse-de-aligned.h5ad`, label: 'Mouse DE h5ad (logFC + t + adj.P.Val)' },
     ],
     note: 'See also ',
     noteLinkText: 'RummaGEO',
@@ -540,6 +544,10 @@ const genePerturbationDatasets: Dataset[] = [
     gmtUrl: `${MINIO_BASE}/rummageo-gene.gmt.gz`,
     fullSignatures: [
       { url: `${MINIO_BASE}/rummageo-gene-full.txt.gz`, label: 'Discretized Matrix' },
+      { url: `${MINIO_BASE}/rummageo-human-de-aligned.txt.gz`, label: 'Human Limma-Voom logFC' },
+      { url: `${MINIO_BASE}/rummageo-mouse-de-aligned.txt.gz`, label: 'Mouse Limma-Voom logFC' },
+      { url: `${MINIO_BASE}/rummageo-human-de-aligned.h5ad`, label: 'Human DE h5ad (logFC + t + adj.P.Val)' },
+      { url: `${MINIO_BASE}/rummageo-mouse-de-aligned.h5ad`, label: 'Mouse DE h5ad (logFC + t + adj.P.Val)' },
     ],
     note: 'See also ',
     noteLinkText: 'RummaGEO',
