@@ -1,7 +1,7 @@
 services:
   perturbseqr-postgres:
     build: db
-    image: johnkgardner/perturbseqr-postgres:0.2.34
+    image: johnkgardner/perturbseqr-postgres:0.2.35
     shm_size: 1Gb
     environment:
       - POSTGRES_PASSWORD
@@ -44,7 +44,7 @@ services:
 
   perturbseqr-enrich:
     build: enrich
-    image: johnkgardner/perturbseqr-enrich:0.2.34
+    image: johnkgardner/perturbseqr-enrich:0.2.35
     x-kubernetes:
       imagePullPolicy: Always
     deploy:
@@ -63,7 +63,7 @@ services:
 
   perturbseqr-app:
     build: .
-    image: johnkgardner/perturbseqr-app:0.2.34-dev
+    image: johnkgardner/perturbseqr-app:0.2.35-dev
     x-kubernetes:
       imagePullPolicy: Always
     environment:
@@ -85,7 +85,7 @@ services:
 
   minio-setup:
     build: minio
-    image: johnkgardner/perturbseqr-minio-setup:0.2.34
+    image: johnkgardner/perturbseqr-minio-setup:0.2.35
     environment:
       - S3_URL=http://minio:${MINIO_ROOT_PASSWORD}@perturbseqr-minio:9000/data
       - PUBLIC_S3_URL=https://s3.perturbseqr.k8s.dev.maayanlab.cloud/data
@@ -110,7 +110,7 @@ services:
     build:
       context: .
       dockerfile: ingest/Dockerfile
-    image: johnkgardner/perturbseqr-ingest:0.2.34
+    image: johnkgardner/perturbseqr-ingest:0.2.35
     x-kubernetes:
       imagePullPolicy: Always
     environment:
