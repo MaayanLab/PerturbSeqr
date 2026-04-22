@@ -93,7 +93,7 @@ const termStructures: Record<string, TermStructure> = {
     extraFields: [],
   },
   'nibr-drug-seq': {
-    example: 'Diphenidol::U2OS::::24h::0.01uM::AF-80-QK39::batchid1 up',
+    example: 'Diphenidol::U2OS::::24h::0.01uM::AF-80-QK39 up',
     direction: 'up',
     fields: [
       { text: 'Diphenidol', label: 'Perturbation' },
@@ -104,7 +104,6 @@ const termStructures: Record<string, TermStructure> = {
     ],
     extraFields: [
       { text: 'AF-80-QK39', label: 'NSN Code' },
-      { text: 'batchid1', label: 'Batch' },
     ],
   },
   'microarrays-cmap': {
@@ -406,7 +405,7 @@ const drugPerturbationDatasets: Dataset[] = [
     title: 'RummaGEO Drug Perturbations',
     libraryName: 'RummaGEO Chem',
     info: '',
-    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/38645198/',
+    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/39569206/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/RummaGEO+Drug+Perturbation+Signatures',
     sourceLabel: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/rummageo-chem.gmt.gz`,
@@ -535,7 +534,7 @@ const genePerturbationDatasets: Dataset[] = [
     title: 'RummaGEO Gene Perturbations',
     libraryName: 'RummaGEO Gene',
     info: '',
-    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/38645198/',
+    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/39569206/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/RummaGEO+Gene+Perturbation+Signatures',
     sourceLabel: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/rummageo-gene.gmt.gz`,
