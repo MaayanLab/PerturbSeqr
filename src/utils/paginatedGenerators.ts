@@ -16,7 +16,7 @@ import {
   import { parseTerm } from "@/utils/parseTerm";
   
 
-export async function* paginatedNodeGenerator(genes: string[], term: string, filterFda: boolean, filterKo: boolean, topN: number = 1000, sort: string, maxTotal: number = 100000, pvalueLe: number = 0.05, postSearchFilterLibraryNames: string[] | null = null, libraryNames: string[] | null = null) {
+export async function* paginatedNodeGenerator(genes: string[], term: string, filterFda: boolean, filterKo: boolean, topN: number = 1000, sort: string, maxTotal: number = 100000, pvalueLe: number = 0.05, libraryNames: string[] | null = null) {
     const pageSize = 500;
     let offset = 0;
 
@@ -33,7 +33,6 @@ export async function* paginatedNodeGenerator(genes: string[], term: string, fil
           first: pageSize,
           topN,
           pvalueLe,
-          postSearchFilterLibraryNames,
           libraryNames,
         },
       });
@@ -204,7 +203,7 @@ export async function* paginatedMoAsGenerator(
 }
 
 
-export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: string[], term: string, filterFda: boolean, filterKo: boolean, topN: number = 1000, sort: string, maxTotal: number = 100000, pvalueLe: number = 0.05, postSearchFilterLibraryNames: string[] | null = null, libraryNames: string[] | null = null) {
+export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: string[], term: string, filterFda: boolean, filterKo: boolean, topN: number = 1000, sort: string, maxTotal: number = 100000, pvalueLe: number = 0.05, libraryNames: string[] | null = null) {
     const pageSize = 500;
     let offset = 0;
 
@@ -222,7 +221,6 @@ export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: 
           first: pageSize,
           topN,
           pvalueLe,
-          postSearchFilterLibraryNames,
           libraryNames,
         },
       });

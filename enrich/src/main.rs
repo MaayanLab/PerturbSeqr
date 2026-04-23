@@ -27,7 +27,12 @@ use std::time::Instant;
 
 use fastfisher::FastFisher;
 use async_rwlockhashmap::RwLockHashMap;
-use bitvec::{SparseBitVec,DenseBitVec,compute_overlap,intersect_count};
+use bitvec::{
+    SparseBitVec,       // compact storage for gene sets (indices of set bits)
+    DenseBitVec,        // full-width vector for queries and library backgrounds (one byte per gene position)
+    compute_overlap,    // counts query genes present in a gene set (Dense × Sparse)
+    intersect_count,    // counts query genes present in a library's background (Dense × Dense)
+};
 
 /**
  * Without this alternative allocator, very large chunks of memory do not get released back to the OS causing a large memory footprint over time.
@@ -47,49 +52,33 @@ struct InputGeneSets {
 
 
 /// In-memory index for fast enrichment analysis.
-///
-/// # Library Filtering Optimization
-///
-/// When filtering by library (e.g., "L1000-CP"), we use pre-built indices to avoid
-/// iterating all gene sets. This is critical for performance with 1.8M+ gene sets.
-///
-/// ## Complexity Analysis
-///
-/// | Operation | Without Optimization | With Optimization |
-/// |-----------|---------------------|-------------------|
-/// | Count filtered gene sets | O(N) iteration | O(k) index lookups |
-/// | Main enrichment loop | O(N) + O(N) HashMap lookups | O(M) direct access |
-/// | BH p-value allocation | O(N) space | O(N) space (unchanged*) |
-///
-/// Where:
-/// - N = total gene sets (~1.8M)
-/// - M = gene sets in selected libraries (e.g., 700K for L1000-CP)
-/// - k = number of selected libraries (typically 1-3)
-///
-/// *BH allocation unchanged because indices reference original positions.
-/// The main loop optimization provides the primary performance benefit.
-///
-/// ## Example Performance Impact (250 genes, L1000-CP filter)
-///
-/// - Before: O(1.8M) iterations + O(1.8M) HashMap lookups = ~370 seconds
-/// - After: O(700K) direct iterations = ~900ms (400x faster)
+/// Built from postgres at startup, serialized to disk for subsequent loads.
 #[derive(SerdeSerialize, SerdeDeserialize, Clone)]
 struct Bitmap {
+    // Gene universe: maps each gene UUID to a bit position index (encoding: symbol → index)
     columns: HashMap<Uuid, u32>,
+    // Reverse lookup: bit position index → gene symbol string (decoding: index → symbol, used for GMT export)
     columns_str: Vec<String>,
+
+    // Gene sets: (gene_set_hash, sparse bit vector of gene positions)
     values: Vec<(Uuid, SparseBitVec)>,
-    // Tuple: (gene_set_id, term, description, fda_approved, count, pert, moa, cid)
+
+    // Gene set metadata: gene_set_hash -> vec of (gene_set_id, term, description, fda_approved, count, pert, moa, cid)
     terms: HashMap<Uuid, Vec<(Uuid, String, String, bool, i32, String, String, String)>>,
-    signature_pairs: SignaturePairs, // Store pairs persistently
+
+    // Paired signatures: (up_index, down_index) into `values` for mimicker/reverser search
+    signature_pairs: SignaturePairs,
+
+    // Mechanism of action counts for consensus search
     moa_counts: HashMap<String, i32>,
 
-    // Library filtering support (see optimization docs above)
+    // Per-library state for library-specific Fisher's exact test backgrounds
     gene_set_libraries: HashMap<Uuid, String>,             // gene_set_hash -> library_name
-    library_backgrounds: HashMap<String, DenseBitVec>,     // library_name -> genes in that library
+    library_backgrounds: HashMap<String, DenseBitVec>,     // library_name -> dense bit vector of all genes in that library
     #[serde(default)]
-    library_n_background: HashMap<String, u32>,
-    library_gene_set_indices: HashMap<String, Vec<usize>>, // library_name -> indices into values (O(1) lookup for filtering)
-    full_background: DenseBitVec,                          // all genes (for no-filter case)
+    library_background_counts: HashMap<String, u32>,            // library_name -> |B_lib| (pre-computed library-specific background size)
+    library_gene_set_indices: HashMap<String, Vec<usize>>, // library_name -> indices into `values`
+    full_background: DenseBitVec,                          // union of all library backgrounds
 }
 
 #[derive(SerdeSerialize, SerdeDeserialize, Clone)]
@@ -108,7 +97,7 @@ impl Bitmap {
             moa_counts: HashMap::new(),
             gene_set_libraries: HashMap::new(),
             library_backgrounds: HashMap::new(),
-            library_n_background: HashMap::new(),
+            library_background_counts: HashMap::new(),
             library_gene_set_indices: HashMap::new(),
             full_background: DenseBitVec::empty(0),
         }
@@ -180,7 +169,7 @@ struct PersistentState {
 }
 
 // The response data, containing the ids, and relevant metrics
-#[derive(Clone)]
+#[derive(Clone)] // Full results are cached once, then cloned and filtered by library selection per-request so subsequent filter changes are instant
 struct PartialQueryResult {
     index: usize,
     n_overlap: u32,
@@ -189,7 +178,7 @@ struct PartialQueryResult {
     adj_pvalue: f64,
 }
 
-#[derive(Clone)]
+#[derive(Clone)] // Full results are cached once, then cloned and filtered by library selection per-request so subsequent filter changes are instant
 struct PartialPairResult {
     index: usize,
     index_up: usize,
@@ -366,11 +355,9 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
             let mut fisher = state.fisher.write().await;
             fisher.extend_to(bitmap.columns.len() * 4);
         }
-        if bitmap.library_n_background.is_empty() && !bitmap.library_backgrounds.is_empty() {
-            for (lib_name, lib_bg) in bitmap.library_backgrounds.iter() {
-                bitmap.library_n_background.insert(lib_name.clone(), lib_bg.count_ones() as u32);
-            }
-        }
+        // Sanity check: library backgrounds and their pre-computed sizes must both be present
+        assert_eq!(bitmap.library_backgrounds.len(), bitmap.library_background_counts.len(),
+            "Stale index: library_backgrounds and library_background_counts out of sync. Delete the cached index and re-ingest.");
         state.bitmaps.insert(background_id, bitmap).await;
         *state.latest.write().await = Some(background_id);
         let duration = start.elapsed();
@@ -462,7 +449,8 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
             }
             // Also add to full background
             full_background.union_mut(&lib_background);
-            bitmap.library_n_background.insert(lib_name.clone(), lib_background.count_ones() as u32);
+            // Insert into library_background_counts HashMap: library name --> number of set bits (unique genes) in the library's background bitvector
+            bitmap.library_background_counts.insert(lib_name.clone(), lib_background.count_ones() as u32);
             bitmap.library_backgrounds.insert(lib_name.clone(), lib_background);
         }
         bitmap.full_background = full_background;
@@ -575,7 +563,7 @@ async fn delete(
 // query a specific background_id, providing the bitset vector as input
 //  the result are the gene_set_ids & relevant metrics
 // this can be pretty fast since the index is saved in memory and the overlaps can be computed in parallel
-#[post("/<background_id>?<filter_term>&<overlap_ge>&<pvalue_le>&<adj_pvalue_le>&<offset>&<limit>&<filter_fda>&<sortby>&<filter_ko>&<top_n>&<library_names>&<post_search_filter_library_names>", data = "<input_gene_set>")]
+#[post("/<background_id>?<filter_term>&<overlap_ge>&<pvalue_le>&<adj_pvalue_le>&<offset>&<limit>&<filter_fda>&<sortby>&<filter_ko>&<top_n>&<library_names>", data = "<input_gene_set>")]
 async fn query(
     mut db: Connection<Postgres>,
     state: &State<PersistentState>,
@@ -592,7 +580,6 @@ async fn query(
     filter_ko: Option<bool>,
     top_n: Option<usize>,
     library_names: Option<String>,
-    post_search_filter_library_names: Option<String>,
 ) -> Result<QueryResponse, Custom<String>> {
     let background_id = {
         if background_id == "latest" {
@@ -619,11 +606,9 @@ async fn query(
         names.split(',').map(|s| s.trim().to_string()).collect()
     });
 
-    // Parse post-search library filter (filters results AFTER Fisher's, doesn't affect background)
-    let post_search_library_filter: Option<std::collections::HashSet<String>> = post_search_filter_library_names.map(|names| {
-        names.split(',').map(|s| s.trim().to_string()).collect()
-    });
-
+    // For each library, count how many of the user's query genes fall within that library's
+    // gene universe. This is |Q ∩ B_lib| — used as the library-specific query size in the
+    // Fisher's contingency table (the "b" cell = library_n_user - overlap).
     let library_n_user: HashMap<String, u32> = bitmap.library_backgrounds.iter()
         .map(|(name, lib_bg)| (name.clone(), intersect_count(&input_gene_set, lib_bg)))
         .collect();
@@ -642,7 +627,7 @@ async fn query(
             let compute_result = |index: usize| -> Option<PartialQueryResult> {
                 let (gene_set_uuid, gene_set) = &bitmap.values[index];
                 let lib_name = bitmap.gene_set_libraries.get(gene_set_uuid)?;
-                let n_background = *bitmap.library_n_background.get(lib_name)?;
+                let n_background = *bitmap.library_background_counts.get(lib_name)?;
                 let n_user_gene_id = *library_n_user.get(lib_name)?;
 
                 let n_overlap = compute_overlap(&background_query.input_gene_set, gene_set) as u32;
@@ -729,17 +714,6 @@ async fn query(
 
     for result in (*results).iter().take(top_n) {
         if let Some((gene_set_hash, _gene_set)) = bitmap.values.get(result.index) {
-            // Post-search library filter: user selected specific datasets in the frontend dropdown.
-            // Enrichment runs against all libraries, but consensus only counts gene sets from selected ones.
-            if let Some(ref post_libs) = post_search_library_filter {
-                // Look up which library this gene set belongs to
-                if let Some(lib_name) = bitmap.gene_set_libraries.get(gene_set_hash) {
-                    // Skip this gene set if its library wasn't selected
-                    if !post_libs.contains(lib_name) {
-                        continue;
-                    }
-                }
-            }
             let current_lib = bitmap.gene_set_libraries.get(gene_set_hash).cloned().unwrap_or_default();
             if let Some(terms) = bitmap.terms.get(gene_set_hash) {
                 // Iterate over the terms for the current gene set
@@ -1160,14 +1134,6 @@ async fn query(
                     }
                 }
             }
-            // Post-search library filter: filter by dataset name AFTER Fisher's (doesn't affect p-values)
-            if let Some(ref post_libs) = post_search_library_filter {
-                if let Some(lib_name) = bitmap.gene_set_libraries.get(gene_set_hash) {
-                    if !post_libs.contains(lib_name) {
-                        return None
-                    }
-                }
-            }
             if let Some(filter_fda) = filter_fda {
                 if filter_fda {
                     if let Some(terms) = bitmap.terms.get(gene_set_hash) {
@@ -1314,7 +1280,7 @@ async fn query(
     })
 }
 
-#[post("/pairs/<background_id>?<filter_term>&<overlap_ge>&<pvalue_le>&<adj_pvalue_le>&<offset>&<limit>&<filter_fda>&<sortby>&<filter_ko>&<top_n>&<library_names>&<post_search_filter_library_names>", data = "<input_gene_sets>")]
+#[post("/pairs/<background_id>?<filter_term>&<overlap_ge>&<pvalue_le>&<adj_pvalue_le>&<offset>&<limit>&<filter_fda>&<sortby>&<filter_ko>&<top_n>&<library_names>", data = "<input_gene_sets>")]
 async fn query_pairs(
     mut db: Connection<Postgres>,
     state: &State<PersistentState>,
@@ -1331,7 +1297,6 @@ async fn query_pairs(
     filter_ko: Option<bool>,
     top_n: Option<usize>,
     library_names: Option<String>,
-    post_search_filter_library_names: Option<String>,
 ) -> Result<PairedQueryResponse, Custom<String>> {
 
     let background_id = {
@@ -1373,11 +1338,6 @@ async fn query_pairs(
         names.split(',').map(|s| s.trim().to_string()).collect()
     });
 
-    // Parse post-search library filter (filters results AFTER Fisher's, doesn't affect background)
-    let post_search_library_filter: Option<std::collections::HashSet<String>> = post_search_filter_library_names.map(|names| {
-        names.split(',').map(|s| s.trim().to_string()).collect()
-    });
-
     let library_n_user_up: HashMap<String, u32> = bitmap.library_backgrounds.iter()
         .map(|(name, lib_bg)| (name.clone(), intersect_count(&input_gene_set_up, lib_bg)))
         .collect();
@@ -1399,7 +1359,7 @@ async fn query_pairs(
                 let (_down_hash, gene_set_down) = &bitmap.values[*down_idx];
 
                 let lib_name = bitmap.gene_set_libraries.get(up_hash)?;
-                let n_background = *bitmap.library_n_background.get(lib_name)?;
+                let n_background = *bitmap.library_background_counts.get(lib_name)?;
                 let n_user_gene_id = *library_n_user_up.get(lib_name)? + *library_n_user_down.get(lib_name)?;
 
                 // Compute four different overlaps
@@ -1527,17 +1487,6 @@ async fn query_pairs(
 
     for result in (*results).iter().take(top_n) {
         if let Some((gene_set_hash, _gene_set)) = bitmap.values.get(result.index_up) {
-            // Post-search library filter: user selected specific datasets in the frontend dropdown.
-            // Enrichment runs against all libraries, but consensus only counts gene sets from selected ones.
-            if let Some(ref post_libs) = post_search_library_filter {
-                // Look up which library this gene set belongs to
-                if let Some(lib_name) = bitmap.gene_set_libraries.get(gene_set_hash) {
-                    // Skip this gene set if its library wasn't selected
-                    if !post_libs.contains(lib_name) {
-                        continue;
-                    }
-                }
-            }
             let current_lib = bitmap.gene_set_libraries.get(gene_set_hash).cloned().unwrap_or_default();
             if let Some(terms) = bitmap.terms.get(gene_set_hash) {
                 // Iterate over the terms for the current gene set
@@ -1943,14 +1892,6 @@ async fn query_pairs(
                     return None
                 } else if is_down && (result.pvalue_mimic < result.pvalue_reverse) {
                     return None
-                }
-            }
-            // Post-search library filter: filter by dataset name AFTER Fisher's (doesn't affect p-values)
-            if let Some(ref post_libs) = post_search_library_filter {
-                if let Some(lib_name) = bitmap.gene_set_libraries.get(gene_set_hash) {
-                    if !post_libs.contains(lib_name) {
-                        return None
-                    }
                 }
             }
             if let Some(filter_fda) = filter_fda {

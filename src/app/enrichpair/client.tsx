@@ -143,7 +143,7 @@ function EnrichmentResults({
       genesUp,
       genesDown,
       filterTerm: term + " " + queryString.dir,
-      libraryNames: libraryNames,
+      libraryNames: datasetFilter.length > 0 ? datasetFilter : libraryNames,
       offset: (page - 1) * pageSize,
       first: pageSize,
       filterFda: fda,
@@ -151,7 +151,6 @@ function EnrichmentResults({
       filterKo: ko,
       topN: topN,
       pvalueLe: pvalueLe,
-      postSearchFilterLibraryNames: datasetFilter.length > 0 ? datasetFilter : null,
     },
   });
 
