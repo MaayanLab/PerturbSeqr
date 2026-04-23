@@ -338,7 +338,7 @@ const drugPerturbationDatasets: Dataset[] = [
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/27667448/',
     sourceUrl: 'https://maayanlab.cloud/CREEDS/',
     sourceLabel: 'CREEDS',
-    sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/CREEDS+Signatures+of+Differentially+Expressed+Genes+for+Drugs',
+    sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/GEO+Signatures+of+Differentially+Expressed+Genes+for+Small+Molecules',
     sourceLabel2: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/creeds-chem.gmt.gz`,
     fullSignatures: [
@@ -470,7 +470,7 @@ const genePerturbationDatasets: Dataset[] = [
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/27667448/',
     sourceUrl: 'https://maayanlab.cloud/CREEDS/',
     sourceLabel: 'CREEDS',
-    sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/CREEDS+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations',
+    sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/GEO+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations',
     sourceLabel2: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/creeds-gene.gmt.gz`,
     fullSignatures: [
