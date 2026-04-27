@@ -22,10 +22,8 @@ export async function GET(request: Request) {
   const topN = searchParams.get("topn") || String(DEFAULT_CONSENSUS_TOP_N_SIGNATURES);
   const maxTotal = searchParams.get("maxTotal") || String(MAX_DOWNLOAD_RESULT_COUNT);
   const pvalueLe = searchParams.get("pvaluele") || String(DEFAULT_PVALUE_CUTOFF);
-  const ds = searchParams.get("ds") || "";
-  const dsArray = ds ? ds.split(",").filter(Boolean) : null;
-  const libraries = searchParams.get("libraries") || "";
-  const librariesArray = libraries ? libraries.split(",").filter(Boolean) : null;
+  const libraryFilter = (searchParams.get("libraries") || "").split(",").filter(Boolean);
+  const libraryNames = libraryFilter.length > 0 ? libraryFilter : null;
 
   const { data: userGeneSet, error: userGeneSetError } =
     await getClient().query<FetchUserGeneSetQuery>({
@@ -135,7 +133,7 @@ export async function GET(request: Request) {
             sort,
             parseInt(maxTotal),
             parseFloat(pvalueLe),
-            dsArray || librariesArray
+            libraryNames
           ),
           (item) => item
         ),

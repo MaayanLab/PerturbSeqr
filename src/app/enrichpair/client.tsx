@@ -110,7 +110,7 @@ function EnrichmentResults({
     ko: "false",
     topn: String(DEFAULT_CONSENSUS_TOP_N_SIGNATURES),
     pvaluele: String(DEFAULT_PVALUE_CUTOFF),
-    ds: "",
+    libraries: "",
   });
   const [rawTerm, setRawTerm] = React.useState("");
   const [topNSlider, setTopNSlider] = React.useState(DEFAULT_CONSENSUS_TOP_N_SIGNATURES);
@@ -134,7 +134,7 @@ function EnrichmentResults({
         ko: queryString.ko === "true",
         topN: parseInt(queryString?.topn ?? String(DEFAULT_CONSENSUS_TOP_N_SIGNATURES)),
         pvalueLe: parseFloat(queryString?.pvaluele ?? String(DEFAULT_PVALUE_CUTOFF)),
-        datasetFilter: queryString.ds ? queryString.ds.split(",").filter(Boolean) : [] as string[],
+        datasetFilter: queryString.libraries ? queryString.libraries.split(",").filter(Boolean) : [] as string[],
       }),
       [queryString]
     );
@@ -297,11 +297,11 @@ function EnrichmentResults({
               <div className="flex gap-1 mb-1">
                 <button
                   className="btn btn-xs"
-                  onClick={() => setQueryString({ ds: "", page: "1" })}
+                  onClick={() => setQueryString({ libraries: "", page: "1" })}
                 >All</button>
                 <button
                   className="btn btn-xs"
-                  onClick={() => setQueryString({ ds: "__none__", page: "1" })}
+                  onClick={() => setQueryString({ libraries: "__none__", page: "1" })}
                 >None</button>
               </div>
               {allLibraryDisplayNames.map((lib) => (
@@ -320,11 +320,11 @@ function EnrichmentResults({
                         next = datasetFilter.filter((l) => l !== lib);
                       }
                       if (next.length >= allLibraryDisplayNames.length) {
-                        setQueryString({ ds: "", page: "1" });
+                        setQueryString({ libraries: "", page: "1" });
                       } else if (next.length === 0) {
-                        setQueryString({ ds: "__none__", page: "1" });
+                        setQueryString({ libraries: "__none__", page: "1" });
                       } else {
-                        setQueryString({ ds: next.join(","), page: "1" });
+                        setQueryString({ libraries: next.join(","), page: "1" });
                       }
                     }}
                   />
@@ -348,9 +348,9 @@ function EnrichmentResults({
             onClick={() => {
               const isDrugActive = datasetFilter.length > 0 && drugLibraryNames.every(n => datasetFilter.includes(n)) && !geneLibraryNames.some(n => datasetFilter.includes(n));
               if (isDrugActive) {
-                setQueryString({ ds: "", page: "1" });
+                setQueryString({ libraries: "", page: "1" });
               } else {
-                setQueryString({ ds: drugLibraryNames.join(","), page: "1" });
+                setQueryString({ libraries: drugLibraryNames.join(","), page: "1" });
               }
             }}
           >
@@ -365,9 +365,9 @@ function EnrichmentResults({
             onClick={() => {
               const isGeneActive = datasetFilter.length > 0 && geneLibraryNames.every(n => datasetFilter.includes(n)) && !drugLibraryNames.some(n => datasetFilter.includes(n));
               if (isGeneActive) {
-                setQueryString({ ds: "", page: "1" });
+                setQueryString({ libraries: "", page: "1" });
               } else {
-                setQueryString({ ds: geneLibraryNames.join(","), page: "1" });
+                setQueryString({ libraries: geneLibraryNames.join(","), page: "1" });
               }
             }}
           >
@@ -646,7 +646,7 @@ function EnrichmentResults({
               &#x1F50D;
             </button>
           </div>
-          <DownloadButtonPair queryString={queryString} datasetDown={datasetDown} datasetUp={datasetUp} libraryNames={libraryNames}></DownloadButtonPair>
+          <DownloadButtonPair queryString={queryString} datasetDown={datasetDown} datasetUp={datasetUp}></DownloadButtonPair>
         </form>
         <div className="border border-base-300 rounded-lg p-3 mt-2 min-h-[2.75rem] bg-base-200/50">
           {term ? (
