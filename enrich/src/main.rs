@@ -108,14 +108,19 @@ impl Bitmap {
         }
     }
 
-    /// Count signature pairs per library (BH denominator for paired search)
+    // Look up which library a gene set belongs to by its index in `values`
+    fn get_library_for_index(&self, index: usize) -> Option<&String> {
+        let (uuid, _) = self.values.get(index)?;
+        self.gene_set_libraries.get(uuid)
+    }
+
+    // Count signature pairs per library (BH denominator for paired search)
     fn get_library_pair_counts(&self) -> HashMap<String, usize> {
         let mut counts: HashMap<String, usize> = HashMap::new();
+        // Both halves of a pair belong to same library, so we only check up_index
         for (up_idx, _) in &self.signature_pairs.pairs {
-            if let Some((uuid, _)) = self.values.get(*up_idx) {
-                if let Some(lib) = self.gene_set_libraries.get(uuid) {
-                    *counts.entry(lib.clone()).or_default() += 1;
-                }
+            if let Some(lib) = self.get_library_for_index(*up_idx) {
+                *counts.entry(lib.clone()).or_default() += 1;
             }
         }
         counts
@@ -694,10 +699,8 @@ async fn query(
             // Group results by library
             let mut per_library: HashMap<String, Vec<PartialQueryResult>> = HashMap::new();
             for result in all_results {
-                if let Some((uuid, _)) = bitmap.values.get(result.index) {
-                    if let Some(lib) = bitmap.gene_set_libraries.get(uuid) {
-                        per_library.entry(lib.clone()).or_default().push(result);
-                    }
+                if let Some(lib) = bitmap.get_library_for_index(result.index) {
+                    per_library.entry(lib.clone()).or_default().push(result);
                 }
             }
 
@@ -736,8 +739,7 @@ async fn query(
     let results: Arc<Vec<PartialQueryResult>> = if let Some(ref libs) = library_filter {
         let filtered: Vec<PartialQueryResult> = results.iter()
             .filter(|r| {
-                bitmap.values.get(r.index)
-                    .and_then(|(uuid, _)| bitmap.gene_set_libraries.get(uuid))
+                bitmap.get_library_for_index(r.index)
                     .map_or(false, |lib| libs.contains(lib))
             })
             .cloned()
@@ -1475,10 +1477,8 @@ async fn query_pairs(
             // Group results by library
             let mut per_library: HashMap<String, Vec<PartialPairResult>> = HashMap::new();
             for result in all_results {
-                if let Some((uuid, _)) = bitmap.values.get(result.index_up) {
-                    if let Some(lib) = bitmap.gene_set_libraries.get(uuid) {
-                        per_library.entry(lib.clone()).or_default().push(result);
-                    }
+                if let Some(lib) = bitmap.get_library_for_index(result.index_up) {
+                    per_library.entry(lib.clone()).or_default().push(result);
                 }
             }
 
@@ -1513,10 +1513,8 @@ async fn query_pairs(
     if let Some(ref libs) = library_filter {
         let filtered: Vec<PartialPairResult> = results.iter()
             .filter(|r| {
-                let up_lib = bitmap.values.get(r.index_up)
-                    .and_then(|(uuid, _)| bitmap.gene_set_libraries.get(uuid));
-                let down_lib = bitmap.values.get(r.index_down)
-                    .and_then(|(uuid, _)| bitmap.gene_set_libraries.get(uuid));
+                let up_lib = bitmap.get_library_for_index(r.index_up);
+                let down_lib = bitmap.get_library_for_index(r.index_down);
                 up_lib.map_or(false, |l| libs.contains(l)) && down_lib.map_or(false, |l| libs.contains(l))
             })
             .cloned()
@@ -1527,12 +1525,10 @@ async fn query_pairs(
     let gene_set_count: usize = if let Some(ref libs) = library_filter {
         bitmap.signature_pairs.pairs.iter()
             .filter(|(up_idx, down_idx)| {
-                let up_hash = &bitmap.values[*up_idx].0;
-                let down_hash = &bitmap.values[*down_idx].0;
-                let up_matches = bitmap.gene_set_libraries.get(up_hash)
-                    .map(|lib| libs.contains(lib)).unwrap_or(false);
-                let down_matches = bitmap.gene_set_libraries.get(down_hash)
-                    .map(|lib| libs.contains(lib)).unwrap_or(false);
+                let up_matches = bitmap.get_library_for_index(*up_idx)
+                    .map_or(false, |lib| libs.contains(lib));
+                let down_matches = bitmap.get_library_for_index(*down_idx)
+                    .map_or(false, |lib| libs.contains(lib));
                 up_matches && down_matches
             })
             .count()
