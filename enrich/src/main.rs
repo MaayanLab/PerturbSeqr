@@ -108,13 +108,6 @@ impl Bitmap {
         }
     }
 
-    /// Call this after inserting all gene sets to compute derived data structures
-    fn compute_pairs_and_counts(&mut self) {
-        self.signature_pairs = self.get_signature_pairs();
-        self.moa_counts = self.get_moa_counts();
-        self.library_pair_counts = self.get_library_pair_counts();
-    }
-
     /// Count signature pairs per library (BH denominator for paired search)
     fn get_library_pair_counts(&self) -> HashMap<String, usize> {
         let mut counts: HashMap<String, usize> = HashMap::new();
@@ -484,8 +477,10 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
             println!("[{}]   {}: {} genes, {} gene sets", background_id, lib_name, lib_bg.count_ones(), gs_count);
         }
 
-        // compute and store pairs
-        bitmap.compute_pairs_and_counts();
+        // Compute derived data structures from the loaded gene sets
+        bitmap.signature_pairs = bitmap.get_signature_pairs();
+        bitmap.moa_counts = bitmap.get_moa_counts();
+        bitmap.library_pair_counts = bitmap.get_library_pair_counts();
 
         // Save to disk for faster subsequent startups
         if let Err(e) = save_index(&background_id, &bitmap) {
