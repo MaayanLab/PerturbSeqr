@@ -80,7 +80,9 @@ struct Bitmap {
     library_gene_set_indices: HashMap<String, Vec<usize>>, // library_name -> indices into `values`
     #[serde(default)]
     library_pair_counts: HashMap<String, usize>,           // library_name -> number of signature pairs in that library (BH denominator for paired search)
-    full_background: DenseBitVec,                          // union of all library backgrounds
+    // Currently unused: per-library backgrounds replaced global background for Fisher's test.
+    // Retained in struct for serialization compatibility and potential future use (e.g. global gene count display).
+    full_background: DenseBitVec,
 }
 
 #[derive(SerdeSerialize, SerdeDeserialize, Clone)]
