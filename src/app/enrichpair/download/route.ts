@@ -159,8 +159,7 @@ export async function GET(request: Request) {
               sort,
               parseInt(maxTotal),
               parseFloat(pvalueLe),
-              dsArray,
-              librariesArray
+              dsArray || librariesArray
             ),
             (item) => item
           ),
