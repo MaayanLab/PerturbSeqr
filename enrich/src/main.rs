@@ -670,50 +670,43 @@ async fn query(
             };
 
             // Run compute_result against every gene set in parallel across all CPU cores (rayon).
-            // Each index maps to one gene set; None results (below overlap/pvalue thresholds) are dropped.
-            let mut results: Vec<_> = (0..bitmap.values.len())
+            // Collect into per-library result vectors for independent BH correction.
+            let all_results: Vec<_> = (0..bitmap.values.len())
                 .into_par_iter()
                 .filter_map(|index| compute_result(index))
                 .collect();
+            let pre_adj_count = all_results.len();
 
-            // Per-library Benjamini-Hochberg correction.
-            let pre_adj_count = results.len();
-            // Group results by library, then BH-correct within each group
-            let mut library_results: HashMap<String, Vec<usize>> = HashMap::new();
-            for (i, result) in results.iter().enumerate() {
+            // Group results by library
+            let mut per_library: HashMap<String, Vec<PartialQueryResult>> = HashMap::new();
+            for result in all_results {
                 if let Some((uuid, _)) = bitmap.values.get(result.index) {
                     if let Some(lib) = bitmap.gene_set_libraries.get(uuid) {
-                        library_results.entry(lib.clone()).or_default().push(i);
+                        per_library.entry(lib.clone()).or_default().push(result);
                     }
                 }
             }
-            for (lib_name, result_indices) in &library_results {
-                // Get total gene sets in this library (the denominator for BH)
-                let lib_size = bitmap.library_gene_set_indices.get(lib_name)
+
+            // Per-library Benjamini-Hochberg correction.
+            // BH is applied within each library independently: passing p-values first, padded
+            // with 1.0 to the library's total gene set count so BH knows the full test count.
+            let mut results: Vec<PartialQueryResult> = Vec::new();
+            for (lib_name, mut lib_results) in per_library {
+                let lib_size = bitmap.library_gene_set_indices.get(&lib_name)
                     .map(|v| v.len()).unwrap_or(1);
-                // Build per-library p-value vector: 1.0 for all gene sets, actual p-value for those that passed
-                let mut pvalues = vec![1.0; lib_size];
-                // Map each result's global index to a local index within this library
-                let lib_indices = bitmap.library_gene_set_indices.get(lib_name).unwrap();
-                let global_to_local: HashMap<usize, usize> = lib_indices.iter().enumerate()
-                    .map(|(local, &global)| (global, local)).collect();
-                for &ri in result_indices {
-                    if let Some(&local_idx) = global_to_local.get(&results[ri].index) {
-                        pvalues[local_idx] = results[ri].pvalue;
-                    }
-                }
+                let mut pvalues: Vec<f64> = lib_results.iter().map(|r| r.pvalue).collect();
+                pvalues.resize(lib_size, 1.0);
                 let adj_pvalues = adjust(&pvalues, Procedure::BenjaminiHochberg);
-                for &ri in result_indices {
-                    if let Some(&local_idx) = global_to_local.get(&results[ri].index) {
-                        results[ri].adj_pvalue = adj_pvalues[local_idx];
-                    }
+                for (i, result) in lib_results.iter_mut().enumerate() {
+                    result.adj_pvalue = adj_pvalues[i];
                 }
+                lib_results.retain(|r| r.adj_pvalue <= adj_pvalue_le);
+                results.extend(lib_results);
             }
-            // Drop results that don't pass the adjusted p-value threshold
-            results.retain(|result| result.adj_pvalue <= adj_pvalue_le);
+
             let post_adj_count = results.len();
             println!("[{}] filter stats: {} passed pvalue, {} passed adj_pvalue", background_id, pre_adj_count, post_adj_count);
-            // Sort by raw p-value (most significant first) and cache for reuse
+            // Sort by raw p-value (most significant first)
             results.sort_unstable_by(|a, b| a.pvalue.partial_cmp(&b.pvalue).unwrap_or(std::cmp::Ordering::Equal));
             let results = Arc::new(results);
 
@@ -1402,7 +1395,7 @@ async fn query_pairs(
         if let Some(results) = cached_results {
             results.value().clone()
         } else {
-            let mut results: Vec<_> = bitmap.signature_pairs.pairs.par_iter().enumerate()
+            let all_results: Vec<_> = bitmap.signature_pairs.pairs.par_iter().enumerate()
             .filter_map(|(index, (up_idx, down_idx))| {
                 let (up_hash, gene_set_up) = &bitmap.values[*up_idx];
                 let (_down_hash, gene_set_down) = &bitmap.values[*down_idx];
@@ -1465,56 +1458,43 @@ async fn query_pairs(
             })
             .collect();
 
-            // Per-library BH correction for paired results (same rationale as query())
-            let mut library_results: HashMap<String, Vec<usize>> = HashMap::new();
-            for (i, result) in results.iter().enumerate() {
+            // Group results by library
+            let mut per_library: HashMap<String, Vec<PartialPairResult>> = HashMap::new();
+            for result in all_results {
                 if let Some((uuid, _)) = bitmap.values.get(result.index_up) {
                     if let Some(lib) = bitmap.gene_set_libraries.get(uuid) {
-                        library_results.entry(lib.clone()).or_default().push(i);
+                        per_library.entry(lib.clone()).or_default().push(result);
                     }
                 }
             }
-            // Count signature pairs per library for BH denominator
+
+            // Count total signature pairs per library (BH denominator)
             let mut library_pair_counts: HashMap<String, usize> = HashMap::new();
-            for (up_idx, _down_idx) in &bitmap.signature_pairs.pairs {
+            for (up_idx, _) in &bitmap.signature_pairs.pairs {
                 if let Some((uuid, _)) = bitmap.values.get(*up_idx) {
                     if let Some(lib) = bitmap.gene_set_libraries.get(uuid) {
                         *library_pair_counts.entry(lib.clone()).or_default() += 1;
                     }
                 }
             }
-            for (lib_name, result_indices) in &library_results {
-                let lib_pair_count = *library_pair_counts.get(lib_name).unwrap_or(&1);
-                // Build per-library p-value vectors for mimic and reverse
-                let mut pvalues_mimic = vec![1.0; lib_pair_count];
-                let mut pvalues_reverse = vec![1.0; lib_pair_count];
-                // Map pair indices to local indices within this library
-                let mut pair_local_idx: HashMap<usize, usize> = HashMap::new();
-                let mut local = 0;
-                for (pair_idx, (up_idx, _)) in bitmap.signature_pairs.pairs.iter().enumerate() {
-                    if let Some((uuid, _)) = bitmap.values.get(*up_idx) {
-                        if bitmap.gene_set_libraries.get(uuid).map(|l| l == lib_name).unwrap_or(false) {
-                            pair_local_idx.insert(pair_idx, local);
-                            local += 1;
-                        }
-                    }
-                }
-                for &ri in result_indices {
-                    if let Some(&local_idx) = pair_local_idx.get(&results[ri].index) {
-                        pvalues_mimic[local_idx] = results[ri].pvalue_mimic;
-                        pvalues_reverse[local_idx] = results[ri].pvalue_reverse;
-                    }
-                }
+
+            // Per-library BH correction for mimic and reverse p-values
+            let mut results: Vec<PartialPairResult> = Vec::new();
+            for (lib_name, mut lib_results) in per_library {
+                let lib_pair_count = *library_pair_counts.get(&lib_name).unwrap_or(&1);
+                let mut pvalues_mimic: Vec<f64> = lib_results.iter().map(|r| r.pvalue_mimic).collect();
+                let mut pvalues_reverse: Vec<f64> = lib_results.iter().map(|r| r.pvalue_reverse).collect();
+                pvalues_mimic.resize(lib_pair_count, 1.0);
+                pvalues_reverse.resize(lib_pair_count, 1.0);
                 let adj_mimic = adjust(&pvalues_mimic, Procedure::BenjaminiHochberg);
                 let adj_reverse = adjust(&pvalues_reverse, Procedure::BenjaminiHochberg);
-                for &ri in result_indices {
-                    if let Some(&local_idx) = pair_local_idx.get(&results[ri].index) {
-                        results[ri].adj_pvalue_mimic = adj_mimic[local_idx];
-                        results[ri].adj_pvalue_reverse = adj_reverse[local_idx];
-                    }
+                for (i, result) in lib_results.iter_mut().enumerate() {
+                    result.adj_pvalue_mimic = adj_mimic[i];
+                    result.adj_pvalue_reverse = adj_reverse[i];
                 }
+                lib_results.retain(|r| r.adj_pvalue_mimic <= adj_pvalue_le || r.adj_pvalue_reverse <= adj_pvalue_le);
+                results.extend(lib_results);
             }
-            results.retain(|result| result.adj_pvalue_mimic <= adj_pvalue_le || result.adj_pvalue_reverse <= adj_pvalue_le);
             results.sort_unstable_by(|a, b| a.pvalue_mimic.partial_cmp(&b.pvalue_mimic).unwrap_or(std::cmp::Ordering::Equal));
 
             let results = Arc::new(results);
