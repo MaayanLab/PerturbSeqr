@@ -29,7 +29,9 @@ const allLibraryDisplayNames = Object.values(libraryConfig.libraries).map((l: an
 const drugLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'drug').map((l: any) => l.displayName as string);
 const geneLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'gene').map((l: any) => l.displayName as string);
 
-const pageSize = 12;
+import { DEFAULT_CONSENSUS_TOP_N_SIGNATURES, DEFAULT_PVALUE_CUTOFF, RESULTS_PER_PAGE } from '@/constants/enrichment';
+
+const pageSize = RESULTS_PER_PAGE;
 
 type GeneSetModalT =
   | {
@@ -85,18 +87,18 @@ function EnrichmentResults({
     moas: "false",
     sort: "pvalue",
     ko: "false",
-    topn: "10000",
-    pvaluele: "0.05",
-    ds: "",
+    topn: String(DEFAULT_CONSENSUS_TOP_N_SIGNATURES),
+    pvaluele: String(DEFAULT_PVALUE_CUTOFF),
+    libraries: "",
   });
   const [rawTerm, setRawTerm] = React.useState("");
-  const [topNSlider, setTopNSlider] = React.useState(10000);
-  const [pvalueLeSlider, setPvalueLeSlider] = React.useState(0.05);
+  const [topNSlider, setTopNSlider] = React.useState(DEFAULT_CONSENSUS_TOP_N_SIGNATURES);
+  const [pvalueLeSlider, setPvalueLeSlider] = React.useState(DEFAULT_PVALUE_CUTOFF);
   const [drugLookupLoaded, setDrugLookupLoaded] = React.useState(false);
   const [datasetDropdownOpen, setDatasetDropdownOpen] = React.useState(false);
   const [sigModalData, setSigModalData] = React.useState<{ signatures: ContributingSignature[]; drug: string } | null>(null);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
-  // Cache the unfiltered total count so post-search filtering doesn't change the headline number
+  // Cache the unfiltered total count so dataset filtering doesn't change the headline number
   const [unfilteredTotalCount, setUnfilteredTotalCount] = React.useState<number | null>(null);
 
   const { page, term, fda, consensus, moas, sort, ko, topN, pvalueLe, datasetFilter } =
@@ -109,9 +111,9 @@ function EnrichmentResults({
         moas: queryString.moas === "true",
         sort: queryString.sort,
         ko: queryString.ko === "true",
-        topN: parseInt(queryString?.topn ?? "10000"),
-        pvalueLe: parseFloat(queryString?.pvaluele ?? "0.05"),
-        datasetFilter: queryString.ds ? queryString.ds.split(",").filter(Boolean) : [] as string[],
+        topN: parseInt(queryString?.topn ?? String(DEFAULT_CONSENSUS_TOP_N_SIGNATURES)),
+        pvalueLe: parseFloat(queryString?.pvaluele ?? String(DEFAULT_PVALUE_CUTOFF)),
+        datasetFilter: queryString.libraries ? queryString.libraries.split(",").filter(Boolean) : [] as string[],
       }),
       [queryString]
     );
@@ -121,7 +123,7 @@ function EnrichmentResults({
     variables: {
       genes,
       filterTerm: term + " " + queryString.dir,
-      libraryNames: libraryNames,
+      libraryNames: datasetFilter.length > 0 ? datasetFilter : libraryNames,
       offset: (page - 1) * pageSize,
       first: pageSize,
       filterFda: fda,
@@ -129,13 +131,12 @@ function EnrichmentResults({
       filterKo: ko,
       topN: topN,
       pvalueLe: pvalueLe,
-      postSearchFilterLibraryNames: datasetFilter.length > 0 ? datasetFilter : null,
     },
   });
 
   console.log(enrichmentResults)
 
-  // Cache unfiltered total count when no post-search filters are active
+  // Cache unfiltered total count when no dataset filters are active
   React.useEffect(() => {
     if (datasetFilter.length === 0 && !fda && !queryString.dir && enrichmentResults?.currentBackground?.enrich?.totalCount != null) {
       setUnfilteredTotalCount(enrichmentResults.currentBackground.enrich.totalCount);
@@ -279,11 +280,11 @@ function EnrichmentResults({
               <div className="flex gap-1 mb-1">
                 <button
                   className="btn btn-xs"
-                  onClick={() => setQueryString({ ds: "", page: "1" })}
+                  onClick={() => setQueryString({ libraries: "", page: "1" })}
                 >All</button>
                 <button
                   className="btn btn-xs"
-                  onClick={() => setQueryString({ ds: "__none__", page: "1" })}
+                  onClick={() => setQueryString({ libraries: "__none__", page: "1" })}
                 >None</button>
               </div>
               {allLibraryDisplayNames.map((lib) => (
@@ -302,11 +303,11 @@ function EnrichmentResults({
                         next = datasetFilter.filter((l) => l !== lib);
                       }
                       if (next.length >= allLibraryDisplayNames.length) {
-                        setQueryString({ ds: "", page: "1" });
+                        setQueryString({ libraries: "", page: "1" });
                       } else if (next.length === 0) {
-                        setQueryString({ ds: "__none__", page: "1" });
+                        setQueryString({ libraries: "__none__", page: "1" });
                       } else {
-                        setQueryString({ ds: next.join(","), page: "1" });
+                        setQueryString({ libraries: next.join(","), page: "1" });
                       }
                     }}
                   />
@@ -330,9 +331,9 @@ function EnrichmentResults({
             onClick={() => {
               const isDrugActive = datasetFilter.length > 0 && drugLibraryNames.every(n => datasetFilter.includes(n)) && !geneLibraryNames.some(n => datasetFilter.includes(n));
               if (isDrugActive) {
-                setQueryString({ ds: "", page: "1" });
+                setQueryString({ libraries: "", page: "1" });
               } else {
-                setQueryString({ ds: drugLibraryNames.join(","), page: "1" });
+                setQueryString({ libraries: drugLibraryNames.join(","), page: "1" });
               }
             }}
           >
@@ -347,9 +348,9 @@ function EnrichmentResults({
             onClick={() => {
               const isGeneActive = datasetFilter.length > 0 && geneLibraryNames.every(n => datasetFilter.includes(n)) && !drugLibraryNames.some(n => datasetFilter.includes(n));
               if (isGeneActive) {
-                setQueryString({ ds: "", page: "1" });
+                setQueryString({ libraries: "", page: "1" });
               } else {
-                setQueryString({ ds: geneLibraryNames.join(","), page: "1" });
+                setQueryString({ libraries: geneLibraryNames.join(","), page: "1" });
               }
             }}
           >
@@ -624,7 +625,7 @@ function EnrichmentResults({
               &#x1F50D;
             </button>
           </div>
-          <DownloadButton queryString={queryString} libraryNames={libraryNames}></DownloadButton>
+          <DownloadButton queryString={queryString}></DownloadButton>
         </form>
         <div className="border border-base-300 rounded-lg p-3 mt-2 min-h-[2.75rem] bg-base-200/50">
           {term ? (
