@@ -108,18 +108,24 @@ impl Bitmap {
         }
     }
 
-    /// Call this after inserting all terms to compute signature pairs and per-library pair counts
-    fn finalize(&mut self) {
+    /// Call this after inserting all gene sets to compute derived data structures
+    fn compute_pairs_and_counts(&mut self) {
         self.signature_pairs = self.get_signature_pairs();
         self.moa_counts = self.get_moa_counts();
-        // Pre-compute pair counts per library (BH denominator for paired search)
+        self.library_pair_counts = self.get_library_pair_counts();
+    }
+
+    /// Count signature pairs per library (BH denominator for paired search)
+    fn get_library_pair_counts(&self) -> HashMap<String, usize> {
+        let mut counts: HashMap<String, usize> = HashMap::new();
         for (up_idx, _) in &self.signature_pairs.pairs {
             if let Some((uuid, _)) = self.values.get(*up_idx) {
                 if let Some(lib) = self.gene_set_libraries.get(uuid) {
-                    *self.library_pair_counts.entry(lib.clone()).or_default() += 1;
+                    *counts.entry(lib.clone()).or_default() += 1;
                 }
             }
         }
+        counts
     }
 
     fn get_signature_pairs(&self) -> SignaturePairs {
@@ -479,7 +485,7 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
         }
 
         // compute and store pairs
-        bitmap.finalize();
+        bitmap.compute_pairs_and_counts();
 
         // Save to disk for faster subsequent startups
         if let Err(e) = save_index(&background_id, &bitmap) {
