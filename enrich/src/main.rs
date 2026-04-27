@@ -79,6 +79,8 @@ struct Bitmap {
     library_background_counts: HashMap<String, u32>,            // library_name -> |B_lib| (pre-computed library-specific background size)
     library_gene_set_indices: HashMap<String, Vec<usize>>, // library_name -> indices into `values`
     #[serde(default)]
+    library_gene_set_counts: HashMap<String, usize>,      // library_name -> total gene sets in that library (BH denominator for single search)
+    #[serde(default)]
     library_pair_counts: HashMap<String, usize>,           // library_name -> number of signature pairs in that library (BH denominator for paired search)
     // Currently unused: per-library backgrounds replaced global background for Fisher's test.
     // Retained in struct for serialization compatibility and potential future use (e.g. global gene count display).
@@ -103,6 +105,7 @@ impl Bitmap {
             library_backgrounds: HashMap::new(),
             library_background_counts: HashMap::new(),
             library_gene_set_indices: HashMap::new(),
+            library_gene_set_counts: HashMap::new(),
             library_pair_counts: HashMap::new(),
             full_background: DenseBitVec::empty(0),
         }
@@ -472,6 +475,10 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
         }
         bitmap.full_background = full_background;
         bitmap.library_gene_set_indices = library_gene_sets;
+        // Pre-compute gene set counts per library (BH denominator for single search)
+        bitmap.library_gene_set_counts = bitmap.library_gene_set_indices.iter()
+            .map(|(lib_name, indices)| (lib_name.clone(), indices.len()))
+            .collect();
 
         // Debug logging for background sizes
         println!("[{}] loaded {} libraries with backgrounds", background_id, bitmap.library_backgrounds.len());
@@ -707,10 +714,10 @@ async fn query(
             // Per-library Benjamini-Hochberg correction.
             // BH is applied within each library independently: passing p-values first, padded
             // with 1.0 to the library's total gene set count so BH knows the full test count.
-            let mut results: Vec<PartialQueryResult> = Vec::new();
+            let mut results: Vec<PartialQueryResult> = Vec::with_capacity(pre_adj_count);
             for (lib_name, mut lib_results) in per_library {
-                let lib_size = bitmap.library_gene_set_indices.get(&lib_name)
-                    .map(|v| v.len()).unwrap_or(1);
+                // Safe to unwrap: library_gene_set_counts is populated by ensure_index for all libraries
+                let lib_size = *bitmap.library_gene_set_counts.get(&lib_name).unwrap();
                 let mut pvalues: Vec<f64> = lib_results.iter().map(|r| r.pvalue).collect();
                 pvalues.resize(lib_size, 1.0);
                 let adj_pvalues = adjust(&pvalues, Procedure::BenjaminiHochberg);
@@ -751,8 +758,7 @@ async fn query(
 
     let gene_set_count: usize = if let Some(ref libs) = library_filter {
         libs.iter()
-            .filter_map(|lib| bitmap.library_gene_set_indices.get(lib))
-            .map(|idxs| idxs.len())
+            .filter_map(|lib| bitmap.library_gene_set_counts.get(lib))
             .sum()
     } else {
         bitmap.values.len()
@@ -1475,6 +1481,7 @@ async fn query_pairs(
             .collect();
 
             // Group results by library
+            let pre_adj_count = all_results.len();
             let mut per_library: HashMap<String, Vec<PartialPairResult>> = HashMap::new();
             for result in all_results {
                 if let Some(lib) = bitmap.get_library_for_index(result.index_up) {
@@ -1483,9 +1490,10 @@ async fn query_pairs(
             }
 
             // Per-library BH correction for mimic and reverse p-values
-            let mut results: Vec<PartialPairResult> = Vec::new();
+            let mut results: Vec<PartialPairResult> = Vec::with_capacity(pre_adj_count);
             for (lib_name, mut lib_results) in per_library {
-                let lib_pair_count = *bitmap.library_pair_counts.get(&lib_name).unwrap_or(&1);
+                // Safe to unwrap: library_pair_counts is populated by ensure_index for all libraries
+                let lib_pair_count = *bitmap.library_pair_counts.get(&lib_name).unwrap();
                 let mut pvalues_mimic: Vec<f64> = lib_results.iter().map(|r| r.pvalue_mimic).collect();
                 let mut pvalues_reverse: Vec<f64> = lib_results.iter().map(|r| r.pvalue_reverse).collect();
                 pvalues_mimic.resize(lib_pair_count, 1.0);
