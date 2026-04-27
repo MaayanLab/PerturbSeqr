@@ -1128,11 +1128,11 @@ async fn query(
         if !filter_terms.is_empty() {
             consensus_results.retain(|result| {
                 let drug_lower = result.drug.to_lowercase();
-                filter_terms.iter().all(|ft| drug_lower.contains(ft))
+                filter_terms.iter().any(|ft| drug_lower.contains(ft))
             });
             moa_consensus_results.retain(|result| {
                 let drug_lower = result.drug.to_lowercase();
-                filter_terms.iter().all(|ft| drug_lower.contains(ft))
+                filter_terms.iter().any(|ft| drug_lower.contains(ft))
             });
         }
 
@@ -1177,7 +1177,7 @@ async fn query(
                     }
                     else if !filter_terms.is_empty() && !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)| {
                         let term_lower = gene_set_term.to_lowercase();
-                        filter_terms.iter().all(|ft| term_lower.contains(ft))
+                        filter_terms.iter().any(|ft| term_lower.contains(ft))
                     }) {
                         return None
                     }
@@ -1921,11 +1921,11 @@ async fn query_pairs(
         if !filter_terms.is_empty() {
             consensus_results.retain(|result| {
                 let drug_lower = result.drug.to_lowercase();
-                filter_terms.iter().all(|ft| drug_lower.contains(ft))
+                filter_terms.iter().any(|ft| drug_lower.contains(ft))
             });
             moa_consensus_results.retain(|result| {
                 let drug_lower = result.drug.to_lowercase();
-                filter_terms.iter().all(|ft| drug_lower.contains(ft))
+                filter_terms.iter().any(|ft| drug_lower.contains(ft))
             });
         }
 
@@ -1966,7 +1966,7 @@ async fn query_pairs(
                 if let Some(terms) = bitmap.terms.get(gene_set_hash) {
                     if !filter_terms.is_empty() && !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)| {
                         let term_lower = gene_set_term.to_lowercase();
-                        filter_terms.iter().all(|ft| term_lower.contains(ft))
+                        filter_terms.iter().any(|ft| term_lower.contains(ft))
                     }) {
                         return None
                     }
