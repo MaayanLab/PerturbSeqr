@@ -6,6 +6,7 @@ import { getClient } from "@/lib/apollo/client";
 import ensureArray from "@/utils/ensureArray";
 import streamTsv from "@/utils/streamTsv";
 import {paginatedNodeGenerator, paginatedConsensusGenerator, paginatedMoAsGenerator} from "@/utils/paginatedGenerators";
+import { DEFAULT_CONSENSUS_TOP_N_SIGNATURES, DEFAULT_PVALUE_CUTOFF, MAX_DOWNLOAD_RESULT_COUNT } from "@/constants/enrichment";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
@@ -18,9 +19,9 @@ export async function GET(request: Request) {
   const sort = searchParams.get("sort") || "pvalue";
   const filterFda = searchParams.get("fda") || "false";
   const dir = searchParams.get("dir") || "";
-  const topN = searchParams.get("topn") || "1000";
-  const maxTotal = searchParams.get("maxTotal") || "100000";
-  const pvalueLe = searchParams.get("pvaluele") || "0.05";
+  const topN = searchParams.get("topn") || String(DEFAULT_CONSENSUS_TOP_N_SIGNATURES);
+  const maxTotal = searchParams.get("maxTotal") || String(MAX_DOWNLOAD_RESULT_COUNT);
+  const pvalueLe = searchParams.get("pvaluele") || String(DEFAULT_PVALUE_CUTOFF);
   const ds = searchParams.get("ds") || "";
   const dsArray = ds ? ds.split(",").filter(Boolean) : null;
   const libraries = searchParams.get("libraries") || "";

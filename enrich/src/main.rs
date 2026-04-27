@@ -34,6 +34,13 @@ use bitvec::{
     intersect_count,    // counts query genes present in a library's background (Dense × Dense)
 };
 
+// Enrichment defaults (API layer — permissive; frontend/SQL apply stricter user-facing defaults)
+const CACHE_TTL_MS: u64 = 30_000;              // cache eviction: 30 seconds
+const DEFAULT_CONSENSUS_TOP_N_SIGNATURES: usize = 10_000; // top N results for consensus aggregation
+const DEFAULT_MIN_GENE_OVERLAP: u32 = 1;              // minimum gene overlap to include a result
+const DEFAULT_PVALUE_CUTOFF: f64 = 1.0;      // p-value cutoff (1.0 = no filter at API level)
+const DEFAULT_ADJ_PVALUE_CUTOFF: f64 = 1.0;  // adjusted p-value cutoff (1.0 = no filter at API level)
+const INDEX_BUILD_LOG_INTERVAL: usize = 100_000; // log progress every N gene sets during index build
 /**
  * Without this alternative allocator, very large chunks of memory do not get released back to the OS causing a large memory footprint over time.
  */
@@ -82,8 +89,8 @@ struct Bitmap {
     library_gene_set_counts: HashMap<String, usize>,      // library_name -> total gene sets in that library (BH denominator for single search)
     #[serde(default)]
     library_pair_counts: HashMap<String, usize>,           // library_name -> number of signature pairs in that library (BH denominator for paired search)
-    // Currently unused: per-library backgrounds replaced global background for Fisher's test.
-    // Retained in struct for serialization compatibility and potential future use (e.g. global gene count display).
+    // Union of all library backgrounds. Not used in Fisher's test (per-library backgrounds are used instead).
+    // Retained for serialization compatibility.
     full_background: DenseBitVec,
 }
 
@@ -166,6 +173,23 @@ impl Bitmap {
     }
 }
 
+// Odds ratio with continuity correction (adds 0.5 to all cells to handle zero counts)
+fn corrected_odds_ratio(a: usize, b: usize, c: usize, d: usize) -> f64 {
+    const CONTINUITY_CORRECTION: f64 = 0.5;
+    ((a as f64 + CONTINUITY_CORRECTION) * (d as f64 + CONTINUITY_CORRECTION))
+        / ((b as f64 + CONTINUITY_CORRECTION) * (c as f64 + CONTINUITY_CORRECTION))
+}
+
+// Directional odds ratios for up/down consensus (same continuity correction)
+fn corrected_directional_odds_ratios(a_up: usize, b_up: usize, a_down: usize, b_down: usize) -> (f64, f64) {
+    const CONTINUITY_CORRECTION: f64 = 0.5;
+    let up = ((a_up as f64 + CONTINUITY_CORRECTION) / (b_up as f64 + CONTINUITY_CORRECTION))
+           / ((a_down as f64 + CONTINUITY_CORRECTION) / (b_down as f64 + CONTINUITY_CORRECTION));
+    let down = ((b_up as f64 + CONTINUITY_CORRECTION) / (a_up as f64 + CONTINUITY_CORRECTION))
+             / ((b_down as f64 + CONTINUITY_CORRECTION) / (a_down as f64 + CONTINUITY_CORRECTION));
+    (up, down)
+}
+
 #[derive(Eq, PartialEq, PartialOrd, Ord)]
 struct BackgroundQuery {
     background_id: Uuid,
@@ -189,7 +213,7 @@ struct PersistentState {
 }
 
 // The response data, containing the ids, and relevant metrics
-#[derive(Clone)] // Full results are cached once, then cloned and filtered by library selection per-request so subsequent filter changes are instant
+#[derive(Clone)] // Cloned from cache for per-request library filtering
 struct PartialQueryResult {
     index: usize,
     n_overlap: u32,
@@ -198,7 +222,7 @@ struct PartialQueryResult {
     adj_pvalue: f64,
 }
 
-#[derive(Clone)] // Full results are cached once, then cloned and filtered by library selection per-request so subsequent filter changes are instant
+#[derive(Clone)] // Cloned from cache for per-request library filtering
 struct PartialPairResult {
     index: usize,
     index_up: usize,
@@ -416,7 +440,7 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
             .fetch(&mut **db)
             .for_each(|row| {
                 let count = progress_counter.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-                if count % 100000 == 0 {
+                if count % INDEX_BUILD_LOG_INTERVAL == 0 {
                     println!("[{}] loaded {} gene sets...", background_id, count);
                 }
                 let row = row.unwrap();
@@ -621,11 +645,11 @@ async fn query(
     let bitmap = state.bitmaps.get_read(&background_id).await.ok_or(Custom(Status::NotFound, String::from("Can't find background")))?;
     let input_gene_set = DenseBitVec::new(&bitmap.columns, &input_gene_set);
     let filter_term = filter_term.and_then(|filter_term| Some(filter_term.to_lowercase()));
-    let overlap_ge = overlap_ge.unwrap_or(1);
-    let pvalue_le =  pvalue_le.unwrap_or(1.0);
-    let adj_pvalue_le =  adj_pvalue_le.unwrap_or(1.0);
+    let overlap_ge = overlap_ge.unwrap_or(DEFAULT_MIN_GENE_OVERLAP);
+    let pvalue_le =  pvalue_le.unwrap_or(DEFAULT_PVALUE_CUTOFF);
+    let adj_pvalue_le =  adj_pvalue_le.unwrap_or(DEFAULT_ADJ_PVALUE_CUTOFF);
     let sortby = sortby.and_then(|sortby| Some(sortby));
-    let top_n = top_n.unwrap_or(1000);
+    let top_n = top_n.unwrap_or(DEFAULT_CONSENSUS_TOP_N_SIGNATURES);
 
     // Parse library_names filter (comma-separated string -> HashSet)
     let library_filter: Option<std::collections::HashSet<String>> = library_names.map(|names| {
@@ -718,13 +742,16 @@ async fn query(
             for (lib_name, mut lib_results) in per_library {
                 // Safe to unwrap: library_gene_set_counts is populated by ensure_index for all libraries
                 let lib_size = *bitmap.library_gene_set_counts.get(&lib_name).unwrap();
+                // Extract p-values from this library's passing results for BH input
                 let mut pvalues: Vec<f64> = lib_results.iter().map(|r| r.pvalue).collect();
+                // Pad to total gene sets in library so BH corrects over all tests, not just passing ones
                 pvalues.resize(lib_size, 1.0);
                 let adj_pvalues = adjust(&pvalues, Procedure::BenjaminiHochberg);
                 for (i, result) in lib_results.iter_mut().enumerate() {
                     result.adj_pvalue = adj_pvalues[i];
                 }
                 lib_results.retain(|r| r.adj_pvalue <= adj_pvalue_le);
+                // Append this library's surviving results into the combined output
                 results.extend(lib_results);
             }
 
@@ -735,7 +762,7 @@ async fn query(
             let results = Arc::new(results);
 
             // Cache full unfiltered results (library filtering applied post-cache)
-            state.cache.insert(background_query, results.clone(), 30000).await;
+            state.cache.insert(background_query, results.clone(), CACHE_TTL_MS).await;
 
             let duration = start.elapsed();
             println!("[{}] enriched in {:?}", background_id, duration);
@@ -743,6 +770,7 @@ async fn query(
         }
     };
 
+    // Post-cache library filter: cached results contain all libraries, filter to user's selection
     let results: Arc<Vec<PartialQueryResult>> = if let Some(ref libs) = library_filter {
         let filtered: Vec<PartialQueryResult> = results.iter()
             .filter(|r| {
@@ -753,15 +781,16 @@ async fn query(
             .collect();
         Arc::new(filtered)
     } else {
-        results
+        results // no filter, use all cached results
     };
 
+    // Total gene sets searched (for response metadata), scoped to selected libraries if filtered
     let gene_set_count: usize = if let Some(ref libs) = library_filter {
         libs.iter()
             .filter_map(|lib| bitmap.library_gene_set_counts.get(lib))
             .sum()
     } else {
-        bitmap.values.len()
+        bitmap.values.len() // no filter, count all gene sets
     };
 
     // CID-based consensus grouping: use CID as group key when available, fall back to perturbation name
@@ -916,7 +945,7 @@ async fn query(
                 }
             }
 
-            let odds_ratio = ((a as f64 + 0.5)  * (d as f64 + 0.5)) / ((b as f64 + 0.5) * (c as f64 + 0.5));
+            let odds_ratio = corrected_odds_ratio(a, b, c, d);
 
             let p_value = fisher.get_p_value(a as usize, b as usize, c as usize, d as usize); // Calculate p-value using FastFisher, b, c, d)
             // Store the result with Fisher's Exact Test p-value
@@ -927,8 +956,7 @@ async fn query(
             let a_down = (total_terms_by_dir as usize).saturating_sub(*sig_up); // Upregulated and insignificant
             let b_down = (*count_insig).saturating_sub(a_down); // Downregulated and insignificant
 
-            let odds_ratio_up = ((a_up as f64 + 0.5) / (b_up as f64 + 0.5)) / ((a_down as f64 + 0.5) / (b_down as f64 + 0.5));
-            let odds_ratio_down = ((b_up as f64 + 0.5) / (a_up as f64 + 0.5)) / ((b_down as f64 + 0.5) / (a_down as f64 + 0.5));
+            let (odds_ratio_up, odds_ratio_down) = corrected_directional_odds_ratios(a_up, b_up, a_down, b_down);
 
             let p_value_up = fisher.get_p_value(a_up as usize, b_up as usize, a_down as usize, b_down as usize);
 
@@ -1042,7 +1070,7 @@ async fn query(
             }
         }
 
-        let odds_ratio = ((a as f64 + 0.5)  * (d as f64 + 0.5)) / ((b as f64 + 0.5) * (c as f64 + 0.5));
+        let odds_ratio = corrected_odds_ratio(a, b, c, d);
 
         let p_value = fisher.get_p_value(a as usize, b as usize, c as usize, d as usize); // Calculate p-value using FastFisher, b, c, d)
         // Store the result with Fisher's Exact Test p-value
@@ -1053,8 +1081,7 @@ async fn query(
         let a_down = (total_terms_by_dir as usize).saturating_sub(*sig_up); // Upregulated and insignificant
         let b_down = (*count_insig).saturating_sub(a_down); // Downregulated and insignificant
 
-        let odds_ratio_up = ((a_up as f64 + 0.5) / (b_up as f64 + 0.5)) / ((a_down as f64 + 0.5) / (b_down as f64 + 0.5));
-        let odds_ratio_down = ((b_up as f64 + 0.5) / (a_up as f64 + 0.5)) / ((b_down as f64 + 0.5) / (a_down as f64 + 0.5));
+        let (odds_ratio_up, odds_ratio_down) = corrected_directional_odds_ratios(a_up, b_up, a_down, b_down);
 
         let p_value_up = fisher.get_p_value(a_up as usize, b_up as usize, a_down as usize, b_down as usize);
 
@@ -1392,8 +1419,8 @@ async fn query_pairs(
 
 
     let filter_term = filter_term.and_then(|filter_term| Some(filter_term.to_lowercase()));
-    let adj_pvalue_le =  adj_pvalue_le.unwrap_or(1.0);
-    let top_n = top_n.unwrap_or(1000);
+    let adj_pvalue_le =  adj_pvalue_le.unwrap_or(DEFAULT_ADJ_PVALUE_CUTOFF);
+    let top_n = top_n.unwrap_or(DEFAULT_CONSENSUS_TOP_N_SIGNATURES);
 
     let fisher = state.fisher.read().await;
 
@@ -1437,7 +1464,7 @@ async fn query_pairs(
                 let reverser_overlap = overlap_up_down + overlap_down_up;
 
                 // Apply overlap filters
-                if mimicker_overlap < overlap_ge.unwrap_or(1) && reverser_overlap < overlap_ge.unwrap_or(1) {
+                if mimicker_overlap < overlap_ge.unwrap_or(DEFAULT_MIN_GENE_OVERLAP) && reverser_overlap < overlap_ge.unwrap_or(DEFAULT_MIN_GENE_OVERLAP) {
                     return None;
                 }
 
@@ -1457,7 +1484,7 @@ async fn query_pairs(
 
                 let pvalue_reverse = fisher.get_p_value(a_reverse as usize, b_reverse as usize, c_reverse as usize, d_reverse as usize);
 
-                if pvalue_mimic > pvalue_le.unwrap_or(1.0) && pvalue_reverse > pvalue_le.unwrap_or(1.0) {
+                if pvalue_mimic > pvalue_le.unwrap_or(DEFAULT_PVALUE_CUTOFF) && pvalue_reverse > pvalue_le.unwrap_or(DEFAULT_PVALUE_CUTOFF) {
                     return None;
                 }
 
@@ -1505,12 +1532,13 @@ async fn query_pairs(
                     result.adj_pvalue_reverse = adj_reverse[i];
                 }
                 lib_results.retain(|r| r.adj_pvalue_mimic <= adj_pvalue_le || r.adj_pvalue_reverse <= adj_pvalue_le);
+                // Append this library's surviving results into the combined output
                 results.extend(lib_results);
             }
             results.sort_unstable_by(|a, b| a.pvalue_mimic.partial_cmp(&b.pvalue_mimic).unwrap_or(std::cmp::Ordering::Equal));
 
             let results = Arc::new(results);
-            state.cachepair.insert(background_query, results.clone(), 30000).await;
+            state.cachepair.insert(background_query, results.clone(), CACHE_TTL_MS).await;
 
             let duration = start.elapsed();
             println!("[{}] enriched pairs in {:?}", background_id, duration);
@@ -1518,6 +1546,7 @@ async fn query_pairs(
         }
     };
 
+    // Post-cache library filter: both halves of a pair must be in selected libraries
     if let Some(ref libs) = library_filter {
         let filtered: Vec<PartialPairResult> = results.iter()
             .filter(|r| {
@@ -1530,6 +1559,7 @@ async fn query_pairs(
         results = Arc::new(filtered);
     }
 
+    // Total signature pairs searched (for response metadata), scoped to selected libraries if filtered
     let gene_set_count: usize = if let Some(ref libs) = library_filter {
         bitmap.signature_pairs.pairs.iter()
             .filter(|(up_idx, down_idx)| {
@@ -1682,7 +1712,7 @@ async fn query_pairs(
                 }
             }
 
-            let odds_ratio = ((a as f64 + 0.5)  * (d as f64 + 0.5)) / ((b as f64 + 0.5) * (c as f64 + 0.5));
+            let odds_ratio = corrected_odds_ratio(a, b, c, d);
 
             let p_value = fisher.get_p_value(a as usize, b as usize, c as usize, d as usize); // Calculate p-value using FastFisher, b, c, d)
             // Store the result with Fisher's Exact Test p-value
@@ -1693,8 +1723,7 @@ async fn query_pairs(
             let a_down = (total_terms_by_dir as usize).saturating_sub(*sig_up); // Upregulated and insignificant
             let b_down = (*count_insig).saturating_sub(a_down); // Downregulated and insignificant
 
-            let odds_ratio_up = ((a_up as f64 + 0.5) / (b_up as f64 + 0.5)) / ((a_down as f64 + 0.5) / (b_down as f64 + 0.5));
-            let odds_ratio_down = ((b_up as f64 + 0.5) / (a_up as f64 + 0.5)) / ((b_down as f64 + 0.5) / (a_down as f64 + 0.5));
+            let (odds_ratio_up, odds_ratio_down) = corrected_directional_odds_ratios(a_up, b_up, a_down, b_down);
 
             let p_value_up = fisher.get_p_value(a_up as usize, b_up as usize, a_down as usize, b_down as usize);
 
@@ -1808,7 +1837,7 @@ async fn query_pairs(
             }
         }
 
-        let odds_ratio = ((a as f64 + 0.5)  * (d as f64 + 0.5)) / ((b as f64 + 0.5) * (c as f64 + 0.5));
+        let odds_ratio = corrected_odds_ratio(a, b, c, d);
 
         let p_value = fisher.get_p_value(a as usize, b as usize, c as usize, d as usize); // Calculate p-value using FastFisher, b, c, d)
         // Store the result with Fisher's Exact Test p-value
@@ -1819,8 +1848,7 @@ async fn query_pairs(
         let a_down = (total_terms_by_dir as usize).saturating_sub(*sig_up); // Upregulated and insignificant
         let b_down = (*count_insig).saturating_sub(a_down); // Downregulated and insignificant
 
-        let odds_ratio_up = ((a_up as f64 + 0.5) / (b_up as f64 + 0.5)) / ((a_down as f64 + 0.5) / (b_down as f64 + 0.5));
-        let odds_ratio_down = ((b_up as f64 + 0.5) / (a_up as f64 + 0.5)) / ((b_down as f64 + 0.5) / (a_down as f64 + 0.5));
+        let (odds_ratio_up, odds_ratio_down) = corrected_directional_odds_ratios(a_up, b_up, a_down, b_down);
 
         let p_value_up = fisher.get_p_value(a_up as usize, b_up as usize, a_down as usize, b_down as usize);
 

@@ -14,10 +14,10 @@ import {
   } from "@/graphql";
   import { getClient } from "@/lib/apollo/client";
   import { parseTerm } from "@/utils/parseTerm";
-  
+  import { DEFAULT_CONSENSUS_TOP_N_SIGNATURES, DEFAULT_PVALUE_CUTOFF, PAGINATION_FETCH_BATCH_SIZE, MAX_DOWNLOAD_RESULT_COUNT } from "@/constants/enrichment";
 
-export async function* paginatedNodeGenerator(genes: string[], term: string, filterFda: boolean, filterKo: boolean, topN: number = 1000, sort: string, maxTotal: number = 100000, pvalueLe: number = 0.05, libraryNames: string[] | null = null) {
-    const pageSize = 500;
+export async function* paginatedNodeGenerator(genes: string[], term: string, filterFda: boolean, filterKo: boolean, topN: number = DEFAULT_CONSENSUS_TOP_N_SIGNATURES, sort: string, maxTotal: number = MAX_DOWNLOAD_RESULT_COUNT, pvalueLe: number = DEFAULT_PVALUE_CUTOFF, libraryNames: string[] | null = null) {
+    const pageSize = PAGINATION_FETCH_BATCH_SIZE;
     let offset = 0;
 
     while (true) {
@@ -83,10 +83,10 @@ export async function* paginatedConsensusGenerator(
     term: string,
     filterFda: boolean,
     filterKo: boolean,
-    topN: number = 1000,
+    topN: number = DEFAULT_CONSENSUS_TOP_N_SIGNATURES,
     sort: string
   ) {
-    const pageSize = 500;
+    const pageSize = PAGINATION_FETCH_BATCH_SIZE;
     let offset = 0;
     let totalCount: number | null = null;
   
@@ -145,10 +145,10 @@ export async function* paginatedMoAsGenerator(
     term: string,
     filterFda: boolean,
     filterKo: boolean,
-    topN: number = 1000,
+    topN: number = DEFAULT_CONSENSUS_TOP_N_SIGNATURES,
     sort: string
   ) {
-    const pageSize = 500;
+    const pageSize = PAGINATION_FETCH_BATCH_SIZE;
     let offset = 0;
     let totalCount: number | null = null;
   
@@ -203,8 +203,8 @@ export async function* paginatedMoAsGenerator(
 }
 
 
-export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: string[], term: string, filterFda: boolean, filterKo: boolean, topN: number = 1000, sort: string, maxTotal: number = 100000, pvalueLe: number = 0.05, libraryNames: string[] | null = null) {
-    const pageSize = 500;
+export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: string[], term: string, filterFda: boolean, filterKo: boolean, topN: number = DEFAULT_CONSENSUS_TOP_N_SIGNATURES, sort: string, maxTotal: number = MAX_DOWNLOAD_RESULT_COUNT, pvalueLe: number = DEFAULT_PVALUE_CUTOFF, libraryNames: string[] | null = null) {
+    const pageSize = PAGINATION_FETCH_BATCH_SIZE;
     let offset = 0;
 
     while (true) {
@@ -275,10 +275,10 @@ export async function* paginatedPairConsensusGenerator(
     term: string,
     filterFda: boolean,
     filterKo: boolean,
-    topN: number = 1000,
+    topN: number = DEFAULT_CONSENSUS_TOP_N_SIGNATURES,
     sort: string
   ) {
-    const pageSize = 500;
+    const pageSize = PAGINATION_FETCH_BATCH_SIZE;
     let offset = 0;
     let totalCount: number | null = null;
   
@@ -339,10 +339,10 @@ export async function* paginatedPairMoAsGenerator(
     term: string,
     filterFda: boolean,
     filterKo: boolean,
-    topN: number = 1000,
+    topN: number = DEFAULT_CONSENSUS_TOP_N_SIGNATURES,
     sort: string
   ) {
-    const pageSize = 500;
+    const pageSize = PAGINATION_FETCH_BATCH_SIZE;
     let offset = 0;
     let totalCount: number | null = null;
   
