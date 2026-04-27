@@ -78,6 +78,8 @@ struct Bitmap {
     #[serde(default)]
     library_background_counts: HashMap<String, u32>,            // library_name -> |B_lib| (pre-computed library-specific background size)
     library_gene_set_indices: HashMap<String, Vec<usize>>, // library_name -> indices into `values`
+    #[serde(default)]
+    library_pair_counts: HashMap<String, usize>,           // library_name -> number of signature pairs in that library (BH denominator for paired search)
     full_background: DenseBitVec,                          // union of all library backgrounds
 }
 
@@ -99,14 +101,23 @@ impl Bitmap {
             library_backgrounds: HashMap::new(),
             library_background_counts: HashMap::new(),
             library_gene_set_indices: HashMap::new(),
+            library_pair_counts: HashMap::new(),
             full_background: DenseBitVec::empty(0),
         }
     }
 
-    /// Call this after inserting all terms to compute signature pairs
+    /// Call this after inserting all terms to compute signature pairs and per-library pair counts
     fn finalize(&mut self) {
         self.signature_pairs = self.get_signature_pairs();
         self.moa_counts = self.get_moa_counts();
+        // Pre-compute pair counts per library (BH denominator for paired search)
+        for (up_idx, _) in &self.signature_pairs.pairs {
+            if let Some((uuid, _)) = self.values.get(*up_idx) {
+                if let Some(lib) = self.gene_set_libraries.get(uuid) {
+                    *self.library_pair_counts.entry(lib.clone()).or_default() += 1;
+                }
+            }
+        }
     }
 
     fn get_signature_pairs(&self) -> SignaturePairs {
@@ -1468,20 +1479,10 @@ async fn query_pairs(
                 }
             }
 
-            // Count total signature pairs per library (BH denominator)
-            let mut library_pair_counts: HashMap<String, usize> = HashMap::new();
-            for (up_idx, _) in &bitmap.signature_pairs.pairs {
-                if let Some((uuid, _)) = bitmap.values.get(*up_idx) {
-                    if let Some(lib) = bitmap.gene_set_libraries.get(uuid) {
-                        *library_pair_counts.entry(lib.clone()).or_default() += 1;
-                    }
-                }
-            }
-
             // Per-library BH correction for mimic and reverse p-values
             let mut results: Vec<PartialPairResult> = Vec::new();
             for (lib_name, mut lib_results) in per_library {
-                let lib_pair_count = *library_pair_counts.get(&lib_name).unwrap_or(&1);
+                let lib_pair_count = *bitmap.library_pair_counts.get(&lib_name).unwrap_or(&1);
                 let mut pvalues_mimic: Vec<f64> = lib_results.iter().map(|r| r.pvalue_mimic).collect();
                 let mut pvalues_reverse: Vec<f64> = lib_results.iter().map(|r| r.pvalue_reverse).collect();
                 pvalues_mimic.resize(lib_pair_count, 1.0);
