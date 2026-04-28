@@ -68,5 +68,5 @@ Then redo MinIO + Ingest steps above.
 
 ## URLs
 
-- App: https://perturbseqr.k8s.dev.maayanlab.cloud
-- MinIO Console: https://console.s3.perturbseqr.k8s.dev.maayanlab.cloud
+- App: https://perturbseqr.maayanlab.cloud
+- MinIO Console: https://console.s3.perturbseqr.maayanlab.cloud

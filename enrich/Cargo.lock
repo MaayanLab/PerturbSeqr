@@ -519,7 +519,7 @@ dependencies = [
 
 [[package]]
 name = "enrich"
-version = "0.2.35"
+version = "0.2.36"
 dependencies = [
  "adjustp",
  "async-lock",
