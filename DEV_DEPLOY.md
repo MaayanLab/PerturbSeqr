@@ -1,5 +1,7 @@
 # Dev Server Deployment
 
+kube-compose requires active sshkube session. Run `eval "$(sshkube init)"` before the other commands.
+
 ## Setup
 
 ```bash
