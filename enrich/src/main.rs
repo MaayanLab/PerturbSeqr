@@ -580,9 +580,6 @@ async fn delete(
             Uuid::parse_str(&background_id).map_err(|e| Custom(Status::BadRequest, e.to_string()))?
         }
     };
-    if !state.bitmaps.contains_key(&background_id).await {
-        return Err(Custom(Status::NotFound, String::from("Not Found")));
-    }
     if state.bitmaps.remove(&background_id).await {
         println!("[{}] deleted from memory", background_id);
     }
