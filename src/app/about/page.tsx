@@ -64,6 +64,7 @@ export default async function About() {
             <li><a className="underline" href="https://pubmed.ncbi.nlm.nih.gov/31806696/" target="_blank">SciPlex Drug Perturbations</a> (<a className="underline" href="https://maayanlab.cloud/Harmonizome/dataset/Sci-Plex+Drug+Perturbation+Signatures" target="_blank">Harmonizome</a>)</li>
             <li><a className="underline" href="https://wren.hms.harvard.edu/DeepCoverMOA/" target="_blank">DeepCover MoA</a> (<a className="underline" href="https://maayanlab.cloud/Harmonizome/dataset/DeepCoverMOA+Drug+Mechanisms+of+Action" target="_blank">Harmonizome</a>)</li>
             <li><a className="underline" href="https://pubmed.ncbi.nlm.nih.gov/26673713/" target="_blank">CREEDS Drug Perturbations</a> (<a className="underline" href="https://maayanlab.cloud/CREEDS/" target="_blank">CREEDS</a>)</li>
+            <li><a className="underline" href="https://rummageo.com" target="_blank">RummaGEO Drug Perturbations</a> (<a className="underline" href="https://maayanlab.cloud/Harmonizome/dataset/RummaGEO+Drug+Perturbation+Signatures" target="_blank">Harmonizome</a>)</li>
           </ul>
           <p className="mt-4">
             <strong>Gene Perturbation Datasets:</strong>
@@ -77,6 +78,7 @@ export default async function About() {
             <li><a className="underline" href="https://pubmed.ncbi.nlm.nih.gov/35688146/" target="_blank">Replogle Perturb-seq</a> K562 Essential (<a className="underline" href="https://maayanlab.cloud/Harmonizome/dataset/Replogle+et+al.,+Cell,+2022+K562+Essential+Perturb-seq+Gene+Perturbation+Signatures" target="_blank">Harmonizome</a>)</li>
             <li><a className="underline" href="https://pubmed.ncbi.nlm.nih.gov/26673713/" target="_blank">CREEDS Gene Perturbations</a> (<a className="underline" href="https://maayanlab.cloud/CREEDS/" target="_blank">CREEDS</a>)</li>
             <li><a className="underline" href="https://cm4ai.org" target="_blank">Bridge2AI CM4AI</a> (Perturb-seq)</li>
+            <li><a className="underline" href="https://rummageo.com" target="_blank">RummaGEO Gene Perturbations</a> (<a className="underline" href="https://maayanlab.cloud/Harmonizome/dataset/RummaGEO+Gene+Perturbation+Signatures" target="_blank">Harmonizome</a>)</li>
           </ul>
           <p className="mt-2">
             <strong>Resources:</strong>
