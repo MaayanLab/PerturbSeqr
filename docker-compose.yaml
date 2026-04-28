@@ -141,6 +141,7 @@ services:
       - MINIO_ROOT_PASSWORD
       - MINIO_SECURE=false
       - ENRICH_URL=http://perturbseqr-enrich:8000
+      - INGEST_CLEAN
     depends_on:
       perturbseqr-postgres:
         condition: service_healthy

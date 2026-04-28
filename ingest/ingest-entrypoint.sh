@@ -16,8 +16,9 @@
 #   - Enrich service running (for index rebuild)
 #
 # Usage:
-#   docker compose run ingest                      # incremental (skips existing gene sets by hash)
-#   docker compose run -e INGEST_CLEAN=true ingest # clean re-ingest (wipes library tables first)
+#   docker compose run ingest                          # incremental (skips existing gene sets by hash)
+#   docker compose run -e INGEST_CLEAN=true ingest     # local: clean re-ingest
+#   INGEST_CLEAN=true kube-compose run ingest          # cluster: clean re-ingest (kube-compose has no -e flag)
 
 set -e
 
