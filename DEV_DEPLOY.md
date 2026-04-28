@@ -54,6 +54,13 @@ kube-compose -f docker-compose.dev.yaml restart perturbseqr-app
 
 ```bash
 # Rebuild images via GitHub Actions "Build All Images", then:
+kube-compose -f docker-compose.dev.yaml diff
+kube-compose -f docker-compose.dev.yaml up
+```
+
+For a quick image pull without re-applying compose:
+
+```bash
 kube-compose -f docker-compose.dev.yaml restart perturbseqr-app
 ```
 
