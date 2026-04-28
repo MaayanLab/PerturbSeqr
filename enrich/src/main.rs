@@ -372,20 +372,21 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
 
     // Try to load from disk
     if let Ok(bitmap) = load_index(&state.s3_bucket, &background_id).await {
-        let start = Instant::now();
-        // Extend fisher table to handle this background
-        {
-            let mut fisher = state.fisher.write().await;
-            fisher.extend_to(bitmap.columns.len() * 4);
+        if bitmap.library_backgrounds.len() == bitmap.library_background_counts.len() {
+            let start = Instant::now();
+            // Extend fisher table to handle this background
+            {
+                let mut fisher = state.fisher.write().await;
+                fisher.extend_to(bitmap.columns.len() * 4);
+            }
+            state.bitmaps.insert(background_id, bitmap).await;
+            *state.latest.write().await = Some(background_id);
+            let duration = start.elapsed();
+            println!("[{}] loaded from S3 in {:?}", background_id, duration);
+            return Ok(());
         }
-        // Sanity check: library backgrounds and their pre-computed sizes must both be present
-        assert_eq!(bitmap.library_backgrounds.len(), bitmap.library_background_counts.len(),
-            "Stale index: library_backgrounds and library_background_counts out of sync. Delete the cached index and re-ingest.");
-        state.bitmaps.insert(background_id, bitmap).await;
-        *state.latest.write().await = Some(background_id);
-        let duration = start.elapsed();
-        println!("[{}] loaded from S3 in {:?}", background_id, duration);
-        return Ok(());
+        println!("[{}] stale S3 index (library_backgrounds/library_background_counts out of sync); rebuilding from postgres", background_id);
+        let _ = s3::delete_index(&state.s3_bucket, &background_id).await;
     }
 
     println!("[{}] initializing from database", background_id);

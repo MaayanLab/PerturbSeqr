@@ -70,7 +70,10 @@ services:
         condition: service_healthy
 
   perturbseqr-app:
-    build: .
+    build:
+      context: .
+      args:
+        - NEXT_PUBLIC_MINIO_URL=https://s3.perturbseqr.k8s.dev.maayanlab.cloud/data
     image: johnkgardner/perturbseqr-app:0.2.36-dev
     platform: linux/amd64
     restart: unless-stopped
