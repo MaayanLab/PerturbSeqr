@@ -41,6 +41,9 @@ COMPOSE_PROFILES=jobs kube-compose -f docker-compose.dev.yaml run minio-setup
 # upload canonical GMTs to data bucket
 rclone copy --progress db/data/drug_perturbation/ perturbseqr-dev:data/
 rclone copy --progress db/data/gene_perturbation/ perturbseqr-dev:data/
+
+# upload full-signature files (Harmonizome matrices, CREEDS JSON, .h5ad, etc.) for the download page
+rclone copy --progress db/data/full-signatures/ perturbseqr-dev:data/
 ```
 
 ```bash
