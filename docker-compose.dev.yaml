@@ -86,6 +86,7 @@ services:
   minio-setup:
     build: minio
     image: johnkgardner/perturbseqr-minio-setup:0.2.35
+    restart: "no"
     environment:
       - S3_URL=http://minio:${MINIO_ROOT_PASSWORD}@perturbseqr-minio:9000/data
       - PUBLIC_S3_URL=https://s3.perturbseqr.k8s.dev.maayanlab.cloud/data
@@ -96,6 +97,7 @@ services:
 
   dbmate:
     image: ghcr.io/amacneil/dbmate
+    restart: "no"
     volumes:
       - ./db/migrations:/db/migrations:ro
     environment:
@@ -111,6 +113,7 @@ services:
       context: .
       dockerfile: ingest/Dockerfile
     image: johnkgardner/perturbseqr-ingest:0.2.35
+    restart: "no"
     x-kubernetes:
       imagePullPolicy: Always
     environment:

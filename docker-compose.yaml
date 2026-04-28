@@ -96,6 +96,7 @@ services:
     image: johnkgardner/perturbseqr-minio-setup:0.2.35
     pull_policy: if_not_present
     platform: linux/amd64
+    restart: "no"
     environment:
       - S3_URL=${PROD_S3_URL}
       - PUBLIC_S3_URL=${PROD_PUBLIC_S3_URL}
@@ -106,6 +107,7 @@ services:
 
   dbmate:
     image: ghcr.io/amacneil/dbmate
+    restart: "no"
     volumes:
       - ./db/migrations:/db/migrations:ro
     environment:
@@ -123,6 +125,7 @@ services:
     image: johnkgardner/perturbseqr-ingest:0.2.35
     pull_policy: if_not_present
     platform: linux/amd64
+    restart: "no"
     environment:
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres?sslmode=disable
       - MINIO_ENDPOINT=perturbseqr-minio:9000
