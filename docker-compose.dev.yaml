@@ -53,12 +53,16 @@ services:
           memory: 5Gb
     environment:
       - ROCKET_DATABASES={postgres={url="postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres"}}
+      - MINIO_ENDPOINT=perturbseqr-minio:9000
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD
+      - MINIO_SECURE=false
     ports:
       - 8000:8000
-    volumes:
-      - enrich-data:/data
     depends_on:
       perturbseqr-postgres:
+        condition: service_healthy
+      perturbseqr-minio:
         condition: service_healthy
 
   perturbseqr-app:
@@ -135,10 +139,6 @@ volumes:
   perturbseqr-data:
     x-kubernetes:
       size: 50Gi
-      class: local-path
-  enrich-data:
-    x-kubernetes:
-      size: 10Gi
       class: local-path
   minio-data:
     x-kubernetes:
