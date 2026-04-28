@@ -51,8 +51,6 @@ services:
     image: johnkgardner/perturbseqr-enrich:0.2.36-dev
     platform: linux/amd64
     restart: unless-stopped
-    x-kubernetes:
-      imagePullPolicy: Always
     deploy:
       resources:
         reservations:
@@ -76,8 +74,6 @@ services:
     image: johnkgardner/perturbseqr-app:0.2.36-dev
     platform: linux/amd64
     restart: unless-stopped
-    x-kubernetes:
-      imagePullPolicy: Always
     environment:
       - PUBLIC_URL=https://perturbseqr.k8s.dev.maayanlab.cloud
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres
@@ -128,8 +124,6 @@ services:
     image: johnkgardner/perturbseqr-ingest:0.2.36-dev
     platform: linux/amd64
     restart: "no"
-    x-kubernetes:
-      imagePullPolicy: Always
     environment:
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres?sslmode=disable
       - MINIO_ENDPOINT=perturbseqr-minio:9000
