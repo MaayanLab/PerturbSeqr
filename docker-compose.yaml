@@ -1,7 +1,7 @@
 services:
   perturbseqr-postgres:
     build: db
-    image: johnkgardner/perturbseqr-postgres:0.2.35
+    image: johnkgardner/perturbseqr-postgres:0.2.36
     pull_policy: if_not_present
     platform: linux/amd64
     restart: unless-stopped
@@ -51,7 +51,7 @@ services:
 
   perturbseqr-enrich:
     build: enrich
-    image: johnkgardner/perturbseqr-enrich:0.2.35
+    image: johnkgardner/perturbseqr-enrich:0.2.36
     pull_policy: if_not_present
     platform: linux/amd64
     restart: unless-stopped
@@ -78,7 +78,7 @@ services:
       context: .
       args:
         - NEXT_PUBLIC_MINIO_URL=${PROD_PUBLIC_S3_URL}
-    image: maayanlab/perturbseqr-app:0.2.35
+    image: maayanlab/perturbseqr-app:0.2.36
     pull_policy: if_not_present
     platform: linux/amd64
     restart: unless-stopped
@@ -101,7 +101,7 @@ services:
 
   minio-setup:
     build: minio
-    image: johnkgardner/perturbseqr-minio-setup:0.2.35
+    image: johnkgardner/perturbseqr-minio-setup:0.2.36
     pull_policy: if_not_present
     platform: linux/amd64
     restart: "no"
@@ -130,7 +130,7 @@ services:
     build:
       context: .
       dockerfile: ingest/Dockerfile
-    image: johnkgardner/perturbseqr-ingest:0.2.35
+    image: johnkgardner/perturbseqr-ingest:0.2.36
     pull_policy: if_not_present
     platform: linux/amd64
     restart: "no"

@@ -1,7 +1,7 @@
 services:
   perturbseqr-postgres:
     build: db
-    image: johnkgardner/perturbseqr-postgres:0.2.36-dev
+    image: johnkgardner/perturbseqr-postgres:0.2.36
     platform: linux/amd64
     restart: unless-stopped
     shm_size: 1Gb
@@ -48,7 +48,7 @@ services:
 
   perturbseqr-enrich:
     build: enrich
-    image: johnkgardner/perturbseqr-enrich:0.2.36-dev
+    image: johnkgardner/perturbseqr-enrich:0.2.36
     platform: linux/amd64
     restart: unless-stopped
     deploy:
@@ -93,7 +93,7 @@ services:
 
   minio-setup:
     build: minio
-    image: johnkgardner/perturbseqr-minio-setup:0.2.36-dev
+    image: johnkgardner/perturbseqr-minio-setup:0.2.36
     platform: linux/amd64
     restart: "no"
     environment:
@@ -121,7 +121,7 @@ services:
     build:
       context: .
       dockerfile: ingest/Dockerfile
-    image: johnkgardner/perturbseqr-ingest:0.2.36-dev
+    image: johnkgardner/perturbseqr-ingest:0.2.36
     platform: linux/amd64
     restart: "no"
     environment:
