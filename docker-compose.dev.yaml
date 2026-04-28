@@ -2,6 +2,7 @@ services:
   perturbseqr-postgres:
     build: db
     image: johnkgardner/perturbseqr-postgres:0.2.36-dev
+    platform: linux/amd64
     restart: unless-stopped
     shm_size: 1Gb
     environment:
@@ -20,6 +21,7 @@ services:
   perturbseqr-minio:
     image: quay.io/minio/minio
     pull_policy: missing
+    platform: linux/amd64
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
@@ -47,6 +49,7 @@ services:
   perturbseqr-enrich:
     build: enrich
     image: johnkgardner/perturbseqr-enrich:0.2.36-dev
+    platform: linux/amd64
     restart: unless-stopped
     x-kubernetes:
       imagePullPolicy: Always
@@ -71,6 +74,7 @@ services:
   perturbseqr-app:
     build: .
     image: johnkgardner/perturbseqr-app:0.2.36-dev
+    platform: linux/amd64
     restart: unless-stopped
     x-kubernetes:
       imagePullPolicy: Always
@@ -94,6 +98,7 @@ services:
   minio-setup:
     build: minio
     image: johnkgardner/perturbseqr-minio-setup:0.2.36-dev
+    platform: linux/amd64
     restart: "no"
     environment:
       - S3_URL=http://minio:${MINIO_ROOT_PASSWORD}@perturbseqr-minio:9000/data
@@ -121,6 +126,7 @@ services:
       context: .
       dockerfile: ingest/Dockerfile
     image: johnkgardner/perturbseqr-ingest:0.2.36-dev
+    platform: linux/amd64
     restart: "no"
     x-kubernetes:
       imagePullPolicy: Always
