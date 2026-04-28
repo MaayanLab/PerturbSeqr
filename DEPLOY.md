@@ -33,7 +33,7 @@ rclone copyto --progress gmts perturbseqr:data/
 ```
 
 ```bash
-# Run ingest
+# Run ingest (incremental — skips existing gene sets by hash)
 COMPOSE_PROFILES=jobs kube-compose run ingest
 
 # Restart app so PostGraphile picks up the new schema
@@ -47,7 +47,17 @@ kube-compose restart perturbseqr-app
 kube-compose restart perturbseqr-app
 ```
 
-## Clean rebuild
+## Clean re-ingest (preserves user_gene_set and MinIO)
+
+Wipes library tables in postgres and re-ingests. Keeps user submissions, the sets-analyzed counter, MinIO bucket contents, and the enrich index lifecycle. Use this for routine library updates:
+
+```bash
+INGEST_CLEAN=true COMPOSE_PROFILES=jobs kube-compose run ingest
+```
+
+## Full rebuild
+
+`-v` deletes the postgres and minio PVCs, so this requires new MinIO uploads and a fresh DB rebuild.
 
 ```bash
 kube-compose down -v

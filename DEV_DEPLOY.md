@@ -47,7 +47,7 @@ rclone copy --progress db/data/full-signatures/ perturbseqr-dev:data/
 ```
 
 ```bash
-# Run ingest
+# Run ingest (incremental — skips existing gene sets by hash)
 COMPOSE_PROFILES=jobs kube-compose -f docker-compose.dev.yaml run ingest
 
 # Restart app so PostGraphile picks up the new schema
@@ -67,7 +67,17 @@ kube-compose -f docker-compose.dev.yaml up
 
 Or trigger a CI rebuild via GitHub Actions "Build All Images", then bump tags in `docker-compose.dev.yaml` and run `kube-compose up`.
 
-## Clean rebuild
+## Clean re-ingest (preserves user_gene_set and MinIO)
+
+Wipes library tables in postgres and re-ingests. Keeps user submissions, the sets-analyzed counter, MinIO bucket contents, and the enrich index lifecycle. Use this for routine library updates:
+
+```bash
+INGEST_CLEAN=true COMPOSE_PROFILES=jobs kube-compose -f docker-compose.dev.yaml run ingest
+```
+
+## Full rebuild
+
+`-v` deletes the postgres and minio PVCs, so this requires new MinIO uploads and a fresh DB rebuild.
 
 ```bash
 kube-compose -f docker-compose.dev.yaml down -v
