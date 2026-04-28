@@ -11,6 +11,13 @@ eval "$(sshkube init)"
 kube-compose -f docker-compose.dev.yaml up
 ```
 
+If sshkube errors out, see [sshkube connection issues](https://docs.k8s.dev.maayanlab.cloud/00-user/70-common-issues/index.html#sshkube-connection-issues):
+
+```bash
+sshkube kill-server
+eval "$(sshkube init)"
+```
+
 ## MinIO + Ingest
 
 After `kube-compose up`, create the MinIO bucket, upload GMT files, then run ingest.
