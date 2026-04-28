@@ -38,8 +38,9 @@ COMPOSE_PROFILES=jobs kube-compose -f docker-compose.dev.yaml run minio-setup
 #secret_access_key = MINIO_ROOT_PASSWORD from .env
 #endpoint = https://s3.perturbseqr.k8s.dev.maayanlab.cloud
 
-# upload .gmt.gz files to data bucket
-rclone copyto --progress gmts perturbseqr-dev:data/
+# upload canonical GMTs to data bucket
+rclone copy --progress db/data/drug_perturbation/ perturbseqr-dev:data/
+rclone copy --progress db/data/gene_perturbation/ perturbseqr-dev:data/
 ```
 
 ```bash
