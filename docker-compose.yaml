@@ -4,6 +4,7 @@ services:
     image: johnkgardner/perturbseqr-postgres:0.2.35
     pull_policy: if_not_present
     platform: linux/amd64
+    restart: unless-stopped
     shm_size: 1Gb
     environment:
       - POSTGRES_PASSWORD
@@ -22,6 +23,7 @@ services:
     image: quay.io/minio/minio
     pull_policy: if_not_present
     platform: linux/amd64
+    restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
       - MINIO_ROOT_USER=minio
@@ -52,6 +54,7 @@ services:
     image: johnkgardner/perturbseqr-enrich:0.2.35
     pull_policy: if_not_present
     platform: linux/amd64
+    restart: unless-stopped
     deploy:
       resources:
         reservations:
@@ -78,6 +81,7 @@ services:
     image: maayanlab/perturbseqr-app:0.2.35
     pull_policy: if_not_present
     platform: linux/amd64
+    restart: unless-stopped
     environment:
       - PUBLIC_URL=https://perturbseqr.maayanlab.cloud
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres

@@ -2,6 +2,7 @@ services:
   perturbseqr-postgres:
     build: db
     image: johnkgardner/perturbseqr-postgres:0.2.36-dev
+    restart: unless-stopped
     shm_size: 1Gb
     environment:
       - POSTGRES_PASSWORD
@@ -19,6 +20,7 @@ services:
   perturbseqr-minio:
     image: quay.io/minio/minio
     pull_policy: missing
+    restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
       - MINIO_ROOT_USER=minio
@@ -45,6 +47,7 @@ services:
   perturbseqr-enrich:
     build: enrich
     image: johnkgardner/perturbseqr-enrich:0.2.36-dev
+    restart: unless-stopped
     x-kubernetes:
       imagePullPolicy: Always
     deploy:
@@ -68,6 +71,7 @@ services:
   perturbseqr-app:
     build: .
     image: johnkgardner/perturbseqr-app:0.2.36-dev
+    restart: unless-stopped
     x-kubernetes:
       imagePullPolicy: Always
     environment:
