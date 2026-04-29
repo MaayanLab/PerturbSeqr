@@ -161,7 +161,7 @@ volumes:
       class: gp2
   minio-data:
     x-kubernetes:
-      size: 5Gi
+      size: 50Gi
       class: gp2
 
 x-kubernetes:
