@@ -1,5 +1,7 @@
 # Dev Server Deployment
 
+kube-compose requires active sshkube session. Run `eval "$(sshkube init)"` before the other commands.
+
 ## Setup
 
 ```bash
@@ -9,6 +11,13 @@ cp .env.example .env
 # Build and push images via GitHub Actions "Build All Images" workflow
 eval "$(sshkube init)"
 kube-compose -f docker-compose.dev.yaml up
+```
+
+If sshkube errors out, see [sshkube connection issues](https://docs.k8s.dev.maayanlab.cloud/00-user/70-common-issues/index.html#sshkube-connection-issues):
+
+```bash
+sshkube kill-server
+eval "$(sshkube init)"
 ```
 
 ## MinIO + Ingest
@@ -29,12 +38,16 @@ COMPOSE_PROFILES=jobs kube-compose -f docker-compose.dev.yaml run minio-setup
 #secret_access_key = MINIO_ROOT_PASSWORD from .env
 #endpoint = https://s3.perturbseqr.k8s.dev.maayanlab.cloud
 
-# upload .gmt.gz files to data bucket
-rclone copyto --progress gmts perturbseqr-dev:data/
+# upload canonical GMTs to data bucket
+rclone copy --progress db/data/drug_perturbation/ perturbseqr-dev:data/
+rclone copy --progress db/data/gene_perturbation/ perturbseqr-dev:data/
+
+# upload full-signature files (Harmonizome matrices, CREEDS JSON, .h5ad, etc.) for the download page
+rclone copy --progress db/data/full-signatures/ perturbseqr-dev:data/
 ```
 
 ```bash
-# Run ingest
+# Run ingest (incremental — skips existing gene sets by hash)
 COMPOSE_PROFILES=jobs kube-compose -f docker-compose.dev.yaml run ingest
 
 # Restart app so PostGraphile picks up the new schema
@@ -44,11 +57,27 @@ kube-compose -f docker-compose.dev.yaml restart perturbseqr-app
 ## Updating
 
 ```bash
-# Rebuild images via GitHub Actions "Build All Images", then:
-kube-compose -f docker-compose.dev.yaml restart perturbseqr-app
+# Bump version, build, push, deploy
+kube-compose -f docker-compose.dev.yaml version perturbseqr-app patch
+docker compose -f docker-compose.dev.yaml build perturbseqr-app
+docker compose -f docker-compose.dev.yaml push perturbseqr-app
+kube-compose -f docker-compose.dev.yaml diff
+kube-compose -f docker-compose.dev.yaml up
 ```
 
-## Clean rebuild
+Or trigger a CI rebuild via GitHub Actions "Build All Images", then bump tags in `docker-compose.dev.yaml` and run `kube-compose up`.
+
+## Clean re-ingest (preserves user_gene_set and MinIO)
+
+Wipes library tables in postgres and re-ingests. Keeps user submissions, the sets-analyzed counter, MinIO bucket contents, and the enrich index lifecycle. Use this for routine library updates:
+
+```bash
+INGEST_CLEAN=true COMPOSE_PROFILES=jobs kube-compose -f docker-compose.dev.yaml run ingest
+```
+
+## Full rebuild
+
+`-v` deletes the postgres and minio PVCs, so this requires new MinIO uploads and a fresh DB rebuild.
 
 ```bash
 kube-compose -f docker-compose.dev.yaml down -v

@@ -88,7 +88,6 @@ db/etl/inputs/gene_perturbation/
 db/etl/intermediate/
 db/etl/rummageo_dge/
 db/etl/*.png
-docker-compose.local.yaml
 
 # Working figures (manuscript figures are tracked separately)
 /*.png

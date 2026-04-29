@@ -1,6 +1,7 @@
 mod async_rwlockhashmap;
 mod fastfisher;
 mod bitvec;
+mod s3;
 
 #[macro_use] extern crate rocket;
 use async_lock::RwLock;
@@ -20,8 +21,6 @@ use rocket::{State, response::status::Custom, http::Status};
 use rocket::serde::{json::{json, Json, Value}, Serialize, Deserialize};
 use serde::{Serialize as SerdeSerialize, Deserialize as SerdeDeserialize};
 use std::sync::Arc;
-use std::fs::File;
-use std::io::{BufReader, BufWriter};
 use retainer::Cache;
 use std::time::Instant;
 
@@ -204,12 +203,13 @@ struct BackgroundQueryPair {
 }
 
 // This structure stores a persistent many-reader single-writer hashmap containing cached indexes for a given background id
-struct PersistentState { 
+struct PersistentState {
     fisher: RwLock<FastFisher>,
     bitmaps: RwLockHashMap<Uuid, Bitmap>,
     latest: RwLock<Option<Uuid>>,
     cache: Cache<Arc<BackgroundQuery>, Arc<Vec<PartialQueryResult>>>,
     cachepair: Cache<Arc<BackgroundQueryPair>, Arc<Vec<PartialPairResult>>>,
+    s3_bucket: Box<::s3::Bucket>,
 }
 
 // The response data, containing the ids, and relevant metrics
@@ -342,45 +342,24 @@ impl<'r> Responder<'r, 'static> for PairedQueryResponse {
 }
 
 
-/// Index persistence: serialize bitmap to disk using bincode for fast startup.
-/// Building the index from the database takes ~10 minutes; loading from disk takes ~1 second.
 #[derive(SerdeSerialize, SerdeDeserialize)]
 struct SerializableIndex {
     background_id: Uuid,
     bitmap: Bitmap,
 }
 
-/// Returns the path where the index file is stored for a given background_id.
-fn get_index_path(background_id: &Uuid) -> String {
-    format!("/data/index_{}.bin", background_id)
+async fn save_index(bucket: &::s3::Bucket, background_id: &Uuid, bitmap: &Bitmap) -> Result<(), String> {
+    let index = SerializableIndex { background_id: *background_id, bitmap: bitmap.clone() };
+    let bytes = bincode::serialize(&index).map_err(|e| e.to_string())?;
+    s3::put_index(bucket, background_id, &bytes).await
 }
 
-/// Saves the bitmap index to disk using bincode serialization.
-/// Called after building the index from the database to enable fast subsequent startups.
-fn save_index(background_id: &Uuid, bitmap: &Bitmap) -> Result<(), String> {
-    let path = get_index_path(background_id);
-    let file = File::create(&path).map_err(|e| e.to_string())?;
-    let writer = BufWriter::new(file);
-    let index = SerializableIndex {
-        background_id: *background_id,
-        bitmap: bitmap.clone(),
-    };
-    bincode::serialize_into(writer, &index).map_err(|e| e.to_string())?;
-    println!("[{}] saved index to {}", background_id, path);
-    Ok(())
-}
-
-/// Loads the bitmap index from disk using bincode deserialization.
-/// Returns an error if the file doesn't exist or the background_id doesn't match.
-fn load_index(background_id: &Uuid) -> Result<Bitmap, String> {
-    let path = get_index_path(background_id);
-    let file = File::open(&path).map_err(|e| e.to_string())?;
-    let reader = BufReader::new(file);
-    let index: SerializableIndex = bincode::deserialize_from(reader).map_err(|e| e.to_string())?;
+async fn load_index(bucket: &::s3::Bucket, background_id: &Uuid) -> Result<Bitmap, String> {
+    let bytes = s3::get_index(bucket, background_id).await?;
+    let index: SerializableIndex = bincode::deserialize(&bytes).map_err(|e| e.to_string())?;
     if index.background_id != *background_id {
-        return Err(format!("Index file background_id mismatch: expected {}, got {}", background_id, index.background_id));
+        return Err(format!("Index background_id mismatch: expected {}, got {}", background_id, index.background_id));
     }
-    println!("[{}] loaded index from {}", background_id, path);
     Ok(index.bitmap)
 }
 
@@ -392,21 +371,22 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
     }
 
     // Try to load from disk
-    if let Ok(bitmap) = load_index(&background_id) {
-        let start = Instant::now();
-        // Extend fisher table to handle this background
-        {
-            let mut fisher = state.fisher.write().await;
-            fisher.extend_to(bitmap.columns.len() * 4);
+    if let Ok(bitmap) = load_index(&state.s3_bucket, &background_id).await {
+        if bitmap.library_backgrounds.len() == bitmap.library_background_counts.len() {
+            let start = Instant::now();
+            // Extend fisher table to handle this background
+            {
+                let mut fisher = state.fisher.write().await;
+                fisher.extend_to(bitmap.columns.len() * 4);
+            }
+            state.bitmaps.insert(background_id, bitmap).await;
+            *state.latest.write().await = Some(background_id);
+            let duration = start.elapsed();
+            println!("[{}] loaded from S3 in {:?}", background_id, duration);
+            return Ok(());
         }
-        // Sanity check: library backgrounds and their pre-computed sizes must both be present
-        assert_eq!(bitmap.library_backgrounds.len(), bitmap.library_background_counts.len(),
-            "Stale index: library_backgrounds and library_background_counts out of sync. Delete the cached index and re-ingest.");
-        state.bitmaps.insert(background_id, bitmap).await;
-        *state.latest.write().await = Some(background_id);
-        let duration = start.elapsed();
-        println!("[{}] loaded from disk in {:?}", background_id, duration);
-        return Ok(());
+        println!("[{}] stale S3 index (library_backgrounds/library_background_counts out of sync); rebuilding from postgres", background_id);
+        let _ = s3::delete_index(&state.s3_bucket, &background_id).await;
     }
 
     println!("[{}] initializing from database", background_id);
@@ -518,9 +498,9 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
         bitmap.moa_counts = bitmap.get_moa_counts();
         bitmap.library_pair_counts = bitmap.get_library_pair_counts();
 
-        // Save to disk for faster subsequent startups
-        if let Err(e) = save_index(&background_id, &bitmap) {
-            println!("[{}] warning: failed to save index to disk: {}", background_id, e);
+        // Save to S3 for faster subsequent startups
+        if let Err(e) = save_index(&state.s3_bucket, &background_id, &bitmap).await {
+            println!("[{}] warning: failed to save index to S3: {}", background_id, e);
         }
     }
 
@@ -601,11 +581,11 @@ async fn delete(
             Uuid::parse_str(&background_id).map_err(|e| Custom(Status::BadRequest, e.to_string()))?
         }
     };
-    if !state.bitmaps.contains_key(&background_id).await {
-        return Err(Custom(Status::NotFound, String::from("Not Found")));
-    }
     if state.bitmaps.remove(&background_id).await {
-        println!("[{}] deleted", background_id);
+        println!("[{}] deleted from memory", background_id);
+    }
+    if let Err(e) = s3::delete_index(&state.s3_bucket, &background_id).await {
+        println!("[{}] warning: failed to delete index from S3: {}", background_id, e);
     }
     Ok(())
 }
@@ -2173,7 +2153,8 @@ fn rocket() -> _ {
             bitmaps: RwLockHashMap::new(),
             latest: RwLock::new(None),
             cache: Cache::new(),
-            cachepair: Cache::new()
+            cachepair: Cache::new(),
+            s3_bucket: s3::create_bucket(),
         })
         .attach(Postgres::init())
         .mount("/", routes![ensure, get_gmt, query, query_pairs, delete])
