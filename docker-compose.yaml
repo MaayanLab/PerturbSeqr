@@ -105,6 +105,8 @@ services:
     pull_policy: if_not_present
     platform: linux/amd64
     restart: "no"
+    x-kubernetes:
+      exclude: true   # k8s uses k8s/minio-setup-job.yaml instead
     environment:
       - S3_URL=${PROD_S3_URL}
       - PUBLIC_S3_URL=${PROD_PUBLIC_S3_URL}
@@ -134,6 +136,8 @@ services:
     pull_policy: if_not_present
     platform: linux/amd64
     restart: "no"
+    x-kubernetes:
+      exclude: true   # k8s uses k8s/ingest-{clean,incremental}-job.yaml instead
     environment:
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres?sslmode=disable
       - MINIO_ENDPOINT=perturbseqr-minio:9000

@@ -99,6 +99,8 @@ services:
     image: johnkgardner/perturbseqr-minio-setup:0.2.36
     platform: linux/amd64
     restart: "no"
+    x-kubernetes:
+      exclude: true   # k8s uses k8s/minio-setup-job.yaml instead
     environment:
       - S3_URL=http://minio:${MINIO_ROOT_PASSWORD}@perturbseqr-minio:9000/data
       - PUBLIC_S3_URL=https://s3.perturbseqr.k8s.dev.maayanlab.cloud/data
@@ -127,6 +129,8 @@ services:
     image: johnkgardner/perturbseqr-ingest:0.2.36
     platform: linux/amd64
     restart: "no"
+    x-kubernetes:
+      exclude: true   # k8s uses k8s/ingest-{clean,incremental}-job.yaml instead
     environment:
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres?sslmode=disable
       - MINIO_ENDPOINT=perturbseqr-minio:9000
