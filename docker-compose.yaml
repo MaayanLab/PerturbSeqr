@@ -77,7 +77,7 @@ services:
     build:
       context: .
       args:
-        - NEXT_PUBLIC_MINIO_URL=${PROD_PUBLIC_S3_URL}
+        - NEXT_PUBLIC_MINIO_URL=${PUBLIC_S3_URL}
     image: maayanlab/perturbseqr-app:0.2.36
     pull_policy: if_not_present
     platform: linux/amd64
@@ -87,7 +87,7 @@ services:
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres
       - NODE_ENV=production
       - ENRICH_URL=http://perturbseqr-enrich:8000
-      - NEXT_PUBLIC_MINIO_URL=${PROD_PUBLIC_S3_URL}
+      - NEXT_PUBLIC_MINIO_URL=${PUBLIC_S3_URL}
       - MINIO_ENDPOINT=perturbseqr-minio:9000
     ports:
       - target: 3000
@@ -108,8 +108,8 @@ services:
     x-kubernetes:
       exclude: true   # k8s uses k8s/minio-setup-job.yaml instead
     environment:
-      - S3_URL=${PROD_S3_URL}
-      - PUBLIC_S3_URL=${PROD_PUBLIC_S3_URL}
+      - S3_URL=${S3_URL}
+      - PUBLIC_S3_URL=${PUBLIC_S3_URL}
     depends_on:
       perturbseqr-minio:
         condition: service_healthy
