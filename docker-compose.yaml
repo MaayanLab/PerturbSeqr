@@ -89,6 +89,7 @@ services:
       - ENRICH_URL=http://perturbseqr-enrich:8000
       - NEXT_PUBLIC_MINIO_URL=${PUBLIC_S3_URL}
       - MINIO_ENDPOINT=perturbseqr-minio:9000
+      - NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
     ports:
       - target: 3000
         published: 3000
