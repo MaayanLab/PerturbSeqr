@@ -10,16 +10,15 @@ cp .env.example .env
 #   - S3_URL: http://minio:<MINIO_ROOT_PASSWORD>@perturbseqr-minio:9000/data
 #   - PUBLIC_S3_URL: https://s3.perturbseqr.maayanlab.cloud/data
 
-# Build and push images via GitHub Actions "Build All Images" workflow
 kube-compose up
 ```
 
 ## MinIO + Ingest
 
-After `kube-compose up`, create the secret holding env values, set up the MinIO bucket, upload GMT files, then run ingest.
+Create a secret holding env values and then set up the MinIO bucket, upload GMT and files for download, run ingest.
 
 ```bash
-# Create secret from .env (consumed by k8s Job manifests below)
+# Create secret from .env
 kubectl create secret generic perturbseqr-env --from-env-file=.env -n perturbseqr
 
 # Create data bucket and apply public-read policy (denies public access to enrich/*)
@@ -35,15 +34,15 @@ kubectl create -f k8s/minio-setup-job.yaml -n perturbseqr
 #secret_access_key = MINIO_ROOT_PASSWORD from .env
 #endpoint = https://s3.perturbseqr.maayanlab.cloud
 
-# upload .gmt.gz files to data bucket
 rclone copyto --progress gmts perturbseqr:data/
+rclone copy --progress db/data/full-signatures/ perturbseqr:data/
 ```
 
 ```bash
-# Run ingest (incremental — skips existing gene sets by hash)
+# Run ingest
 kubectl create -f k8s/ingest-incremental-job.yaml -n perturbseqr
 
-# Watch progress (Job names use generateName: ingest-incremental-<random>)
+# Logs
 kubectl get jobs -n perturbseqr
 kubectl logs -f job/<job-name> -n perturbseqr
 
@@ -54,13 +53,16 @@ kube-compose restart perturbseqr-app
 ## Updating
 
 ```bash
-# Rebuild images via GitHub Actions "Build All Images", then:
-kube-compose restart perturbseqr-app
+kube-compose version perturbseqr-app patch
+docker compose build perturbseqr-app
+docker compose push perturbseqr-app
+kube-compose diff
+kube-compose up
 ```
 
-## Clean re-ingest (preserves user_gene_set and MinIO)
+Or bump tags in `docker-compose.yaml`, rebuild, and run `kube-compose up`.
 
-Wipes library tables in postgres and re-ingests. Keeps user submissions, the sets-analyzed counter, MinIO bucket contents, and the enrich index lifecycle. Use this for routine library updates:
+## Clean re-ingest (preserves user_gene_set)
 
 ```bash
 kubectl create -f k8s/ingest-clean-job.yaml -n perturbseqr
@@ -68,15 +70,21 @@ kubectl create -f k8s/ingest-clean-job.yaml -n perturbseqr
 
 ## Full rebuild
 
-`-v` deletes the postgres and minio PVCs, so this requires new MinIO uploads and a fresh DB rebuild.
+`-v` deletes the postgres and minio PVCs requiring new MinIO uploads and a DB rebuild.
 
 ```bash
 kube-compose down -v
 kubectl delete secret perturbseqr-env -n perturbseqr
 kube-compose up
-```
 
-Then redo MinIO + Ingest steps above.
+kubectl create secret generic perturbseqr-env --from-env-file=.env -n perturbseqr
+kubectl create -f k8s/minio-setup-job.yaml -n perturbseqr
+
+# Re-upload GMT files
+
+# Fresh ingest
+kubectl create -f k8s/ingest-incremental-job.yaml -n perturbseqr
+```
 
 ## URLs
 
