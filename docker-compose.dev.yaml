@@ -154,7 +154,7 @@ volumes:
       class: local-path
   minio-data:
     x-kubernetes:
-      size: 5Gi
+      size: 50Gi
       class: local-path
 
 x-kubernetes:
