@@ -1,0 +1,32 @@
+services:
+  perturbseqr-postgres:
+    platform: linux/arm64
+    build:
+      platforms:
+        - linux/arm64
+  perturbseqr-minio:
+    platform: linux/arm64
+  perturbseqr-enrich:
+    platform: linux/arm64
+    build:
+      platforms:
+        - linux/arm64
+    deploy:
+      resources:
+        reservations:
+          memory: 10Gb
+  perturbseqr-app:
+    platform: linux/arm64
+    build:
+      platforms:
+        - linux/arm64
+  minio-setup:
+    platform: linux/arm64
+    build:
+      platforms:
+        - linux/arm64
+  ingest:
+    platform: linux/arm64
+    build:
+      platforms:
+        - linux/arm64

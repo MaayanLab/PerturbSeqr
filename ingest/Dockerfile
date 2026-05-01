@@ -37,6 +37,9 @@ COPY public/metadata/drug_lookup.json ./metadata/drug_lookup.json
 # Copy migrations for dbmate
 COPY db/migrations ./migrations/
 
+# Copy wipe_libraries.sql (used when INGEST_CLEAN=true)
+COPY db/sql/wipe_libraries.sql ./sql/wipe_libraries.sql
+
 ENV INGEST_CONFIG_DIR=/app/config
 ENV INGEST_METADATA_DIR=/app/metadata
 ENV INGEST_DATA_DIR=/app/data

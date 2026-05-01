@@ -68,11 +68,31 @@ startup_log*.txt
 startup_log*.md
 .python-version
 scratch/
-public/umap/figures/local
 
 # UMAP intermediate data (large CSVs, only HTML figures needed for app)
 public/umap/csv/
 public/umap/enrich/
 # Use case data files
 *.xlsx
-.vscode/settings.json
+
+# Data files
+*.tsv
+*.rpt
+*.feather
+*.parquet
+*.gmt
+*.gmt.gz
+db/etl/inputs/_cache/
+db/etl/inputs/drug_perturbation/
+db/etl/inputs/gene_perturbation/
+db/etl/intermediate/
+db/etl/rummageo_dge/
+db/etl/*.png
+
+# Working figures (manuscript figures are tracked separately)
+/*.png
+
+# Generated metadata
+public/metadata/gene_id_conflicts.json
+public/metadata/gene_id_coverage.json
+public/metadata/gene_lookup.json

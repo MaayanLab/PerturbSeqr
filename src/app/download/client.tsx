@@ -93,7 +93,7 @@ const termStructures: Record<string, TermStructure> = {
     extraFields: [],
   },
   'nibr-drug-seq': {
-    example: 'Diphenidol::U2OS::::24h::0.01uM::AF-80-QK39::batchid1 up',
+    example: 'Diphenidol::U2OS::::24h::0.01uM::AF-80-QK39 up',
     direction: 'up',
     fields: [
       { text: 'Diphenidol', label: 'Perturbation' },
@@ -104,7 +104,6 @@ const termStructures: Record<string, TermStructure> = {
     ],
     extraFields: [
       { text: 'AF-80-QK39', label: 'NSN Code' },
-      { text: 'batchid1', label: 'Batch' },
     ],
   },
   'microarrays-cmap': {
@@ -339,7 +338,7 @@ const drugPerturbationDatasets: Dataset[] = [
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/27667448/',
     sourceUrl: 'https://maayanlab.cloud/CREEDS/',
     sourceLabel: 'CREEDS',
-    sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/CREEDS+Signatures+of+Differentially+Expressed+Genes+for+Drugs',
+    sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/GEO+Signatures+of+Differentially+Expressed+Genes+for+Small+Molecules',
     sourceLabel2: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/creeds-chem.gmt.gz`,
     fullSignatures: [
@@ -406,12 +405,16 @@ const drugPerturbationDatasets: Dataset[] = [
     title: 'RummaGEO Drug Perturbations',
     libraryName: 'RummaGEO Chem',
     info: '',
-    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/38645198/',
+    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/39569206/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/RummaGEO+Drug+Perturbation+Signatures',
     sourceLabel: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/rummageo-chem.gmt.gz`,
     fullSignatures: [
       { url: `${MINIO_BASE}/rummageo-chem-full.txt.gz`, label: 'Discretized Matrix' },
+      { url: `${MINIO_BASE}/rummageo-human-de-aligned.txt.gz`, label: 'Human Limma-Voom logFC' },
+      { url: `${MINIO_BASE}/rummageo-mouse-de-aligned.txt.gz`, label: 'Mouse Limma-Voom logFC' },
+      { url: `${MINIO_BASE}/rummageo-human-de-aligned.h5ad`, label: 'Human DE h5ad (logFC + t + adj.P.Val)' },
+      { url: `${MINIO_BASE}/rummageo-mouse-de-aligned.h5ad`, label: 'Mouse DE h5ad (logFC + t + adj.P.Val)' },
     ],
     note: 'See also ',
     noteLinkText: 'RummaGEO',
@@ -467,7 +470,7 @@ const genePerturbationDatasets: Dataset[] = [
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/27667448/',
     sourceUrl: 'https://maayanlab.cloud/CREEDS/',
     sourceLabel: 'CREEDS',
-    sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/CREEDS+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations',
+    sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/GEO+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations',
     sourceLabel2: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/creeds-gene.gmt.gz`,
     fullSignatures: [
@@ -535,12 +538,16 @@ const genePerturbationDatasets: Dataset[] = [
     title: 'RummaGEO Gene Perturbations',
     libraryName: 'RummaGEO Gene',
     info: '',
-    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/38645198/',
+    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/39569206/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/RummaGEO+Gene+Perturbation+Signatures',
     sourceLabel: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/rummageo-gene.gmt.gz`,
     fullSignatures: [
       { url: `${MINIO_BASE}/rummageo-gene-full.txt.gz`, label: 'Discretized Matrix' },
+      { url: `${MINIO_BASE}/rummageo-human-de-aligned.txt.gz`, label: 'Human Limma-Voom logFC' },
+      { url: `${MINIO_BASE}/rummageo-mouse-de-aligned.txt.gz`, label: 'Mouse Limma-Voom logFC' },
+      { url: `${MINIO_BASE}/rummageo-human-de-aligned.h5ad`, label: 'Human DE h5ad (logFC + t + adj.P.Val)' },
+      { url: `${MINIO_BASE}/rummageo-mouse-de-aligned.h5ad`, label: 'Mouse DE h5ad (logFC + t + adj.P.Val)' },
     ],
     note: 'See also ',
     noteLinkText: 'RummaGEO',

@@ -1,0 +1,26 @@
+# Clean re-ingest. INGEST_CLEAN=true wipes library tables before reingesting; user_gene_set is preserved.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: ingest-clean-
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 43200  # 12 hours
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: ingest
+        image: johnkgardner/perturbseqr-ingest:0.2.36
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom: { secretKeyRef: { name: perturbseqr-env, key: POSTGRES_PASSWORD } }
+        - name: MINIO_ROOT_PASSWORD
+          valueFrom: { secretKeyRef: { name: perturbseqr-env, key: MINIO_ROOT_PASSWORD } }
+        - name: DATABASE_URL
+          value: postgres://postgres:$(POSTGRES_PASSWORD)@perturbseqr-postgres/postgres?sslmode=disable
+        - { name: MINIO_ENDPOINT, value: perturbseqr-minio:9000 }
+        - { name: MINIO_ROOT_USER, value: minio }
+        - { name: MINIO_SECURE,    value: "false" }
+        - { name: ENRICH_URL,      value: http://perturbseqr-enrich:8000 }
+        - { name: INGEST_CLEAN,    value: "true" }
