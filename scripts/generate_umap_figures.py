@@ -49,9 +49,12 @@ from goatools.anno.broad_gos import NS2GOS
 
 # Base directory for GMT files
 BASE_DIR = Path(__file__).parent.parent / "db" / "data"
+# GMT directories
 DRUG_DIR = BASE_DIR / "drug_perturbation"
 GENE_DIR = BASE_DIR / "gene_perturbation"
+# metadata directories
 MOA_DIR =  Path(__file__).parent.parent / "public" / "metadata"
+METADATA_DIR = BASE_DIR / "metadata"
 # Output directories
 OUTPUT_DIR = Path(__file__).parent.parent / "public" / "umap"
 ENRICHMENT_DIR = OUTPUT_DIR / "enrich"
@@ -244,9 +247,11 @@ def drug_lookup():
     """
     return pd.read_json(f'{MOA_DIR}/drug_lookup.json').to_dict().get
 
-def add_moa(df:pd.DataFrame, drug_lookup:function):
+def add_moa(df:pd.DataFrame, drug_lookup):
     """
-    Adds MOA column to scatter dataframe using drug_lookup
+    Adds MOA column to scatter dataframe using drug_lookup, fill in missing MOA
+    data with cmap_moas.csv (from lincs-l1000-cp, ginkgo, tahoe-100m and nibr-drug-seq metadata
+    and OpenTargets drug_mechanism_of_action dataset)
     Args:
         df: scatterplot dataframe
         drug_lookup: lookup function to retreive drug information
@@ -263,6 +268,16 @@ def add_moa(df:pd.DataFrame, drug_lookup:function):
     df['moa'] = df['pert_lower'].apply(lambda x: drug_lookup(x, None))
     df['moa'] = df['moa'].apply(lambda x: x['moa'] if pd.notna(x) else x)
     df['moa'] = df['moa'].apply(lambda x: re.split(r'[|;]', x)[0] if pd.notna(x) else x)
+    # fill in missing moas
+    moa_from_cmap_metadata = pd.read_csv(f'{METADATA_DIR}/resolved_missing_moas.csv')
+    moa_from_cmap_metadata['pert_lower'] = moa_from_cmap_metadata['perturbation'].apply(str.lower)
+    moa_from_cmap_metadata = dict(zip(moa_from_cmap_metadata['pert_lower'], moa_from_cmap_metadata['moa']))
+    def fill_moa(row):
+        if pd.isna(row['moa']):
+            return moa_from_cmap_metadata.get(row['pert_lower'], None)
+        else:
+            return row['moa']
+    df['moa'] = df.apply(fill_moa, axis=1)
     return df
 
 # Cluster / Term Specificity Calculations
@@ -343,29 +358,34 @@ def create_drug_scatterplot(scatter_df: pd.DataFrame, title: str = "UMAP"):
     df = df[~df['outlier']]
     # fill NaN moa
     df['moa'] = df['moa'].apply(lambda x: 'Not Found' if pd.isna(x) else x)
+    # better matching
+    df['moa_lower'] = df['moa'].str.lower()
+    df['moa_lower'] = df['moa_lower'].apply(lambda x: re.split(r'[;,|]',x)[0])
     # set moa not in top_common to other
-    category_counts = df.groupby('moa').size().reset_index(name='count')
-    top_common = category_counts[category_counts['moa'] != 'Not Found'].moa.to_list()[:20]
-    df['moa'] = df['moa'].apply(lambda x: x if x in top_common + ['Not Found'] else 'Other')
+    category_counts = df.groupby('moa_lower').size().reset_index(name='count')
+    # sort by # sigs
+    category_counts = category_counts.sort_values('count', ascending=False)
+    top_common = category_counts[category_counts['moa_lower'] != 'not found'].moa_lower.to_list()[:20]
+    df['moa_lower'] = df['moa_lower'].apply(lambda x: x if x in top_common + ['not found'] else 'other')
     # wrapped moa for label
-    df['wrapped_moa'] = df['moa'].apply(lambda x: "\n".join(wrap(str(x), 20)))
+    df['wrapped_moa'] = df['moa_lower'].apply(lambda x: "\n".join(wrap(str(x), 20)))
     # reorder for plotting
-    category_counts = df.groupby('moa').size().reset_index(name='count')
-    df = df.merge(category_counts, how='left', on='moa')
+    plot_order = df.groupby('moa_lower').size().reset_index(name='count')
+    df = df.merge(plot_order, how='left', on='moa_lower')
     df = df.sort_values('count', ascending=False)
 
     # Color mapping
     n_colors = max(3, min(20, len(top_common)))
     palette = sns.color_palette("tab20", n_colors).as_hex() 
     term_colors = {c: palette[i % len(palette)] for i, c in enumerate(df['wrapped_moa'].unique())}
-    term_colors['Not Found'] = '#CCCCCC'
-    term_colors['Other'] = '#997570'
+    term_colors['not found'] = '#CCCCCC'
+    term_colors['other'] = '#997570'
     
     df['color'] = df['wrapped_moa'].map(term_colors)
     # alphabetize legend labels
-    hue_order= sorted([m for m in term_colors.keys() if m not in ['Not Found','Other']])
+    hue_order= sorted([m for m in term_colors.keys() if m not in ['not found','other']])
 
-    hue_order = hue_order + ['Other','Not Found']
+    hue_order = hue_order + ['other','not found']
     
     sns.set_theme(
     context='paper',
