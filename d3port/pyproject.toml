@@ -1,0 +1,12 @@
+[project]
+name = "d3port"
+version = "0.0.1"
+description = "Demo: render Enrichr d3.barGraph inline in a Jupyter notebook against a Perturb-Seqr enrichment result"
+requires-python = ">=3.11"
+dependencies = [
+    "perturbseqr",
+    "jupyter>=1.0",
+]
+
+[tool.uv.sources]
+perturbseqr = { path = "../perturbseqr-py", editable = true }
