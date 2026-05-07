@@ -24,6 +24,7 @@ import { parseTerm, getCellDisplay } from "@/utils/parseTerm";
 import { preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary, getDatasetUrl } from "@/utils/metadataLookup";
 import { useRouter } from "next/navigation";
 import libraryConfig from "@/config/libraries.json";
+import { LibraryBarGraphGrid, LibraryCardPaired } from "@/components/BarGraph";
 
 const allLibraryDisplayNames = Object.values(libraryConfig.libraries).map((l: any) => l.displayName as string);
 const drugLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'drug').map((l: any) => l.displayName as string);
@@ -111,6 +112,7 @@ function EnrichmentResults({
     topn: String(DEFAULT_CONSENSUS_TOP_N_SIGNATURES),
     pvaluele: String(DEFAULT_PVALUE_CUTOFF),
     libraries: "",
+    view: "",
   });
   const [rawTerm, setRawTerm] = React.useState("");
   const [topNSlider, setTopNSlider] = React.useState(DEFAULT_CONSENSUS_TOP_N_SIGNATURES);
@@ -122,7 +124,7 @@ function EnrichmentResults({
   // Cache the unfiltered total count so dataset filtering doesn't change the headline number
   const [unfilteredTotalCount, setUnfilteredTotalCount] = React.useState<number | null>(null);
 
-  const { page, term, fda, consensus, moas, sort, ko, topN, pvalueLe, datasetFilter } =
+  const { page, term, fda, consensus, moas, sort, ko, topN, pvalueLe, datasetFilter, view } =
     React.useMemo(
       () => ({
         page: queryString.page ? +queryString.page : 1,
@@ -135,9 +137,29 @@ function EnrichmentResults({
         topN: parseInt(queryString?.topn ?? String(DEFAULT_CONSENSUS_TOP_N_SIGNATURES)),
         pvalueLe: parseFloat(queryString?.pvaluele ?? String(DEFAULT_PVALUE_CUTOFF)),
         datasetFilter: queryString.libraries ? queryString.libraries.split(",").filter(Boolean) : [] as string[],
+        view: (() => {
+          // Explicit URL wins; otherwise: real filter → table, else → chart.
+          if (queryString.view === "table" || queryString.view === "chart") {
+            return queryString.view as "chart" | "table";
+          }
+          const filt = queryString.libraries
+            ? queryString.libraries.split(",").filter(Boolean)
+            : [];
+          const hasRealFilter = filt.length > 0 && !filt.includes("__none__");
+          return (hasRealFilter ? "table" : "chart") as "chart" | "table";
+        })(),
       }),
       [queryString]
     );
+
+  // Libraries to render cards for. The sentinel "__none__" means the user
+  // explicitly cleared the Dataset filter — render no cards. Otherwise fall
+  // back to all libraries.
+  const chartLibraries = React.useMemo(() => {
+    if (datasetFilter.includes("__none__")) return [];
+    if (datasetFilter.length > 0) return datasetFilter;
+    return libraryNames ?? allLibraryDisplayNames;
+  }, [datasetFilter, libraryNames]);
   // Query enrichment results
   const { data: enrichmentResults, error } = usePairEnrichmentQueryQuery({
     skip: genesUp.length === 0 || genesDown.length === 0,
@@ -197,8 +219,26 @@ function EnrichmentResults({
   }, [enrichmentResults]);
 
   return (
-    <div className="flex flex-col gap-2 my-2">
-      <h2 className="text-md font-bold">
+    <div className="flex flex-col gap-1 mt-1">
+      <ul className="menu menu-horizontal gap-3 text-base justify-center py-0">
+        <li>
+          <a
+            className={view === "chart" ? "active" : ""}
+            onClick={() => setQueryString({ view: "chart" })}
+          >
+            Bar Graphs
+          </a>
+        </li>
+        <li>
+          <a
+            className={view === "table" ? "active" : ""}
+            onClick={() => setQueryString({ view: "table" })}
+          >
+            Table
+          </a>
+        </li>
+      </ul>
+      <h2 className="text-lg font-bold">
          {!enrichmentResults?.currentBackground?.pairedEnrich && !error ? (
                   <>
                     Rummaging through <Stats show_gene_sets />.
@@ -297,11 +337,11 @@ function EnrichmentResults({
               <div className="flex gap-1 mb-1">
                 <button
                   className="btn btn-xs"
-                  onClick={() => setQueryString({ libraries: "", page: "1" })}
+                  onClick={() => setQueryString({ libraries: "", page: "1", view })}
                 >All</button>
                 <button
                   className="btn btn-xs"
-                  onClick={() => setQueryString({ libraries: "__none__", page: "1" })}
+                  onClick={() => setQueryString({ libraries: "__none__", page: "1", view })}
                 >None</button>
               </div>
               {allLibraryDisplayNames.map((lib) => (
@@ -320,11 +360,11 @@ function EnrichmentResults({
                         next = datasetFilter.filter((l) => l !== lib);
                       }
                       if (next.length >= allLibraryDisplayNames.length) {
-                        setQueryString({ libraries: "", page: "1" });
+                        setQueryString({ libraries: "", page: "1", view });
                       } else if (next.length === 0) {
-                        setQueryString({ libraries: "__none__", page: "1" });
+                        setQueryString({ libraries: "__none__", page: "1", view });
                       } else {
-                        setQueryString({ libraries: next.join(","), page: "1" });
+                        setQueryString({ libraries: next.join(","), page: "1", view });
                       }
                     }}
                   />
@@ -348,9 +388,9 @@ function EnrichmentResults({
             onClick={() => {
               const isDrugActive = datasetFilter.length > 0 && drugLibraryNames.every(n => datasetFilter.includes(n)) && !geneLibraryNames.some(n => datasetFilter.includes(n));
               if (isDrugActive) {
-                setQueryString({ libraries: "", page: "1" });
+                setQueryString({ libraries: "", page: "1", view });
               } else {
-                setQueryString({ libraries: drugLibraryNames.join(","), page: "1" });
+                setQueryString({ libraries: drugLibraryNames.join(","), page: "1", view });
               }
             }}
           >
@@ -365,9 +405,9 @@ function EnrichmentResults({
             onClick={() => {
               const isGeneActive = datasetFilter.length > 0 && geneLibraryNames.every(n => datasetFilter.includes(n)) && !drugLibraryNames.some(n => datasetFilter.includes(n));
               if (isGeneActive) {
-                setQueryString({ libraries: "", page: "1" });
+                setQueryString({ libraries: "", page: "1", view });
               } else {
-                setQueryString({ libraries: geneLibraryNames.join(","), page: "1" });
+                setQueryString({ libraries: geneLibraryNames.join(","), page: "1", view });
               }
             }}
           >
@@ -375,6 +415,7 @@ function EnrichmentResults({
           </div>
         </div>
 
+        {view === "table" && (<>
         <div
           id="dir-select"
           className="join place-content-start place-items-center"
@@ -613,7 +654,9 @@ function EnrichmentResults({
             </div>
           </div>
         ) : <></>}
+        </>)}
         </div>
+        {view === "table" && (<>
         <form
           id="search-form"
           className="join flex flex-row place-content-end place-items-center overflow-visible"
@@ -680,7 +723,20 @@ function EnrichmentResults({
             <span className="text-xs text-base-content/40">No active filters. Use the search bar to filter by cell line, drug, gene, etc.</span>
           )}
         </div>
+        </>)}
       </div>
+      {view === "chart" && (
+        <LibraryBarGraphGrid
+          activeLibraries={chartLibraries}
+          renderCard={(lib) => (
+            <LibraryCardPaired
+              genesUp={genesUp} genesDown={genesDown}
+              libraryName={lib} setQueryString={setQueryString}
+            />
+          )}
+        />
+      )}
+      {view === "table" && (<>
       <div className="overflow-x-auto -mx-8 md:-mx-24 px-2">
         {consensus || moas ? (
           <>
@@ -1566,6 +1622,7 @@ function EnrichmentResults({
           )}
         </div>
       ) : null}
+      </>)}
       <SignaturesModal
         signatures={sigModalData?.signatures}
         drug={sigModalData?.drug || ""}

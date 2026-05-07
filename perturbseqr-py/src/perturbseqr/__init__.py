@@ -88,7 +88,7 @@ def enrich(
     *,
     libraries: list[str] | None = None,
     top: int = 100,
-    sort_by: str = "pvalue_up",
+    sort_by: str = "pvalue",
     filter_term: str = "",
     filter_fda: bool = False,
     filter_ko: bool = False,

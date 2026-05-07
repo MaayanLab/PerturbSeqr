@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* -----------------------------------------------------------------------
+ * Typographic scale
+ *
+ *   title       text-4xl font-bold     36px   landing page title (one per page)
+ *   heading     text-xl  font-bold     20px   short section headers
+ *   subheading  text-lg  font-semibold 18px   card titles, modal titles, h3/h4,
+ *                                             results-summary h2 (long sentences)
+ *   body        text-base              16px   paragraph content, modal subtitles
+ *   secondary   text-sm                14px   table cells, form labels, sub-tabs, button text
+ *   caption     text-xs                12px   filter labels, tooltips, footnotes, helper text
+ * -----------------------------------------------------------------------*/
+
 input[type=file]::file-selector-button {
   display: none;
 }
