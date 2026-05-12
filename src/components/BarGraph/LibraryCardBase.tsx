@@ -70,7 +70,16 @@ export function LibraryCardBase({
           <BarGraph
             leftRows={leftRows}
             rightRows={rightRows}
-            options={{ leftLabel, rightLabel }}
+            options={{
+              leftLabel,
+              rightLabel,
+              // Gene-perturbation libraries use orange/purple to distinguish from
+              // drug-perturbation libraries' default red/blue.
+              ...(isGene && {
+                leftMaxColor: '#f97316',  // orange-500
+                rightMaxColor: '#a855f7', // purple-500
+              }),
+            }}
           />
         )}
       </div>
