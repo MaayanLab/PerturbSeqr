@@ -1,35 +1,22 @@
-"""Perturb-Seqr GraphQL API wrapper (v0.0.1).
+"""Perturb-Seqr GraphQL API wrapper.
 
 Mirrors the actions exposed by the Perturb-Seqr front end: enrichment, paired
 (up/down) enrichment, and term search.
-
-    import perturbseqr as ps
-    df = ps.enrich(["STAT1", "STAT3", "JAK1", "JAK2", "IFNG"])
-    df = ps.enrich(genes, libraries=["LINCS L1000 CP"], top=5)
-    df = ps.enrich_pair(up=[...], down=[...])
-    df = ps.term_search("STAT3")
 """
 from __future__ import annotations
 
 import pandas as pd
-import requests
+from gql import Client, gql
+from gql.transport.requests import RequestsHTTPTransport
 
 PERTURBSEQR_URL = "https://perturbseqr.k8s.dev.maayanlab.cloud/graphql"
 
-_session = requests.Session()
+_transport = RequestsHTTPTransport(url=PERTURBSEQR_URL, timeout=60, retries=0)
+_client = Client(transport=_transport)
 
 
-def _post(operation_name: str, variables: dict, query: str, timeout: float = 120.0) -> dict:
-    response = _session.post(
-        PERTURBSEQR_URL,
-        json={"operationName": operation_name, "variables": variables, "query": query},
-        timeout=timeout,
-    )
-    response.raise_for_status()
-    payload = response.json()
-    if payload.get("errors"):
-        raise RuntimeError(payload["errors"])
-    return payload["data"]
+def _execute(query, variables: dict) -> dict:
+    return _client.execute(query, variable_values=variables)
 
 
 # ---------------------------------------------------------------------------
@@ -41,7 +28,7 @@ ENRICH_COLUMNS = [
     "pvalue", "adjPvalue", "oddsRatio", "nOverlap",
 ]
 
-_ENRICHMENT_QUERY = """query EnrichmentQuery(
+_ENRICHMENT_QUERY = gql("""query EnrichmentQuery(
     $genes: [String]!
     $libraryNames: [String]
     $filterTerm: String = ""
@@ -80,7 +67,7 @@ _ENRICHMENT_QUERY = """query EnrichmentQuery(
             totalCount
         }
     }
-}"""
+}""")
 
 
 def enrich(
@@ -106,7 +93,7 @@ def enrich(
     if libraries is not None:
         variables["libraryNames"] = list(libraries)
 
-    data = _post("EnrichmentQuery", variables, _ENRICHMENT_QUERY)
+    data = _execute(_ENRICHMENT_QUERY, variables)
     nodes = data["currentBackground"]["enrich"]["nodes"]
     if not nodes:
         return pd.DataFrame(columns=ENRICH_COLUMNS)
@@ -129,7 +116,7 @@ ENRICH_PAIR_COLUMNS = [
     "pvalueReverse", "adjPvalueReverse", "oddsRatioReverse", "reverserOverlap",
 ]
 
-_PAIR_ENRICHMENT_QUERY = """query PairEnrichmentQuery(
+_PAIR_ENRICHMENT_QUERY = gql("""query PairEnrichmentQuery(
     $genesUp: [String]!
     $genesDown: [String]!
     $libraryNames: [String]
@@ -177,7 +164,7 @@ _PAIR_ENRICHMENT_QUERY = """query PairEnrichmentQuery(
             totalCount
         }
     }
-}"""
+}""")
 
 
 def enrich_pair(
@@ -209,7 +196,7 @@ def enrich_pair(
     if libraries is not None:
         variables["libraryNames"] = list(libraries)
 
-    data = _post("PairEnrichmentQuery", variables, _PAIR_ENRICHMENT_QUERY)
+    data = _execute(_PAIR_ENRICHMENT_QUERY, variables)
     nodes = data["currentBackground"]["pairedEnrich"]["nodes"]
     if not nodes:
         return pd.DataFrame(columns=ENRICH_PAIR_COLUMNS)
@@ -231,7 +218,7 @@ def enrich_pair(
 
 TERM_SEARCH_COLUMNS = ["term", "id", "library_name", "nGeneIds"]
 
-_TERM_SEARCH_QUERY = """query TermSearch(
+_TERM_SEARCH_QUERY = gql("""query TermSearch(
     $terms: [String]!
     $libraryNames: [String]
     $offset: Int = 0
@@ -251,7 +238,7 @@ _TERM_SEARCH_QUERY = """query TermSearch(
         }
         totalCount
     }
-}"""
+}""")
 
 
 def term_search(
@@ -266,11 +253,10 @@ def term_search(
     if libraries is not None:
         variables["libraryNames"] = list(libraries)
 
-    data = _post("TermSearch", variables, _TERM_SEARCH_QUERY)
+    data = _execute(_TERM_SEARCH_QUERY, variables)
     nodes = data["geneSetTermSearch"]["nodes"]
     if not nodes:
         return pd.DataFrame(columns=TERM_SEARCH_COLUMNS)
 
     df = pd.json_normalize(nodes).rename(columns={"library.name": "library_name"})
     return df[TERM_SEARCH_COLUMNS]
-
