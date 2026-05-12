@@ -165,7 +165,9 @@ impl Bitmap {
 
         for term_list in self.terms.values() {
             for (_, _, _, _, _, _, moa, _cid) in term_list {
-                *moa_counts.entry(moa.clone()).or_insert(0) += 1;
+                if !moa.is_empty() {
+                    *moa_counts.entry(moa.clone()).or_insert(0) += 1;
+                }
             }
         }
         moa_counts
@@ -836,10 +838,12 @@ async fn query(
                             drug_counts.insert(group_key.clone(), (*count as usize, *fda_approved));
                         }
 
-                        let moa_entry = moa_signifigance_counts.entry(moa.clone()).or_insert((0, 0, 0));
-                        moa_entry.0 += 1; // Increment significant count
-                        if gene_set_term.contains(" up") {
-                            moa_entry.2 += 1;
+                        if !moa.is_empty() {
+                            let moa_entry = moa_signifigance_counts.entry(moa.clone()).or_insert((0, 0, 0));
+                            moa_entry.0 += 1; // Increment significant count
+                            if gene_set_term.contains(" up") {
+                                moa_entry.2 += 1;
+                            }
                         }
                     }
                 }
