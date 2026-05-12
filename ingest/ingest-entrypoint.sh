@@ -55,7 +55,6 @@ echo ""
 # Step 4: Ingest FDA counts
 echo "=== Step 4: Ingesting FDA counts ==="
 cd /app/db && python ingest_fda_counts.py
-cd /app/db && python ingest_fda_counts.py --update-counts
 echo ""
 
 # Step 5: Refresh materialized views

@@ -1171,8 +1171,7 @@ function EnrichmentResults({
                 {/* <th>Direction</th> */}
                 <th className="relative group">
                   <div className="absolute z-10 left-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
-                    Number of signatures for this perturbation contained within
-                    the database
+                    Number of signatures with this perturbation, per dataset
                   </div>
                   Signature<br></br>
                   <span className="inline-flex">
@@ -1378,7 +1377,7 @@ function EnrichmentResults({
 
                   // Get FDA data from database
                   const fdaData = enrichmentResult?.geneSet?.nodes[0].geneSetFdaCountsById?.nodes[0];
-                  const count = fdaData?.count || 1;
+                  const count = fdaData?.count ?? 0;
                   const approved = fdaData?.approved || false;
                   const dbMoa = fdaData?.moa || '';
 

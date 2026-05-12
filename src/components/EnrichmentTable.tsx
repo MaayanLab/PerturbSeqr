@@ -102,7 +102,7 @@ export function EnrichmentTable({
           <th>Direction</th>
           <th className="relative group">
             <div className="absolute z-10 left-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
-              Number of signatures for this perturbation contained within the database
+              Number of signatures with this perturbation, per dataset
             </div>
             Signature<br></br>
             <span className="inline-flex">
@@ -238,7 +238,7 @@ export function EnrichmentTable({
           const isGenePert = isGenePerturbationLibrary(libraryName);
 
           const fdaData = enrichmentResult?.geneSets?.nodes?.[0]?.geneSetFdaCountsById?.nodes?.[0];
-          const sigCount = fdaData?.count || 1;
+          const sigCount = fdaData?.count ?? 0;
           const dbMoa = fdaData?.moa || '';
           const approved = fdaData?.approved || false;
 

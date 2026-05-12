@@ -5,10 +5,8 @@
 """Populate fda_counts table from drug_lookup.json.
 
 Usage: uv run db/ingest_fda_counts.py
-       uv run db/ingest_fda_counts.py --update-counts
 """
 
-import argparse
 import json
 import os
 from pathlib import Path
@@ -47,45 +45,13 @@ def ingest_fda_counts(conn, drug_lookup: dict):
     print(f"Done! Upserted {len(rows)} entries")
 
 
-def update_counts_from_gene_sets(conn):
-    """Update counts by grouping gene_sets by CID (so synonyms get same count)."""
-    print("Updating counts from gene_set...")
-
-    with conn.cursor() as cur:
-        # Group by CID when available, fall back to perturbation name
-        # Use NULLIF to treat empty strings as NULL so COALESCE falls through to perturbation
-        cur.execute("""
-            UPDATE app_public.fda_counts fc
-            SET count = gs_counts.cnt
-            FROM (
-                SELECT COALESCE(NULLIF(cid, ''), LOWER(perturbation)) as group_key, COUNT(*) as cnt
-                FROM app_public.gene_set
-                WHERE perturbation IS NOT NULL AND perturbation != ''
-                GROUP BY COALESCE(NULLIF(cid, ''), LOWER(perturbation))
-            ) gs_counts
-            WHERE COALESCE(NULLIF(fc.cid, ''), LOWER(fc.perturbation)) = gs_counts.group_key
-        """)
-        print(f"Updated counts for {cur.rowcount} perturbations")
-
-        cur.execute("UPDATE app_public.fda_counts SET count = 0 WHERE count IS NULL")
-
-    conn.commit()
-
-
 def main():
-    parser = argparse.ArgumentParser(description='Ingest FDA counts')
-    parser.add_argument('--update-counts', action='store_true', help='Only update counts from gene_set table')
-    args = parser.parse_args()
-
     conn = get_conn()
     try:
-        if args.update_counts:
-            update_counts_from_gene_sets(conn)
-        else:
-            with open(DRUG_LOOKUP_PATH) as f:
-                drug_lookup = json.load(f)
-            print(f"Loaded {len(drug_lookup)} drugs from drug_lookup.json")
-            ingest_fda_counts(conn, drug_lookup)
+        with open(DRUG_LOOKUP_PATH) as f:
+            drug_lookup = json.load(f)
+        print(f"Loaded {len(drug_lookup)} drugs from drug_lookup.json")
+        ingest_fda_counts(conn, drug_lookup)
     finally:
         conn.close()
 
