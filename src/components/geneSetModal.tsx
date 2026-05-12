@@ -116,7 +116,7 @@ export default function GeneSetModal({
     <>
       <dialog className="modal" ref={ref}>
         <div className="modal-box w-11/12 max-w-screen-xl h-5/6 overflow-hidden flex flex-col p-0">
-          <p className="text-md text-center text-gray-900 dark:text-white flex-shrink-0 py-2">
+          <p className="text-lg text-center text-gray-900 dark:text-white flex-shrink-0 py-2">
             Gene Set ({geneset ? geneset?.length : "n"})
           </p>
           {dataset && (
@@ -124,7 +124,7 @@ export default function GeneSetModal({
               {dataset}
             </p>
           )}
-          <p className="text-md text-center text-gray-600 dark:text-white">
+          <p className="text-base text-center text-gray-600 dark:text-white">
             {term}
           </p>
           <div

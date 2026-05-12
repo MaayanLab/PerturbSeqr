@@ -6,12 +6,12 @@
 Ginkgo Bioworks — internal dataset, no public source.
 
 The Ginkgo data is licensed and used in PerturbSeqr at the app layer for licensing reasons.
-There is no public download endpoint and the raw dash-delimited GMT was provided to us
-directly. This module codifies the source→canonical transform AND applies the cross-dataset
-protein-coding filter (all Ginkgo signatures are human A549, so organism is fixed).
+There is no public download endpoint and the raw GMT was provided to us directly. This
+module codifies the source→canonical transform AND applies the cross-dataset protein-coding
+filter (all Ginkgo signatures are human A549, so organism is fixed).
 
-Source line:    A549-SC_514-1000-24       (cell-pert-conc_nM-tp_h, dash-delimited)
-Canonical term: SC_514::A549::::24h::1uM up
+Source line:    SC-514::A549::24::1000nM up   (pert::cell::tp_h::conc_nM, ::-delimited)
+Canonical term: SC-514::A549::::24h::1uM up
 
 If you need to regenerate this GMT, contact the Ginkgo collaboration lead and place the
 raw GMT at RAW_GMT. download() will transform + PC-filter it into OUTPUT.
@@ -26,7 +26,7 @@ import gzip
 import sys
 
 sys.path.insert(0, str(Path(__file__).parent))
-from _utils import DRUG_INTERMEDIATE, DRUG_OUTPUT, CACHE_DIR, D, strip_direction, standardize_gmt
+from _utils import DRUG_INTERMEDIATE, DRUG_OUTPUT, CACHE_DIR, DELIMITER, strip_direction, standardize_gmt
 
 INTERMEDIATE = DRUG_INTERMEDIATE / "ginkgo-bioworks.gmt.gz"
 FINAL = DRUG_OUTPUT / "ginkgo-bioworks.gmt.gz"
@@ -38,25 +38,21 @@ GINKGO_CELL_LINES = {"A549"}
 
 
 def transform(term: str) -> str:
-    """Source: A549-SC_514-1000-24-up   (cell-pert-conc_nM-tp_h-direction; ALL hyphen-delimited)
-    Canonical: SC_514::A549::::24h::1uM up"""
-    # Direction is hyphen-delimited in this source (-up/-down/-dn), not space-delimited.
-    for suf in ("-up", "-down", "-dn"):
-        if term.endswith(suf):
-            body, direction = term[:-len(suf)], " " + suf[1:]
-            break
+    """Source: SC-514::A549::24::1000nM up   (pert::cell::tp_h::conc_nM, ::-delimited)
+    Canonical: SC-514::A549::::24h::1uM up"""
+    body, direction = strip_direction(term)
+    parts = body.split(DELIMITER)
+    if len(parts) != 4:
+        return term
+    perturbation, cell_val, tp_raw, conc_raw = parts
+    timepoint = tp_raw + "h"
+    if conc_raw.endswith("nM"):
+        conc_um = float(conc_raw[:-2]) / 1000
+        concentration = f"{conc_um:g}uM"
     else:
-        body, direction = term, ""
-    parts = body.split("-")
-    if len(parts) < 4:
-        return body + direction
-    cell_val = parts[0]
-    timepoint = parts[-1] + "h"
-    conc_um = float(parts[-2]) / 1000  # raw values are nM
-    concentration = f"{conc_um:g}uM"
-    perturbation = "-".join(parts[1:-2])
+        concentration = conc_raw
     cell_line, cell_type = (cell_val, "") if cell_val in GINKGO_CELL_LINES else ("", cell_val)
-    return D.join([perturbation, cell_line, cell_type, timepoint, concentration]) + direction
+    return DELIMITER.join([perturbation, cell_line, cell_type, timepoint, concentration]) + direction
 
 
 def _read_raw_gmt(path: Path) -> dict[str, list[str]]:

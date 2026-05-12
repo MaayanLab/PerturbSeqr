@@ -1,0 +1,17 @@
+[project]
+name = "perturbseqr"
+version = "0.0.1"
+description = "Python wrapper for the Perturb-Seqr GraphQL API"
+readme = "README.md"
+authors = [
+    { name = "John Gardner", email = "john.gardner@mssm.edu" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "pandas>=2.0",
+    "requests>=2.31",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.26,<0.10.0"]
+build-backend = "uv_build"
