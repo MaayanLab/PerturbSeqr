@@ -477,7 +477,7 @@ def create_gene_scatterplot(scatter_df: pd.DataFrame, top_terms_df: pd.DataFrame
         hue='go_id',
         palette=term_colors,
         edgecolor=None,
-        s=20
+        s=7
     )
     # Signatures assigned to specific GO terms
     ax = sns.scatterplot(
@@ -488,14 +488,15 @@ def create_gene_scatterplot(scatter_df: pd.DataFrame, top_terms_df: pd.DataFrame
         hue='go_id',
         palette=term_colors,
         edgecolor=None,
-        s=20
+        s=7
     )
     plt.title(title.split(' ')[0].capitalize())
     ax.get_legend().set_title('')
-    sns.move_legend(ax, "upper right", bbox_to_anchor=(1.15, 1))
+    sns.move_legend(ax, "upper right", bbox_to_anchor=(1.25, 1))
     plt.xlabel('UMAP 1')
     plt.ylabel('UMAP 2')
     fig.savefig(f"{FIGURE_DIR}/{title}.png", dpi=500, bbox_inches='tight')
+    df[['go_id','color_go_term']].drop_duplicates().to_csv(SCATTER_DIR / f'{title}_go_terms.csv', index=False)
     plt.close(fig)
 
 # Main Processing Functions
