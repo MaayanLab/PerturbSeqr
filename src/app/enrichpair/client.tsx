@@ -137,17 +137,7 @@ function EnrichmentResults({
         topN: parseInt(queryString?.topn ?? String(DEFAULT_CONSENSUS_TOP_N_SIGNATURES)),
         pvalueLe: parseFloat(queryString?.pvaluele ?? String(DEFAULT_PVALUE_CUTOFF)),
         datasetFilter: queryString.libraries ? queryString.libraries.split(",").filter(Boolean) : [] as string[],
-        view: (() => {
-          // Explicit URL wins; otherwise: real filter → table, else → chart.
-          if (queryString.view === "table" || queryString.view === "chart") {
-            return queryString.view as "chart" | "table";
-          }
-          const filt = queryString.libraries
-            ? queryString.libraries.split(",").filter(Boolean)
-            : [];
-          const hasRealFilter = filt.length > 0 && !filt.includes("__none__");
-          return (hasRealFilter ? "table" : "chart") as "chart" | "table";
-        })(),
+        view: (queryString.view === "table" ? "table" : "chart") as "chart" | "table",
       }),
       [queryString]
     );
