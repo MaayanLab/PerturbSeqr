@@ -61,7 +61,16 @@ export function LibraryCardBase({
           {subtitle}
         </p>
         {loading ? (
-          <div className="text-sm text-base-content/60 py-4 text-center">Loading…</div>
+          <div className="py-2 text-center">
+            <Image
+              src="/images/loading.gif"
+              alt="Loading…"
+              width={100}
+              height={117}
+              className="rounded mx-auto dark:invert"
+              unoptimized
+            />
+          </div>
         ) : error ? (
           <div className="text-sm text-error py-4 text-center">Error loading {libraryName}</div>
         ) : noResults ? (

@@ -690,12 +690,16 @@ function EnrichmentResults({
         </>)}
       </div>
       {view === "chart" && (
-        <LibraryBarGraphGrid
-          activeLibraries={chartLibraries}
-          renderCard={(lib) => (
-            <LibraryCardSingle genes={genes} libraryName={lib} setQueryString={setQueryString} />
-          )}
-        />
+        !enrichmentResults?.currentBackground?.enrich && !error ? (
+          <Loading />
+        ) : (
+          <LibraryBarGraphGrid
+            activeLibraries={chartLibraries}
+            renderCard={(lib) => (
+              <LibraryCardSingle genes={genes} libraryName={lib} setQueryString={setQueryString} />
+            )}
+          />
+        )
       )}
       {view === "table" && (<>
       <div className="overflow-x-auto -mx-8 md:-mx-24 px-2">
