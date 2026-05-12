@@ -88,7 +88,7 @@ export default function InputFormUpDown({setInputSingle, selectedLibraries = [],
   return (
     <>
      
-      <h1 className="text-xl">Input up & down gene sets</h1>
+      <h1 className="text-xl">Input up and down gene sets</h1>
       <p className="prose">
         Try a gene set signature <a
           className="font-bold cursor-pointer"
