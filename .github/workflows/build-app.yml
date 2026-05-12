@@ -6,7 +6,7 @@ on:
       tag:
         description: 'Image tag'
         required: true
-        default: '0.2.37'
+        default: '0.2.38'
       environment:
         description: 'Which image(s) to build'
         required: true
