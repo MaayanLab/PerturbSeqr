@@ -61,7 +61,7 @@ export default function Footer() {
           </Link>
         </p>
       </div>
-      <div className="text-center pt-5 text-md font-bold">
+      <div className="text-center pt-5 text-sm font-bold">
         <ul>
           <li>
             <Link

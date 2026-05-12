@@ -47,11 +47,17 @@ const customSizes: Record<string, number> = {
 }
 const defaultSize = 80
 
-// Build per-library entries from config, sorted alphabetically by display name
+// Build per-library entries from config. Drug libraries first (alphabetical
+// within), then gene libraries (alphabetical within). Same category color
+// theme (cyan / fuchsia) carries over from the button styling, so the
+// grouping is visually obvious in the grid.
 const allLibraries = Object.values(libraryConfig.libraries).map((l: any) => ({
   name: l.displayName as string,
   category: l.category as 'drug' | 'gene',
-})).sort((a, b) => a.name.localeCompare(b.name))
+})).sort((a, b) => {
+  if (a.category !== b.category) return a.category === 'drug' ? -1 : 1;
+  return a.name.localeCompare(b.name);
+})
 
 // Export counts for use in subtitle
 export const resourceCount = new Set(allLibraries.map(l => logoMap[l.name]?.src).filter(Boolean)).size

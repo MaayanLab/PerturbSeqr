@@ -79,6 +79,7 @@ export type BackgroundEnrichArgs = {
   libraryNames?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   overlapGe?: InputMaybe<Scalars['Int']['input']>;
+  postSearchFilterLibraryNames?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   pvalueLe?: InputMaybe<Scalars['Float']['input']>;
   sortby?: InputMaybe<Scalars['String']['input']>;
   topN?: InputMaybe<Scalars['Int']['input']>;
@@ -107,6 +108,7 @@ export type BackgroundPairedEnrichArgs = {
   libraryNames?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   overlapGe?: InputMaybe<Scalars['Int']['input']>;
+  postSearchFilterLibraryNames?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   pvalueLe?: InputMaybe<Scalars['Float']['input']>;
   sortby?: InputMaybe<Scalars['String']['input']>;
   topN?: InputMaybe<Scalars['Int']['input']>;
