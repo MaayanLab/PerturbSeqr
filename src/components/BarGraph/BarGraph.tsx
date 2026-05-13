@@ -76,9 +76,12 @@ const DEFAULTS = {
   headerFontSize: 14, // secondary (text-sm)
 };
 
-// Helper: -log10(p)
+// Returns -log10(p). When the user's input gene set exactly matches a
+// term's gene set in the library, the backend reports p = 0. That becomes
+// Infinity here. The shared scale below drops infinities from its domain
+// and uses clamp: true. The outlier renders as a full-width bar. The rest
+// of the chart stays undistorted.
 function neglog(p: number): number {
-  // Backend guarantees positive p.
   return -Math.log10(p);
 }
 
@@ -162,14 +165,23 @@ function BarGraphInner({
   const centerX = width / 2;
   const halfWidth = Math.max(0, centerX - opts.centerPadding);
 
-  // Both sides share scale: bar length and color track −log10(p) magnitude, not per-side ranking.
+  // Shared x-axis across both halves. Bar length and color track −log10(p)
+  // magnitude, not per-side ranking. Infinity values from self-matches are
+  // excluded from the domain so they don't compress the rest of the data.
+  // When self-matches are present, the finite scale caps at 90% so they
+  // remain visibly longer than every finite hit. Otherwise the finite scale
+  // uses the full halfWidth.
   const allVals = [...leftVals, ...rightVals];
-  const allMin = allVals.length ? Math.min(...allVals) : 0;
-  const allMax = allVals.length ? Math.max(...allVals) : 1;
+  const finiteVals = allVals.filter(Number.isFinite);
+  const allMin = finiteVals.length ? Math.min(...finiteVals) : 0;
+  const allMax = finiteVals.length ? Math.max(...finiteVals) : 1;
+  const hasInfinity = allVals.length !== finiteVals.length;
+  const finiteMaxWidth = hasInfinity ? halfWidth * 0.9 : halfWidth;
 
   const xShared = scaleLinear<number>({
     domain: [allMin, allMax],
-    range: [opts.minBarWidth, halfWidth],
+    range: [opts.minBarWidth, finiteMaxWidth],
+    clamp: true,
   });
   const y = scaleBand<number>({
     domain: Array.from({ length: totalRanks }, (_, i) => i),
@@ -178,8 +190,9 @@ function BarGraphInner({
   });
 
   const colorFor = (min: string, max: string) => (v: number) => {
-    const t = allMax === allMin ? 1 : (v - allMin) / (allMax - allMin);
-    return interpolateRgb(min, max)(t);
+    // Non-finite v from a self-match. Or a zero-range domain. Render max color.
+    if (!Number.isFinite(v) || allMax === allMin) return interpolateRgb(min, max)(1);
+    return interpolateRgb(min, max)((v - allMin) / (allMax - allMin));
   };
   const colorLeft  = colorFor(opts.leftMinColor,  opts.leftMaxColor);
   const colorRight = colorFor(opts.rightMinColor, opts.rightMaxColor);
@@ -206,7 +219,8 @@ function BarGraphInner({
   // One ranked row's faded backing bar + opaque (or gray, if !sig) top bar + label.
   const renderSide = (row: BarRow, value: number, side: BarSide) => {
     const isLeft = side === 'left';
-    const w = xShared(value);
+    // Self-matches bypass the scale and take the full halfWidth.
+    const w = Number.isFinite(value) ? xShared(value) : halfWidth;
     const color = isLeft ? colorLeft(value) : colorRight(value);
     const sig = row.pvalue < 0.05;
     const x0 = isLeft ? centerX - w : centerX;
