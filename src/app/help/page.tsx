@@ -40,21 +40,13 @@ export default function UserManual() {
             API for programmatic access. To get started try submitting the included
             examples on the home page:
           </p>
-          <div className="flex flex-row">
           <Image
-            src="/images/getting-started-1.png"
-            width={500}
-            height={400}
+            src="/images/home-default-updown.png"
+            width={900}
+            height={700}
             alt={""}
             className="border rounded-lg mx-auto my-4"
           />
-          <Image
-            src="/images/getting-started-2.png"
-            width={500}
-            height={400}
-            alt={""}
-            className="border rounded-lg mx-auto my-4"
-          /></div>
           <p>
             All search features are accompanied by dataset filtering, enabling users
             to select which drug and gene perturbation datasets are included in their
@@ -69,26 +61,18 @@ export default function UserManual() {
             identify consensus mechanisms of action (MoAs), and consensus compounds
             seen across cell lines, time points and concentrations:
           </p>
-          <div className="flex flex-row">
           <Image
-            src="/images/gene-set-search-2.png"
-            width={500}
-            height={400}
+            src="/images/enrich-bar-charts.png"
+            width={900}
+            height={700}
             alt={""}
             className="border rounded-lg mx-auto my-4"
           />
-          <Image
-            src="/images/gene-set-search-11.png"
-            width={500}
-            height={400}
-            alt={""}
-            className="border rounded-lg mx-auto my-4"
-          /></div>
           <p>
             Additionally, users can apply post-query dataset filtering on the results page to further narrow down results of interest.
           </p>
           <Image
-            src="/images/post-search-dataset-dropdown.png"
+            src="/images/enrich-dataset-dropdown.png"
             width={900}
             height={700}
             alt={""}
@@ -171,9 +155,9 @@ export default function UserManual() {
           compound or gene perturbation, or on the underlined cell line:
           </p>
           <Image
-            src="/images/gene-set-search-2.png"
-            width={600}
-            height={500}
+            src="/images/enrich-table.png"
+            width={900}
+            height={700}
             alt={""}
             className="border rounded-lg mx-auto my-4"
           />
@@ -285,21 +269,13 @@ export default function UserManual() {
           are listed with new line, tab, or comma separators after selecting the up &
           down gene set option on the input form:
           </p>
-          <div className="flex flex-row">
           <Image
-            src="/images/gene-set-search-9.png"
-            width={500}
-            height={400}
+            src="/images/updown-input-form-example.png"
+            width={700}
+            height={500}
             alt={""}
             className="border rounded-lg mx-auto my-4"
           />
-          <Image
-            src="/images/gene-set-search-10.png"
-            width={500}
-            height={400}
-            alt={""}
-            className="border rounded-lg mx-auto my-4"
-          /></div>
           <p>
             The gene set search page is very similar to that of the single gene set
             search page, displaying the enrichment statistics, button filters, and
@@ -307,9 +283,9 @@ export default function UserManual() {
             explored:
           </p>
           <Image
-            src="/images/gene-set-search-11.png"
-            width={600}
-            height={500}
+            src="/images/enrichpair-table.png"
+            width={900}
+            height={700}
             alt={""}
             className="border rounded-lg mx-auto my-4"
           />
