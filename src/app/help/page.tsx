@@ -12,92 +12,22 @@ export default function UserManual() {
     <div className="prose">
       <div className="flex">
         <div className="flex-col mx-auto max-w-5xl">
-          <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 mt-3" role="alert">
-            <p className="font-bold">In Progress: Perturb-Seqr Documentation</p>
-            <p>Perturb-Seqr-specific documentation is in progress. The documentation below may not fully reflect the current application.</p>
-          </div>
           <h2 className="title text-2xl font-medium mb-3 mt-3 text-center">
             Perturb-Seqr Documentation
           </h2>
-          <div className="navbar block text-center">
-            <div className="navbar-center">
-              <ul className="menu menu-horizontal gap-3 flex text-lg flex-wrap justify-center">
-                <li>
-                  <Link
-                    href="/about"
-                    className="underline cursor-pointer"
-                    shallow
-                  >
-                    Abstract
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#dataset-filtering"
-                    className="underline cursor-pointer"
-                    shallow
-                  >
-                    Dataset Filtering
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#gene-set-search"
-                    className="underline cursor-pointer"
-                    shallow
-                  >
-                    Single Gene Set Search
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#up-down-gene-set-search"
-                    className="underline cursor-pointer"
-                    shallow
-                  >
-                    Up & Down Gene Set Search
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#dataset-visualizations"
-                    className="underline cursor-pointer"
-                    shallow
-                  >
-                    Dataset Visualizations
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#metadata-search"
-                    className="underline cursor-pointer"
-                    shallow
-                  >
-                    Term Search
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#download-page"
-                    className="underline cursor-pointer"
-                    shallow
-                  >
-                    Download
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#api"
-                    className="underline cursor-pointer"
-                    shallow
-                  >
-                    API
-                  </Link>
-                </li>
-              </ul>
-            </div>
+          <div className="text-center mb-6 mt-2">
+            <h3 className="text-lg font-semibold mb-2">Table of Contents</h3>
+            <ol className="list-decimal list-inside text-base inline-block text-left">
+              <li><Link href="#getting-started" className="underline cursor-pointer" shallow>Getting Started</Link></li>
+              <li><Link href="#dataset-filtering" className="underline cursor-pointer" shallow>Dataset Filtering</Link></li>
+              <li><Link href="#gene-set-search" className="underline cursor-pointer" shallow>Single Gene Set Search</Link></li>
+              <li><Link href="#up-down-gene-set-search" className="underline cursor-pointer" shallow>Up &amp; Down Gene Set Search</Link></li>
+              <li><Link href="#dataset-visualizations" className="underline cursor-pointer" shallow>Dataset Visualizations</Link></li>
+              <li><Link href="#metadata-search" className="underline cursor-pointer" shallow>Term Search</Link></li>
+              <li><Link href="#download-page" className="underline cursor-pointer" shallow>Download Page</Link></li>
+              <li><Link href="#api" className="underline cursor-pointer" shallow>API</Link></li>
+            </ol>
           </div>
-          <br></br>
           <h2 className="title text-xl font-medium mb-3" id="getting-started">
             Getting Started
           </h2>
