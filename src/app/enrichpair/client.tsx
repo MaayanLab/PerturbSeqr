@@ -290,6 +290,7 @@ function EnrichmentResults({
       {view === "chart" && (
         <p className="text-sm text-base-content/70 mt-1">
           Sorting library cards by geometric mean of top 10 adjusted p-values across mimicker and reverser hits.
+          Bars within each chart are colored and scaled by p-value.
         </p>
       )}
       {(() => {
