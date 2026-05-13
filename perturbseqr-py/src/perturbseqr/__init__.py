@@ -80,7 +80,25 @@ def enrich(
     filter_fda: bool = False,
     filter_ko: bool = False,
 ) -> pd.DataFrame:
-    """Single gene set enrichment against Perturb-Seqr."""
+    """Single gene set enrichment.
+
+    Parameters
+    ----------
+    genes : list[str]
+        Gene symbols.
+    libraries : list[str], optional
+        Restrict to these library names.
+    top : int, default 100
+        Max rows returned.
+    sort_by : str, default "pvalue"
+        Sort column.
+    filter_term : str, default ""
+        Substring filter on the term column.
+    filter_fda : bool, default False
+        Keep only FDA-approved drugs.
+    filter_ko : bool, default False
+        Keep only gene knockouts.
+    """
     variables: dict = {
         "genes": list(genes),
         "first": top,
@@ -180,7 +198,31 @@ def enrich_pair(
     top_n: int = 1000,
     pvalue_le: float = 0.05,
 ) -> pd.DataFrame:
-    """Up/down gene set enrichment (DEX-shaped query)."""
+    """Paired up and down gene set enrichment.
+
+    Parameters
+    ----------
+    up : list[str]
+        Up-regulated gene symbols.
+    down : list[str]
+        Down-regulated gene symbols.
+    libraries : list[str], optional
+        Restrict to these library names.
+    top : int, default 100
+        Max rows returned.
+    sort_by : str, default "pvalue_mimic"
+        Sort column.
+    filter_term : str, default ""
+        Substring filter on the term column.
+    filter_fda : bool, default False
+        Keep only FDA-approved drugs.
+    filter_ko : bool, default False
+        Keep only gene knockouts.
+    top_n : int, default 1000
+        Max library size considered.
+    pvalue_le : float, default 0.05
+        Keep only rows with p <= this.
+    """
     variables: dict = {
         "genesUp": list(up),
         "genesDown": list(down),
@@ -247,7 +289,17 @@ def term_search(
     libraries: list[str] | None = None,
     top: int = 10,
 ) -> pd.DataFrame:
-    """Search gene set terms by substring(s)."""
+    """Search gene set terms by substring.
+
+    Parameters
+    ----------
+    query : str | list[str]
+        Substring(s) to match.
+    libraries : list[str], optional
+        Restrict to these library names.
+    top : int, default 10
+        Max rows returned.
+    """
     terms = [query] if isinstance(query, str) else list(query)
     variables: dict = {"terms": terms, "first": top, "offset": 0}
     if libraries is not None:

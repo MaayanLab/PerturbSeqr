@@ -32,7 +32,13 @@ export default function UserManual() {
             Getting Started
           </h2>
           <p>
-            The Perturb-Seqr web application is a comprehensive Connectivity Mapping search engine that integrates 9 drug perturbation and 7 gene perturbation datasets into a single unifying resource. The application provides single gene set search, up and down gene set search, and term search. Additionally, Perturb-Seqr offers interactive UMAP visualizations and an API for programmatic access. To get started try submitting the included examples on the home page:
+            The Perturb-Seqr web application is a comprehensive Connectivity Mapping
+            search engine that integrates 9 drug perturbation and 7 gene perturbation
+            datasets into a single unifying resource. The application provides single
+            gene set search, up and down gene set search, and term search.
+            Additionally, Perturb-Seqr offers interactive UMAP visualizations and an
+            API for programmatic access. To get started try submitting the included
+            examples on the home page:
           </p>
           <div className="flex flex-row">
           <Image
@@ -50,7 +56,18 @@ export default function UserManual() {
             className="border rounded-lg mx-auto my-4"
           /></div>
           <p>
-            All search features are accompanied by dataset filtering, enabling users to select which drug and gene perturbation datasets are included in their results. Each gene set&apos;s p-value is computed against its own dataset-specific background (the union of all genes appearing in that dataset&apos;s gene sets), ensuring that statistical comparisons are internally consistent and that p-values are reproducible regardless of which datasets are selected. Once submitting either of the examples, a results table will be returned sorted by the most significantly overlapping gene sets. From here, you can apply additional filtering for FDA-approved drugs, for the directionality of the gene sets, as well as identify consensus mechanisms of action (MoAs), and consensus compounds seen across cell lines, time points and concentrations:
+            All search features are accompanied by dataset filtering, enabling users
+            to select which drug and gene perturbation datasets are included in their
+            results. Each gene set&apos;s p-value is computed against its own
+            dataset-specific background (the union of all genes appearing in that
+            dataset&apos;s gene sets), ensuring that statistical comparisons are
+            internally consistent and that p-values are reproducible regardless of
+            which datasets are selected. Once submitting either of the examples, a
+            results table will be returned sorted by the most significantly
+            overlapping gene sets. From here, you can apply additional filtering for
+            FDA-approved drugs, for the directionality of the gene sets, as well as
+            identify consensus mechanisms of action (MoAs), and consensus compounds
+            seen across cell lines, time points and concentrations:
           </p>
           <div className="flex flex-row">
           <Image
@@ -85,7 +102,10 @@ export default function UserManual() {
             Dataset Filtering
           </h2>
           <p>
-            On search pages, users can toggle individual datasets on or off to control which are included in their query. Cyan icons represent drug perturbation datasets while magenta icons represent gene perturbation datasets. By default, all datasets are selected.
+            On search pages, users can toggle individual datasets on or off to
+            control which are included in their query. Cyan icons represent drug
+            perturbation datasets while magenta icons represent gene perturbation
+            datasets. By default, all datasets are selected.
           </p>
           <Image
             src="/images/dataset-icons.gif"
@@ -96,7 +116,11 @@ export default function UserManual() {
             unoptimized
           />
           <p>
-            Dataset filtering controls which datasets&apos; results are displayed. Each gene set is always tested against its own dataset-specific background, so p-values remain stable regardless of which datasets are selected. This means the same gene set will always receive the same p-value whether viewed alone or alongside other datasets.
+            Dataset filtering controls which datasets&apos; results are displayed.
+            Each gene set is always tested against its own dataset-specific
+            background, so p-values remain stable regardless of which datasets are
+            selected. This means the same gene set will always receive the same
+            p-value whether viewed alone or alongside other datasets.
           </p>
           <p>
             Dataset filtering selections and gene set inputs will persist as long as the user navigates back using the &quot;BACK&quot; button on the results page.
@@ -121,7 +145,14 @@ export default function UserManual() {
             Single Gene Set Search
           </h2>
           <p>
-          The Gene Set Search page enables users to search the Perturb-Seqr database for gene sets that match their query gene set. Similarity to gene sets contained within the Perturb-Seqr database with the query gene set is measured with Fisher&apos;s exact test. Any significantly overlapping gene sets are returned to the user along with their accompanying metadata. User query gene sets can be pasted or typed into the input form with each gene on a new line, or the user may upload a file containing genes where the genes are listed with new line, tab, or comma separators:
+          The Gene Set Search page enables users to search the Perturb-Seqr database
+          for gene sets that match their query gene set. Similarity to gene sets
+          contained within the Perturb-Seqr database with the query gene set is
+          measured with Fisher&apos;s exact test. Any significantly overlapping gene
+          sets are returned to the user along with their accompanying metadata. User
+          query gene sets can be pasted or typed into the input form with each gene
+          on a new line, or the user may upload a file containing genes where the
+          genes are listed with new line, tab, or comma separators:
 
           </p>
           <Image
@@ -132,7 +163,12 @@ export default function UserManual() {
             className="border rounded-lg mx-auto my-4"
           />
           <p>
-          Paginated results are returned with the total number of gene sets which the query was compared to and the number of those gene sets which were significantly enriched. Enrichment statistics are provided on the right side of the table. The user may explore the metadata associated with the gene sets on each results page, by clicking on the icon next to the compound or gene perturbation, or on the underlined cell line:
+          Paginated results are returned with the total number of gene sets which the
+          query was compared to and the number of those gene sets which were
+          significantly enriched. Enrichment statistics are provided on the right
+          side of the table. The user may explore the metadata associated with the
+          gene sets on each results page, by clicking on the icon next to the
+          compound or gene perturbation, or on the underlined cell line:
           </p>
           <Image
             src="/images/gene-set-search-2.png"
@@ -142,7 +178,12 @@ export default function UserManual() {
             className="border rounded-lg mx-auto my-4"
           />
           <p>
-          Other information such as the directionality of the gene set, the number of overlapping genes, and the total number of genes in the enriched gene set are also displayed. Clicking the overlap or gene set size will open a modal box with the corresponding genes as well as buttons to copy the gene set to the clipboard, or to view the enrichment results on RummaGEO, Rummagene, or Enrichr:
+          Other information such as the directionality of the gene set, the number of
+          overlapping genes, and the total number of genes in the enriched gene set
+          are also displayed. Clicking the overlap or gene set size will open a modal
+          box with the corresponding genes as well as buttons to copy the gene set to
+          the clipboard, or to view the enrichment results on RummaGEO, Rummagene, or
+          Enrichr:
           </p>
           <Image
             src="/images/gene-set-search-3.png"
@@ -152,7 +193,11 @@ export default function UserManual() {
             className="border rounded-lg mx-auto my-4"
           />
           <p>
-          To further filter and refine the results, the user may use the search bar located above the table to search for gene sets containing certain keywords. This allows, for instance, to view enriched results from the A549 cell line based upon the same input gene set. The total number of enriched gene sets is updated accordingly:
+          To further filter and refine the results, the user may use the search bar
+          located above the table to search for gene sets containing certain
+          keywords. This allows, for instance, to view enriched results from the A549
+          cell line based upon the same input gene set. The total number of enriched
+          gene sets is updated accordingly:
           </p>
           <Image
             src="/images/gene-set-search-4.png"
@@ -162,7 +207,9 @@ export default function UserManual() {
             className="border rounded-lg mx-auto my-4"
           />
           <p>
-          Results may also be easily downloaded using the button to the far right of the search feature in a tab delimited format (for downloads of greater than 10,000 results please refer to the downloads page):
+          Results may also be easily downloaded using the button to the far right of
+          the search feature in a tab delimited format (for downloads of greater than
+          10,000 results please refer to the downloads page):
           </p>
           <Image
             src="/images/gene-set-search-5.png"
@@ -183,7 +230,13 @@ export default function UserManual() {
             className="border rounded-lg mx-auto my-4"
           />
            <p>
-          To generate consensus results, selecting the consensus perturbations button at the top of the table will compute significant compounds and gene perturbations using the Fisher&apos;s exact test, taking into account the number of significant and insignificant gene sets corresponding to that perturbation. P-values for the direction of the gene set are then generated for each significant consensus perturbation using the number of significant up and down, and insignificant up and down terms for that perturbation:
+          To generate consensus results, selecting the consensus perturbations button
+          at the top of the table will compute significant compounds and gene
+          perturbations using the Fisher&apos;s exact test, taking into account the
+          number of significant and insignificant gene sets corresponding to that
+          perturbation. P-values for the direction of the gene set are then generated
+          for each significant consensus perturbation using the number of significant
+          up and down, and insignificant up and down terms for that perturbation:
           </p>
           <Image
             src="/images/gene-set-search-7.png"
@@ -193,7 +246,13 @@ export default function UserManual() {
             className="border rounded-lg mx-auto my-4"
           />
             <p>
-          To identify the most common mechanisms of action and their directionality similar to the consensus compound feature, the consensus mechanism of action button can be selected. This will compute the number of significant and insignificant gene sets corresponding to that mechanism of action and generate p-values for the direction of the gene set using the number of significant up and down, and insignificant up and down terms for that mechanism of action:
+          To identify the most common mechanisms of action and their directionality
+          similar to the consensus compound feature, the consensus mechanism of
+          action button can be selected. This will compute the number of significant
+          and insignificant gene sets corresponding to that mechanism of action and
+          generate p-values for the direction of the gene set using the number of
+          significant up and down, and insignificant up and down terms for that
+          mechanism of action:
           </p>
           <Image
             src="/images/gene-set-search-8.png"
@@ -211,7 +270,20 @@ export default function UserManual() {
             Up & Down Gene Set Search
           </h2>
           <p>
-          The up and down gene set search functionality enables users to search the Perturb-Seqr database for gene set pairs that most significantly mimic or reverse the expression of the submitted up and down gene sets. A Fisher&apos;s exact test is also used to assess the significance of these results, specifically measuring a mimicker overlap (up Perturb-Seqr gene set & up user gene set + down Perturb-Seqr gene set & down user gene set) and reverser overlap (up Perturb-Seqr gene set & down user gene set + down Perturb-Seqr gene set & up user gene set). Any significantly overlapping mimicker or reverser gene set is returned to the user along with their accompanying metadata. Similarly to the single gene set search, user query gene sets can be pasted or typed into the two input boxes with each gene on a new line, or the user may upload a file containing genes where the genes are listed with new line, tab, or comma separators after selecting the up & down gene set option on the input form:
+          The up and down gene set search functionality enables users to search the
+          Perturb-Seqr database for gene set pairs that most significantly mimic or
+          reverse the expression of the submitted up and down gene sets. A
+          Fisher&apos;s exact test is also used to assess the significance of these
+          results, specifically measuring a mimicker overlap (up Perturb-Seqr gene
+          set & up user gene set + down Perturb-Seqr gene set & down user gene set)
+          and reverser overlap (up Perturb-Seqr gene set & down user gene set + down
+          Perturb-Seqr gene set & up user gene set). Any significantly overlapping
+          mimicker or reverser gene set is returned to the user along with their
+          accompanying metadata. Similarly to the single gene set search, user query
+          gene sets can be pasted or typed into the two input boxes with each gene on
+          a new line, or the user may upload a file containing genes where the genes
+          are listed with new line, tab, or comma separators after selecting the up &
+          down gene set option on the input form:
           </p>
           <div className="flex flex-row">
           <Image
@@ -229,7 +301,10 @@ export default function UserManual() {
             className="border rounded-lg mx-auto my-4"
           /></div>
           <p>
-            The gene set search page is very similar to that of the single gene set search page, displaying the enrichment statistics, button filters, and mimicker and reverser overlaps which can be opened as modals and further explored:
+            The gene set search page is very similar to that of the single gene set
+            search page, displaying the enrichment statistics, button filters, and
+            mimicker and reverser overlaps which can be opened as modals and further
+            explored:
           </p>
           <Image
             src="/images/gene-set-search-11.png"
@@ -247,7 +322,10 @@ export default function UserManual() {
             Dataset Visualizations
           </h2>
           <p>
-            Users can explore the unique structure and clustering of each dataset through precomputed UMAP visualizations. Datasets can be selected from the dropdown menu. Hovering over points on the UMAP will display the corresponding term.
+            Users can explore the unique structure and clustering of each dataset
+            through precomputed UMAP visualizations. Datasets can be selected from
+            the dropdown menu. Hovering over points on the UMAP will display the
+            corresponding term.
           </p>
           <Image
             src="/images/umaps.png"
@@ -297,7 +375,10 @@ export default function UserManual() {
             Download Page
           </h2>
           <p>
-            All data is available in GMT format on the Download page. The term format for each dataset is shown, with each term format consistent up to the fifth position. Links to the original publication, Harmonizome, and full differential expression matrices are also available.
+            All data is available in GMT format on the Download page. The term format
+            for each dataset is shown, with each term format consistent up to the
+            fifth position. Links to the original publication, Harmonizome, and full
+            differential expression matrices are also available.
           </p>
           <div className="flex flex-row">
           <Image
@@ -340,8 +421,145 @@ export default function UserManual() {
             alt={""}
             className="border rounded-lg mx-auto my-4"
           />
+
+          <h3 className="text-lg font-semibold mb-2 mt-6">Python wrapper: <code>perturbseqr-py</code></h3>
           <p>
-          For example, enrichment analysis queries can be performed in Python against the Perturb-Seqr gene sets using the requests library as follows. The optional <code>library_names</code> parameter filters results to specific datasets:
+            A Python wrapper around this GraphQL endpoint is also available.
+            Standard queries return results directly into Python data
+            structures such as pandas DataFrames.
+          </p>
+
+          {/* TODO(prose): one-line lead-in to the uv install command. */}
+          <div className="text-gray bg-slate-300 dark:bg-slate-700 text-xs font-mono mt-2 p-5 rounded-lg box-content sm:max-w-xl sm:overflow-scroll md:max-w-xl lg:max-w-3xl xl:max-w-full">
+            <pre>
+              <code>{`uv add \\
+  "perturbseqr @ git+https://github.com/MaayanLab/PerturbSeqr.git#subdirectory=perturbseqr-py"`}</code>
+            </pre>
+          </div>
+
+          <p>
+            More information on the available functions and their parameters
+            can be found at{" "}
+            <a className="underline cursor-pointer"
+              href="https://github.com/MaayanLab/PerturbSeqr/tree/main/perturbseqr-py"
+              target="_blank">
+              https://github.com/MaayanLab/PerturbSeqr/tree/main/perturbseqr-py
+            </a>.
+          </p>
+          {/* numpy-style function docs: signature in a code block, then a
+              short description, then a bulleted parameter list. */}
+          <div className="text-gray bg-slate-300 dark:bg-slate-700 text-xs font-mono mt-3 p-3 rounded-lg">
+            <pre><code>{`ps.enrich(
+    genes,
+    *,
+    libraries=None,
+    top=100,
+    sort_by="pvalue",
+    filter_term="",
+    filter_fda=False,
+    filter_ko=False,
+)`}</code></pre>
+          </div>
+          <p className="text-sm mt-2">Single gene set enrichment.</p>
+          <dl className="text-sm ml-4 mt-1 mb-4">
+            <dt className="font-semibold mt-2"><code>genes</code> : <em>list[str]</em></dt>
+            <dd className="ml-6">Gene symbols.</dd>
+            <dt className="font-semibold mt-2"><code>libraries</code> : <em>list[str], optional</em></dt>
+            <dd className="ml-6">Restrict to these library names.</dd>
+            <dt className="font-semibold mt-2"><code>top</code> : <em>int, default 100</em></dt>
+            <dd className="ml-6">Max rows returned.</dd>
+            <dt className="font-semibold mt-2"><code>sort_by</code> : <em>str, default &quot;pvalue&quot;</em></dt>
+            <dd className="ml-6">Sort column.</dd>
+            <dt className="font-semibold mt-2"><code>filter_term</code> : <em>str, default &quot;&quot;</em></dt>
+            <dd className="ml-6">Substring filter on the term column.</dd>
+            <dt className="font-semibold mt-2"><code>filter_fda</code> : <em>bool, default False</em></dt>
+            <dd className="ml-6">Keep only FDA-approved drugs.</dd>
+            <dt className="font-semibold mt-2"><code>filter_ko</code> : <em>bool, default False</em></dt>
+            <dd className="ml-6">Keep only gene knockouts.</dd>
+          </dl>
+
+          <div className="text-gray bg-slate-300 dark:bg-slate-700 text-xs font-mono mt-3 p-3 rounded-lg">
+            <pre><code>{`ps.enrich_pair(
+    *,
+    up,
+    down,
+    libraries=None,
+    top=100,
+    sort_by="pvalue_mimic",
+    filter_term="",
+    filter_fda=False,
+    filter_ko=False,
+    top_n=1000,
+    pvalue_le=0.05,
+)`}</code></pre>
+          </div>
+          <p className="text-sm mt-2">Paired up and down gene set enrichment.</p>
+          <dl className="text-sm ml-4 mt-1 mb-4">
+            <dt className="font-semibold mt-2"><code>up</code> : <em>list[str]</em></dt>
+            <dd className="ml-6">Up-regulated gene symbols.</dd>
+            <dt className="font-semibold mt-2"><code>down</code> : <em>list[str]</em></dt>
+            <dd className="ml-6">Down-regulated gene symbols.</dd>
+            <dt className="font-semibold mt-2"><code>libraries</code> : <em>list[str], optional</em></dt>
+            <dd className="ml-6">Restrict to these library names.</dd>
+            <dt className="font-semibold mt-2"><code>top</code> : <em>int, default 100</em></dt>
+            <dd className="ml-6">Max rows returned.</dd>
+            <dt className="font-semibold mt-2"><code>sort_by</code> : <em>str, default &quot;pvalue_mimic&quot;</em></dt>
+            <dd className="ml-6">Sort column.</dd>
+            <dt className="font-semibold mt-2"><code>filter_term</code> : <em>str, default &quot;&quot;</em></dt>
+            <dd className="ml-6">Substring filter on the term column.</dd>
+            <dt className="font-semibold mt-2"><code>filter_fda</code> : <em>bool, default False</em></dt>
+            <dd className="ml-6">Keep only FDA-approved drugs.</dd>
+            <dt className="font-semibold mt-2"><code>filter_ko</code> : <em>bool, default False</em></dt>
+            <dd className="ml-6">Keep only gene knockouts.</dd>
+            <dt className="font-semibold mt-2"><code>top_n</code> : <em>int, default 1000</em></dt>
+            <dd className="ml-6">Max library size considered.</dd>
+            <dt className="font-semibold mt-2"><code>pvalue_le</code> : <em>float, default 0.05</em></dt>
+            <dd className="ml-6">Keep only rows with p ≤ this.</dd>
+          </dl>
+
+          <div className="text-gray bg-slate-300 dark:bg-slate-700 text-xs font-mono mt-3 p-3 rounded-lg">
+            <pre><code>{`ps.term_search(
+    query,
+    *,
+    libraries=None,
+    top=10,
+)`}</code></pre>
+          </div>
+          <p className="text-sm mt-2">Search gene set terms by substring.</p>
+          <dl className="text-sm ml-4 mt-1 mb-4">
+            <dt className="font-semibold mt-2"><code>query</code> : <em>str | list[str]</em></dt>
+            <dd className="ml-6">Substring(s) to match.</dd>
+            <dt className="font-semibold mt-2"><code>libraries</code> : <em>list[str], optional</em></dt>
+            <dd className="ml-6">Restrict to these library names.</dd>
+            <dt className="font-semibold mt-2"><code>top</code> : <em>int, default 10</em></dt>
+            <dd className="ml-6">Max rows returned.</dd>
+          </dl>
+          <p className="text-sm font-semibold mt-6 mb-2">Realistic example</p>
+          <p className="text-sm mb-2">Putting the three functions together against the Perturb-Seqr endpoint:</p>
+          <div className="text-gray bg-slate-300 dark:bg-slate-700 text-xs font-mono mt-2 p-5 rounded-lg box-content sm:max-w-xl sm:overflow-scroll md:max-w-xl lg:max-w-3xl xl:max-w-full">
+            <pre>
+              <code>{`import perturbseqr as ps
+
+# Single gene set enrichment
+df = ps.enrich(["RASD1", "S100P", "TRIM51", "PDK4", "TIPARP", "TUBA3E", ...])
+
+# Restrict libraries and result count
+df = ps.enrich(genes, libraries=["LINCS L1000 CP"], top=25)
+
+# Up/down (paired) enrichment
+df = ps.enrich_pair(up=[...], down=[...])
+
+# Search gene set terms by substring
+df = ps.term_search("STAT3")`}</code>
+            </pre>
+          </div>
+
+          <h3 className="text-lg font-semibold mb-2 mt-6">Calling the GraphQL endpoint directly</h3>
+          <p>
+            The GraphQL endpoint can also be queried directly. The examples
+            below use Python&apos;s <code>requests</code> library. Single
+            gene set enrichment, with the optional <code>library_names</code>
+            parameter restricting results to specific datasets:
           </p>
           <div className="text-gray bg-slate-300 dark:bg-slate-700 text-xs font-mono mt-5 p-5 rounded-lg box-content sm:max-w-xl sm:overflow-scroll md:max-w-xl lg:max-w-3xl xl:max-w-full">
             <button className="float-right" onClick={() => navigator.clipboard.writeText(singleGeneEnrich)}><FaCopy/></button>
@@ -352,9 +570,7 @@ export default function UserManual() {
             </pre>
           </div>
           <br />
-          <p>
-          Additionally, up and down gene set enrichment analysis queries can be performed in Python against all Perturb-Seqr gene sets using the requests library as follows:
-          </p>
+          <p>Paired up and down gene set enrichment:</p>
           <div className="text-gray bg-slate-300 dark:bg-slate-700 text-xs font-mono mt-5 p-5 rounded-lg box-content sm:max-w-xl sm:overflow-scroll md:max-w-xl lg:max-w-3xl xl:max-w-full">
             <button className="float-right" onClick={() => navigator.clipboard.writeText(upDownGeneSetEnrich)}><FaCopy/></button>
             <pre>
@@ -365,7 +581,8 @@ export default function UserManual() {
           </div>
           <br />
           <p>
-          Overlapping genes can be retrieved from either the single or up- and down-gene set search results using the Perturb-Seqr gene set ids provided in the returned enrichment tables:
+            Overlapping genes can be retrieved using the gene set ids
+            returned by either enrichment query above:
           </p>
           <div className="text-gray bg-slate-300 dark:bg-slate-700 text-xs font-mono mt-5 p-5 rounded-lg box-content sm:max-w-xl sm:overflow-scroll md:max-w-xl lg:max-w-3xl xl:max-w-full">
             <button className="float-right" onClick={() => navigator.clipboard.writeText(overlap)}><FaCopy/></button>
@@ -385,7 +602,8 @@ export default function UserManual() {
           </div>
           <br />
           <p>
-          To find the overlap of a user gene set and the Perturb-Seqr background, the following query can be used to retrieve the overlap and converted symbols:
+            To find the overlap between a user gene set and the Perturb-Seqr
+            background, returning converted symbols:
           </p>
           <div className="text-gray bg-slate-300 dark:bg-slate-700 text-xs font-mono mt-5 p-5 rounded-lg box-content sm:max-w-xl sm:overflow-scroll md:max-w-xl lg:max-w-3xl xl:max-w-full">
             <button className="float-right" onClick={() => navigator.clipboard.writeText(validGenes)}><FaCopy/></button>
@@ -407,20 +625,16 @@ export default function UserManual() {
             </Link>
             .
           </p>
-          <div className="text-center mt-8 mb-4">
-            <a
-              href="#"
-              className="text-sm underline cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              onClick={(e) => {
-                e.preventDefault();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-            >
-              Back to top
-            </a>
-          </div>
         </div>
       </div>
+      <button
+        type="button"
+        aria-label="Back to top"
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 btn btn-circle shadow-lg bg-base-100 z-50 print:hidden"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      >
+        ↑
+      </button>
     </div>
   );
 }
