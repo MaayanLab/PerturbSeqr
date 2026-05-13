@@ -80,24 +80,29 @@ export function LibraryCardBase({
           {subtitle}
         </p>
         {/* Fixed-height content area so drug and gene subgrids share row
-            heights and stay aligned, even when one side has many "no enriched
-            terms" cards next to tall bar charts on the other side. */}
-        <div className="min-h-[340px] flex flex-col justify-center">
+            heights and stay aligned. Bar charts sit at the top right below
+            the subtitle. Empty states (loading, error, no enriched terms)
+            center inside the remaining space. */}
+        <div className="min-h-[340px] flex flex-col">
           {loading ? (
-            <div className="py-2 text-center">
+            <div className="flex-1 flex items-center justify-center">
               <Image
                 src="/images/loading.gif"
                 alt="Loading…"
                 width={100}
                 height={117}
-                className="rounded mx-auto dark:invert"
+                className="rounded dark:invert"
                 unoptimized
               />
             </div>
           ) : error ? (
-            <div className="text-sm text-error py-4 text-center">Error loading {libraryName}</div>
+            <div className="flex-1 flex items-center justify-center text-sm text-error">
+              Error loading {libraryName}
+            </div>
           ) : noResults ? (
-            <div className="text-sm text-base-content/60 py-4 text-center italic">No enriched terms</div>
+            <div className="flex-1 flex items-center justify-center text-sm text-base-content/60 italic">
+              No enriched terms
+            </div>
           ) : (
             <BarGraph
               leftRows={leftRows}
