@@ -270,7 +270,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
           </p>
         )}
       </div>
-      <div className='border m-5 mt-1 overflow-x-auto'>
+      <div className='border m-5 mt-1'>
       <div className='flex flex-row flex-wrap place-content-end items-center pt-3 pr-3 gap-2'>
           <div className='join flex flex-row items-center'>
             <span className="label-text text-base">Search:&nbsp;</span>
@@ -302,6 +302,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
             </div>
           </div>
         </div>
+        <div className='overflow-x-auto'>
         <table className="table table-sm">
           <thead>
             <tr>
@@ -453,6 +454,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
             })}
           </tbody>
         </table>
+        </div>
       </div>
       <div className="flex flex-col items-center">
         <Pagination
