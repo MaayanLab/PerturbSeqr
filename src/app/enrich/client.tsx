@@ -255,6 +255,11 @@ function EnrichmentResults({
           </>
         )}
       </h2>
+      {view === "chart" && (
+        <p className="text-sm text-base-content/70 mt-1">
+          Sorting library cards by geometric mean of top 10 adjusted p-values across up- and down-regulated hits.
+        </p>
+      )}
       {(() => {
         const filters: string[] = [];
         if (datasetFilter.length > 0 && !datasetFilter.includes("__none__"))

@@ -30,11 +30,30 @@ export function LibraryCardBase({
   totalSignificant: number;
   setQueryString: (qs: Record<string, string | null>) => void;
 }) {
+  // Rank libraries by the geometric mean of the top 10 adjusted p-values,
+  // pooled across mimicker and reverser sides. Equivalently, the mean of
+  // -log10(adjPvalue) over the 10 pooled rows with the smallest adj_p.
+  //
+  // adjPvalue is BH-corrected within each library. It normalizes for
+  // library size, so a small library with strong hits competes fairly
+  // with a giant one. Pooling across sides treats both directions equally
+  // so a directional library does not skew the rank. NEGLOG_CAP handles
+  // self-matches where p = 0 yields Infinity.
+  const NEGLOG_CAP = 50;
+  const score = React.useMemo(() => {
+    const top = [...leftRows, ...rightRows]
+      .map((r) => Math.min(-Math.log10(r.adjPvalue ?? r.pvalue), NEGLOG_CAP))
+      .sort((a, b) => b - a)
+      .slice(0, 10);
+    if (top.length === 0) return 0;
+    return top.reduce((a, b) => a + b, 0) / top.length;
+  }, [leftRows, rightRows]);
+
   const noResults = !loading && !error && leftRows.length === 0 && rightRows.length === 0;
   let order = 0;
   if (error) order = 2;
   else if (noResults) order = 1;
-  else if (!loading) order = -totalSignificant;
+  else if (!loading) order = -Math.round(score * 1000);
 
   const goToTable = () =>
     setQueryString({ view: 'table', libraries: libraryName, page: '1' });
@@ -60,10 +79,9 @@ export function LibraryCardBase({
         <p className="text-xs text-base-content/50 mb-2 select-none [&_strong]:text-base-content">
           {subtitle}
         </p>
-        {/* Fixed-height content area. Drug and gene subgrids share row
-            heights this way. Without it, a tall bar chart on one side next
-            to a short "no enriched terms" card on the other would offset
-            every subsequent row on that side. */}
+        {/* Fixed-height content area so drug and gene subgrids share row
+            heights and stay aligned, even when one side has many "no enriched
+            terms" cards next to tall bar charts on the other side. */}
         <div className="min-h-[340px] flex flex-col justify-center">
           {loading ? (
             <div className="py-2 text-center">
