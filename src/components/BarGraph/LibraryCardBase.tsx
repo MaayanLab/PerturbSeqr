@@ -60,37 +60,43 @@ export function LibraryCardBase({
         <p className="text-xs text-base-content/50 mb-2 select-none [&_strong]:text-base-content">
           {subtitle}
         </p>
-        {loading ? (
-          <div className="py-2 text-center">
-            <Image
-              src="/images/loading.gif"
-              alt="Loading…"
-              width={100}
-              height={117}
-              className="rounded mx-auto dark:invert"
-              unoptimized
+        {/* Fixed-height content area. Drug and gene subgrids share row
+            heights this way. Without it, a tall bar chart on one side next
+            to a short "no enriched terms" card on the other would offset
+            every subsequent row on that side. */}
+        <div className="min-h-[340px] flex flex-col justify-center">
+          {loading ? (
+            <div className="py-2 text-center">
+              <Image
+                src="/images/loading.gif"
+                alt="Loading…"
+                width={100}
+                height={117}
+                className="rounded mx-auto dark:invert"
+                unoptimized
+              />
+            </div>
+          ) : error ? (
+            <div className="text-sm text-error py-4 text-center">Error loading {libraryName}</div>
+          ) : noResults ? (
+            <div className="text-sm text-base-content/60 py-4 text-center italic">No enriched terms</div>
+          ) : (
+            <BarGraph
+              leftRows={leftRows}
+              rightRows={rightRows}
+              options={{
+                leftLabel,
+                rightLabel,
+                // Gene-perturbation libraries use orange/purple to distinguish from
+                // drug-perturbation libraries' default red/blue.
+                ...(isGene && {
+                  leftMaxColor: '#f97316',  // orange-500
+                  rightMaxColor: '#a855f7', // purple-500
+                }),
+              }}
             />
-          </div>
-        ) : error ? (
-          <div className="text-sm text-error py-4 text-center">Error loading {libraryName}</div>
-        ) : noResults ? (
-          <div className="text-sm text-base-content/60 py-4 text-center italic">No enriched terms</div>
-        ) : (
-          <BarGraph
-            leftRows={leftRows}
-            rightRows={rightRows}
-            options={{
-              leftLabel,
-              rightLabel,
-              // Gene-perturbation libraries use orange/purple to distinguish from
-              // drug-perturbation libraries' default red/blue.
-              ...(isGene && {
-                leftMaxColor: '#f97316',  // orange-500
-                rightMaxColor: '#a855f7', // purple-500
-              }),
-            }}
-          />
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

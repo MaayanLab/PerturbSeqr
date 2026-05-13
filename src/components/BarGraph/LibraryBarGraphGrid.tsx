@@ -30,7 +30,11 @@ export function LibraryBarGraphGrid({
   const geneLibs = activeLibraries.filter((lib) =>  isGenePerturbationLibrary(lib));
   const parentCols =
     drugLibs.length > 0 && geneLibs.length > 0 ? 'md:grid-cols-2' : 'md:grid-cols-1';
-  const sideClass = 'grid grid-cols-1 lg:grid-cols-2 items-start gap-3 content-start';
+  // Fixed `grid-auto-rows` so every row is the same height in both the drug
+  // and gene subgrids. Without this, the two subgrids can drift out of
+  // alignment when one side has many "no enriched terms" cards next to tall
+  // bar charts on the other side.
+  const sideClass = 'grid grid-cols-1 lg:grid-cols-2 items-start gap-3 content-start [grid-auto-rows:460px]';
   return (
     <div className={`grid grid-cols-1 ${parentCols} gap-3 mt-1`}>
       {drugLibs.length > 0 && (
