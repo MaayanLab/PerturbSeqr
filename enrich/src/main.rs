@@ -1241,8 +1241,8 @@ async fn query(
     if let Some(sortby) = sortby {
         match sortby.as_str() {
             "adj_pvalue" => {
-                consensus_results.sort_unstable_by(|a, b| a.pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
-                moa_consensus_results.sort_unstable_by(|a, b| a.pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
+                consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
+                moa_consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
                 results.sort_unstable_by(|a, b| a.adj_pvalue.partial_cmp(&b.adj_pvalue).unwrap_or(std::cmp::Ordering::Equal));
             },
             "pvalue" => {
@@ -1269,7 +1269,7 @@ async fn query(
             },
             "adj_pvalue_up" => {
                 consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
-                moa_consensus_results.sort_unstable_by(|a, b| a.pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
+                moa_consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
                 results.sort_unstable_by(|a, b| a.adj_pvalue.partial_cmp(&b.adj_pvalue).unwrap_or(std::cmp::Ordering::Equal));
             },
             "pvalue_down" => {
@@ -1648,7 +1648,7 @@ async fn query_pairs(
 
     let total_terms = bitmap.terms.values().len() / 2 as usize;
 
-    let n_significant_drugs = results.len() / 2 as usize;
+    let n_significant_drugs = results.len();
 
     let n_insignificant_drugs = total_terms - n_significant_drugs;
 
@@ -1949,7 +1949,7 @@ async fn query_pairs(
 
     let consensus_len = consensus_results.len();
 
-    let moa_consensus_len = consensus_results.len();
+    let moa_consensus_len = moa_consensus_results.len();
 
     println!("Consensus results computed for {} perturbations and {} MoAs", consensus_len, moa_consensus_len);
 
