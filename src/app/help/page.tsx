@@ -140,8 +140,8 @@ export default function UserManual() {
           <figure className="my-4">
             <Image
               src="/images/dataset-icons.gif"
-              width={700}
-              height={500}
+              width={900}
+              height={1000}
               alt={""}
               className="border rounded-lg mx-auto"
               unoptimized
