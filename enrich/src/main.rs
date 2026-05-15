@@ -182,6 +182,18 @@ fn corrected_odds_ratio(a: usize, b: usize, c: usize, d: usize) -> f64 {
         / ((b as f64 + CONTINUITY_CORRECTION) * (c as f64 + CONTINUITY_CORRECTION))
 }
 
+// Frontend appends " up"/" down" (or trailing space for no direction) to filter_term; strip and return (search_term, is_up, is_down).
+fn parse_filter_term(filter_term: &str) -> (String, bool, bool) {
+    let lower = filter_term.to_lowercase();
+    if let Some(rest) = lower.strip_suffix(" up") {
+        (rest.trim().to_string(), true, false)
+    } else if let Some(rest) = lower.strip_suffix(" down") {
+        (rest.trim().to_string(), false, true)
+    } else {
+        (lower.trim().to_string(), false, false)
+    }
+}
+
 // Directional odds ratios for up/down consensus (same continuity correction)
 fn corrected_directional_odds_ratios(a_up: usize, b_up: usize, a_down: usize, b_down: usize) -> (f64, f64) {
     const CONTINUITY_CORRECTION: f64 = 0.5;
@@ -1148,9 +1160,7 @@ async fn query(
     }
 
     if let Some(filter_term) = &filter_term {
-        let is_up = filter_term.contains(" up");
-        let is_down = filter_term.contains(" down");
-        let filter_term_clean = filter_term.replace(" up", "").replace(" down", "").trim().to_lowercase();
+        let (filter_term_clean, is_up, is_down) = parse_filter_term(filter_term);
         let filter_terms: Vec<String> = filter_term_clean.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
         if !filter_terms.is_empty() {
             consensus_results.retain(|result| {
@@ -1191,9 +1201,7 @@ async fn query(
         .filter_map(|result| {
             let (gene_set_hash, _gene_set) = bitmap.values.get(result.index)?;
             if let Some(filter_term) = &filter_term {
-                let is_up = filter_term.contains(" up");
-                let is_down = filter_term.contains(" down");
-                let filter_term_clean = filter_term.replace(" up", "").replace(" down", "").trim().to_lowercase();
+                let (filter_term_clean, is_up, is_down) = parse_filter_term(filter_term);
                 let filter_terms: Vec<String> = filter_term_clean.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
                 if let Some(terms) = bitmap.terms.get(gene_set_hash) {
                     if is_up && !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)|  gene_set_term.to_lowercase().contains(" up")) {
@@ -1915,9 +1923,7 @@ async fn query_pairs(
     }
 
     if let Some(filter_term) = &filter_term {
-        let is_up = filter_term.contains(" up");
-        let is_down = filter_term.contains(" down");
-        let filter_term_clean = filter_term.replace(" up", "").replace(" down", "").trim().to_lowercase();
+        let (filter_term_clean, is_up, is_down) = parse_filter_term(filter_term);
         let filter_terms: Vec<String> = filter_term_clean.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
         if !filter_terms.is_empty() {
             consensus_results.retain(|result| {
@@ -1960,10 +1966,8 @@ async fn query_pairs(
         .filter_map(|result| {
             let (gene_set_hash, _gene_set) = bitmap.values.get(result.index_up)?;
             if let Some(filter_term) = &filter_term {
-                let filter_term_clean = filter_term.replace(" up", "").replace(" down", "").trim().to_lowercase();
+                let (filter_term_clean, is_up, is_down) = parse_filter_term(filter_term);
                 let filter_terms: Vec<String> = filter_term_clean.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
-                let is_up = filter_term.contains(" up");
-                let is_down = filter_term.contains(" down");
                 if let Some(terms) = bitmap.terms.get(gene_set_hash) {
                     if !filter_terms.is_empty() && !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)| {
                         let term_lower = gene_set_term.to_lowercase();
