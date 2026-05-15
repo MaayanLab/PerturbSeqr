@@ -74,15 +74,17 @@ def _process_chunk(conn, chunk_data, all_genes, library_id, library_name):
         gene_map.update(dict(zip(new_gene_df['symbol'], new_gene_df['id'])))
         del new_gene_df, buffer
 
-    # Compute hashes first to check against DB
     hashes = [compute_hash(g) for g in gene_lists]
 
-    # Check which hashes already exist in DB (query per chunk, not cached)
-    existing = {str(r['hash']) for r in query(conn, 'SELECT hash FROM app_public.gene_set WHERE hash = ANY(%s::uuid[])', [hashes])}
-
-    # Filter to new gene sets only
-    new_indices = [i for i, h in enumerate(hashes) if h not in existing]
-    n_skipped = len(hashes) - len(new_indices)
+    # Dedup on (term, description, hash). All three are needed because distinct signatures can
+    # share a gene set (e.g. RummaGEO/CREEDS mine both drug- and gene-perturbation versions of the same study).
+    existing = {(r['term'], r['description'], str(r['hash'])) for r in query(conn,
+        "SELECT term, description, hash FROM app_public.gene_set "
+        "WHERE library_id = %s AND term = ANY(%s)",
+        [library_id, terms])}
+    new_indices = [i for i, t in enumerate(terms)
+                   if (t, descriptions[i], hashes[i]) not in existing]
+    n_skipped = len(terms) - len(new_indices)
 
     if not new_indices:
         del terms, descriptions, gene_lists, hashes, existing, gene_map

@@ -1,4 +1,4 @@
-const DELIMITER = '::'
+const TERM_DELIMITER = '::'
 const FIELDS = ['perturbation', 'cellLine', 'cellType', 'timepoint', 'concentration'] as const
 
 export type ParsedTerm = {
@@ -7,6 +7,10 @@ export type ParsedTerm = {
   cellType: string
   timepoint: string
   concentration: string
+  /** KO/KD/KI/OE/Mut, blank if unknown. Gene libraries only; '|'-aligned to `perturbation` for combinations. */
+  perturbationType: string
+  /** CRISPRi/Cas9/shRNA/... — gene libraries only. */
+  perturbationMethod: string
   direction: string
   extras: string[]
   raw: string
@@ -16,6 +20,7 @@ export type ParsedTerm = {
  * Parse a canonical GMT term into its component fields.
  *
  * Canonical format: perturbation::cellLine::cellType::timepoint::concentration[::extra1::extra2::...] up|down
+ * For gene perturbation libraries, fields 5 and 6 are perturbation_type and perturbation_method.
  *
  * @param term - The term string with direction suffix
  * @returns ParsedTerm with all fields
@@ -35,7 +40,7 @@ export function parseTerm(term: string): ParsedTerm {
     body = body.slice(0, -3)
   }
 
-  const parts = body.split(DELIMITER)
+  const parts = body.split(TERM_DELIMITER)
 
   return {
     perturbation: parts[0] ?? '',
@@ -43,6 +48,8 @@ export function parseTerm(term: string): ParsedTerm {
     cellType: parts[2] ?? '',
     timepoint: parts[3] ?? '',
     concentration: parts[4] ?? '',
+    perturbationType: parts[5] ?? '',
+    perturbationMethod: parts[6] ?? '',
     direction,
     extras: parts.slice(5),
     raw: body,
@@ -64,6 +71,23 @@ export function getCellDisplay(parsed: ParsedTerm): string {
 export function getTermField(term: string, field: keyof ParsedTerm, fallback = ''): string {
   const parsed = parseTerm(term)
   const val = parsed[field]
-  if (Array.isArray(val)) return val.join(DELIMITER) || fallback
+  if (Array.isArray(val)) return val.join(TERM_DELIMITER) || fallback
   return val || fallback
+}
+
+/** Append perturbation type to each gene for gene libraries (e.g. "PRSS36 KO", "SF3A3 KD | MYC OE"). Returns `perturbation` unchanged for drug libraries or when the type is blank. */
+export function formatPerturbationWithType(
+  perturbation: string,
+  perturbationType: string,
+  isGeneLibrary: boolean,
+): string {
+  if (!isGeneLibrary || !perturbation) return perturbation
+  const genes = perturbation.split('|')
+  const types = perturbationType.split('|')
+  return genes
+    .map((gene, i) => {
+      const t = (types[i] || '').trim()
+      return t ? `${gene} ${t}` : gene
+    })
+    .join(' | ')
 }

@@ -1,6 +1,8 @@
 # /// script
 # requires-python = ">=3.11"
-# dependencies = []
+# dependencies = [
+#   "maayanlab-bioinformatics @ git+https://github.com/MaayanLab/maayanlab-bioinformatics.git@python3.14-compat",
+# ]
 # ///
 """
 SciPlex — Harmonizome reprocessing.
@@ -20,7 +22,7 @@ from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).parent))
-from _utils import DRUG_INTERMEDIATE, DRUG_OUTPUT, D, strip_direction, harmonizome_paired_download, standardize_gmt
+from _utils import DRUG_INTERMEDIATE, DRUG_OUTPUT, TERM_DELIMITER, strip_direction, harmonizome_paired_download, standardize_gmt
 
 INTERMEDIATE = DRUG_INTERMEDIATE / "sciplex.gmt.gz"
 FINAL = DRUG_OUTPUT / "sciplex.gmt.gz"
@@ -32,7 +34,7 @@ def transform(term: str) -> str:
     if len(parts) < 4:
         return body + direction
     cell_line, perturbation, concentration, timepoint = parts[:4]
-    return D.join([perturbation, cell_line, "", timepoint, concentration]) + direction
+    return TERM_DELIMITER.join([perturbation, cell_line, "", timepoint, concentration]) + direction
 
 
 def download(no_cache: bool = False) -> Path:

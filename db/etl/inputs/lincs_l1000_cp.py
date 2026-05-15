@@ -1,32 +1,34 @@
 # /// script
 # requires-python = ">=3.11"
-# dependencies = []
+# dependencies = [
+#   "maayanlab-bioinformatics @ git+https://github.com/MaayanLab/maayanlab-bioinformatics.git@python3.14-compat",
+# ]
 # ///
 """
 LINCS L1000 chemical perturbations (CP) — pruned to top 250 by CD coefficient.
 
-Source: https://maayanlab.cloud/sigcom-lincs/#/Download
 Coverage: 156,926 signatures.
 
-Like Ginkgo, the raw GMTs come from internal/manual placement — SigCom LINCS is
-client-side gated. Drop the paired files at:
-    _cache/lincs-l1000-cp-raw-up.gmt
-    _cache/lincs-l1000-cp-raw-down.gmt
-(direction is encoded in the filename per the Harmonizome-style convention; terms are bare).
+Raw GMTs come from internal/manual placement. Drop the paired files at:
+    db/etl/inputs/drug_perturbation/lincs-l1000-cp-raw-up.gmt
+    db/etl/inputs/drug_perturbation/lincs-l1000-cp-raw-down.gmt
+(direction is encoded in the filename; terms are bare).
 
-BRD → drug name resolution (programmatic): many raw terms carry opaque Broad reagent codes
-(BRD-K04923131, BRD-A00474148, ...) that SigCom's upstream lookup left unresolved. We apply
-a second pass via LINCS's unified inventory `instinfo_beta.txt`, filtered to
-pert_type == 'trt_cp' via `_lincs.load_pert_map()`. The BRD code is always preserved in both
-the last canonical extra AND the description column so traceability is never lost.
+BRD → drug name resolution: we use LINCS's `instinfo_beta.txt` to try to resolve BRD codes.
 
 Raw source line format (no direction suffix on the term; direction comes from filename):
   ABY001_A375_XH_A13_BRD-K04923131_10uM
 
 Term transform:
-  resolved:   "..._BRD-K04923131_10uM" (up file)  ->  "afatinib::A375::::XH::10uM::ABY001::A13::BRD-K04923131 up"     desc="BRD-K04923131"
-  unresolved: "..._BRD-K04923131_10uM" (up file)  ->  "BRD-K04923131::A375::::XH::10uM::ABY001::A13::BRD-K04923131 up" desc="BRD-K04923131"
-  pre-resolved (already a drug name): "..._afatinib_10uM" (up file)  ->  "afatinib::A375::::XH::10uM::ABY001::A13 up"  desc=""
+  pre-resolved (raw_pert is already a drug name):
+    "REP.B007_HT29_24H_C23_bortezomib_20uM" (up file)
+      ->  "bortezomib::HT29::::24H::20uM::REP.B007::C23 up"   desc=""
+  resolved BRD (instinfo_beta.txt maps it to a drug name):
+    "REP.A012_A549_24H_B12_BRD-A00100033_10uM" (up file)
+      ->  "nifurtimox::A549::::24H::10uM::REP.A012::B12::BRD-A00100033 up"   desc="BRD-A00100033"
+  unresolved BRD (instinfo_beta.txt has no name for it):
+    "MOAR017_HAP1.CDK4_24H_M03_BRD-K04923131_3.33uM" (up file)
+      ->  "BRD-K04923131::HAP1.CDK4::::24H::3.33uM::MOAR017::M03::BRD-K04923131 up"   desc="BRD-K04923131"
 
 Pipeline: ETL stage 0 (input acquisition). Produces
 db/data/drug_perturbation/lincs-l1000-cp.gmt.gz, validated by format_verification (test).
@@ -38,7 +40,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from _utils import DRUG_INTERMEDIATE, DRUG_OUTPUT, CACHE_DIR, D, strip_direction, append_to_description, standardize_gmt
+from _utils import DRUG_INTERMEDIATE, DRUG_OUTPUT, TERM_DELIMITER, strip_direction, append_to_description, standardize_gmt
 from _lincs import load_pert_map
 
 INTERMEDIATE = DRUG_INTERMEDIATE / "lincs-l1000-cp.gmt.gz"
@@ -72,7 +74,7 @@ def make_transform(brd_map: dict[str, str]):
             perturbation = raw_pert
             extras = [batch, well]
             desc = ""
-        return D.join([perturbation, cell_line, "", timepoint, concentration, *extras]) + direction, desc
+        return TERM_DELIMITER.join([perturbation, cell_line, "", timepoint, concentration, *extras]) + direction, desc
     return transform
 
 

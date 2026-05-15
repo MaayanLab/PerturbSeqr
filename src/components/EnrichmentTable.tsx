@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Loading from '@/components/loading';
 import { IoMdInformationCircleOutline } from 'react-icons/io';
 import { FaSortUp } from 'react-icons/fa6';
-import { parseTerm, getCellDisplay } from '@/utils/parseTerm';
+import { parseTerm, getCellDisplay, formatPerturbationWithType } from '@/utils/parseTerm';
 import {
   getDrugInfo,
   getPerturbationUrl,
@@ -236,6 +236,9 @@ export function EnrichmentTable({
           const concentration = parsed.concentration || 'N/A';
 
           const isGenePert = isGenePerturbationLibrary(libraryName);
+          // Display string with perturbation type appended for gene libraries (e.g. "PRSS36 KO").
+          // `perturbation` stays raw — it feeds the NCBI/PubChem URL and drug lookups below.
+          const perturbationDisplay = formatPerturbationWithType(perturbation, parsed.perturbationType, isGenePert);
 
           const fdaData = enrichmentResult?.geneSets?.nodes?.[0]?.geneSetFdaCountsById?.nodes?.[0];
           const sigCount = fdaData?.count ?? 0;
@@ -275,9 +278,9 @@ export function EnrichmentTable({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="link link-neutral hover:link-hover truncate block"
-                    title={perturbation}
+                    title={perturbationDisplay}
                   >
-                    {perturbation}
+                    {perturbationDisplay}
                   </a>
                   {!isGenePert && drugInfo?.cid && (
                     <div className="text-xs text-gray-500">

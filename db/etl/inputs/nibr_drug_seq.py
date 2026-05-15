@@ -2,9 +2,6 @@
 # requires-python = ">=3.11"
 # dependencies = [
 #   "maayanlab-bioinformatics @ git+https://github.com/MaayanLab/maayanlab-bioinformatics.git@python3.14-compat",
-#   "requests",
-#   "tqdm",
-#   "polars",
 # ]
 # ///
 """
@@ -13,22 +10,13 @@ NIBR DRUG-seq U2OS MoA Box — Harmonizome reprocessing.
 Harmonizome: https://maayanlab.cloud/Harmonizome/dataset/NIBR+DRUG-seq+U2OS+MoA+Box+Gene+Expression+Profiles
 Reference: Li et al. 2022.
 
-We use Harmonizome rather than the raw NIBR DRUG-seqr distribution (the latter would
-add a per-batch slot + chem-identifier description column, but isn't a public source).
-Harmonizome's reprocessing collapses across batches and discards descriptions; we accept
-that loss in exchange for a stable public source.
-
 Filtering note: Harmonizome reprocesses with padj<0.01, protein-coding genes only.
 ~14% of compounds are Novartis-internal (NSN code only, no public name).
 
-Term transform (NSN→drug-name resolved via db/data/metadata/drugseqr.tsv; NSN format is
-XX-NN-XXNN with dashes only, so the trailing _ separates concentration cleanly). The NSN
-always goes into both the last canonical extra AND the description column, prefixed with
-"NSN:" so the namespace is self-describing wherever the code appears (parallel to how
-Broad's BRD-K / BRDN codes already announce themselves):
+Term transform — NSN→drug-name resolved via db/data/metadata/drugseqr.tsv; the NSN is preserved (prefixed "NSN:") in both the last canonical extra and the description column:
 
-  resolved:   "AA-01-JO26_0.01uM up"  ->  "Rolipram::U2OS::::24h::0.01uM::NSN:AA-01-JO26 up"        desc="NSN:AA-01-JO26"
-  unresolved: "AF-80-QK39_1uM up"     ->  "NSN:AF-80-QK39::U2OS::::24h::1uM::NSN:AF-80-QK39 up"     desc="NSN:AF-80-QK39"
+  resolved:   "AA-07-FZ97_1uM up"   ->  "Calcitriol::U2OS::::24h::1uM::NSN:AA-07-FZ97 up"           desc="NSN:AA-07-FZ97"
+  unresolved: "AA-03-QM41_10uM up"  ->  "NSN:AA-03-QM41::U2OS::::24h::10uM::NSN:AA-03-QM41 up"      desc="NSN:AA-03-QM41"
 
 Pipeline: ETL stage 0 (input acquisition).
 Usage: uv run db/etl/inputs/nibr_drug_seq.py
@@ -38,7 +26,7 @@ import csv
 import sys
 
 sys.path.insert(0, str(Path(__file__).parent))
-from _utils import DRUG_INTERMEDIATE, DRUG_OUTPUT, METADATA_DIR, D, strip_direction, harmonizome_paired_download, standardize_gmt
+from _utils import DRUG_INTERMEDIATE, DRUG_OUTPUT, METADATA_DIR, TERM_DELIMITER, strip_direction, harmonizome_paired_download, standardize_gmt
 
 INTERMEDIATE = DRUG_INTERMEDIATE / "nibr-drug-seq.gmt.gz"
 FINAL = DRUG_OUTPUT / "nibr-drug-seq.gmt.gz"
@@ -76,7 +64,7 @@ def make_transform(nsn_map: dict[str, str]):
         nsn_tag = NSN_PREFIX + nsn
         # nsn_map keys are the raw NSN (no prefix); fall back to NSN:<code> in perturbation slot when unresolved
         perturbation = nsn_map.get(nsn, nsn_tag)
-        return D.join([perturbation, "U2OS", "", "24h", concentration, nsn_tag]) + direction, nsn_tag
+        return TERM_DELIMITER.join([perturbation, "U2OS", "", "24h", concentration, nsn_tag]) + direction, nsn_tag
     return transform
 
 

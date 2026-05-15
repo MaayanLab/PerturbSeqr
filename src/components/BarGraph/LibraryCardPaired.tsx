@@ -4,6 +4,7 @@ import React from 'react';
 import { usePairEnrichmentQueryQuery } from '@/graphql';
 import { type BarRow, buildBarRow } from './BarGraph';
 import { LibraryCardBase } from './LibraryCardBase';
+import { isGenePerturbationLibrary } from '@/utils/metadataLookup';
 
 const PER_SIDE = 10;
 
@@ -38,6 +39,7 @@ export function LibraryCardPaired({
   const revVariables = React.useMemo(() => ({ ...baseVars, sortBy: 'pvalue_reverse' }), [baseVars]);
 
   const skip = genesUp.length === 0 || genesDown.length === 0;
+  const isGeneLibrary = isGenePerturbationLibrary(libraryName);
 
   const { data: mimData, loading: mimLoading, error: mimError } = usePairEnrichmentQueryQuery({ skip, variables: mimVariables, fetchPolicy: 'no-cache' });
   const { data: revData, loading: revLoading, error: revError } = usePairEnrichmentQueryQuery({ skip, variables: revVariables, fetchPolicy: 'no-cache' });
@@ -51,9 +53,9 @@ export function LibraryCardPaired({
       .map((n) => buildBarRow(n.geneSet?.nodes?.[0]?.term ?? '', {
         pvalue: n.pvalueMimic, adjPvalue: n.adjPvalueMimic,
         oddsRatio: n.oddsRatioMimic, nOverlap: n.mimickerOverlap,
-      }))
+      }, isGeneLibrary))
       .filter((r) => r.term);
-  }, [mimData]);
+  }, [mimData, isGeneLibrary]);
 
   const reverserRows: BarRow[] = React.useMemo(() => {
     const nodes = revData?.currentBackground?.pairedEnrich?.nodes ?? [];
@@ -62,9 +64,9 @@ export function LibraryCardPaired({
       .map((n) => buildBarRow(n.geneSet?.nodes?.[0]?.term ?? '', {
         pvalue: n.pvalueReverse, adjPvalue: n.adjPvalueReverse,
         oddsRatio: n.oddsRatioReverse, nOverlap: n.reverserOverlap,
-      }))
+      }, isGeneLibrary))
       .filter((r) => r.term);
-  }, [revData]);
+  }, [revData, isGeneLibrary]);
 
   return (
     <LibraryCardBase

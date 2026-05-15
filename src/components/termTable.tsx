@@ -4,7 +4,7 @@ import GeneSetModal from '@/components/geneSetModal';
 import useQsState from '@/utils/useQsState';
 import Pagination from '@/components/pagination';
 import TermDownloadButton from '@/components/termDownloadButton';
-import { parseTerm, getCellDisplay } from '@/utils/parseTerm';
+import { parseTerm, getCellDisplay, formatPerturbationWithType } from '@/utils/parseTerm';
 import { preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary, getDatasetUrl } from '@/utils/metadataLookup';
 import Image from 'next/image';
 import { FaFilter } from 'react-icons/fa';
@@ -151,6 +151,9 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
         _dirDisplay: dirDisplay,
         _moa: (!isGenePert && drugInfo?.moa) ? drugInfo.moa : 'N/A',
         _perturbation: perturbation,
+        // Display string with perturbation type appended for gene libraries (e.g. "PRSS36 KO");
+        // _perturbation stays raw for the NCBI/PubChem URL and drug lookups.
+        _perturbationDisplay: formatPerturbationWithType(perturbation, parsed.perturbationType, isGenePert),
         _isGenePert: isGenePert,
         _drugInfo: drugInfo,
         _parsed: parsed,
@@ -347,9 +350,9 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
                         target="_blank"
                         rel="noopener noreferrer"
                         className="link link-neutral hover:link-hover truncate block"
-                        title={el._perturbation}
+                        title={el._perturbationDisplay}
                       >
-                        {el._perturbation}
+                        {el._perturbationDisplay}
                       </a>
                       {!el._isGenePert && el._drugInfo?.cid && (
                         <div className="text-xs text-gray-500">

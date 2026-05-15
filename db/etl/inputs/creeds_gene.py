@@ -1,6 +1,8 @@
 # /// script
 # requires-python = ">=3.11"
-# dependencies = []
+# dependencies = [
+#   "maayanlab-bioinformatics @ git+https://github.com/MaayanLab/maayanlab-bioinformatics.git@python3.14-compat",
+# ]
 # ///
 """
 CREEDS Gene — gene perturbation signatures merged from two sources.
@@ -15,7 +17,8 @@ Step 1 — set-difference merge:
 
   Unlike creeds_chem, GEO-Gene terms already encode the tissue inline, so no GEOparse lookup
   is needed. Each merged term is reformatted to canonical:
-      {gene_symbol}::::{cell_type}::::::{pert_type}::{organism}::{geo_id} up|down
+      {gene_symbol}::::{cell_type}::::::{perturbation_type}::{perturbation_method}::{organism}::{geo_id} up|down
+  where {perturbation_type} = normalize_perturbation_type(pert_type).
 
 Step 2 — humanize DEGs (mouse/rat → human ortholog, drop non-protein-coding):
     Output = { s ∈ Merged : humanize(s) ≠ ∅ }, with each s's DEGs replaced by humanize(s).
@@ -29,30 +32,31 @@ from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).parent))
-from _utils import GENE_INTERMEDIATE, GENE_OUTPUT, CREEDS_BASE, HARMONIZOME_BASE, CACHE_DIR, D, download_to, standardize_gmt
+from _utils import GENE_INTERMEDIATE, GENE_OUTPUT, CREEDS_BASE, HARMONIZOME_BASE, CACHE_DIR, TERM_DELIMITER, download_to, load_gmt_dict, standardize_gmt, normalize_perturbation_type
 from _creeds import (
     ALLOWED_ORGS, normalize_org, clean_cell_type, assert_unique,
-    load_gmt_dict, load_creeds_meta, write_gmt_gz,
+    load_creeds_meta, write_gmt_gz,
     parse_creeds_key, perturbations_only_in_geo,
 )
 
 INTERMEDIATE = GENE_INTERMEDIATE / "creeds-gene.gmt.gz"
 FINAL = GENE_OUTPUT / "creeds-gene.gmt.gz"
-# CREEDS Gene canonical: gene::cellLine::cellType::timepoint::conc::pertType::organism::geoId — organism at ::-index 6
-_parse_organism = lambda k: k.rsplit(" ", 1)[0].split(D)[6] if D in k else "human"
+# CREEDS Gene canonical: gene::cellLine::cellType::timepoint::conc::perturbation_type::perturbation_method::organism::geoId — organism at ::-index 7
+_parse_organism = lambda k: k.rsplit(" ", 1)[0].split(TERM_DELIMITER)[7] if TERM_DELIMITER in k else "human"
 GEO_SLUG = "geogene"
 CREEDS_JSON_URL = f"{CREEDS_BASE}/single_gene_perturbations-v1.0.json"
 CREEDS_GMT_URL = f"{CREEDS_BASE}/single_gene_perturbations-v1.0.gmt"
 
 
+# CREEDS pert_type → canonical perturbation_type.
 def _make_term(gene: str, pert_type: str, organism: str, cell_type: str, geo_id: str,
                direction: str, *, replicate: str = "") -> str:
-    """Canonical: gene::cellLine::cellType::timepoint::concentration::pertType::organism::geoId[::replicate] direction"""
-    pt = (pert_type or "unknown").replace("_", "-").strip()
-    extras = [pt, normalize_org(organism), geo_id]
+    """Canonical: gene::cellLine::cellType::timepoint::concentration::perturbation_type::perturbation_method::organism::geoId[::replicate] direction.
+    CREEDS has no perturbation_method info, so field 6 is left blank."""
+    extras = [normalize_perturbation_type(pert_type), "", normalize_org(organism), geo_id]
     if replicate:
         extras.append(replicate)
-    return D.join([gene, "", clean_cell_type(cell_type), "", ""] + extras) + " " + direction
+    return TERM_DELIMITER.join([gene, "", clean_cell_type(cell_type), "", ""] + extras) + " " + direction
 
 
 def _reformat_creeds(creeds_gmt: dict, creeds_meta: dict, seen: set[str]) -> dict[str, list[str]]:

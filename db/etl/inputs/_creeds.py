@@ -35,32 +35,19 @@ import json
 import re
 from pathlib import Path
 
-# Re-export: the PC filter is a cross-dataset concern (see project_pc_filter memory).
-# Lives in _utils.py; kept here so existing `from _creeds import filter_to_human_pc` works.
-from _utils import filter_to_human_pc  # noqa: F401
-
 # Allowed species across CREEDS + Harmonizome (we drop everything else)
 ORG_MAP = {"mouse": "mus musculus", "human": "homo sapiens", "rat": "rattus norvegicus"}
 ALLOWED_ORGS = set(ORG_MAP.values()) | set(ORG_MAP.keys())
 
 
 def normalize_org(org: str) -> str:
-    """CREEDS uses 'mouse', Harmonizome uses 'mus musculus'.
-
-        normalize_org("mouse")        -> "mus musculus"   (alias translated)
-        normalize_org("HUMAN")        -> "homo sapiens"   (alias translated)
-        normalize_org("Mus musculus") -> "mus musculus"   (already canonical, identity)
-        normalize_org("dog")          -> "dog"            (unknown, identity)
-    """
-    return ORG_MAP.get(org.strip().lower(), org.strip().lower())# fallback equals the lookup so non-alias inputs (already canonical, or unknown) pass through unchanged
+    """Map 'mouse' → 'mus musculus' etc.; unknown values pass through lowercased."""
+    key = org.strip().lower()
+    return ORG_MAP.get(key, key)
 
 
 def clean_cell_type(ct: str) -> str:
-    """Collapse all whitespace (incl. embedded tabs/newlines) to single spaces.
-
-    Tabs and newlines in source cell_type values break GMT format (each line is
-    \\t-delimited; an embedded \\t corrupts column boundaries). Empty/None → ''.
-    """
+    """Collapse whitespace (incl. tabs/newlines that would corrupt GMT columns) to single spaces."""
     return " ".join((ct or "").split())
 
 
@@ -73,11 +60,6 @@ def assert_unique(term: str, seen: set[str]) -> str:
         )
     seen.add(term)
     return term
-
-
-# load_gmt_dict moved to _utils.py — re-exported here so existing
-# `from _creeds import load_gmt_dict` continues to work.
-from _utils import load_gmt_dict  # noqa: F401, E402
 
 
 def load_creeds_meta(path: Path, key: str = "id") -> dict[str, dict]:

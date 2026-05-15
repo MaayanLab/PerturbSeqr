@@ -20,6 +20,10 @@ from _utils import GENE_INTERMEDIATE, GENE_OUTPUT
 INTERMEDIATE = GENE_INTERMEDIATE / "cm4ai.gmt.gz"
 FINAL = GENE_OUTPUT / "cm4ai.gmt.gz"
 
+# Canonical fields 5/6 for every CM4AI term once the data is un-embargoed.
+PERTURBATION_TYPE = "KD"
+PERTURBATION_METHOD = "CRISPRi"
+
 
 def download(no_cache: bool = False):
     # Embargoed: write empty placeholders to both layers so format_verification + visualize_etl

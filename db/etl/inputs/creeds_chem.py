@@ -1,6 +1,9 @@
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["GEOparse"]
+# dependencies = [
+#   "maayanlab-bioinformatics @ git+https://github.com/MaayanLab/maayanlab-bioinformatics.git@python3.14-compat",
+#   "GEOparse",
+# ]
 # ///
 """
 CREEDS Chem — drug perturbation signatures merged from two sources.
@@ -31,17 +34,17 @@ import re
 import sys
 
 sys.path.insert(0, str(Path(__file__).parent))
-from _utils import DRUG_INTERMEDIATE, DRUG_OUTPUT, CREEDS_BASE, HARMONIZOME_BASE, CACHE_DIR, D, download_to, standardize_gmt
+from _utils import DRUG_INTERMEDIATE, DRUG_OUTPUT, CREEDS_BASE, HARMONIZOME_BASE, CACHE_DIR, TERM_DELIMITER, download_to, load_gmt_dict, standardize_gmt
 from _creeds import (
     ALLOWED_ORGS, normalize_org, clean_cell_type, assert_unique,
-    load_gmt_dict, load_creeds_meta, write_gmt_gz,
+    load_creeds_meta, write_gmt_gz,
     parse_creeds_key, perturbations_only_in_geo, lookup_cell_type_gse,
 )
 
 INTERMEDIATE = DRUG_INTERMEDIATE / "creeds-chem.gmt.gz"
 FINAL = DRUG_OUTPUT / "creeds-chem.gmt.gz"
 # CREEDS canonical: drug::cellLine::cellType::timepoint::conc::organism::geoId — organism at ::-index 5
-_parse_organism = lambda k: k.rsplit(" ", 1)[0].split(D)[5] if D in k else "human"
+_parse_organism = lambda k: k.rsplit(" ", 1)[0].split(TERM_DELIMITER)[5] if TERM_DELIMITER in k else "human"
 GEO_SLUG = "geochemical"
 CREEDS_JSON_URL = f"{CREEDS_BASE}/single_drug_perturbations-v1.0.json"
 CREEDS_GMT_URL = f"{CREEDS_BASE}/single_drug_perturbations-v1.0.gmt"
@@ -64,7 +67,7 @@ def _make_term(drug: str, organism: str, cell_type: str, geo_id: str, direction:
         extras.append(platform)
     if condition:
         extras.append(condition)
-    return D.join([drug, "", clean_cell_type(cell_type), "", ""] + extras) + " " + direction
+    return TERM_DELIMITER.join([drug, "", clean_cell_type(cell_type), "", ""] + extras) + " " + direction
 
 
 def _reformat_creeds(creeds_gmt: dict, creeds_meta: dict, seen: set[str]) -> dict[str, list[str]]:

@@ -1,6 +1,8 @@
 # /// script
 # requires-python = ">=3.11"
-# dependencies = []
+# dependencies = [
+#   "maayanlab-bioinformatics @ git+https://github.com/MaayanLab/maayanlab-bioinformatics.git@python3.14-compat",
+# ]
 # ///
 """
 Replogle et al. CRISPRi Perturb-seq — Harmonizome reprocessing of 3 sub-screens.
@@ -16,7 +18,8 @@ Harmonizome publishes 3 separate Replogle datasets (one per cell line / screen s
 with its own up + dn GMT pair. We download all 6 files and emit canonical terms in one pass.
 
 Source line:    10023_ZC3H18_P1P2  (id_perturbation_batch)  + filename direction
-Canonical term: ZC3H18::K562::::day6::::P1P2::essential::10023 up
+Canonical term: ZC3H18::K562::::day6::::KD::CRISPRi::P1P2::essential::10023 up
+Fields 5/6 = perturbation_type / perturbation_method — the whole library is uniformly CRISPRi knockdown.
 
 Pipeline: ETL stage 0 (input acquisition). Produces
 db/data/gene_perturbation/replogle-perturb-seq.gmt.gz, validated by format_verification (test).
@@ -28,10 +31,14 @@ import gzip
 import sys
 
 sys.path.insert(0, str(Path(__file__).parent))
-from _utils import GENE_INTERMEDIATE, GENE_OUTPUT, CACHE_DIR, D, download_to, HARMONIZOME_BASE, standardize_gmt
+from _utils import GENE_INTERMEDIATE, GENE_OUTPUT, CACHE_DIR, TERM_DELIMITER, download_to, HARMONIZOME_BASE, standardize_gmt
 
 INTERMEDIATE = GENE_INTERMEDIATE / "replogle-perturb-seq.gmt.gz"
 FINAL = GENE_OUTPUT / "replogle-perturb-seq.gmt.gz"
+
+# The entire Replogle library is uniformly CRISPRi knockdown.
+PERTURBATION_TYPE = "KD"
+PERTURBATION_METHOD = "CRISPRi"
 
 # (Harmonizome slug, cell_line, timepoint, screen_scope)
 SUB_SCREENS = [
@@ -58,7 +65,7 @@ def download(no_cache: bool = False) -> Path:
                             parts = body.split("_")
                             if len(parts) >= 3:
                                 id_, perturbation, batch = parts[:3]
-                                term = D.join([perturbation, cell_line, "", timepoint, "", batch, screen, id_]) + f" {direction}"
+                                term = TERM_DELIMITER.join([perturbation, cell_line, "", timepoint, "", PERTURBATION_TYPE, PERTURBATION_METHOD, batch, screen, id_]) + f" {direction}"
                             else:
                                 term = body + f" {direction}"
                             out.write(f"{term}\t{rest}")

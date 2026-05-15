@@ -1,6 +1,8 @@
 # /// script
 # requires-python = ">=3.11"
-# dependencies = []
+# dependencies = [
+#   "maayanlab-bioinformatics @ git+https://github.com/MaayanLab/maayanlab-bioinformatics.git@python3.14-compat",
+# ]
 # ///
 """
 DeepCover MoA — Harmonizome reprocessing.
@@ -9,9 +11,6 @@ Source: https://wren.hms.harvard.edu/DeepCoverMOA/
 Harmonizome: https://maayanlab.cloud/Harmonizome/dataset/DeepCoverMOA+Drug+Mechanisms+of+Action
 Reference: Mitchell et al., Nature Biotechnology 2023. PMID:36593396.
 Raw data: MassIVE MSV000089282.
-
-Note: DeepCover terms have no per-experiment metadata (cell line/timepoint/concentration are
-fixed at HCT116/24h/10uM), so we synthesize those slots.
 
 Term transform:
   (4-Chlorobenzyl)pyridine up  ->  (4-Chlorobenzyl)pyridine::HCT116::::24h::10uM up
@@ -25,15 +24,19 @@ from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).parent))
-from _utils import DRUG_INTERMEDIATE, DRUG_OUTPUT, D, strip_direction, harmonizome_paired_download, standardize_gmt
+from _utils import DRUG_INTERMEDIATE, DRUG_OUTPUT, TERM_DELIMITER, strip_direction, harmonizome_paired_download, standardize_gmt
 
 INTERMEDIATE = DRUG_INTERMEDIATE / "deepcover-moa.gmt.gz"
 FINAL = DRUG_OUTPUT / "deepcover-moa.gmt.gz"
 
+CELL_LINE = "HCT116"
+TIMEPOINT = "24h"
+CONCENTRATION = "10uM"
+
 
 def transform(term: str) -> str:
     body, direction = strip_direction(term)
-    return D.join([body, "HCT116", "", "24h", "10uM"]) + direction
+    return TERM_DELIMITER.join([body, CELL_LINE, "", TIMEPOINT, CONCENTRATION]) + direction
 
 
 def download(no_cache: bool = False) -> Path:

@@ -3,11 +3,7 @@
 # requires-python = ">=3.11"
 # dependencies = [
 #   "maayanlab-bioinformatics @ git+https://github.com/MaayanLab/maayanlab-bioinformatics.git@python3.14-compat",
-#   "requests",
-#   "tqdm",
-#   "polars",
 #   "GEOparse",
-#   "huggingface_hub",
 # ]
 # ///
 """

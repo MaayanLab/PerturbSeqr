@@ -4,6 +4,7 @@ import React from 'react';
 import { useEnrichmentQueryQuery } from '@/graphql';
 import { type BarRow, buildBarRow } from './BarGraph';
 import { LibraryCardBase } from './LibraryCardBase';
+import { isGenePerturbationLibrary } from '@/utils/metadataLookup';
 
 const PER_SIDE = 10;
 
@@ -40,8 +41,9 @@ export function LibraryCardSingle({
   const { data: upData,   loading: upLoading,   error: upError }   = useEnrichmentQueryQuery({ skip, variables: upVariables,   fetchPolicy: 'no-cache' });
   const { data: downData, loading: downLoading, error: downError } = useEnrichmentQueryQuery({ skip, variables: downVariables, fetchPolicy: 'no-cache' });
 
+  const isGeneLibrary = isGenePerturbationLibrary(libraryName);
   const toRow = (n: any): BarRow =>
-    buildBarRow(n.geneSets?.nodes?.[0]?.term ?? '', n);
+    buildBarRow(n.geneSets?.nodes?.[0]?.term ?? '', n, isGeneLibrary);
 
   const upRows: BarRow[] = React.useMemo(() => {
     const nodes = upData?.currentBackground?.enrich?.nodes ?? [];
