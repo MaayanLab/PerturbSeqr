@@ -31,14 +31,17 @@ DATA_DIR = Path(__file__).parent.parent / "data"
 DRUG_DIR = DATA_DIR / "drug_perturbation"
 GENE_DIR = DATA_DIR / "gene_perturbation"
 
-DIRECTIONS = (" up", " down", " dn")
+DIRECTIONS = (" up", " down")
 MIN_FIELDS = 5  # perturbation, cellLine, cellType, timepoint, concentration
 
 
 def validate_term(term: str, *, is_gene: bool = False) -> str | None:
-    """Return None if the term is canonical, else a human-readable reason it's not."""
+    """Return None if the term is canonical, else a human-readable reason it's not.
+    Direction must be exactly ' up' or ' down' — ' dn' / ' DN' / 'UP' etc. are non-canonical."""
+    if term.endswith(" dn"):
+        return "direction ' dn' is non-canonical; use ' down'"
     if not any(term.endswith(d) for d in DIRECTIONS):
-        return "missing direction suffix (' up' / ' down' / ' dn')"
+        return "missing direction suffix (' up' / ' down')"
     body = term.rsplit(" ", 1)[0]
     fields = body.split(TERM_DELIMITER)
     if len(fields) < MIN_FIELDS:

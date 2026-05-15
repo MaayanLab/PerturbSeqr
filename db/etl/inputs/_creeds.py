@@ -79,11 +79,12 @@ def write_gmt_gz(gmt: dict[str, list[str]], path: Path) -> int:
 
 
 def split_direction(creeds_term: str) -> tuple[str, str]:
-    """CREEDS first-column terms end with '-up' or '-dn'. Return (stem, direction)."""
+    """CREEDS first-column terms end with '-up' or '-dn'. Return (stem, direction).
+    Direction is canonicalized to 'up'/'down' to match the rest of the pipeline."""
     if creeds_term.endswith("-up"):
         return creeds_term[:-3], "up"
     if creeds_term.endswith("-dn"):
-        return creeds_term[:-3], "dn"
+        return creeds_term[:-3], "down"
     return creeds_term, "up"
 
 

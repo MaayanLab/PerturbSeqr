@@ -97,7 +97,7 @@ def _reformat_harmonizome(geo_gmt: dict, keep_keys: set[str], seen: set[str]) ->
         else:
             drug, org, platform, condition, geo_id, direction = m.groups()
             geo_id = geo_id.upper()
-            direction = "dn" if direction.lower() == "down" else direction.lower()
+            direction = "down" if direction.lower() == "dn" else direction.lower()
             cell_type = lookup_cell_type_gse(geo_id, GEOCACHE)
             new_term = _make_term(drug, org, cell_type, geo_id, direction,
                                   platform=platform, condition=condition or "")

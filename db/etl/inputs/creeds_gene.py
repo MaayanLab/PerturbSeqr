@@ -85,7 +85,7 @@ def _reformat_harmonizome(geo_gmt: dict, keep_keys: set[str], seen: set[str]) ->
         term = key.split("\t", 1)[0]
         body, _, direction = term.rpartition(" ")
         if direction.lower() in ("up", "down", "dn"):
-            direction = "dn" if direction.lower() == "down" else direction.lower()
+            direction = "down" if direction.lower() == "dn" else direction.lower()
         else:
             body, direction = term, "up"
         fields = body.split("_")
