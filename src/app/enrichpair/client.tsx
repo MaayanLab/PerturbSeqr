@@ -1257,8 +1257,8 @@ function EnrichmentResults({
               {enrichmentResults?.currentBackground?.pairedEnrich?.nodes?.flatMap(
                 (enrichmentResult, genesetIndex) => {
                   const term = enrichmentResult?.geneSet?.nodes[0]?.term;
-                  const geneSetUp =  enrichmentResult?.geneSet?.nodes.filter((x) => x.term.includes(" up"))[0]
-                  const geneSetDown =  enrichmentResult?.geneSet?.nodes.filter((x) => x.term.includes(" down"))[0]
+                  const geneSetUp =  enrichmentResult?.geneSet?.nodes.filter((x) => x.term.endsWith(" up"))[0]
+                  const geneSetDown =  enrichmentResult?.geneSet?.nodes.filter((x) => x.term.endsWith(" down"))[0]
                   const libraryName = geneSetUp?.library?.name || geneSetDown?.library?.name || '';
 
                   const parsed = term ? parseTerm(term) : parseTerm('');
