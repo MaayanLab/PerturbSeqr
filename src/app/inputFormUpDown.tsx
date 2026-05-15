@@ -74,14 +74,12 @@ export default function InputFormUpDown({setInputSingle, selectedLibraries = [],
   const handleFileChosenUp = React.useCallback((file: File | null) => {
       fileReader.current = new FileReader();
       fileReader.current.onloadend = handleFileReadUp;
-      console.log(file)
       fileReader.current.readAsText(file!);
   }, [handleFileReadUp]);
 
   const handleFileChosenDown = React.useCallback((file: File | null) => {
     fileReader.current = new FileReader();
     fileReader.current.onloadend = handleFileReadDown;
-    console.log(file)
     fileReader.current.readAsText(file!);
 }, [handleFileReadDown]);
 

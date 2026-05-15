@@ -1786,8 +1786,6 @@ export default function EnrichClientPage({
         variables: {genes: allGenes || []}
     });
 
-    console.log(userGeneSetInfo)
-
     const nGenesIncluded = userGeneSetInfo?.geneMap2?.nodes.filter(g => g.geneInfo?.symbol).length
   return (
     <div className="flex flex-col gap-4">

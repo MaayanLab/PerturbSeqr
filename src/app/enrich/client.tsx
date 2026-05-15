@@ -147,8 +147,6 @@ function EnrichmentResults({
     },
   });
 
-  console.log(enrichmentResults)
-
   // Cache unfiltered total count when no dataset filters are active
   React.useEffect(() => {
     if (datasetFilter.length === 0 && !fda && !queryString.dir && enrichmentResults?.currentBackground?.enrich?.totalCount != null) {
@@ -1307,8 +1305,6 @@ export default function EnrichClientPage({
       skip: !dataset,
       variables: {genes: userGeneSet?.userGeneSet?.genes?.filter((gene): gene is string => !!gene) || []}
   });
-
-  console.log(userGeneSetInfo)
 
   const nGenesIncluded = userGeneSetInfo?.geneMap2?.nodes.filter(g => g.geneInfo?.symbol).length
   return (

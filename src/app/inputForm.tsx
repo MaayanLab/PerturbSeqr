@@ -61,7 +61,6 @@ export default function InputForm({setInputSingle, selectedLibraries = [], initi
   const handleFileChosen = React.useCallback((file: File | null) => {
       fileReader.current = new FileReader();
       fileReader.current.onloadend = handleFileRead;
-      console.log(file)
       fileReader.current.readAsText(file!);
       
   

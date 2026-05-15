@@ -2,7 +2,6 @@
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
-    console.log(request)
     var { cellLine } = await request.json()
     if (cellLine.includes('.')) {
         cellLine = cellLine.split('.')[0]

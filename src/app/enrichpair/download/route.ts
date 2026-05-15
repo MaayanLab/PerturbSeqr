@@ -28,8 +28,6 @@ export async function GET(request: Request) {
   const libraryFilter = (searchParams.get("libraries") || "").split(",").filter(Boolean);
   const libraryNames = libraryFilter.length > 0 ? libraryFilter : null;
 
-  console.log(datasetUp, datasetDown)
-
   const { data: userGeneSetUp, error: userGeneSetErrorUp } =
     await getClient().query<FetchUserGeneSetQuery>({
       query: FetchUserGeneSetDocument,

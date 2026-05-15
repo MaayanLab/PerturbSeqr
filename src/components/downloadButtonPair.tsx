@@ -12,8 +12,6 @@ export default function DownloadButtonPair(
   const [showModal, setShowModal] = useState(false);
   const [maxTotal, setMaxTotal] = useState<number>(1000);
 
-  console.log("queryString", datasetUp, datasetDown)
-
   const handleDownload = async () => {
     setLoading(true);
     setShowModal(false);
