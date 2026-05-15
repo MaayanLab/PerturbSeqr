@@ -122,8 +122,6 @@ function EnrichmentResults({
   const [datasetDropdownOpen, setDatasetDropdownOpen] = React.useState(false);
   const [sigModalData, setSigModalData] = React.useState<{ signatures: ContributingSignature[]; drug: string } | null>(null);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
-  // Cache the unfiltered total count so dataset filtering doesn't change the headline number
-  const [unfilteredTotalCount, setUnfilteredTotalCount] = React.useState<number | null>(null);
 
   const { page, term, fda, consensus, moas, sort, ko, topN, pvalueLe, datasetFilter, view } =
     React.useMemo(
@@ -142,6 +140,17 @@ function EnrichmentResults({
       }),
       [queryString]
     );
+
+  const activeFilters: string[] = [];
+  if (datasetFilter.length > 0 && !datasetFilter.includes("__none__"))
+    activeFilters.push(`${datasetFilter.length} dataset${datasetFilter.length > 1 ? "s" : ""}`);
+  if (fda) activeFilters.push("FDA approved");
+  if (queryString.dir === "up") activeFilters.push("mimickers");
+  if (queryString.dir === "down") activeFilters.push("reversers");
+  const filterClause =
+    activeFilters.length === 0
+      ? ""
+      : ` that pass the ${activeFilters.length === 1 ? `${activeFilters[0]} filter` : `${activeFilters.join(", ")} filters`}`;
 
   // Libraries to render cards for. The sentinel "__none__" means the user
   // explicitly cleared the Dataset filter — render no cards. Otherwise fall
@@ -168,13 +177,6 @@ function EnrichmentResults({
       pvalueLe: pvalueLe,
     },
   });
-
-  // Cache unfiltered total count when no dataset filters are active
-  React.useEffect(() => {
-    if (datasetFilter.length === 0 && !fda && !queryString.dir && enrichmentResults?.currentBackground?.pairedEnrich?.totalCount != null) {
-      setUnfilteredTotalCount(enrichmentResults.currentBackground.pairedEnrich.totalCount);
-    }
-  }, [datasetFilter.length, fda, queryString.dir, enrichmentResults?.currentBackground?.pairedEnrich?.totalCount]);
 
 
   // Close dataset dropdown on outside click
@@ -280,9 +282,9 @@ function EnrichmentResults({
                         ></Image>{" "}
                         found{" "}
                         {Intl.NumberFormat("en-US", {}).format(
-                          unfilteredTotalCount ?? enrichmentResults?.currentBackground?.pairedEnrich?.totalCount ?? 0
+                          enrichmentResults?.currentBackground?.pairedEnrich?.totalCount || 0
                         )}{" "}
-                        statistically significant matches.
+                        statistically significant matches{filterClause}.
                       </>
                     )}
                   </>
@@ -294,22 +296,6 @@ function EnrichmentResults({
           Bars within each chart are colored and scaled by p-value.
         </p>
       )}
-      {(() => {
-        const filters: string[] = [];
-        if (datasetFilter.length > 0 && !datasetFilter.includes("__none__"))
-          filters.push(`${datasetFilter.length} dataset${datasetFilter.length > 1 ? "s" : ""}`);
-        if (fda) filters.push("FDA approved");
-        if (queryString.dir === "up") filters.push("mimickers");
-        if (queryString.dir === "down") filters.push("reversers");
-        if (filters.length > 0)
-          return (
-            <p className="text-sm text-base-content/70 mt-1">
-              Filtering by {filters.join(", ")} — showing{" "}
-              {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.pairedEnrich?.totalCount || 0)} matches.
-            </p>
-          );
-        return null;
-      })()}
       {datasetFilter.includes("__none__") && (
         <p className="text-sm text-base-content/70 mt-1">
           No datasets selected. Use the Dataset column filter to select datasets.
