@@ -688,7 +688,7 @@ async fn query(
                 let a = n_overlap;
                 let b = n_user_gene_id - a;
                 let c = n_gs_gene_id - a;
-                let d = n_background - b - c + a;
+                let d = n_background - a - b - c;
                 // Compute one-tailed Fisher's exact test p-value
                 let pvalue = fisher.get_p_value(a as usize, b as usize, c as usize, d as usize);
                 // Skip if p-value exceeds threshold
@@ -1241,8 +1241,8 @@ async fn query(
     if let Some(sortby) = sortby {
         match sortby.as_str() {
             "adj_pvalue" => {
-                consensus_results.sort_unstable_by(|a, b| a.pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
-                moa_consensus_results.sort_unstable_by(|a, b| a.pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
+                consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
+                moa_consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
                 results.sort_unstable_by(|a, b| a.adj_pvalue.partial_cmp(&b.adj_pvalue).unwrap_or(std::cmp::Ordering::Equal));
             },
             "pvalue" => {
@@ -1269,7 +1269,7 @@ async fn query(
             },
             "adj_pvalue_up" => {
                 consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
-                moa_consensus_results.sort_unstable_by(|a, b| a.pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
+                moa_consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
                 results.sort_unstable_by(|a, b| a.adj_pvalue.partial_cmp(&b.adj_pvalue).unwrap_or(std::cmp::Ordering::Equal));
             },
             "pvalue_down" => {
@@ -1456,7 +1456,7 @@ async fn query_pairs(
                 let a_mimic = mimicker_overlap;
                 let b_mimic = n_user_gene_id - a_mimic;
                 let c_mimic = (gene_set_up.v.len() + gene_set_down.v.len()) as u32 - a_mimic;
-                let d_mimic = n_background - b_mimic - c_mimic + a_mimic;
+                let d_mimic = n_background - a_mimic - b_mimic - c_mimic;
 
                 let pvalue_mimic = fisher.get_p_value(a_mimic as usize, b_mimic as usize, c_mimic as usize, d_mimic as usize);
 
@@ -1464,7 +1464,7 @@ async fn query_pairs(
                 let a_reverse = reverser_overlap;
                 let b_reverse = n_user_gene_id - a_reverse;
                 let c_reverse = (gene_set_up.v.len() + gene_set_down.v.len()) as u32 - a_reverse;
-                let d_reverse = n_background - b_reverse - c_reverse + a_reverse;
+                let d_reverse = n_background - a_reverse - b_reverse - c_reverse;
 
                 let pvalue_reverse = fisher.get_p_value(a_reverse as usize, b_reverse as usize, c_reverse as usize, d_reverse as usize);
 
@@ -1648,7 +1648,7 @@ async fn query_pairs(
 
     let total_terms = bitmap.terms.values().len() / 2 as usize;
 
-    let n_significant_drugs = results.len() / 2 as usize;
+    let n_significant_drugs = results.len();
 
     let n_insignificant_drugs = total_terms - n_significant_drugs;
 
@@ -1949,7 +1949,7 @@ async fn query_pairs(
 
     let consensus_len = consensus_results.len();
 
-    let moa_consensus_len = consensus_results.len();
+    let moa_consensus_len = moa_consensus_results.len();
 
     println!("Consensus results computed for {} perturbations and {} MoAs", consensus_len, moa_consensus_len);
 
