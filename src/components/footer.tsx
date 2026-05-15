@@ -64,10 +64,7 @@ export default function Footer() {
       <div className="text-center pt-5 text-sm font-bold">
         <ul>
           <li>
-            <Link
-              href="https://github.com/MaayanLab/PerturbSeqr/blob/main/LICENSE"
-              target="_blank"
-            >
+            <Link href="/license">
               License
             </Link>
           </li>
