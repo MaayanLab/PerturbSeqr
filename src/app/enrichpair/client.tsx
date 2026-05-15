@@ -20,7 +20,7 @@ import SignaturesModal from "@/components/signaturesModal";
 import type { ContributingSignature } from "@/components/signaturesModal";
 import { FaFilter, FaSortUp } from "react-icons/fa6";
 import { IoMdInformationCircleOutline } from "react-icons/io";
-import { parseTerm, getCellDisplay } from "@/utils/parseTerm";
+import { parseTerm, getCellDisplay, formatPerturbationWithType } from "@/utils/parseTerm";
 import { preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary, getDatasetUrl } from "@/utils/metadataLookup";
 import { useRouter } from "next/navigation";
 import libraryConfig from "@/config/libraries.json";
@@ -1370,6 +1370,9 @@ function EnrichmentResults({
 
                   // Check if this is a gene or drug perturbation library
                   const isGenePert = isGenePerturbationLibrary(libraryName);
+                  // Display string with perturbation type appended for gene libraries (e.g. "PRSS36 KO");
+                  // `perturbation` stays raw for the NCBI/PubChem URL and drug lookups.
+                  const perturbationDisplay = formatPerturbationWithType(perturbation, parsed.perturbationType, isGenePert);
 
                   // Get FDA data from database
                   const fdaData = enrichmentResult?.geneSet?.nodes[0].geneSetFdaCountsById?.nodes[0];
@@ -1415,9 +1418,9 @@ function EnrichmentResults({
                             target="_blank"
                             rel="noopener noreferrer"
                             className="link link-neutral hover:link-hover truncate block"
-                            title={perturbation}
+                            title={perturbationDisplay}
                           >
-                            {perturbation}
+                            {perturbationDisplay}
                           </a>
                           {/* Show CID for drug perturbations */}
                           {!isGenePert && drugInfo?.cid && (

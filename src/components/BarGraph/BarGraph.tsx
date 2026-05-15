@@ -26,7 +26,7 @@ import {
   TooltipWithBounds,
   defaultStyles as defaultTooltipStyles,
 } from '@visx/tooltip';
-import { parseTerm } from '@/utils/parseTerm';
+import { parseTerm, formatPerturbationWithType } from '@/utils/parseTerm';
 
 export interface BarRow {
   term: string;
@@ -97,10 +97,12 @@ export interface EnrichStats {
   oddsRatio?: number | null;
   nOverlap?: number | null;
 }
-export function buildBarRow(fullTerm: string, stats: EnrichStats): BarRow {
+export function buildBarRow(fullTerm: string, stats: EnrichStats, isGeneLibrary = false): BarRow {
   const parsed = parseTerm(fullTerm);
+  const perturbation = parsed.perturbation || parsed.raw || fullTerm;
   return {
-    term: parsed.perturbation || parsed.raw || fullTerm,
+    // Bar label: gene name with perturbation type appended for gene libraries (e.g. "PRSS36 KO").
+    term: formatPerturbationWithType(perturbation, parsed.perturbationType, isGeneLibrary),
     pvalue: stats.pvalue ?? 1,
     adjPvalue: stats.adjPvalue ?? undefined,
     oddsRatio: stats.oddsRatio ?? undefined,

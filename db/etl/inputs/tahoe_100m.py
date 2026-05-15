@@ -2,9 +2,6 @@
 # requires-python = ">=3.11"
 # dependencies = [
 #   "maayanlab-bioinformatics @ git+https://github.com/MaayanLab/maayanlab-bioinformatics.git@python3.14-compat",
-#   "requests",
-#   "tqdm",
-#   "polars",
 # ]
 # ///
 """
@@ -14,10 +11,6 @@ Input: db/etl/intermediate/drug_perturbation/tahoe-100m.gmt.gz
        (already in canonical {drug}::{cell_line}::{cell_type}::24h::{conc} {direction} format,
         produced by db/etl/tahoe_deseq2_to_gmt.py from the HuggingFace pseudobulk DE table)
 Output: db/data/drug_perturbation/tahoe-100m.gmt.gz (PC-filtered + alias-renamed)
-
-The DESeq2 → canonical pipeline lives in db/etl/tahoe_deseq2_to_gmt.py because it's slow
-(~hours), produces stable output, and only re-runs when upstream Tahoe data refreshes.
-This module is the lightweight stage C wrapper.
 
 Usage: uv run db/etl/inputs/tahoe_100m.py
 """

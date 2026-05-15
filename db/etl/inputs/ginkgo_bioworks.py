@@ -1,14 +1,11 @@
 # /// script
 # requires-python = ">=3.11"
-# dependencies = []
+# dependencies = [
+#   "maayanlab-bioinformatics @ git+https://github.com/MaayanLab/maayanlab-bioinformatics.git@python3.14-compat",
+# ]
 # ///
 """
-Ginkgo Bioworks — internal dataset, no public source.
-
-The Ginkgo data is licensed and used in PerturbSeqr at the app layer for licensing reasons.
-There is no public download endpoint and the raw GMT was provided to us directly. This
-module codifies the source→canonical transform AND applies the cross-dataset protein-coding
-filter (all Ginkgo signatures are human A549, so organism is fixed).
+Ginkgo Bioworks.
 
 Source line:    SC-514::A549::24::1000nM up   (pert::cell::tp_h::conc_nM, ::-delimited)
 Canonical term: SC-514::A549::::24h::1uM up
@@ -26,7 +23,7 @@ import gzip
 import sys
 
 sys.path.insert(0, str(Path(__file__).parent))
-from _utils import DRUG_INTERMEDIATE, DRUG_OUTPUT, CACHE_DIR, DELIMITER, strip_direction, standardize_gmt
+from _utils import DRUG_INTERMEDIATE, DRUG_OUTPUT, TERM_DELIMITER, strip_direction, standardize_gmt
 
 INTERMEDIATE = DRUG_INTERMEDIATE / "ginkgo-bioworks.gmt.gz"
 FINAL = DRUG_OUTPUT / "ginkgo-bioworks.gmt.gz"
@@ -41,7 +38,7 @@ def transform(term: str) -> str:
     """Source: SC-514::A549::24::1000nM up   (pert::cell::tp_h::conc_nM, ::-delimited)
     Canonical: SC-514::A549::::24h::1uM up"""
     body, direction = strip_direction(term)
-    parts = body.split(DELIMITER)
+    parts = body.split(TERM_DELIMITER)
     if len(parts) != 4:
         return term
     perturbation, cell_val, tp_raw, conc_raw = parts
@@ -52,7 +49,7 @@ def transform(term: str) -> str:
     else:
         concentration = conc_raw
     cell_line, cell_type = (cell_val, "") if cell_val in GINKGO_CELL_LINES else ("", cell_val)
-    return DELIMITER.join([perturbation, cell_line, cell_type, timepoint, concentration]) + direction
+    return TERM_DELIMITER.join([perturbation, cell_line, cell_type, timepoint, concentration]) + direction
 
 
 def _read_raw_gmt(path: Path) -> dict[str, list[str]]:

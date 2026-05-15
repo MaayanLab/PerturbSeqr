@@ -7,20 +7,8 @@
 """
 Shared helpers for input downloaders in db/etl/inputs/.
 
-I/O
-    - download_to()                  — download a URL to a local path, with cache-skip
-    - merge_up_down()                — concat up + dn GMTs into one file, applying an optional per-term transform
-    - harmonizome_paired_download()  — download + merge a Harmonizome slug in one call
-    - load_metadata()                — JSON metadata file loader (raises FileNotFoundError if missing)
-    - load_gmt_dict()                — parse a (gzipped) GMT into {term[ direction]\\tdesc: [genes]}
-
-Canonical-format helpers
-    - strip_direction()              — split a term into (body, ' up'/' down'/' dn'/'')
-    - filter_to_human_pc()           — DEG filter (mouse/rat → human ortholog, drop non-protein-coding)
-                                       used cross-dataset; keeps every signature whose post-filter DEG set is non-empty
-
-Outputs: GMT in canonical perturbation::cellLine::cellType::timepoint::concentration[::extras] up|down
-format at db/data/{drug,gene}_perturbation/<dataset>.gmt.gz.
+Canonical output format: perturbation::cellLine::cellType::timepoint::concentration[::extras] up|down
+at db/data/{drug,gene}_perturbation/<dataset>.gmt.gz.
 """
 import gzip
 import json
@@ -49,7 +37,72 @@ HARMONIZOME_BASE = "https://maayanlab.cloud/static/hdfs/harmonizome/data"
 CREEDS_BASE = "https://maayanlab.cloud/CREEDS/download"
 
 # Canonical term format constants
-DELIMITER = "::"           # field delimiter
+TERM_DELIMITER = "::"      # field delimiter
+
+# Gene perturbation terms carry two canonical fields after concentration:
+#   [5] perturbation_type   — what was done to the gene (KO/KD/KI/OE/Mut); BLANK when unknown
+#   [6] perturbation_method — how it was done (CRISPRi/Cas9/shRNA/...);    BLANK when unknown
+# Unknown is represented as an empty field.
+
+CANONICAL_GENE_PERTURBATION_TYPES = frozenset({"KO", "KD", "KI", "OE", "Mut"})
+CANONICAL_GENE_PERTURBATION_METHODS = frozenset({
+    "CRISPRi", "CRISPRa", "Cas9", "shRNA", "siRNA", "RNAi", "transgenic",
+})
+
+PERTURBATION_TYPE_SYNONYMS = {
+    "ko": "KO", "knockout": "KO", "deficiency": "KO", "deletion": "KO",
+    "null mutation": "KO", "null allele": "KO",
+    "kd": "KD", "knockdown": "KD", "depletion": "KD",
+    "ki": "KI", "knock in": "KI", "knockin": "KI",
+    "oe": "OE", "overexpression": "OE", "activation": "OE",
+    "mut": "Mut", "mutant": "Mut", "active mutant": "Mut", "activemutant": "Mut",
+    "point mutation": "Mut", "missense": "Mut",
+}
+# Keyword-substring fallback for the CREEDS long tail — values like "CAG knock-in",
+# "Partial Depletion", "Mutation - D77G point mutation".
+PERTURBATION_TYPE_KEYWORDS = [
+    ("knock in", "KI"), ("knockin", "KI"),
+    ("knockout", "KO"), ("knock out", "KO"), ("deficiency", "KO"),
+    ("deletion", "KO"), ("null", "KO"),
+    ("knockdown", "KD"), ("knock down", "KD"), ("depletion", "KD"),
+    ("deplet", "KD"), ("down expression", "KD"), ("repression", "KD"), ("silenc", "KD"),
+    ("overexpression", "OE"), ("over expression", "OE"), ("overexpress", "OE"),
+    ("induction", "OE"), ("induced expression", "OE"), ("activation", "OE"),
+    ("mutation", "Mut"), ("mutant", "Mut"), ("missense", "Mut"),
+]
+# Genuinely ambiguous / non-informative → blank (these don't warn).
+_AMBIGUOUS_PERTURBATION_TYPE = {"inhibition", "druginhibition", "unknown", ""}
+
+
+def normalize_perturbation_type(raw: str | None) -> str:
+    """Map a raw perturbation-type string to a canonical value, or "" if it doesn't
+    map cleanly."""
+    if raw is None:
+        return ""
+    raw = raw.strip()
+    if "|" in raw:
+        return "|".join(normalize_perturbation_type(part) for part in raw.split("|"))
+    key = raw.lower().replace("-", " ").replace("_", " ").strip()
+    if key in PERTURBATION_TYPE_SYNONYMS:
+        return PERTURBATION_TYPE_SYNONYMS[key]
+    for kw, pert_type in PERTURBATION_TYPE_KEYWORDS:
+        if kw in key:
+            return pert_type
+    if key not in _AMBIGUOUS_PERTURBATION_TYPE:
+        print(f"  WARN normalize_perturbation_type: unrecognized value {raw!r} → blank")
+    return ""
+
+
+def normalize_perturbation_method(raw: str | None) -> str:
+    """Map a raw perturbation-method string to a canonical value, or "" if it doesn't
+    map cleanly."""
+    if raw is None:
+        return ""
+    key = raw.strip()
+    for m in CANONICAL_GENE_PERTURBATION_METHODS:
+        if key.lower() == m.lower():
+            return m
+    return ""
 
 
 def strip_direction(term: str) -> tuple[str, str]:
@@ -84,14 +137,8 @@ def load_metadata(filename: str) -> dict:
 
 
 def load_gmt_dict(path: Path, *, direction: str | None = None) -> dict[str, list[str]]:
-    """Read a GMT (gzipped or plain) into {key: [genes]}, where key = 'term[ direction]\\tdesc'.
-
-    Both columns are preserved because some sources (e.g. CREEDS) encode a canonical id in
-    the description column while leaving the symbolic name in the term.
-
-    If `direction` is given, append ' up' / ' down' to the term portion of every key —
-    Harmonizome's up/dn GMTs carry direction in the filename, not the term.
-    """
+    """Read a GMT (gzipped or plain) into {'term[ direction]\\tdesc': [genes]}. Pass `direction`
+    to append ' up' / ' down' when the source encodes direction in the filename, not the term."""
     opener = gzip.open if str(path).endswith(".gz") else open
     out: dict[str, list[str]] = {}
     with opener(path, "rt") as f:
@@ -117,22 +164,12 @@ def download_to(url: str, dest: Path, *, no_cache: bool = False) -> Path:
 
 def merge_up_down(up_path: Path, down_path: Path, output_path: Path,
                   *, transform_fn=None) -> int:
-    """Merge up + down GMTs into one file, pairing siblings on adjacent lines.
-
-    Assumes input terms are NOT already direction-suffixed (Harmonizome encodes
-    direction in the filename). 
-    
-    transform_fn (optional) rewrites each direction-tagged term into our canonical ::-delimited 
-    format since each dataset has its own raw term shape (underscore-packed strings, dataset-specific field ordering, etc.).
-    
-    Returns lines written.
-    """
+    """Merge up + down GMTs into one file, pairing siblings on adjacent lines. `transform_fn`
+    (optional) rewrites each direction-tagged term into canonical ::-format. Returns lines written."""
     up = load_gmt_dict(up_path, direction="up")
     dn = load_gmt_dict(down_path, direction="down")
 
-    # up keys look like "term up\tdesc"; paired dn key is "term down\tdesc".
-    # Fill `ordered` by walking up keys first (each followed by its dn sibling if present),
-    # then appending any dn keys that have no up counterpart. 
+    # Walk up-keys first (each followed by its dn sibling if present), then unpaired dn keys.
     ordered: list[str] = []
     paired_dn: set[str] = set()
     for up_key in up:
@@ -168,12 +205,7 @@ def merge_up_down(up_path: Path, down_path: Path, output_path: Path,
 def harmonizome_paired_download(slug: str, output_path: Path,
                                 *, transform_fn=None, no_cache: bool = False) -> Path:
     """Download the Harmonizome up + dn GMTs for `slug`, merge, and write to output_path.
-
-    `transform_fn` is applied per term during merge — pass it to convert source terms to
-    the canonical ::-delimited format. Without it, terms keep their raw underscore form.
-
-    URL pattern: https://maayanlab.cloud/static/hdfs/harmonizome/data/<slug>/gene_set_library_{up,dn}_crisp.gmt.gz
-    """
+    `transform_fn` (optional) is applied per term during merge to rewrite source terms to canonical ::-format."""
     up = download_to(f"{HARMONIZOME_BASE}/{slug}/gene_set_library_up_crisp.gmt.gz",
                      CACHE_DIR / f"{slug}_up_crisp.gmt.gz", no_cache=no_cache)
     dn = download_to(f"{HARMONIZOME_BASE}/{slug}/gene_set_library_dn_crisp.gmt.gz",
@@ -185,12 +217,8 @@ def harmonizome_paired_download(slug: str, output_path: Path,
 
 def standardize_gmt(intermediate_path: Path, final_path: Path,
                     parse_organism=lambda _k: "human") -> int:
-    """Stage C: read a canonical intermediate GMT, apply filter_to_human_pc, write the
-    standardized result to final_path. Returns terms written (post-drop).
-
-    `parse_organism(gmt_key) -> str` returns the organism for each term so multi-organism
-    datasets (CREEDS) can route mouse DEGs through the ortholog map. Single-organism
-    datasets default to human."""
+    """Stage C: PC filter the intermediate GMT (with mouse→human ortholog mapping via
+    `parse_organism(key) -> 'human'|'mouse'|...`) and write to final_path. Returns terms written."""
     gmt = load_gmt_dict(intermediate_path)
     filtered = filter_to_human_pc(gmt, parse_organism, CACHE_DIR)
     final_path.parent.mkdir(parents=True, exist_ok=True)
@@ -206,9 +234,7 @@ def standardize_gmt(intermediate_path: Path, final_path: Path,
     return n
 
 
-# ============================================================================
-# Protein-coding DEG filter (cross-dataset concern)
-# ============================================================================
+# Protein-coding DEG filter (cross-dataset concern).
 # Every ETL dataset should route DEGs through this filter.
 #
 # Output gene-name contract: uppercase, and present in NCBI gene_info for a PC gene

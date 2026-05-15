@@ -33,7 +33,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent))
 from _utils import (
-    DRUG_INTERMEDIATE, DRUG_OUTPUT, CACHE_DIR, DELIMITER,
+    DRUG_INTERMEDIATE, DRUG_OUTPUT, CACHE_DIR, TERM_DELIMITER,
     strip_direction, download_to, harmonizome_paired_download, standardize_gmt,
 )
 
@@ -55,7 +55,8 @@ def _format_concentration(conc_molar: float) -> str:
         val, unit = conc_um * 1000, "nM"
     else:
         val, unit = conc_um, "uM"
-    return f"{int(val)}{unit}" if val == int(val) else f"{val:.2g}{unit}"
+    val = round(val, 4)   # 1e-7 M * 1e6 * 1000 = 100.00000000000001, which fell through to "1e+02nM"
+    return f"{int(val)}{unit}" if val == int(val) else f"{val:g}{unit}"
 
 
 def _load_instance_lookup() -> dict[str, str]:
@@ -64,7 +65,7 @@ def _load_instance_lookup() -> dict[str, str]:
     df = pd.read_csv(INSTANCES_PATH, sep="\t")
     out: dict[str, str] = {}
     for _, row in df.iterrows():
-        out[str(row["instance_id"])] = DELIMITER.join([
+        out[str(row["instance_id"])] = TERM_DELIMITER.join([
             str(row["cmap_name"]),
             str(row["cell2"]),
             "",

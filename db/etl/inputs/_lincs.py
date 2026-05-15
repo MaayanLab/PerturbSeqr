@@ -3,19 +3,8 @@
 # dependencies = []
 # ///
 """
-Shared LINCS instinfo_beta.txt parser used by lincs_l1000_cp.py and lincs_l1000_xpr.py.
-
-Both modules resolve opaque reagent codes in their perturbation slot by looking up
-`cmap_name` for a given `pert_id` in LINCS's unified inventory. They differ only in
-which `pert_type` they filter on:
-
-    pert_type == "trt_cp"   -> BRD-K / BRD-A / ... chemical codes  (lincs_l1000_cp)
-    pert_type == "trt_xpr"  -> BRDN CRISPR reagent codes           (lincs_l1000_xpr)
-
-The full instinfo file is ~1 GB; the filtered-per-pert_type subsets are ~150–250 KB.
-We cache both the raw download and each filtered subset so re-runs are instant.
-
-Pipeline: shared helper, not directly runnable. Imported by lincs_l1000_*.py.
+Shared LINCS instinfo_beta.txt parser used by lincs_l1000_{cp,xpr}.py to resolve
+reagent codes (BRD-K / BRD-A for trt_cp, BRDN for trt_xpr) to cmap_name.
 """
 import csv
 from pathlib import Path
@@ -52,10 +41,7 @@ def _build_pert_map(pert_type: str) -> dict[str, str]:
 
 
 def load_pert_map(pert_type: str) -> dict[str, str]:
-    """Return {pert_id → cmap_name} for the given LINCS pert_type (e.g. 'trt_cp', 'trt_xpr').
-
-    Builds the filtered cache on first call; subsequent calls read the cached TSV directly.
-    """
+    """{pert_id → cmap_name} for the given LINCS pert_type. Builds the filtered cache on first call."""
     cache = _filter_cache_path(pert_type)
     if not cache.exists():
         return _build_pert_map(pert_type)
