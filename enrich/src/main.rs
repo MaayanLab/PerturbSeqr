@@ -1975,9 +1975,12 @@ async fn query_pairs(
                     }) {
                         return None
                     }
-                } else if is_up && (result.pvalue_mimic > result.pvalue_reverse) {
+                }
+                let threshold = pvalue_le.unwrap_or(DEFAULT_PVALUE_CUTOFF);
+                if is_up && result.pvalue_mimic > threshold {
                     return None
-                } else if is_down && (result.pvalue_mimic < result.pvalue_reverse) {
+                }
+                if is_down && result.pvalue_reverse > threshold {
                     return None
                 }
             }
