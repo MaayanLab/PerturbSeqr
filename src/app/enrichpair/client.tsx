@@ -240,7 +240,7 @@ function EnrichmentResults({
                   <>
                     {consensus ? (
                       <>
-                        After rummaging through {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.pairedEnrich?.geneSetCount || 0)} gene sets.{" "}
+                        After rummaging through {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.pairedEnrich?.geneSetCount || 0)} gene set pairs.{" "}
                         <Image
                           className="inline-block rounded"
                           src="/images/perturbseqr-logo.png"
@@ -256,7 +256,7 @@ function EnrichmentResults({
                         consensus perturbations.
                       </>
                     ) : moas ? <>
-                    After rummaging through {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.pairedEnrich?.geneSetCount || 0)} gene sets.{" "}
+                    After rummaging through {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.pairedEnrich?.geneSetCount || 0)} gene set pairs.{" "}
                         <Image
                           className="inline-block rounded"
                           src="/images/perturbseqr-logo.png"
@@ -272,7 +272,7 @@ function EnrichmentResults({
                         consensus MoAs.</>
                     : (
                       <>
-                        After rummaging through {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.pairedEnrich?.geneSetCount || 0)} gene sets.{" "}
+                        After rummaging through {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.pairedEnrich?.geneSetCount || 0)} gene set pairs.{" "}
                         <Image
                           className="inline-block rounded"
                           src="/images/perturbseqr-logo.png"
