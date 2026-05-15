@@ -527,8 +527,8 @@ function EnrichmentResults({
           }}
           className={
             queryString.consensus === "true"
-              ? "button btn btn-sm bg-gray-400 hover:bg-gray-500 text-gray-800"
-              : "button btn btn-sm"
+              ? "hidden button btn btn-sm bg-gray-400 hover:bg-gray-500 text-gray-800"
+              : "hidden button btn btn-sm"
           }
         >
           Consensus Perturbations
@@ -564,8 +564,8 @@ function EnrichmentResults({
           }}
           className={
             queryString.moas === "true"
-              ? "button btn btn-sm bg-gray-400 hover:bg-gray-500 text-gray-800"
-              : "button btn btn-sm"
+              ? "hidden button btn btn-sm bg-gray-400 hover:bg-gray-500 text-gray-800"
+              : "hidden button btn btn-sm"
           }
         >
           Consensus MoAs
