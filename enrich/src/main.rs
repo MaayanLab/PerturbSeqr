@@ -136,27 +136,28 @@ impl Bitmap {
     }
 
     fn get_signature_pairs(&self) -> SignaturePairs {
-        let mut name_to_indices: HashMap<String, (Option<usize>, Option<usize>)> = HashMap::new();
+        let mut name_to_indices: HashMap<(String, String), (Option<usize>, Option<usize>)> = HashMap::new();
 
         // Iterate over values to ensure indices align with `values`
         for (idx, (uuid, _)) in self.values.iter().enumerate() {
+            let Some(lib) = self.gene_set_libraries.get(uuid) else { continue };
             if let Some(term_vec) = self.terms.get(uuid) {
                 for (_gene_set_id, full_name, _description, _fda_approved, _count, _pert, _moa, _cid) in term_vec {
                     if let Some(base_name) = full_name.strip_suffix(" up") {
-                        name_to_indices.entry(base_name.to_string()).or_insert((None, None)).0 = Some(idx);
+                        name_to_indices.entry((lib.clone(), base_name.to_string())).or_insert((None, None)).0 = Some(idx);
                     } else if let Some(base_name) = full_name.strip_suffix(" down") {
-                        name_to_indices.entry(base_name.to_string()).or_insert((None, None)).1 = Some(idx);
+                        name_to_indices.entry((lib.clone(), base_name.to_string())).or_insert((None, None)).1 = Some(idx);
                     }
                 }
             }
         }
-    
+
         // Extract valid pairs
         let pairs = name_to_indices
             .into_iter()
-            .filter_map(|(_base_name, (up_idx, down_idx))| Some((up_idx?, down_idx?)))
+            .filter_map(|(_key, (up_idx, down_idx))| Some((up_idx?, down_idx?)))
             .collect();
-    
+
         SignaturePairs { pairs }
     }
 
