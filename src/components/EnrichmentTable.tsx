@@ -4,7 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import Loading from '@/components/loading';
 import { IoMdInformationCircleOutline } from 'react-icons/io';
-import { FaSortUp } from 'react-icons/fa6';
+import { SortableHeader } from '@/components/SortableHeader';
 import { parseTerm, getCellDisplay, formatPerturbationWithType } from '@/utils/parseTerm';
 import {
   getDrugInfo,
@@ -123,96 +123,30 @@ export function EnrichmentTable({
             <br />
             Size
           </th>
-          <th>
-            <span
-              className="flex align-text-top cursor-pointer"
-              onClick={() =>
-                setQueryString({
-                  page: '1',
-                  q: queryString.q,
-                  fda: queryString.fda,
-                  dir: queryString.dir,
-                  sort: 'overlap',
-                  ko: queryString.ko,
-                  topn: queryString.topn,
-                  pvaluele: queryString.pvaluele,
-                  consensus: queryString.consensus,
-                })
-              }
-            >
-              Overlap <FaSortUp />
-            </span>
-          </th>
-          <th>
-            <span
-              className="flex align-text-top cursor-pointer"
-              onClick={() =>
-                setQueryString({
-                  page: '1',
-                  q: queryString.q,
-                  fda: queryString.fda,
-                  dir: queryString.dir,
-                  sort: 'odds_ratio',
-                  ko: queryString.ko,
-                  topn: queryString.topn,
-                  pvaluele: queryString.pvaluele,
-                  consensus: queryString.consensus,
-                })
-              }
-            >
-              Odds
-              <br />
-              Ratio <FaSortUp />
-            </span>
-          </th>
-          <th className="relative group">
-            <div className="absolute z-10 right-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
-              P-value computed using the Fisher&apos;s Exact Test
-            </div>
-            <span
-              className="flex align-text-top cursor-pointer"
-              onClick={() =>
-                setQueryString({
-                  page: '1',
-                  q: queryString.q,
-                  fda: queryString.fda,
-                  dir: queryString.dir,
-                  sort: 'pvalue',
-                  ko: queryString.ko,
-                  topn: queryString.topn,
-                  pvaluele: queryString.pvaluele,
-                  consensus: queryString.consensus,
-                })
-              }
-            >
-              PValue <FaSortUp />
-              <IoMdInformationCircleOutline className="ml-0.5" />
-            </span>
-          </th>
-          <th className="relative group">
-            <div className="absolute z-10 right-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
-              Adjusted P-value computed using the Benjamini-Hochberg procedure
-            </div>
-            <span
-              className="flex align-text-top cursor-pointer"
-              onClick={() =>
-                setQueryString({
-                  page: '1',
-                  q: queryString.q,
-                  fda: queryString.fda,
-                  dir: queryString.dir,
-                  sort: 'adj_pvalue',
-                  ko: queryString.ko,
-                  topn: queryString.topn,
-                  pvaluele: queryString.pvaluele,
-                  consensus: queryString.consensus,
-                })
-              }
-            >
-              AdjPValue <FaSortUp />
-              <IoMdInformationCircleOutline className="ml-0.5" />
-            </span>
-          </th>
+          <SortableHeader sortKey="overlap" currentSort={queryString.sort} setQueryString={setQueryString}>
+            Overlap
+          </SortableHeader>
+          <SortableHeader sortKey="odds_ratio" currentSort={queryString.sort} setQueryString={setQueryString}>
+            Odds<br />Ratio
+          </SortableHeader>
+          <SortableHeader
+            sortKey="pvalue"
+            currentSort={queryString.sort}
+            setQueryString={setQueryString}
+            tooltipSide="right"
+            tooltip={<>P-value computed using the Fisher&apos;s Exact Test</>}
+          >
+            PValue
+          </SortableHeader>
+          <SortableHeader
+            sortKey="adj_pvalue"
+            currentSort={queryString.sort}
+            setQueryString={setQueryString}
+            tooltipSide="right"
+            tooltip="Adjusted P-value computed using the Benjamini-Hochberg procedure"
+          >
+            AdjPValue
+          </SortableHeader>
         </tr>
       </thead>
       <tbody>

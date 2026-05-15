@@ -25,6 +25,7 @@ import { preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLink
 import { useRouter } from "next/navigation";
 import libraryConfig from "@/config/libraries.json";
 import { LibraryBarGraphGrid, LibraryCardPaired } from "@/components/BarGraph";
+import { SortableHeader } from "@/components/SortableHeader";
 
 const allLibraryDisplayNames = Object.values(libraryConfig.libraries).map((l: any) => l.displayName as string);
 const drugLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'drug').map((l: any) => l.displayName as string);
@@ -1198,152 +1199,51 @@ function EnrichmentResults({
                 <th>
                   Mimicker<br />Overlap 
                 </th>
+                <SortableHeader sortKey="odds_ratio_mimic" currentSort={queryString.sort} setQueryString={setQueryString}>
+                  Odds<br />Ratio<br />Mimicker
+                </SortableHeader>
+                <SortableHeader
+                  sortKey="pvalue_mimic"
+                  currentSort={queryString.sort}
+                  setQueryString={setQueryString}
+                  tooltipSide="right"
+                  tooltip={<>P-value computed using the Fisher&apos;s Exact Test</>}
+                >
+                  PValue<br />Mimicker
+                </SortableHeader>
+                <SortableHeader
+                  sortKey="adj_pvalue_mimic"
+                  currentSort={queryString.sort}
+                  setQueryString={setQueryString}
+                  tooltipSide="right"
+                  tooltip="Adjusted P-value computed using the Benjamini-Hochberg procedure"
+                >
+                  AdjPValue<br />Mimicker
+                </SortableHeader>
                 <th>
-                  <span
-                    className="flex align-text-top cursor-pointer"
-                    onClick={() =>
-                      setQueryString({
-                        page: "1",
-                        q: queryString.q,
-                        fda: queryString.fda,
-                        dir: queryString.dir,
-                        sort: "odds_ratio_mimic",
-                        ko: queryString.ko,
-                        topn: queryString.topn,
-                        pvaluele: queryString.pvaluele,
-                        consensus: queryString.consensus,
-                      })
-                    }
-                  >
-                    Odds
-                    <br />
-                    Ratio<br />Mimicker <FaSortUp />
-                  </span>
+                  Reverser<br/>Overlap
                 </th>
-                <th className="relative group">
-                  <div className="absolute z-10 right-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
-                    P-value computed using the Fisher&apos;s Exact Test
-                  </div>
-                  <span
-                    className="flex align-text-top cursor-pointer"
-                    onClick={() =>
-                      setQueryString({
-                        page: "1",
-                        q: queryString.q,
-                        fda: queryString.fda,
-                        dir: queryString.dir,
-                        sort: "pvalue_mimic",
-                        ko: queryString.ko,
-                        topn: queryString.topn,
-                        pvaluele: queryString.pvaluele,
-                        consensus: queryString.consensus,
-                      })
-                    }
-                  >
-                    PValue<br/>Mimicker <FaSortUp />
-                    <IoMdInformationCircleOutline className="ml-0.5" />
-                  </span>
-                </th>
-                <th className="relative group">
-                  <div className="absolute z-10 right-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
-                    Adjusted P-value computed using the Benjamini-Hochberg
-                    procedure
-                  </div>
-                  <span
-                    className="flex align-text-top cursor-pointer"
-                    onClick={() =>
-                      setQueryString({
-                        page: "1",
-                        q: queryString.q,
-                        fda: queryString.fda,
-                        dir: queryString.dir,
-                        sort: "adj_pvalue_mimic",
-                        ko: queryString.ko,
-                        topn: queryString.topn,
-                        pvaluele: queryString.pvaluele,
-                        consensus: queryString.consensus,
-                      })
-                    }
-                  >
-                    AdjPValue<br/>Mimicker <FaSortUp />
-                    <IoMdInformationCircleOutline className="ml-0.5" />
-                  </span>
-                </th>
-                <th>
-                  Reverser<br/>Overlap 
-                </th>
-                <th>
-                  <span
-                    className="flex align-text-top cursor-pointer"
-                    onClick={() =>
-                      setQueryString({
-                        page: "1",
-                        q: queryString.q,
-                        fda: queryString.fda,
-                        dir: queryString.dir,
-                        sort: "odds_ratio_reverse",
-                        ko: queryString.ko,
-                        topn: queryString.topn,
-                        pvaluele: queryString.pvaluele,
-                        consensus: queryString.consensus,
-                      })
-                    }
-                  >
-                    Odds
-                    <br />
-                    Ratio <br />
-                    Reverser<FaSortUp />
-                  </span>
-                </th>
-                <th className="relative group">
-                  <div className="absolute z-10 right-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
-                    P-value computed using the Fisher&apos;s Exact Test
-                  </div>
-                  <span
-                    className="flex align-text-top cursor-pointer"
-                    onClick={() =>
-                      setQueryString({
-                        page: "1",
-                        q: queryString.q,
-                        fda: queryString.fda,
-                        dir: queryString.dir,
-                        sort: "pvalue_reverse",
-                        ko: queryString.ko,
-                        topn: queryString.topn,
-                        pvaluele: queryString.pvaluele,
-                        consensus: queryString.consensus,
-                      })
-                    }
-                  >
-                    PValue<br />Reverser <FaSortUp />
-                    <IoMdInformationCircleOutline className="ml-0.5" />
-                  </span>
-                </th>
-                <th className="relative group">
-                  <div className="absolute z-10 right-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
-                    Adjusted P-value computed using the Benjamini-Hochberg
-                    procedure
-                  </div>
-                  <span
-                    className="flex align-text-top cursor-pointer"
-                    onClick={() =>
-                      setQueryString({
-                        page: "1",
-                        q: queryString.q,
-                        fda: queryString.fda,
-                        dir: queryString.dir,
-                        sort: "adj_pvalue_reverse",
-                        ko: queryString.ko,
-                        topn: queryString.topn,
-                        pvaluele: queryString.pvaluele,
-                        consensus: queryString.consensus,
-                      })
-                    }
-                  >
-                    AdjPValue<br />Reverser <FaSortUp />
-                    <IoMdInformationCircleOutline className="ml-0.5" />
-                  </span>
-                </th>
+                <SortableHeader sortKey="odds_ratio_reverse" currentSort={queryString.sort} setQueryString={setQueryString}>
+                  Odds<br />Ratio<br />Reverser
+                </SortableHeader>
+                <SortableHeader
+                  sortKey="pvalue_reverse"
+                  currentSort={queryString.sort}
+                  setQueryString={setQueryString}
+                  tooltipSide="right"
+                  tooltip={<>P-value computed using the Fisher&apos;s Exact Test</>}
+                >
+                  PValue<br />Reverser
+                </SortableHeader>
+                <SortableHeader
+                  sortKey="adj_pvalue_reverse"
+                  currentSort={queryString.sort}
+                  setQueryString={setQueryString}
+                  tooltipSide="right"
+                  tooltip="Adjusted P-value computed using the Benjamini-Hochberg procedure"
+                >
+                  AdjPValue<br />Reverser
+                </SortableHeader>
               </tr>
             </thead>
             <tbody>
