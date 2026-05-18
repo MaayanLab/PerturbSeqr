@@ -21,7 +21,9 @@ export default async function License() {
       <p className="mt-1">
         Within any publication that uses any methods or results inspired by Perturb-Seqr, please cite:
       </p>
-      <p className="mt-1 font-bold">TBD</p>
+      <p className="mt-1 font-bold">
+        John K. Gardner, Lily D. Taub, Daniel J. B. Clarke, Ido Diamant, Avi Ma&apos;ayan. Perturb-Seqr: Comprehensive Signature Search Engine Integrating Connectivity Maps from Multiple Sources. <a className="underline" href="https://perturbseqr.maayanlab.cloud/">https://perturbseqr.maayanlab.cloud/</a>
+      </p>
       <h3 className="text-lg font-semibold mt-4">Disclaimer</h3>
       <p className="mt-1 font-bold">
         PERTURB-SEQR IS NOT TO BE USED FOR TREATING OR DIAGNOSING HUMAN SUBJECTS.

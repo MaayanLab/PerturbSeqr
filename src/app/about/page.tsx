@@ -28,7 +28,7 @@ export default async function About() {
         <div className="flex-col">
           <h3 className="text-lg font-semibold mt-4">Perturb-Seqr: Comprehensive Signature Search Engine Integrating Connectivity Maps from Multiple Sources</h3>
           <p className="text-sm mt-1">
-            John K. Gardner<sup>1</sup>, Lily D. Taub<sup>1</sup>, Ido Diamant<sup>1</sup>, Avi Ma&apos;ayan<sup>1</sup>
+            John K. Gardner<sup>1</sup>, Lily D. Taub<sup>1</sup>, Daniel J. B. Clarke<sup>1</sup>, Ido Diamant<sup>1</sup>, Avi Ma&apos;ayan<sup>1</sup>
           </p>
           <p className="text-xs text-gray-500 mt-1">
             <sup>1</sup>Department of Pharmacological Sciences, Mount Sinai Center for Bioinformatics, Icahn School of Medicine at Mount Sinai, New York, New York; CFDE Data Resource Center
@@ -50,7 +50,7 @@ export default async function About() {
           </p>
           <br />
           <p className='mb-2 font-bold'>Please acknowledge Perturb-Seqr in your publications by citing the following reference: </p>
-          <p className='font-bold'>[Citation placeholder]</p>
+          <p className='font-bold'>John K. Gardner, Lily D. Taub, Daniel J. B. Clarke, Ido Diamant, Avi Ma&apos;ayan. Perturb-Seqr: Comprehensive Signature Search Engine Integrating Connectivity Maps from Multiple Sources. <a className="underline" href="https://perturbseqr.maayanlab.cloud/">https://perturbseqr.maayanlab.cloud/</a></p>
           <br/>
           <p>
             <strong>Drug/Chemical Perturbation Datasets:</strong>
