@@ -1,6 +1,6 @@
 [project]
 name = "perturbseqr"
-version = "0.0.2"
+version = "0.3.0"
 description = "Python wrapper for the Perturb-Seqr GraphQL API"
 readme = "README.md"
 authors = [
