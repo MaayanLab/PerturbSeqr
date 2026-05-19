@@ -611,6 +611,30 @@ const metadataDatasets: Dataset[] = [
     sourceUrl: 'https://rummageo.com',
     sourceLabel: 'Link',
   },
+  {
+    title: 'PerturbAtlas Metadata',
+    value: 'Signature metadata',
+    info: 'PerturbAtlas study and sample annotations',
+    publicationUrl: '',
+    sourceUrl: 'https://drive.google.com/drive/folders/1KPKn_4zCsNRhEmBiQjuSY67vR5kautiA',
+    sourceLabel: 'Link',
+  },
+  {
+    title: 'CREEDS Gene Metadata',
+    value: 'Signature metadata',
+    info: 'CREEDS gene perturbation annotations',
+    publicationUrl: '',
+    sourceUrl: 'https://maayanlab.cloud/CREEDS/download/single_gene_perturbations-v1.0.json',
+    sourceLabel: 'Link',
+  },
+  {
+    title: 'CREEDS Chem Metadata',
+    value: 'Drug metadata',
+    info: 'CREEDS chemical perturbation annotations',
+    publicationUrl: '',
+    sourceUrl: 'https://maayanlab.cloud/CREEDS/download/single_drug_perturbations-v1.0.json',
+    sourceLabel: 'Link',
+  },
 ]
 
 // --- Components ---
