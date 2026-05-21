@@ -35,7 +35,10 @@ def download(no_cache: bool = False) -> Path:
         transform_fn=make_transform(load_meta("Mus musculus", no_cache=no_cache)),
         no_cache=no_cache,
     )
-    standardize_gmt(INTERMEDIATE, FINAL, parse_organism=lambda _k: "mouse")
+    # Harmonizome already maps these mouse DEGs to human orthologs upstream, so members are
+    # already human symbols — treat as human, not mouse. Upstream mapping cell:
+    # https://github.com/MaayanLab/HarmonizomePythonScripts/blob/master/PerturbAtlas/Signatures%20of%20Differentially%20Expressed%20Genes%20for%20Mouse%20Gene%20Perturbations/PerturbAtlasMouse.ipynb
+    standardize_gmt(INTERMEDIATE, FINAL, parse_organism=lambda _k: "human")
     return FINAL
 
 

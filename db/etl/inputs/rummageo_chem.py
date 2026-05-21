@@ -11,9 +11,6 @@ Source: https://rummageo.com
 Harmonizome: https://maayanlab.cloud/Harmonizome/dataset/RummaGEO+Drug+Perturbation+Signatures
 Reference: Marino et al. 2024 Patterns.
 
-Harmonizome supplies the DEG gene-set lists. RummaGEO's per-sample GEO annotations are too
-messy to extract cell line / cell type without mistakes, so v1 leaves those blank.
-
 Term transform:
   GSE100217_1_v_0_ethanol_mouse up  ->  ethanol::::::::::mouse::GSE100217::1::0 up
 Fields 1-4 (cell line / type / timepoint / concentration) are blank.
@@ -32,10 +29,6 @@ from _utils import DRUG_INTERMEDIATE, DRUG_OUTPUT, TERM_DELIMITER, strip_directi
 INTERMEDIATE = DRUG_INTERMEDIATE / "rummageo-chem.gmt.gz"
 FINAL = DRUG_OUTPUT / "rummageo-chem.gmt.gz"
 
-# Organism is at canonical position 5 (after pert/cellLine/cellType/timepoint/concentration).
-_parse_organism = lambda key: key.rsplit(" ", 1)[0].split(TERM_DELIMITER)[5] if TERM_DELIMITER in key else "human"
-
-
 def transform(term: str) -> str:
     body, direction = strip_direction(term)
     parts = body.split("_")
@@ -48,7 +41,10 @@ def transform(term: str) -> str:
 
 def download(no_cache: bool = False) -> Path:
     harmonizome_paired_download("rummageochem", INTERMEDIATE, transform_fn=transform, no_cache=no_cache)
-    standardize_gmt(INTERMEDIATE, FINAL, parse_organism=_parse_organism)
+    # Harmonizome already maps mouse DEGs to human orthologs upstream (even for mouse studies),
+    # so members are already human symbols — filter as human. Upstream mapping cell:
+    # https://github.com/MaayanLab/HarmonizomePythonScripts/blob/master/RummaGEO/Drug%20Perturbation%20Signatures/RummaGEODrug.ipynb
+    standardize_gmt(INTERMEDIATE, FINAL)
     return FINAL
 
 
