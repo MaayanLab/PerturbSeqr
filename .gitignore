@@ -36,6 +36,7 @@ db/data/*.json
 # misc
 .DS_Store
 *.pem
+.vscode/settings.json
 
 # debug
 npm-debug.log*
@@ -68,6 +69,7 @@ startup_log*.txt
 startup_log*.md
 .python-version
 scratch/
+public/umap/figures/local
 
 # UMAP intermediate data (large CSVs, only HTML figures needed for app)
 public/umap/csv/

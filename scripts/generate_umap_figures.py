@@ -31,6 +31,7 @@ from pathlib import Path
 from os import path, mkdir
 import re
 from textwrap import wrap
+import math
 
 from maayanlab_bioinformatics.parse.gmt import gmt_read_dict
 import pyenrichr as pye
@@ -56,14 +57,32 @@ GENE_DIR = BASE_DIR / "gene_perturbation"
 MOA_DIR =  Path(__file__).parent.parent / "public" / "metadata"
 METADATA_DIR = BASE_DIR / "metadata"
 # Output directories
-OUTPUT_DIR = Path(__file__).parent.parent / "public" / "umap"
-ENRICHMENT_DIR = OUTPUT_DIR / "enrich"
-SCATTER_DIR = OUTPUT_DIR / "csv"
-FIGURE_DIR = OUTPUT_DIR / "figures"
+INPUTS_DIR = Path(__file__).parent.parent / "public" / "umap"
+ENRICHMENT_DIR = INPUTS_DIR / "enrich"
+SCATTER_DIR = INPUTS_DIR / "csv"
+FIGURE_DIR = Path(__file__).parent.parent / "manuscript" / "figures" / "umap"
 # Settings for Enrichment analysis
 TARGET_LIB = 'GO_Biological_Process_2025'
 MIN_OVERLAP = 10
 MIN_SET_SIZE = 5
+# Plot Aesthetics
+FIG_WIDTH = 12
+FIG_HEIGHT = 12
+MARKER_SIZE=7
+LEGEND_FONT_SIZE=12
+# Figure parameters
+FIG_DPI=400
+
+sns.set_theme(
+context='paper',
+style='white',
+    rc={
+        "axes.titlesize": 14,
+        "axes.labelsize": 14,
+        "xtick.labelsize": 10,
+        "ytick.labelsize": 10
+    }
+)
 
 # Library definitions: output_name -> (category, file_stem)
 # output_name determines the UMAP filename: {output_name}_UMAP.html
@@ -107,6 +126,14 @@ DRUG_LIBS = [
     "cmap-build02",
     "geo-chem"
 ]   
+
+DRUG_TITLES = dict(zip(DRUG_LIBS,
+                       ["SciPlex","NIBR DRUG-seq","DeepCover MoA","Ginkgo Bioworks",
+                        "LINCS L1000 CP","CREEDS Chem","Tahoe-100M","Microarrays CMap",
+                        "RummaGEO Chem"]))
+GENE_TITLES = dict(zip(GENE_LIBS,
+                       ["LINCS L1000 XPR","PerturbAtlas Human","PerturbAtlas Mouse",
+                        "CREEDS Gene","RummaGEO Gene","Replogle et al."]))
 
 
 # GMT Loading Functions
@@ -386,18 +413,8 @@ def create_drug_scatterplot(scatter_df: pd.DataFrame, title: str = "UMAP"):
     hue_order= sorted([m for m in term_colors.keys() if m not in ['not found','other']])
 
     hue_order = hue_order + ['other','not found']
-    
-    sns.set_theme(
-    context='paper',
-    style='whitegrid',
-        rc={
-            "axes.titlesize": 14,
-            "axes.labelsize": 12,
-            "xtick.labelsize": 10,
-            "ytick.labelsize": 10
-        }
-    )
-    fig = plt.figure(figsize=(10,10))
+
+    fig = plt.figure(figsize=(FIG_WIDTH, FIG_HEIGHT))
     ax = sns.scatterplot(
         data=df.sort_values('count', ascending=False),
         x='x',
@@ -407,15 +424,21 @@ def create_drug_scatterplot(scatter_df: pd.DataFrame, title: str = "UMAP"):
         hue_order=hue_order,
         palette=term_colors,
         edgecolor=None,
-        s=7
+        s=MARKER_SIZE
     )
-    plt.title(title.split(' ')[0].capitalize())
-    ax.get_legend().set_title('')
-    
-    plt.legend(loc='upper left', bbox_to_anchor=(1,1), markerscale=3, shadow=False, frameon=False, fontsize=8)
+    # despine
+    sns.despine(ax=ax, top=True, right=True)
+    # labels/title
+    ax.set(xticklabels=[], yticklabels=[])
+    plt.title(title)
     plt.xlabel('UMAP 1')
     plt.ylabel('UMAP 2')
-    fig.savefig(f"{FIGURE_DIR}/{title}.png", dpi=500, bbox_inches='tight')
+    # legend aesthetics
+    ax.get_legend().set_title('')
+    plt.legend(markerscale=3, shadow=False, frameon=False) 
+    sns.move_legend(ax, "upper left", bbox_to_anchor = (1,1), handletextpad=0.3, labelspacing=0.2, fontsize=LEGEND_FONT_SIZE)
+
+    fig.savefig(f"{FIGURE_DIR}/{'_'.join(title.split(' '))}.png", dpi=FIG_DPI, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -452,32 +475,22 @@ def create_gene_scatterplot(scatter_df: pd.DataFrame, top_terms_df: pd.DataFrame
     # Color mapping
     n_colors = max(3, min(20, df['color_go_term'].nunique() - 2))
     palette = sns.color_palette("tab20", n_colors).as_hex() 
-    term_colors = {c: palette[i % len(palette)] for i, c in enumerate(df['go_id'].unique())}
+    term_colors = {c: palette[i % len(palette)] for i, c in enumerate(df['wrapped_go'].unique())}
     term_colors['Other'] = '#CCCCCC'
     term_colors['No Enrichment'] = "#8F8F8F"
-    df['color'] = df['go_id'].map(term_colors)
+    df['color'] = df['wrapped_go'].map(term_colors)
     
-    sns.set_theme(
-    context='paper',
-    style='whitegrid',
-        rc={
-            "axes.titlesize": 14,
-            "axes.labelsize": 12,
-            "xtick.labelsize": 10,
-            "ytick.labelsize": 10
-        }
-    )
-    fig = plt.figure(figsize=(10,10))
+    fig = plt.figure(figsize=(FIG_WIDTH,FIG_HEIGHT))
     # Other/No Enrichment signatures
     sns.scatterplot(
         data=df[df['go_id'].isin(['Other','No Enrichment'])],
         x='x',
         y='y',
         alpha = 0.5,
-        hue='go_id',
+        hue='wrapped_go',
         palette=term_colors,
         edgecolor=None,
-        s=7
+        s=MARKER_SIZE
     )
     # Signatures assigned to specific GO terms
     ax = sns.scatterplot(
@@ -485,18 +498,26 @@ def create_gene_scatterplot(scatter_df: pd.DataFrame, top_terms_df: pd.DataFrame
         x='x',
         y='y',
         alpha = 1,
-        hue='go_id',
+        hue='wrapped_go',
         palette=term_colors,
         edgecolor=None,
-        s=7
+        s=MARKER_SIZE
     )
-    plt.title(title.split(' ')[0].capitalize())
-    ax.get_legend().set_title('')
-    sns.move_legend(ax, "upper right", bbox_to_anchor=(1.25, 1))
+     # despine
+    sns.despine(ax=ax, top=True, right=True)
+    # labels/title
+    ax.set(xticklabels=[], yticklabels=[])
+    plt.title(title)
     plt.xlabel('UMAP 1')
     plt.ylabel('UMAP 2')
-    fig.savefig(f"{FIGURE_DIR}/{title}.png", dpi=500, bbox_inches='tight')
-    df[['go_id','color_go_term']].drop_duplicates().to_csv(SCATTER_DIR / f'{title}_go_terms.csv', index=False)
+    # legend aesthetics
+    ax.get_legend().set_title('')
+    legend_cols = math.ceil(df['go_id'].nunique()/15)
+    # sns.move_legend(ax, "upper left", bbox_to_anchor = (1,1), handletextpad=0.3, labelspacing=0.2, fontsize=LEGEND_FONT_SIZE)
+    plt.legend(markerscale=3, shadow=False, frameon=False, loc='upper left', bbox_to_anchor = (1,1), ncol=legend_cols, fontsize=LEGEND_FONT_SIZE) 
+
+    fig.savefig(f"{FIGURE_DIR}/{'_'.join(title.split(' '))}.png", dpi=FIG_DPI, bbox_inches='tight')
+    df[['go_id','wrapped_go','color_go_term']].drop_duplicates().to_csv(SCATTER_DIR / f'{title}_go_terms.csv', index=False)
     plt.close(fig)
 
 # Main Processing Functions
@@ -583,11 +604,11 @@ def process_library(
             create_gene_scatterplot(scatter_df,
                                     top_terms_df,
                                     cluster_specific_terms_df,
-                                    title=f"{library_name} UMAP")
+                                    title=f"{GENE_TITLES[library_name]}")
             print(f"Saved: {library_name} UMAP")
         else:
             create_drug_scatterplot(scatter_df,
-                                    title = f"{library_name} UMAP")
+                                    title = f"{DRUG_TITLES[library_name]}")
             print(f"Saved: {library_name} UMAP")
 
     return
