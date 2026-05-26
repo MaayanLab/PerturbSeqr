@@ -444,10 +444,11 @@ def create_drug_scatterplot(scatter_df: pd.DataFrame, title: str = "UMAP"):
 
 def create_gene_scatterplot(scatter_df: pd.DataFrame, top_terms_df: pd.DataFrame, specific_terms_df: pd.DataFrame, title: str = "UMAP"):
     """
-    Create an interactive Bokeh scatterplot colored by 10 most commonly enriched GO terms
+    Create scatter plot colored by 10 most commonly enriched GO terms for paper figures
     Args:
         scatter_df: DataFrame with x, y, direction, cluster, term, genes columns
         top_terms_df: DataFrame with most enriched GO term for each signature
+        specific_terms_df: DataFrame with most specific GO term for each cluster
         title: Plot title
     Saves png image
     """
@@ -520,20 +521,96 @@ def create_gene_scatterplot(scatter_df: pd.DataFrame, top_terms_df: pd.DataFrame
     df[['go_id','wrapped_go','color_go_term']].drop_duplicates().to_csv(SCATTER_DIR / f'{title}_go_terms.csv', index=False)
     plt.close(fig)
 
+def create_scatterplot_cell_lines(scatter_df: pd.DataFrame, title: str = "UMAP"):
+    """
+    Create scatter plot colored by cell lines
+    Args:
+        scatter_df: DataFrame with x, y, direction, cluster, term, genes columns
+        title: Plot title
+    Saves png image
+    """
+     # remove outleirs
+    compute_outliers(scatter_df, 3)
+    df = scatter_df.copy()
+    df = df[~df['outlier']]
+    # parse cell line
+    def _clean_cell_line(term):
+        cell_line = term.split('::')[1].lower()
+        return re.sub(r'(,|\.311)+', '', cell_line.split(' ')[0].strip().lower()) if pd.notna(term) else term
+    if title not in (['Ginkgo Bioworks', 'PerturbAtlas Mouse', 'PerturbAtlas Human'
+                      'RummaGEO Chem', 'RummaGEO Gene', 'CREEDS Chem','CREEDS Gene']):
+        df['cell_line'] = df['term'].map(_clean_cell_line)
+    else:
+        df['cell_line'] = df['term'].map(lambda x: x.split('::')[1].lower() if x.split('::')[1] != '' else x.split('::')[2].lower())
+    # reorder for plotting
+    cell_line_counts = df.groupby('cell_line').size().reset_index(name='count')    
+    cell_line_counts = cell_line_counts.sort_values('count', ascending=False)
+    common_cell_lines = cell_line_counts.cell_line.to_list()[:20]
+    df = df.merge(cell_line_counts, how='left', on='cell_line')
+    df = df.sort_values('count', ascending=False)
+    df['cell_line_color'] = df['cell_line'].apply(lambda x: x if x in common_cell_lines else 'Other')
+    print(df.cell_line.unique())
+    print(df.cell_line_color.unique())
+    # Color mapping
+    n_colors = max(3, min(20, len(common_cell_lines)))
+    palette = sns.color_palette("tab20", n_colors).as_hex() 
+    cell_line_colors = {c: palette[i] for i, c in enumerate(common_cell_lines)}
+    cell_line_colors['Other'] = '#CCCCCC'
+    
+    fig = plt.figure(figsize=(FIG_WIDTH,FIG_HEIGHT))
+    # Other cell lines
+    sns.scatterplot(
+        data=df[df['cell_line_color']=='Other'],
+        x='x',
+        y='y',
+        alpha = 0.5,
+        hue='cell_line_color',
+        palette=cell_line_colors,
+        edgecolor=None,
+        s=MARKER_SIZE
+    )
+    # Signatures assigned to most common cell lines
+    ax = sns.scatterplot(
+        data=df[df['cell_line_color']!='Other'],
+        x='x',
+        y='y',
+        alpha = 1,
+        hue='cell_line_color',
+        palette=cell_line_colors,
+        edgecolor=None,
+        s=MARKER_SIZE
+    )
+     # despine
+    sns.despine(ax=ax, top=True, right=True)
+    # labels/title
+    ax.set(xticklabels=[], yticklabels=[])
+    plt.title(title)
+    plt.xlabel('UMAP 1')
+    plt.ylabel('UMAP 2')
+    # legend aesthetics
+    ax.get_legend().set_title('')
+    plt.legend(markerscale=3, shadow=False, frameon=False, loc='upper left', bbox_to_anchor = (1,1), fontsize=LEGEND_FONT_SIZE) 
+
+    fig.savefig(f"{FIGURE_DIR}/{'_'.join(title.split(' '))}_cell_lines.png", dpi=FIG_DPI, bbox_inches='tight')
+    plt.close(fig)
 # Main Processing Functions
 
 def process_library(
     library_name: str,
     run_enrichment: bool = True,
     run_specificity: bool = True,
-    save_umap: bool = True
+    save_umap: bool = True,
+    cell_line: bool = False,
 ) -> pd.DataFrame:
     """
     Process a single library (combined up+down) and save outputs.
 
     Args:
         library_name: Name of the library
-        run_enrichment: Indicator to run enrichment analysis or use saved results
+        run_enrichment: Indicator to run GO Term enrichment analysis or use saved results
+        run_specificity: Indicate to run GO Term cluster specificity analysis or use saved results
+        save_umap: Indicator to save PNG UMAP
+        cell_line: Indicator to color UMAP points by signature cell line
 
     Saves enrichment results and specficity table
     """
@@ -542,7 +619,7 @@ def process_library(
     ENRICHMENT_DIR.mkdir(parents=True, exist_ok=True)
     csv_path = ENRICHMENT_DIR / f"{library_name}.csv"
     
-    if library_name in GENE_LIBS:
+    if (library_name in GENE_LIBS) and (not cell_line):
         if run_enrichment:
             print(f"\n{'='*60}")
             print(f"Processing: {library_name}")
@@ -571,7 +648,7 @@ def process_library(
     
     scatter_df = get_scatter(library_name)
 
-    if library_name in GENE_LIBS:
+    if (library_name in GENE_LIBS) and (not cell_line):
         # identify broad GO terms in enrichment results
         id_pattern = r"GO:\d+"
         go_id_dict = {re.search(id_pattern, id).group():id for id in enrich_pmat.index.values}
@@ -601,13 +678,19 @@ def process_library(
     # Save UMAP visualization
     if save_umap:
         if library_name in GENE_LIBS:
-            create_gene_scatterplot(scatter_df,
-                                    top_terms_df,
-                                    cluster_specific_terms_df,
-                                    title=f"{GENE_TITLES[library_name]}")
+            if cell_line:
+                create_scatterplot_cell_lines(scatter_df, title=f"{GENE_TITLES[library_name]}")
+            else:
+                create_gene_scatterplot(scatter_df,
+                                        top_terms_df,
+                                        cluster_specific_terms_df,
+                                        title=f"{GENE_TITLES[library_name]}")
             print(f"Saved: {library_name} UMAP")
         else:
-            create_drug_scatterplot(scatter_df,
+            if cell_line:
+                create_scatterplot_cell_lines(scatter_df, title=f"{DRUG_TITLES[library_name]}")
+            else:
+                create_drug_scatterplot(scatter_df,
                                     title = f"{DRUG_TITLES[library_name]}")
             print(f"Saved: {library_name} UMAP")
 
@@ -620,7 +703,8 @@ def process_all_libraries(
     skip_drug: bool = False,
     run_enrichment: bool = False,
     run_specificity: bool = False,
-    save_umap: bool=False
+    save_umap: bool=False,
+    cell_line: bool=False
 ):
     """
     Process all configured libraries.
@@ -646,7 +730,8 @@ def process_all_libraries(
                 library_name,
                 run_enrichment=run_enrichment,
                 run_specificity=run_specificity,
-                save_umap=save_umap
+                save_umap=save_umap,
+                cell_line=cell_line
             )
         except FileNotFoundError as e:
             print(f"\nWarning: {e}")
@@ -722,6 +807,11 @@ Examples:
         action="store_true",
         help="Skip UMAP plot generation"
     )
+    parser.add_argument(
+        "--cell-line",
+        action="store_true",
+        help="Color UMAP points by signature cell line"
+    )
 
     args = parser.parse_args()
 
@@ -735,7 +825,8 @@ Examples:
                 args.library,
                 run_enrichment= not args.skip_enrichment,
                 run_specificity = not args.skip_cluster_enrichment,
-                save_umap = not args.no_umap
+                save_umap = not args.no_umap,
+                cell_line = args.cell_line
             )
         except FileNotFoundError as e:
             print(f"Error: {e}")
@@ -746,7 +837,8 @@ Examples:
             skip_drug=args.skip_drug,
             run_enrichment= not args.skip_enrichment,
             run_specificity = not args.skip_cluster_enrichment,
-            save_umap = not args.no_umap
+            save_umap = not args.no_umap,
+            cell_line = args.cell_line
         )
 
     print("\nDone!")
