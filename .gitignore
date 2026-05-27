@@ -55,9 +55,19 @@ next-env.d.ts
 
 *Mammalia
 
-benchmarking
+# benchmarking: track code + docs; ignore data, results, caches, large binaries
+benchmarking/reference_data/
+benchmarking/**/_cache/
+benchmarking/**/results/
+benchmarking/**/data/
+benchmarking/**/*.h5ad
+benchmarking/**/*.parquet
+benchmarking/**/*.feather
+benchmarking/**/*.gctx
+benchmarking/**/*.csv
+benchmarking/**/*.png
 
-docs/
+/docs/
 ARCHITECTURE.md
 
 # Local development
