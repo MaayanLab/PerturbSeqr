@@ -129,7 +129,7 @@ DRUG_LIBS = [
 
 DRUG_TITLES = dict(zip(DRUG_LIBS,
                        ["SciPlex","NIBR DRUG-seq","DeepCover MoA","Ginkgo Bioworks",
-                        "LINCS L1000 CP","CREEDS Chem","Tahoe-100M","Microarrays CMap",
+                        "LINCS L1000 CP","CREEDS Chem","Tahoe-100M","Microarrays CMAP",
                         "RummaGEO Chem"]))
 GENE_TITLES = dict(zip(GENE_LIBS,
                        ["LINCS L1000 XPR","PerturbAtlas Human","PerturbAtlas Mouse",

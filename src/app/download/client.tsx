@@ -331,7 +331,7 @@ type Dataset = {
 const drugPerturbationDatasets: Dataset[] = [
   {
     title: 'CMAP Build 02',
-    libraryName: 'Microarrays CMap',
+    libraryName: 'Microarrays CMAP',
     info: '',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/17008526/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/CMAP+Signatures+of+Differentially+Expressed+Genes+for+Small+Molecules',

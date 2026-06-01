@@ -8,7 +8,7 @@ const logoMap: Record<string, { src: string; darkSrc?: string; type: 'image' | '
   'Tahoe-100M': { src: '/images/tahoe-logo-new.png', type: 'image' },
   'LINCS L1000 CP': { src: '/images/cmap-logo.svg', type: 'svg' },
   'LINCS L1000 XPR': { src: '/images/cmap-logo.svg', type: 'svg' },
-  'Microarrays CMap': { src: '/images/broad-logo.png', type: 'image' },
+  'Microarrays CMAP': { src: '/images/broad-logo.png', type: 'image' },
   'NIBR DRUG-seq': { src: '/images/nibr-logo.png', type: 'image' },
   'SciPlex': { src: '/images/sciplex-logo.svg', darkSrc: '/images/sciplex-logo-dark.svg', type: 'svg' },
   'DeepCover MoA': { src: '/images/deepcovermoa-logo.png', type: 'image' },
@@ -27,7 +27,7 @@ const logoMap: Record<string, { src: string; darkSrc?: string; type: 'image' | '
 const shortLabels: Record<string, string> = {
   'LINCS L1000 CP': 'L1000 CP',
   'LINCS L1000 XPR': 'L1000 XPR',
-  'Microarrays CMap': 'CMap Arrays',
+  'Microarrays CMAP': 'CMAP Arrays',
   'NIBR DRUG-seq': 'NIBR DR-seq',
   'DeepCover MoA': 'DeepCover',
   'Ginkgo Bioworks': 'Ginkgo DR-seq',
@@ -40,7 +40,7 @@ const shortLabels: Record<string, string> = {
 const customSizes: Record<string, number> = {
   'RummaGEO Chem': 60,
   'RummaGEO Gene': 60,
-  'Microarrays CMap': 100,
+  'Microarrays CMAP': 100,
   'SciPlex': 75,
   'NIBR DRUG-seq': 100,
   'Replogle et al.': 200,
