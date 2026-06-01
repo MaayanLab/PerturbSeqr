@@ -19,7 +19,7 @@
       "sourceNote": "Tahoe Bio Tahoe-100M dataset. 379 drugs across 72 cell lines with concentration data."
     },
     "microarrays-cmap": {
-      "displayName": "Microarrays CMap",
+      "displayName": "Microarrays CMAP",
       "category": "drug",
       "source": "https://maayanlab.cloud/Harmonizome/dataset/CMAP+Signatures+of+Differentially+Expressed+Genes+for+Small+Molecules",
       "sourceNote": "Connectivity Map Build 02 (Lamb et al. 2006). Reprocessed from Harmonizome with full experimental metadata. 1,309 drugs across 5 cell lines."

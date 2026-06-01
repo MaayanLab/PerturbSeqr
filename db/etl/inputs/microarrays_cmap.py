@@ -6,7 +6,7 @@
 # ]
 # ///
 """
-Microarrays CMap (Build 02) — Harmonizome crisp GMTs joined with Bioconductor
+Microarrays CMAP (Build 02) — Harmonizome crisp GMTs joined with Bioconductor
 per-instance metadata to recover cell line / concentration / timepoint / batch.
 
 Sources:
