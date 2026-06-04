@@ -25,7 +25,7 @@ METADATA_DIR = BASE_DIR.parent / "public" / "metadata"
 FIG_DIR = BASE_DIR / "figures" / "summary"
 # Libraries
 DRUG_LIBS = ['LINCS L1000 CP', 'Tahoe-100M', 'RummaGEO Chem', 'NIBR DRUG-seq', 'Ginkgo Bioworks',
-                'Microarrays CMap', 'SciPlex', 'CREEDS Chem', 'DeepCover MoA']
+                'Microarrays CMAP', 'SciPlex', 'CREEDS Chem', 'DeepCover MoA']
 GENE_LIBS = ['LINCS L1000 XPR', 'Perturb Atlas Human', 'Perturb Atlas Mouse', 'RummaGEO Gene',
                 'Replogle et al.', 'CREEDS Gene']
 

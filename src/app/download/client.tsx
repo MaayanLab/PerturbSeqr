@@ -15,6 +15,7 @@ type TermStructure = {
   direction: string
   fields: TermField[]
   extraFields: TermField[]
+  caption?: string  // optional clarifying note rendered under the field legend
 }
 
 // Colors for the standardized canonical term fields, indexed positionally:
@@ -62,6 +63,10 @@ function TermStructureDisplay({ structure, compact = false }: { structure: TermS
         })}
         <span className={`${textSize} text-gray-600`}>{'\u25CF'} Direction</span>
       </div>
+      {/* Optional clarifying note */}
+      {structure.caption && (
+        <div className={`${textSize} text-gray-500 italic mt-1`}>{structure.caption}</div>
+      )}
     </div>
   )
 }
@@ -191,6 +196,7 @@ const termStructures: Record<string, TermStructure> = {
       { text: '0', label: 'Group 1' },
       { text: '1', label: 'Group 2' },
     ],
+    caption: 'When the GEO ID holds two comma-separated accessions, they are a GEO SubSeries and its parent SuperSeries, listed in ascending accession-number order.',
   },
   'perturb-atlas-human': {
     example: 'CPSF6::::K562::::::KD::::SRP013565::10000 up',
@@ -279,7 +285,7 @@ const termStructures: Record<string, TermStructure> = {
     ],
   },
   'rummageo-gene': {
-    example: 'atrx::::::::::KO::::mouse::GSE100464,GSE100465::0::3 up',
+    example: 'atrx::::::::::::::mouse::GSE100464,GSE100465::0::3 up',
     direction: 'up',
     fields: [
       { text: 'atrx', label: 'Perturbation' },
@@ -287,7 +293,7 @@ const termStructures: Record<string, TermStructure> = {
       { text: '', label: 'Cell Type' },
       { text: '', label: 'Timepoint' },
       { text: '', label: 'Concentration' },
-      { text: 'KO', label: 'Pert. Type' },
+      { text: '', label: 'Pert. Type' },
       { text: '', label: 'Method' },
     ],
     extraFields: [
@@ -296,6 +302,7 @@ const termStructures: Record<string, TermStructure> = {
       { text: '0', label: 'Group 1' },
       { text: '3', label: 'Group 2' },
     ],
+    caption: 'When the GEO ID holds two comma-separated accessions, they are a GEO SubSeries and its parent SuperSeries, listed in ascending accession-number order.',
   },
 }
 
@@ -331,7 +338,7 @@ type Dataset = {
 const drugPerturbationDatasets: Dataset[] = [
   {
     title: 'CMAP Build 02',
-    libraryName: 'Microarrays CMap',
+    libraryName: 'Microarrays CMAP',
     info: '',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/17008526/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/CMAP+Signatures+of+Differentially+Expressed+Genes+for+Small+Molecules',
