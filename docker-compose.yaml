@@ -78,7 +78,7 @@ services:
       context: .
       args:
         - NEXT_PUBLIC_MINIO_URL=${PUBLIC_S3_URL}
-    image: johnkgardner/perturbseqr-app:0.2.42
+    image: johnkgardner/perturbseqr-app:0.2.43
     pull_policy: if_not_present
     platform: linux/amd64
     restart: unless-stopped
