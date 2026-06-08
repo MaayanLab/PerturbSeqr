@@ -8,7 +8,8 @@ import Footer from "@/components/footer";
 
 export const metadata: Metadata = {
   title: "Perturb-Seqr",
-  description: "Perturb-Seqr",
+  description:
+    "Search through gene sets created from 12 Connectivity Mapping resources, organized into 16 gene set libraries: 9 drug perturbation and 7 gene perturbation followed by expression.",
   keywords: [
     "big data",
     "bioinformatics",
@@ -59,19 +60,19 @@ export const metadata: Metadata = {
     "L1000",
     "LINCS",
   ].join(", "),
-  metadataBase: new URL("https://perturbseqr.k8s.dev.maayanlab.cloud"),
+  metadataBase: new URL("https://perturbseqr.maayanlab.cloud"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: "Perturb-Seqr",
     description:
-      "Search through 646,250 gene sets created from 12 Connectivity Mapping resources that performed massive single perturbations followed by expression experiments in human cells",
-    url: "https://perturbseqr.k8s.dev.maayanlab.cloud",
-    siteName: "Perturb-Seqr",
+      "Search through gene sets created from 12 Connectivity Mapping resources, organized into 16 gene set libraries: 9 drug perturbation and 7 gene perturbation followed by expression.",
+    url: "https://perturbseqr.maayanlab.cloud",
+    siteName: "Ma'ayan Lab",
     images: [
       {
-        url: "https://perturbseqr.k8s.dev.maayanlab.cloud/images/perturbseqr-logo.png",
+        url: "https://perturbseqr.maayanlab.cloud/images/perturbseqr-logo.png",
         width: 1024,
         height: 998,
       },
