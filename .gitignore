@@ -77,6 +77,9 @@ public/umap/enrich/
 # Use case data files
 *.xlsx
 
+# UMAP figures (too big for repo storage)
+manuscript/figures/umap
+
 # Data files
 *.tsv
 *.rpt
