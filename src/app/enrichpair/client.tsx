@@ -25,6 +25,7 @@ import { preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLink
 import { useRouter } from "next/navigation";
 import libraryConfig from "@/config/libraries.json";
 import { LibraryBarGraphGrid, LibraryCardPaired } from "@/components/BarGraph";
+import ShareButton from "@/components/shareButton";
 import { SortableHeader } from "@/components/SortableHeader";
 
 const allLibraryDisplayNames = Object.values(libraryConfig.libraries).map((l: any) => l.displayName as string);
@@ -230,6 +231,7 @@ function EnrichmentResults({
             Table
           </a>
         </li>
+        <ShareButton />
       </ul>
       <h2 className="text-lg font-bold">
          {!enrichmentResults?.currentBackground?.pairedEnrich && !error ? (
