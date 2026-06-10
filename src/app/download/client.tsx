@@ -15,15 +15,19 @@ type TermStructure = {
   direction: string
   fields: TermField[]
   extraFields: TermField[]
+  caption?: string  // optional clarifying note rendered under the field legend
 }
 
-// Standard field colors (positions 0-4)
-const FIELD_COLORS = ['#2563eb', '#059669', '#0891b2', '#d97706', '#dc2626']
-// Extra field colors (positions 5+)
-const EXTRA_COLORS = ['#7c3aed', '#be185d', '#6d28d9', '#9333ea']
+// Colors for the standardized canonical term fields, indexed positionally:
+// 0=perturbation, 1=cellLine, 2=cellType, 3=timepoint, 4=concentration,
+// 5=perturbation type, 6=perturbation method (5-6 are gene-library-only).
+const FIELD_COLORS = ['#2563eb', '#059669', '#0891b2', '#d97706', '#dc2626', '#7c3aed', '#be185d']
+// Dataset-specific extras (hollow circle).
+const EXTRA_COLORS = ['#6d28d9', '#9333ea', '#a855f7', '#c026d3']
 
 function TermStructureDisplay({ structure, compact = false }: { structure: TermStructure; compact?: boolean }) {
   const allFields = [...structure.fields, ...structure.extraFields]
+  const standardCount = structure.fields.length
   const textSize = compact ? 'text-xs' : 'text-sm'
   const monoSize = compact ? 'text-xs' : 'text-base'
 
@@ -35,7 +39,7 @@ function TermStructureDisplay({ structure, compact = false }: { structure: TermS
           <span key={i}>
             <span
               className="font-bold"
-              style={{ color: i < 5 ? FIELD_COLORS[i] : EXTRA_COLORS[(i - 5) % EXTRA_COLORS.length] }}
+              style={{ color: i < standardCount ? FIELD_COLORS[i] : EXTRA_COLORS[(i - standardCount) % EXTRA_COLORS.length] }}
             >
               {field.text || '\u00A0'}
             </span>
@@ -48,8 +52,9 @@ function TermStructureDisplay({ structure, compact = false }: { structure: TermS
       {/* Labels */}
       <div className="flex flex-wrap gap-x-2 gap-y-0.5">
         {allFields.map((field, i) => {
-          const color = i < 5 ? FIELD_COLORS[i] : EXTRA_COLORS[(i - 5) % EXTRA_COLORS.length]
-          const dot = i < 5 ? '\u25CF' : '\u25CB'
+          const isStandard = i < standardCount
+          const color = isStandard ? FIELD_COLORS[i] : EXTRA_COLORS[(i - standardCount) % EXTRA_COLORS.length]
+          const dot = isStandard ? '\u25CF' : '\u25CB'
           return (
             <span key={i} className={textSize} style={{ color }}>
               {dot} {field.label}
@@ -58,6 +63,10 @@ function TermStructureDisplay({ structure, compact = false }: { structure: TermS
         })}
         <span className={`${textSize} text-gray-600`}>{'\u25CF'} Direction</span>
       </div>
+      {/* Optional clarifying note */}
+      {structure.caption && (
+        <div className={`${textSize} text-gray-500 italic mt-1`}>{structure.caption}</div>
+      )}
     </div>
   )
 }
@@ -93,7 +102,7 @@ const termStructures: Record<string, TermStructure> = {
     extraFields: [],
   },
   'nibr-drug-seq': {
-    example: 'Diphenidol::U2OS::::24h::0.01uM::AF-80-QK39::batchid1 up',
+    example: 'Diphenidol::U2OS::::24h::0.01uM::AF-80-QK39 up',
     direction: 'up',
     fields: [
       { text: 'Diphenidol', label: 'Perturbation' },
@@ -104,7 +113,6 @@ const termStructures: Record<string, TermStructure> = {
     ],
     extraFields: [
       { text: 'AF-80-QK39', label: 'NSN Code' },
-      { text: 'batchid1', label: 'Batch' },
     ],
   },
   'microarrays-cmap': {
@@ -188,25 +196,27 @@ const termStructures: Record<string, TermStructure> = {
       { text: '0', label: 'Group 1' },
       { text: '1', label: 'Group 2' },
     ],
+    caption: 'When the GEO ID holds two comma-separated accessions, they are a GEO SubSeries and its parent SuperSeries, listed in ascending accession-number order.',
   },
   'perturb-atlas-human': {
-    example: 'CPSF6::K562::::::::KD::SRP013565::10000 up',
+    example: 'CPSF6::::K562::::::KD::::SRP013565::10000 up',
     direction: 'up',
     fields: [
       { text: 'CPSF6', label: 'Perturbation' },
-      { text: 'K562', label: 'Cell Line' },
-      { text: '', label: 'Cell Type' },
+      { text: '', label: 'Cell Line' },
+      { text: 'K562', label: 'Cell Type' },
       { text: '', label: 'Timepoint' },
       { text: '', label: 'Concentration' },
+      { text: 'KD', label: 'Pert. Type' },
+      { text: '', label: 'Method' },
     ],
     extraFields: [
-      { text: 'KD', label: 'Pert. Type' },
       { text: 'SRP013565', label: 'SRA ID' },
       { text: '10000', label: 'Atlas ID' },
     ],
   },
   'perturb-atlas-mouse': {
-    example: 'Adar1::::Anti-CD40 and anti-IgM activated B cells::::::KO::SRP360154::1001 up',
+    example: 'Adar1::::Anti-CD40 and anti-IgM activated B cells::::::KO::::SRP360154::1001 up',
     direction: 'up',
     fields: [
       { text: 'Adar1', label: 'Perturbation' },
@@ -214,15 +224,16 @@ const termStructures: Record<string, TermStructure> = {
       { text: 'Anti-CD40 and anti-IgM activated B cells', label: 'Cell Type' },
       { text: '', label: 'Timepoint' },
       { text: '', label: 'Concentration' },
+      { text: 'KO', label: 'Pert. Type' },
+      { text: '', label: 'Method' },
     ],
     extraFields: [
-      { text: 'KO', label: 'Pert. Type' },
       { text: 'SRP360154', label: 'SRA ID' },
       { text: '1001', label: 'Atlas ID' },
     ],
   },
   'lincs-l1000-xpr': {
-    example: 'AKT1::A549::::96H::::HAHN001::A03 up',
+    example: 'AKT1::A549::::96H::::KO::Cas9::HAHN001::A03 up',
     direction: 'up',
     fields: [
       { text: 'AKT1', label: 'Perturbation' },
@@ -230,6 +241,8 @@ const termStructures: Record<string, TermStructure> = {
       { text: '', label: 'Cell Type' },
       { text: '96H', label: 'Timepoint' },
       { text: '', label: 'Concentration' },
+      { text: 'KO', label: 'Pert. Type' },
+      { text: 'Cas9', label: 'Method' },
     ],
     extraFields: [
       { text: 'HAHN001', label: 'Pert. ID' },
@@ -237,7 +250,7 @@ const termStructures: Record<string, TermStructure> = {
     ],
   },
   'replogle-perturb-seq': {
-    example: 'ZC3H18::K562::::day6::::P1P2::essential::10023 up',
+    example: 'ZC3H18::K562::::day6::::KD::CRISPRi::P1P2::essential::10023 up',
     direction: 'up',
     fields: [
       { text: 'ZC3H18', label: 'Perturbation' },
@@ -245,6 +258,8 @@ const termStructures: Record<string, TermStructure> = {
       { text: '', label: 'Cell Type' },
       { text: 'day6', label: 'Timepoint' },
       { text: '', label: 'Concentration' },
+      { text: 'KD', label: 'Pert. Type' },
+      { text: 'CRISPRi', label: 'Method' },
     ],
     extraFields: [
       { text: 'P1P2', label: 'Guide' },
@@ -253,7 +268,7 @@ const termStructures: Record<string, TermStructure> = {
     ],
   },
   'creeds-gene': {
-    example: 'Foxo1::::T reg::::::KO::mus musculus::GSE40655.508 up',
+    example: 'Foxo1::::T reg::::::KO::::mus musculus::GSE40655.508 up',
     direction: 'up',
     fields: [
       { text: 'Foxo1', label: 'Perturbation' },
@@ -261,29 +276,33 @@ const termStructures: Record<string, TermStructure> = {
       { text: 'T reg', label: 'Cell Type' },
       { text: '', label: 'Timepoint' },
       { text: '', label: 'Concentration' },
+      { text: 'KO', label: 'Pert. Type' },
+      { text: '', label: 'Method' },
     ],
     extraFields: [
-      { text: 'KO', label: 'Pert. Type' },
       { text: 'mus musculus', label: 'Organism' },
       { text: 'GSE40655.508', label: 'GEO ID' },
     ],
   },
   'rummageo-gene': {
-    example: 'irf1::BEAS-2B::respiratory epithelial cells::24h::::human::GSE114284::1::0 up',
+    example: 'atrx::::::::::::::mouse::GSE100464,GSE100465::0::3 up',
     direction: 'up',
     fields: [
-      { text: 'irf1', label: 'Perturbation' },
-      { text: 'BEAS-2B', label: 'Cell Line' },
-      { text: 'respiratory epithelial cells', label: 'Cell Type' },
-      { text: '24h', label: 'Timepoint' },
+      { text: 'atrx', label: 'Perturbation' },
+      { text: '', label: 'Cell Line' },
+      { text: '', label: 'Cell Type' },
+      { text: '', label: 'Timepoint' },
       { text: '', label: 'Concentration' },
+      { text: '', label: 'Pert. Type' },
+      { text: '', label: 'Method' },
     ],
     extraFields: [
-      { text: 'human', label: 'Organism' },
-      { text: 'GSE114284', label: 'GEO ID' },
-      { text: '1', label: 'Group 1' },
-      { text: '0', label: 'Group 2' },
+      { text: 'mouse', label: 'Organism' },
+      { text: 'GSE100464,GSE100465', label: 'GEO ID' },
+      { text: '0', label: 'Group 1' },
+      { text: '3', label: 'Group 2' },
     ],
+    caption: 'When the GEO ID holds two comma-separated accessions, they are a GEO SubSeries and its parent SuperSeries, listed in ascending accession-number order.',
   },
 }
 
@@ -319,7 +338,7 @@ type Dataset = {
 const drugPerturbationDatasets: Dataset[] = [
   {
     title: 'CMAP Build 02',
-    libraryName: 'Microarrays CMap',
+    libraryName: 'Microarrays CMAP',
     info: '',
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/17008526/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/CMAP+Signatures+of+Differentially+Expressed+Genes+for+Small+Molecules',
@@ -339,7 +358,7 @@ const drugPerturbationDatasets: Dataset[] = [
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/27667448/',
     sourceUrl: 'https://maayanlab.cloud/CREEDS/',
     sourceLabel: 'CREEDS',
-    sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/CREEDS+Signatures+of+Differentially+Expressed+Genes+for+Drugs',
+    sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/GEO+Signatures+of+Differentially+Expressed+Genes+for+Small+Molecules',
     sourceLabel2: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/creeds-chem.gmt.gz`,
     fullSignatures: [
@@ -364,7 +383,7 @@ const drugPerturbationDatasets: Dataset[] = [
     title: 'Ginkgo Bioworks',
     libraryName: 'Ginkgo Bioworks',
     info: '',
-    publicationUrl: 'https://www.ginkgobioworks.com/',
+    publicationUrl: 'https://datapoints.ginkgo.bio/dataset-access',
     sourceUrl: 'https://huggingface.co/ginkgo-datapoints',
     sourceLabel: 'Hugging Face',
     note: 'Data used under license',
@@ -406,12 +425,16 @@ const drugPerturbationDatasets: Dataset[] = [
     title: 'RummaGEO Drug Perturbations',
     libraryName: 'RummaGEO Chem',
     info: '',
-    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/38645198/',
+    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/39569206/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/RummaGEO+Drug+Perturbation+Signatures',
     sourceLabel: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/rummageo-chem.gmt.gz`,
     fullSignatures: [
       { url: `${MINIO_BASE}/rummageo-chem-full.txt.gz`, label: 'Discretized Matrix' },
+      { url: `${MINIO_BASE}/rummageo-human-de-aligned.txt.gz`, label: 'Human Limma-Voom logFC' },
+      { url: `${MINIO_BASE}/rummageo-mouse-de-aligned.txt.gz`, label: 'Mouse Limma-Voom logFC' },
+      { url: `${MINIO_BASE}/rummageo-human-de-aligned.h5ad`, label: 'Human DE h5ad (logFC + t + adj.P.Val)' },
+      { url: `${MINIO_BASE}/rummageo-mouse-de-aligned.h5ad`, label: 'Mouse DE h5ad (logFC + t + adj.P.Val)' },
     ],
     note: 'See also ',
     noteLinkText: 'RummaGEO',
@@ -452,7 +475,7 @@ const genePerturbationDatasets: Dataset[] = [
     title: 'CM4AI',
     value: '0 signatures',
     info: '',
-    publicationUrl: '',
+    publicationUrl: 'https://www.biorxiv.org/content/10.1101/2024.11.03.621734v2',
     sourceUrl: 'https://cm4ai.org',
     sourceLabel: 'CM4AI',
     fullSignatures: [
@@ -467,7 +490,7 @@ const genePerturbationDatasets: Dataset[] = [
     publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/27667448/',
     sourceUrl: 'https://maayanlab.cloud/CREEDS/',
     sourceLabel: 'CREEDS',
-    sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/CREEDS+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations',
+    sourceUrl2: 'https://maayanlab.cloud/Harmonizome/dataset/GEO+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations',
     sourceLabel2: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/creeds-gene.gmt.gz`,
     fullSignatures: [
@@ -535,12 +558,16 @@ const genePerturbationDatasets: Dataset[] = [
     title: 'RummaGEO Gene Perturbations',
     libraryName: 'RummaGEO Gene',
     info: '',
-    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/38645198/',
+    publicationUrl: 'https://pubmed.ncbi.nlm.nih.gov/39569206/',
     sourceUrl: 'https://maayanlab.cloud/Harmonizome/dataset/RummaGEO+Gene+Perturbation+Signatures',
     sourceLabel: 'Harmonizome',
     gmtUrl: `${MINIO_BASE}/rummageo-gene.gmt.gz`,
     fullSignatures: [
       { url: `${MINIO_BASE}/rummageo-gene-full.txt.gz`, label: 'Discretized Matrix' },
+      { url: `${MINIO_BASE}/rummageo-human-de-aligned.txt.gz`, label: 'Human Limma-Voom logFC' },
+      { url: `${MINIO_BASE}/rummageo-mouse-de-aligned.txt.gz`, label: 'Mouse Limma-Voom logFC' },
+      { url: `${MINIO_BASE}/rummageo-human-de-aligned.h5ad`, label: 'Human DE h5ad (logFC + t + adj.P.Val)' },
+      { url: `${MINIO_BASE}/rummageo-mouse-de-aligned.h5ad`, label: 'Mouse DE h5ad (logFC + t + adj.P.Val)' },
     ],
     note: 'See also ',
     noteLinkText: 'RummaGEO',
@@ -589,6 +616,30 @@ const metadataDatasets: Dataset[] = [
     info: 'RummaGEO experiment annotations',
     publicationUrl: '',
     sourceUrl: 'https://rummageo.com',
+    sourceLabel: 'Link',
+  },
+  {
+    title: 'PerturbAtlas Metadata',
+    value: 'Signature metadata',
+    info: 'PerturbAtlas study and sample annotations',
+    publicationUrl: '',
+    sourceUrl: 'https://drive.google.com/drive/folders/1KPKn_4zCsNRhEmBiQjuSY67vR5kautiA',
+    sourceLabel: 'Link',
+  },
+  {
+    title: 'CREEDS Gene Metadata',
+    value: 'Signature metadata',
+    info: 'CREEDS gene perturbation annotations',
+    publicationUrl: '',
+    sourceUrl: 'https://maayanlab.cloud/CREEDS/download/single_gene_perturbations-v1.0.json',
+    sourceLabel: 'Link',
+  },
+  {
+    title: 'CREEDS Chem Metadata',
+    value: 'Drug metadata',
+    info: 'CREEDS chemical perturbation annotations',
+    publicationUrl: '',
+    sourceUrl: 'https://maayanlab.cloud/CREEDS/download/single_drug_perturbations-v1.0.json',
     sourceLabel: 'Link',
   },
 ]

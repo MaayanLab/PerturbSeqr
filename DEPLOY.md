@@ -4,19 +4,25 @@
 
 ```bash
 cp .env.example .env
-# edit .env with real passwords
+# edit .env:
+#   - POSTGRES_PASSWORD: secure value
+#   - MINIO_ROOT_PASSWORD: secure value
+#   - S3_URL: http://minio:<MINIO_ROOT_PASSWORD>@perturbseqr-minio:9000/data
+#   - PUBLIC_S3_URL: https://s3.perturbseqr.maayanlab.cloud/data
 
-# Build and push images via GitHub Actions "Build All Images" workflow
 kube-compose up
 ```
 
 ## MinIO + Ingest
 
-After `kube-compose up`, create the MinIO bucket, upload GMT files, then run ingest.
+Create a secret holding env values and then set up the MinIO bucket, upload GMT and files for download, run ingest.
 
 ```bash
-# Create data bucket
-COMPOSE_PROFILES=jobs kube-compose run minio-setup
+# Create secret from .env
+kubectl create secret generic perturbseqr-env --from-env-file=.env -n perturbseqr
+
+# Create data bucket and apply public-read policy (denies public access to enrich/*)
+kubectl create -f k8s/minio-setup-job.yaml -n perturbseqr
 ```
 
 ```bash
@@ -28,13 +34,17 @@ COMPOSE_PROFILES=jobs kube-compose run minio-setup
 #secret_access_key = MINIO_ROOT_PASSWORD from .env
 #endpoint = https://s3.perturbseqr.maayanlab.cloud
 
-# upload .gmt.gz files to gmts bucket
 rclone copyto --progress gmts perturbseqr:data/
+rclone copy --progress db/data/full-signatures/ perturbseqr:data/
 ```
 
 ```bash
 # Run ingest
-COMPOSE_PROFILES=jobs kube-compose run ingest
+kubectl create -f k8s/ingest-incremental-job.yaml -n perturbseqr
+
+# Logs
+kubectl get jobs -n perturbseqr
+kubectl logs -f job/<job-name> -n perturbseqr
 
 # Restart app so PostGraphile picks up the new schema
 kube-compose restart perturbseqr-app
@@ -43,20 +53,40 @@ kube-compose restart perturbseqr-app
 ## Updating
 
 ```bash
-# Rebuild images via GitHub Actions "Build All Images", then:
-kube-compose restart perturbseqr-app
-```
-
-## Clean rebuild
-
-```bash
-kube-compose down -v
+kube-compose version perturbseqr-app patch
+docker compose build perturbseqr-app
+docker compose push perturbseqr-app
+kube-compose diff
 kube-compose up
 ```
 
-Then redo MinIO + Ingest steps above.
+Or bump tags in `docker-compose.yaml`, rebuild, and run `kube-compose up`.
+
+## Clean re-ingest (preserves user_gene_set)
+
+```bash
+kubectl create -f k8s/ingest-clean-job.yaml -n perturbseqr
+```
+
+## Full rebuild
+
+`-v` deletes the postgres and minio PVCs requiring new MinIO uploads and a DB rebuild.
+
+```bash
+kube-compose down -v
+kubectl delete secret perturbseqr-env -n perturbseqr
+kube-compose up
+
+kubectl create secret generic perturbseqr-env --from-env-file=.env -n perturbseqr
+kubectl create -f k8s/minio-setup-job.yaml -n perturbseqr
+
+# Re-upload GMT files
+
+# Fresh ingest
+kubectl create -f k8s/ingest-incremental-job.yaml -n perturbseqr
+```
 
 ## URLs
 
-- App: https://perturbseqr.k8s.dev.maayanlab.cloud
-- MinIO Console: https://console.s3.perturbseqr.k8s.dev.maayanlab.cloud
+- App: https://perturbseqr.maayanlab.cloud
+- MinIO Console: https://console.s3.perturbseqr.maayanlab.cloud

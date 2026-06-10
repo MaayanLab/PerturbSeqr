@@ -74,21 +74,19 @@ export default function InputFormUpDown({setInputSingle, selectedLibraries = [],
   const handleFileChosenUp = React.useCallback((file: File | null) => {
       fileReader.current = new FileReader();
       fileReader.current.onloadend = handleFileReadUp;
-      console.log(file)
       fileReader.current.readAsText(file!);
   }, [handleFileReadUp]);
 
   const handleFileChosenDown = React.useCallback((file: File | null) => {
     fileReader.current = new FileReader();
     fileReader.current.onloadend = handleFileReadDown;
-    console.log(file)
     fileReader.current.readAsText(file!);
 }, [handleFileReadDown]);
 
   return (
     <>
      
-      <h1 className="text-xl">Input up & down gene sets</h1>
+      <h1 className="text-xl">Input up and down gene sets</h1>
       <p className="prose">
         Try a gene set signature <a
           className="font-bold cursor-pointer"
@@ -173,7 +171,7 @@ export default function InputFormUpDown({setInputSingle, selectedLibraries = [],
         </div>
         <span className={classNames("loading", "w-6", { 'hidden': !loading })}></span>
         <div className={classNames("alert alert-error", { 'hidden': !error })}>{error?.message ?? null}</div>
-        <button className="btn mx-auto" type="submit" disabled={(genesUp.length < 1 || genesDown.length < 1)}>Submit</button>
+        <button className="btn btn-neutral mx-auto" type="submit" disabled={(genesUp.length < 1 || genesDown.length < 1)}>Submit</button>
         <button className="btn btn-outline btn-sm mx-auto mt-1" type="button" disabled={genesUp.length < 1 && genesDown.length < 1} onClick={() => { setRawGenesUp(''); setRawGenesDown(''); if (fileInputUpRef.current) fileInputUpRef.current.value = ''; if (fileInputDownRef.current) fileInputDownRef.current.value = '' }}>Clear</button>
       </form>
       <button className='btn btn-outline text-xs p-2' onClick={() => setInputSingle(true)}>SWITCH TO SINGLE SET INPUT</button>

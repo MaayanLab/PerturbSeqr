@@ -20,16 +20,21 @@ import SignaturesModal from "@/components/signaturesModal";
 import type { ContributingSignature } from "@/components/signaturesModal";
 import { FaFilter, FaSortUp } from "react-icons/fa6";
 import { IoMdInformationCircleOutline } from "react-icons/io";
-import { parseTerm, getCellDisplay } from "@/utils/parseTerm";
+import { parseTerm, getCellDisplay, formatPerturbationWithType } from "@/utils/parseTerm";
 import { preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary, getDatasetUrl } from "@/utils/metadataLookup";
 import { useRouter } from "next/navigation";
 import libraryConfig from "@/config/libraries.json";
+import { LibraryBarGraphGrid, LibraryCardPaired } from "@/components/BarGraph";
+import ShareButton from "@/components/shareButton";
+import { SortableHeader } from "@/components/SortableHeader";
 
 const allLibraryDisplayNames = Object.values(libraryConfig.libraries).map((l: any) => l.displayName as string);
 const drugLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'drug').map((l: any) => l.displayName as string);
 const geneLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'gene').map((l: any) => l.displayName as string);
 
-const pageSize = 12;
+import { DEFAULT_CONSENSUS_TOP_N_SIGNATURES, DEFAULT_PVALUE_CUTOFF, RESULTS_PER_PAGE } from '@/constants/enrichment';
+
+const pageSize = RESULTS_PER_PAGE;
 
 type GeneSetModalT =
   | {
@@ -106,21 +111,20 @@ function EnrichmentResults({
     moas: "false",
     sort: "pvalue_mimic",
     ko: "false",
-    topn: "10000",
-    pvaluele: "0.05",
-    ds: "",
+    topn: String(DEFAULT_CONSENSUS_TOP_N_SIGNATURES),
+    pvaluele: String(DEFAULT_PVALUE_CUTOFF),
+    libraries: "",
+    view: "",
   });
   const [rawTerm, setRawTerm] = React.useState("");
-  const [topNSlider, setTopNSlider] = React.useState(10000);
-  const [pvalueLeSlider, setPvalueLeSlider] = React.useState(0.05);
+  const [topNSlider, setTopNSlider] = React.useState(DEFAULT_CONSENSUS_TOP_N_SIGNATURES);
+  const [pvalueLeSlider, setPvalueLeSlider] = React.useState(DEFAULT_PVALUE_CUTOFF);
   const [drugLookupLoaded, setDrugLookupLoaded] = React.useState(false);
   const [datasetDropdownOpen, setDatasetDropdownOpen] = React.useState(false);
   const [sigModalData, setSigModalData] = React.useState<{ signatures: ContributingSignature[]; drug: string } | null>(null);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
-  // Cache the unfiltered total count so post-search filtering doesn't change the headline number
-  const [unfilteredTotalCount, setUnfilteredTotalCount] = React.useState<number | null>(null);
 
-  const { page, term, fda, consensus, moas, sort, ko, topN, pvalueLe, datasetFilter } =
+  const { page, term, fda, consensus, moas, sort, ko, topN, pvalueLe, datasetFilter, view } =
     React.useMemo(
       () => ({
         page: queryString.page ? +queryString.page : 1,
@@ -130,12 +134,33 @@ function EnrichmentResults({
         moas: queryString.moas === "true",
         sort: queryString.sort,
         ko: queryString.ko === "true",
-        topN: parseInt(queryString?.topn ?? "10000"),
-        pvalueLe: parseFloat(queryString?.pvaluele ?? "0.05"),
-        datasetFilter: queryString.ds ? queryString.ds.split(",").filter(Boolean) : [] as string[],
+        topN: parseInt(queryString?.topn ?? String(DEFAULT_CONSENSUS_TOP_N_SIGNATURES)),
+        pvalueLe: parseFloat(queryString?.pvaluele ?? String(DEFAULT_PVALUE_CUTOFF)),
+        datasetFilter: queryString.libraries ? queryString.libraries.split(",").filter(Boolean) : [] as string[],
+        view: (queryString.view === "table" ? "table" : "chart") as "chart" | "table",
       }),
       [queryString]
     );
+
+  const activeFilters: string[] = [];
+  if (datasetFilter.length > 0 && !datasetFilter.includes("__none__"))
+    activeFilters.push(`${datasetFilter.length} dataset${datasetFilter.length > 1 ? "s" : ""}`);
+  if (fda) activeFilters.push("FDA approved");
+  if (queryString.dir === "up") activeFilters.push("mimickers");
+  if (queryString.dir === "down") activeFilters.push("reversers");
+  const filterClause =
+    activeFilters.length === 0
+      ? ""
+      : ` that pass the ${activeFilters.length === 1 ? `${activeFilters[0]} filter` : `${activeFilters.join(", ")} filters`}`;
+
+  // Libraries to render cards for. The sentinel "__none__" means the user
+  // explicitly cleared the Dataset filter — render no cards. Otherwise fall
+  // back to all libraries.
+  const chartLibraries = React.useMemo(() => {
+    if (datasetFilter.includes("__none__")) return [];
+    if (datasetFilter.length > 0) return datasetFilter;
+    return libraryNames ?? allLibraryDisplayNames;
+  }, [datasetFilter, libraryNames]);
   // Query enrichment results
   const { data: enrichmentResults, error } = usePairEnrichmentQueryQuery({
     skip: genesUp.length === 0 || genesDown.length === 0,
@@ -143,7 +168,7 @@ function EnrichmentResults({
       genesUp,
       genesDown,
       filterTerm: term + " " + queryString.dir,
-      libraryNames: libraryNames,
+      libraryNames: datasetFilter.length > 0 ? datasetFilter : libraryNames,
       offset: (page - 1) * pageSize,
       first: pageSize,
       filterFda: fda,
@@ -151,16 +176,8 @@ function EnrichmentResults({
       filterKo: ko,
       topN: topN,
       pvalueLe: pvalueLe,
-      postSearchFilterLibraryNames: datasetFilter.length > 0 ? datasetFilter : null,
     },
   });
-
-  // Cache unfiltered total count when no post-search filters are active
-  React.useEffect(() => {
-    if (datasetFilter.length === 0 && !fda && !queryString.dir && enrichmentResults?.currentBackground?.pairedEnrich?.totalCount != null) {
-      setUnfilteredTotalCount(enrichmentResults.currentBackground.pairedEnrich.totalCount);
-    }
-  }, [datasetFilter.length, fda, queryString.dir, enrichmentResults?.currentBackground?.pairedEnrich?.totalCount]);
 
 
   // Close dataset dropdown on outside click
@@ -196,8 +213,27 @@ function EnrichmentResults({
   }, [enrichmentResults]);
 
   return (
-    <div className="flex flex-col gap-2 my-2">
-      <h2 className="text-md font-bold">
+    <div className="flex flex-col gap-1 mt-1">
+      <ul className="menu menu-horizontal gap-3 text-base justify-center py-0">
+        <li>
+          <a
+            className={view === "chart" ? "active" : ""}
+            onClick={() => setQueryString({ view: "chart" })}
+          >
+            Bar Graphs
+          </a>
+        </li>
+        <li>
+          <a
+            className={view === "table" ? "active" : ""}
+            onClick={() => setQueryString({ view: "table" })}
+          >
+            Table
+          </a>
+        </li>
+        <ShareButton />
+      </ul>
+      <h2 className="text-lg font-bold">
          {!enrichmentResults?.currentBackground?.pairedEnrich && !error ? (
                   <>
                     Rummaging through <Stats show_gene_sets />.
@@ -206,7 +242,7 @@ function EnrichmentResults({
                   <>
                     {consensus ? (
                       <>
-                        After rummaging through {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.pairedEnrich?.geneSetCount || 0)} gene sets.{" "}
+                        After rummaging through {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.pairedEnrich?.geneSetCount || 0)} gene set pairs.{" "}
                         <Image
                           className="inline-block rounded"
                           src="/images/perturbseqr-logo.png"
@@ -222,7 +258,7 @@ function EnrichmentResults({
                         consensus perturbations.
                       </>
                     ) : moas ? <>
-                    After rummaging through {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.pairedEnrich?.geneSetCount || 0)} gene sets.{" "}
+                    After rummaging through {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.pairedEnrich?.geneSetCount || 0)} gene set pairs.{" "}
                         <Image
                           className="inline-block rounded"
                           src="/images/perturbseqr-logo.png"
@@ -238,7 +274,7 @@ function EnrichmentResults({
                         consensus MoAs.</>
                     : (
                       <>
-                        After rummaging through {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.pairedEnrich?.geneSetCount || 0)} gene sets.{" "}
+                        After rummaging through {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.pairedEnrich?.geneSetCount || 0)} gene set pairs.{" "}
                         <Image
                           className="inline-block rounded"
                           src="/images/perturbseqr-logo.png"
@@ -248,30 +284,20 @@ function EnrichmentResults({
                         ></Image>{" "}
                         found{" "}
                         {Intl.NumberFormat("en-US", {}).format(
-                          unfilteredTotalCount ?? enrichmentResults?.currentBackground?.pairedEnrich?.totalCount ?? 0
+                          enrichmentResults?.currentBackground?.pairedEnrich?.totalCount || 0
                         )}{" "}
-                        statistically significant matches.
+                        statistically significant matches{filterClause}.
                       </>
                     )}
                   </>
                 )}
       </h2>
-      {(() => {
-        const filters: string[] = [];
-        if (datasetFilter.length > 0 && !datasetFilter.includes("__none__"))
-          filters.push(`${datasetFilter.length} dataset${datasetFilter.length > 1 ? "s" : ""}`);
-        if (fda) filters.push("FDA approved");
-        if (queryString.dir === "up") filters.push("mimickers");
-        if (queryString.dir === "down") filters.push("reversers");
-        if (filters.length > 0)
-          return (
-            <p className="text-sm text-base-content/70 mt-1">
-              Filtering by {filters.join(", ")} — showing{" "}
-              {Intl.NumberFormat("en-US", {}).format(enrichmentResults?.currentBackground?.pairedEnrich?.totalCount || 0)} matches.
-            </p>
-          );
-        return null;
-      })()}
+      {view === "chart" && (
+        <p className="text-sm text-base-content/70 mt-1">
+          Sorting library cards by geometric mean of top 10 adjusted p-values across mimicker and reverser hits.
+          Bars within each chart are colored and scaled by p-value.
+        </p>
+      )}
       {datasetFilter.includes("__none__") && (
         <p className="text-sm text-base-content/70 mt-1">
           No datasets selected. Use the Dataset column filter to select datasets.
@@ -296,11 +322,11 @@ function EnrichmentResults({
               <div className="flex gap-1 mb-1">
                 <button
                   className="btn btn-xs"
-                  onClick={() => setQueryString({ ds: "", page: "1" })}
+                  onClick={() => setQueryString({ libraries: "", page: "1", view })}
                 >All</button>
                 <button
                   className="btn btn-xs"
-                  onClick={() => setQueryString({ ds: "__none__", page: "1" })}
+                  onClick={() => setQueryString({ libraries: "__none__", page: "1", view })}
                 >None</button>
               </div>
               {allLibraryDisplayNames.map((lib) => (
@@ -319,11 +345,11 @@ function EnrichmentResults({
                         next = datasetFilter.filter((l) => l !== lib);
                       }
                       if (next.length >= allLibraryDisplayNames.length) {
-                        setQueryString({ ds: "", page: "1" });
+                        setQueryString({ libraries: "", page: "1", view });
                       } else if (next.length === 0) {
-                        setQueryString({ ds: "__none__", page: "1" });
+                        setQueryString({ libraries: "__none__", page: "1", view });
                       } else {
-                        setQueryString({ ds: next.join(","), page: "1" });
+                        setQueryString({ libraries: next.join(","), page: "1", view });
                       }
                     }}
                   />
@@ -347,9 +373,9 @@ function EnrichmentResults({
             onClick={() => {
               const isDrugActive = datasetFilter.length > 0 && drugLibraryNames.every(n => datasetFilter.includes(n)) && !geneLibraryNames.some(n => datasetFilter.includes(n));
               if (isDrugActive) {
-                setQueryString({ ds: "", page: "1" });
+                setQueryString({ libraries: "", page: "1", view });
               } else {
-                setQueryString({ ds: drugLibraryNames.join(","), page: "1" });
+                setQueryString({ libraries: drugLibraryNames.join(","), page: "1", view });
               }
             }}
           >
@@ -364,9 +390,9 @@ function EnrichmentResults({
             onClick={() => {
               const isGeneActive = datasetFilter.length > 0 && geneLibraryNames.every(n => datasetFilter.includes(n)) && !drugLibraryNames.some(n => datasetFilter.includes(n));
               if (isGeneActive) {
-                setQueryString({ ds: "", page: "1" });
+                setQueryString({ libraries: "", page: "1", view });
               } else {
-                setQueryString({ ds: geneLibraryNames.join(","), page: "1" });
+                setQueryString({ libraries: geneLibraryNames.join(","), page: "1", view });
               }
             }}
           >
@@ -374,13 +400,14 @@ function EnrichmentResults({
           </div>
         </div>
 
+        {view === "table" && (<>
         <div
           id="dir-select"
           className="join place-content-start place-items-center"
         >
           <div
             className={
-              (queryString.dir == "up" || queryString.sortBy == "pvalue_mimic")
+              queryString.dir == "up"
                 ? "join-item px-3 py-1.5 text-sm bg-gray-400 hover:bg-gray-500 text-gray-800 font-bold cursor-pointer"
                 : "join-item px-3 py-1.5  bg-gray-100 cursor-pointer font-bold text-sm dark:bg-gray-900"
             }
@@ -418,7 +445,7 @@ function EnrichmentResults({
           </div>
           <div
             className={
-              (queryString.dir == "down" || queryString.sortBy == "pvalue_reverse")
+              queryString.dir == "down"
                 ? "join-item px-3 py-1.5 text-sm bg-gray-400 hover:bg-gray-500 text-gray-800 font-bold cursor-pointer"
                 : "join-item px-3 py-1.5 bg-gray-100 cursor-pointer font-bold text-sm dark:bg-gray-900"
             }
@@ -523,8 +550,8 @@ function EnrichmentResults({
           }}
           className={
             queryString.consensus === "true"
-              ? "button btn btn-sm bg-gray-400 hover:bg-gray-500 text-gray-800"
-              : "button btn btn-sm"
+              ? "hidden button btn btn-sm bg-gray-400 hover:bg-gray-500 text-gray-800"
+              : "hidden button btn btn-sm"
           }
         >
           Consensus Perturbations
@@ -560,8 +587,8 @@ function EnrichmentResults({
           }}
           className={
             queryString.moas === "true"
-              ? "button btn btn-sm bg-gray-400 hover:bg-gray-500 text-gray-800"
-              : "button btn btn-sm"
+              ? "hidden button btn btn-sm bg-gray-400 hover:bg-gray-500 text-gray-800"
+              : "hidden button btn btn-sm"
           }
         >
           Consensus MoAs
@@ -612,7 +639,9 @@ function EnrichmentResults({
             </div>
           </div>
         ) : <></>}
+        </>)}
         </div>
+        {view === "table" && (<>
         <form
           id="search-form"
           className="join flex flex-row place-content-end place-items-center overflow-visible"
@@ -645,7 +674,7 @@ function EnrichmentResults({
               &#x1F50D;
             </button>
           </div>
-          <DownloadButtonPair queryString={queryString} datasetDown={datasetDown} datasetUp={datasetUp} libraryNames={libraryNames}></DownloadButtonPair>
+          <DownloadButtonPair queryString={queryString} datasetDown={datasetDown} datasetUp={datasetUp}></DownloadButtonPair>
         </form>
         <div className="border border-base-300 rounded-lg p-3 mt-2 min-h-[2.75rem] bg-base-200/50">
           {term ? (
@@ -679,7 +708,24 @@ function EnrichmentResults({
             <span className="text-xs text-base-content/40">No active filters. Use the search bar to filter by cell line, drug, gene, etc.</span>
           )}
         </div>
+        </>)}
       </div>
+      {view === "chart" && (
+        !enrichmentResults?.currentBackground?.pairedEnrich && !error ? (
+          <Loading />
+        ) : (
+          <LibraryBarGraphGrid
+            activeLibraries={chartLibraries}
+            renderCard={(lib) => (
+              <LibraryCardPaired
+                genesUp={genesUp} genesDown={genesDown}
+                libraryName={lib} setQueryString={setQueryString}
+              />
+            )}
+          />
+        )
+      )}
+      {view === "table" && (<>
       <div className="overflow-x-auto -mx-8 md:-mx-24 px-2">
         {consensus || moas ? (
           <>
@@ -1110,8 +1156,7 @@ function EnrichmentResults({
                 {/* <th>Direction</th> */}
                 <th className="relative group">
                   <div className="absolute z-10 left-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
-                    Number of signatures for this perturbation contained within
-                    the database
+                    Number of signatures with this perturbation, per dataset
                   </div>
                   Signature<br></br>
                   <span className="inline-flex">
@@ -1142,152 +1187,51 @@ function EnrichmentResults({
                 <th>
                   Mimicker<br />Overlap 
                 </th>
+                <SortableHeader sortKey="odds_ratio_mimic" currentSort={queryString.sort} setQueryString={setQueryString}>
+                  Odds<br />Ratio<br />Mimicker
+                </SortableHeader>
+                <SortableHeader
+                  sortKey="pvalue_mimic"
+                  currentSort={queryString.sort}
+                  setQueryString={setQueryString}
+                  tooltipSide="right"
+                  tooltip={<>P-value computed using the Fisher&apos;s Exact Test</>}
+                >
+                  PValue<br />Mimicker
+                </SortableHeader>
+                <SortableHeader
+                  sortKey="adj_pvalue_mimic"
+                  currentSort={queryString.sort}
+                  setQueryString={setQueryString}
+                  tooltipSide="right"
+                  tooltip="Adjusted P-value computed using the Benjamini-Hochberg procedure"
+                >
+                  AdjPValue<br />Mimicker
+                </SortableHeader>
                 <th>
-                  <span
-                    className="flex align-text-top cursor-pointer"
-                    onClick={() =>
-                      setQueryString({
-                        page: "1",
-                        q: queryString.q,
-                        fda: queryString.fda,
-                        dir: queryString.dir,
-                        sort: "odds_ratio_mimic",
-                        ko: queryString.ko,
-                        topn: queryString.topn,
-                        pvaluele: queryString.pvaluele,
-                        consensus: queryString.consensus,
-                      })
-                    }
-                  >
-                    Odds
-                    <br />
-                    Ratio<br />Mimicker <FaSortUp />
-                  </span>
+                  Reverser<br/>Overlap
                 </th>
-                <th className="relative group">
-                  <div className="absolute z-10 right-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
-                    P-value computed using the Fisher&apos;s Exact Test
-                  </div>
-                  <span
-                    className="flex align-text-top cursor-pointer"
-                    onClick={() =>
-                      setQueryString({
-                        page: "1",
-                        q: queryString.q,
-                        fda: queryString.fda,
-                        dir: queryString.dir,
-                        sort: "pvalue_mimic",
-                        ko: queryString.ko,
-                        topn: queryString.topn,
-                        pvaluele: queryString.pvaluele,
-                        consensus: queryString.consensus,
-                      })
-                    }
-                  >
-                    PValue<br/>Mimicker <FaSortUp />
-                    <IoMdInformationCircleOutline className="ml-0.5" />
-                  </span>
-                </th>
-                <th className="relative group">
-                  <div className="absolute z-10 right-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
-                    Adjusted P-value computed using the Benjamini-Hochberg
-                    procedure
-                  </div>
-                  <span
-                    className="flex align-text-top cursor-pointer"
-                    onClick={() =>
-                      setQueryString({
-                        page: "1",
-                        q: queryString.q,
-                        fda: queryString.fda,
-                        dir: queryString.dir,
-                        sort: "adj_pvalue_mimic",
-                        ko: queryString.ko,
-                        topn: queryString.topn,
-                        pvaluele: queryString.pvaluele,
-                        consensus: queryString.consensus,
-                      })
-                    }
-                  >
-                    AdjPValue<br/>Mimicker <FaSortUp />
-                    <IoMdInformationCircleOutline className="ml-0.5" />
-                  </span>
-                </th>
-                <th>
-                  Reverser<br/>Overlap 
-                </th>
-                <th>
-                  <span
-                    className="flex align-text-top cursor-pointer"
-                    onClick={() =>
-                      setQueryString({
-                        page: "1",
-                        q: queryString.q,
-                        fda: queryString.fda,
-                        dir: queryString.dir,
-                        sort: "odds_ratio_reverse",
-                        ko: queryString.ko,
-                        topn: queryString.topn,
-                        pvaluele: queryString.pvaluele,
-                        consensus: queryString.consensus,
-                      })
-                    }
-                  >
-                    Odds
-                    <br />
-                    Ratio <br />
-                    Reverser<FaSortUp />
-                  </span>
-                </th>
-                <th className="relative group">
-                  <div className="absolute z-10 right-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
-                    P-value computed using the Fisher&apos;s Exact Test
-                  </div>
-                  <span
-                    className="flex align-text-top cursor-pointer"
-                    onClick={() =>
-                      setQueryString({
-                        page: "1",
-                        q: queryString.q,
-                        fda: queryString.fda,
-                        dir: queryString.dir,
-                        sort: "pvalue_reverse",
-                        ko: queryString.ko,
-                        topn: queryString.topn,
-                        pvaluele: queryString.pvaluele,
-                        consensus: queryString.consensus,
-                      })
-                    }
-                  >
-                    PValue<br />Reverser <FaSortUp />
-                    <IoMdInformationCircleOutline className="ml-0.5" />
-                  </span>
-                </th>
-                <th className="relative group">
-                  <div className="absolute z-10 right-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
-                    Adjusted P-value computed using the Benjamini-Hochberg
-                    procedure
-                  </div>
-                  <span
-                    className="flex align-text-top cursor-pointer"
-                    onClick={() =>
-                      setQueryString({
-                        page: "1",
-                        q: queryString.q,
-                        fda: queryString.fda,
-                        dir: queryString.dir,
-                        sort: "adj_pvalue_reverse",
-                        ko: queryString.ko,
-                        topn: queryString.topn,
-                        pvaluele: queryString.pvaluele,
-                        consensus: queryString.consensus,
-                      })
-                    }
-                  >
-                    AdjPValue<br />Reverser <FaSortUp />
-                    <IoMdInformationCircleOutline className="ml-0.5" />
-                  </span>
-                </th>
+                <SortableHeader sortKey="odds_ratio_reverse" currentSort={queryString.sort} setQueryString={setQueryString}>
+                  Odds<br />Ratio<br />Reverser
+                </SortableHeader>
+                <SortableHeader
+                  sortKey="pvalue_reverse"
+                  currentSort={queryString.sort}
+                  setQueryString={setQueryString}
+                  tooltipSide="right"
+                  tooltip={<>P-value computed using the Fisher&apos;s Exact Test</>}
+                >
+                  PValue<br />Reverser
+                </SortableHeader>
+                <SortableHeader
+                  sortKey="adj_pvalue_reverse"
+                  currentSort={queryString.sort}
+                  setQueryString={setQueryString}
+                  tooltipSide="right"
+                  tooltip="Adjusted P-value computed using the Benjamini-Hochberg procedure"
+                >
+                  AdjPValue<br />Reverser
+                </SortableHeader>
               </tr>
             </thead>
             <tbody>
@@ -1301,8 +1245,8 @@ function EnrichmentResults({
               {enrichmentResults?.currentBackground?.pairedEnrich?.nodes?.flatMap(
                 (enrichmentResult, genesetIndex) => {
                   const term = enrichmentResult?.geneSet?.nodes[0]?.term;
-                  const geneSetUp =  enrichmentResult?.geneSet?.nodes.filter((x) => x.term.includes(" up"))[0]
-                  const geneSetDown =  enrichmentResult?.geneSet?.nodes.filter((x) => x.term.includes(" down"))[0]
+                  const geneSetUp =  enrichmentResult?.geneSet?.nodes.filter((x) => x.term.endsWith(" up"))[0]
+                  const geneSetDown =  enrichmentResult?.geneSet?.nodes.filter((x) => x.term.endsWith(" down"))[0]
                   const libraryName = geneSetUp?.library?.name || geneSetDown?.library?.name || '';
 
                   const parsed = term ? parseTerm(term) : parseTerm('');
@@ -1314,10 +1258,13 @@ function EnrichmentResults({
 
                   // Check if this is a gene or drug perturbation library
                   const isGenePert = isGenePerturbationLibrary(libraryName);
+                  // Display string with perturbation type appended for gene libraries (e.g. "PRSS36 KO");
+                  // `perturbation` stays raw for the NCBI/PubChem URL and drug lookups.
+                  const perturbationDisplay = formatPerturbationWithType(perturbation, parsed.perturbationType, isGenePert);
 
                   // Get FDA data from database
                   const fdaData = enrichmentResult?.geneSet?.nodes[0].geneSetFdaCountsById?.nodes[0];
-                  const count = fdaData?.count || 1;
+                  const count = fdaData?.count ?? 0;
                   const approved = fdaData?.approved || false;
                   const dbMoa = fdaData?.moa || '';
 
@@ -1359,9 +1306,9 @@ function EnrichmentResults({
                             target="_blank"
                             rel="noopener noreferrer"
                             className="link link-neutral hover:link-hover truncate block"
-                            title={perturbation}
+                            title={perturbationDisplay}
                           >
-                            {perturbation}
+                            {perturbationDisplay}
                           </a>
                           {/* Show CID for drug perturbations */}
                           {!isGenePert && drugInfo?.cid && (
@@ -1565,6 +1512,7 @@ function EnrichmentResults({
           )}
         </div>
       ) : null}
+      </>)}
       <SignaturesModal
         signatures={sigModalData?.signatures}
         drug={sigModalData?.drug || ""}
@@ -1726,14 +1674,13 @@ export default function EnrichClientPage({
         variables: {genes: allGenes || []}
     });
 
-    console.log(userGeneSetInfo)
-
     const nGenesIncluded = userGeneSetInfo?.geneMap2?.nodes.filter(g => g.geneInfo?.symbol).length
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-row gap-2 alert">
         <button
           className="btn btn-sm btn-outline"
+          title="Return to input form with your current gene set and library selections"
           onClick={() => {
             const params = new URLSearchParams()
             params.append('dataset', datasetUp)
@@ -1744,7 +1691,7 @@ export default function EnrichClientPage({
             router.push(`/?${params.toString()}`)
           }}
         >
-          ← Back
+          ← Recompute
         </button>
         <span className="prose">Input:</span>
         <label

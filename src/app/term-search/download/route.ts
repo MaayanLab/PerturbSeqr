@@ -21,7 +21,6 @@ export async function GET(request: Request) {
   let cursor: string | null = null;
 
   const encoder = new TextEncoder();
-  console.log(term)
 
   const stream = new ReadableStream({
     async start(controller) {

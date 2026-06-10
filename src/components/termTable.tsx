@@ -4,7 +4,7 @@ import GeneSetModal from '@/components/geneSetModal';
 import useQsState from '@/utils/useQsState';
 import Pagination from '@/components/pagination';
 import TermDownloadButton from '@/components/termDownloadButton';
-import { parseTerm, getCellDisplay } from '@/utils/parseTerm';
+import { parseTerm, getCellDisplay, formatPerturbationWithType } from '@/utils/parseTerm';
 import { preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary, getDatasetUrl } from '@/utils/metadataLookup';
 import Image from 'next/image';
 import { FaFilter } from 'react-icons/fa';
@@ -151,6 +151,9 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
         _dirDisplay: dirDisplay,
         _moa: (!isGenePert && drugInfo?.moa) ? drugInfo.moa : 'N/A',
         _perturbation: perturbation,
+        // Display string with perturbation type appended for gene libraries (e.g. "PRSS36 KO");
+        // _perturbation stays raw for the NCBI/PubChem URL and drug lookups.
+        _perturbationDisplay: formatPerturbationWithType(perturbation, parsed.perturbationType, isGenePert),
         _isGenePert: isGenePert,
         _drugInfo: drugInfo,
         _parsed: parsed,
@@ -270,7 +273,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
           </p>
         )}
       </div>
-      <div className='border m-5 mt-1 overflow-x-auto'>
+      <div className='border m-5 mt-1'>
       <div className='flex flex-row flex-wrap place-content-end items-center pt-3 pr-3 gap-2'>
           <div className='join flex flex-row items-center'>
             <span className="label-text text-base">Search:&nbsp;</span>
@@ -302,6 +305,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
             </div>
           </div>
         </div>
+        <div className='overflow-x-auto'>
         <table className="table table-sm">
           <thead>
             <tr>
@@ -346,9 +350,9 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
                         target="_blank"
                         rel="noopener noreferrer"
                         className="link link-neutral hover:link-hover truncate block"
-                        title={el._perturbation}
+                        title={el._perturbationDisplay}
                       >
-                        {el._perturbation}
+                        {el._perturbationDisplay}
                       </a>
                       {!el._isGenePert && el._drugInfo?.cid && (
                         <div className="text-xs text-gray-500">
@@ -453,6 +457,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
             })}
           </tbody>
         </table>
+        </div>
       </div>
       <div className="flex flex-col items-center">
         <Pagination

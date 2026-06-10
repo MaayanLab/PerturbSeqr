@@ -1,6 +1,7 @@
 mod async_rwlockhashmap;
 mod fastfisher;
 mod bitvec;
+mod s3;
 
 #[macro_use] extern crate rocket;
 use async_lock::RwLock;
@@ -20,15 +21,25 @@ use rocket::{State, response::status::Custom, http::Status};
 use rocket::serde::{json::{json, Json, Value}, Serialize, Deserialize};
 use serde::{Serialize as SerdeSerialize, Deserialize as SerdeDeserialize};
 use std::sync::Arc;
-use std::fs::File;
-use std::io::{BufReader, BufWriter};
 use retainer::Cache;
 use std::time::Instant;
 
 use fastfisher::FastFisher;
 use async_rwlockhashmap::RwLockHashMap;
-use bitvec::{SparseBitVec,DenseBitVec,compute_overlap};
+use bitvec::{
+    SparseBitVec,       // compact storage for gene sets (indices of set bits)
+    DenseBitVec,        // full-width vector for queries and library backgrounds (one byte per gene position)
+    compute_overlap,    // counts query genes present in a gene set (Dense × Sparse)
+    intersect_count,    // counts query genes present in a library's background (Dense × Dense)
+};
 
+// Enrichment defaults (API layer — permissive; frontend/SQL apply stricter user-facing defaults)
+const CACHE_TTL_MS: u64 = 30_000;              // cache eviction: 30 seconds
+const DEFAULT_CONSENSUS_TOP_N_SIGNATURES: usize = 10_000; // top N results for consensus aggregation
+const DEFAULT_MIN_GENE_OVERLAP: u32 = 1;              // minimum gene overlap to include a result
+const DEFAULT_PVALUE_CUTOFF: f64 = 1.0;      // p-value cutoff (1.0 = no filter at API level)
+const DEFAULT_ADJ_PVALUE_CUTOFF: f64 = 1.0;  // adjusted p-value cutoff (1.0 = no filter at API level)
+const INDEX_BUILD_LOG_INTERVAL: usize = 100_000; // log progress every N gene sets during index build
 /**
  * Without this alternative allocator, very large chunks of memory do not get released back to the OS causing a large memory footprint over time.
  */
@@ -47,47 +58,39 @@ struct InputGeneSets {
 
 
 /// In-memory index for fast enrichment analysis.
-///
-/// # Library Filtering Optimization
-///
-/// When filtering by library (e.g., "L1000-CP"), we use pre-built indices to avoid
-/// iterating all gene sets. This is critical for performance with 1.8M+ gene sets.
-///
-/// ## Complexity Analysis
-///
-/// | Operation | Without Optimization | With Optimization |
-/// |-----------|---------------------|-------------------|
-/// | Count filtered gene sets | O(N) iteration | O(k) index lookups |
-/// | Main enrichment loop | O(N) + O(N) HashMap lookups | O(M) direct access |
-/// | BH p-value allocation | O(N) space | O(N) space (unchanged*) |
-///
-/// Where:
-/// - N = total gene sets (~1.8M)
-/// - M = gene sets in selected libraries (e.g., 700K for L1000-CP)
-/// - k = number of selected libraries (typically 1-3)
-///
-/// *BH allocation unchanged because indices reference original positions.
-/// The main loop optimization provides the primary performance benefit.
-///
-/// ## Example Performance Impact (250 genes, L1000-CP filter)
-///
-/// - Before: O(1.8M) iterations + O(1.8M) HashMap lookups = ~370 seconds
-/// - After: O(700K) direct iterations = ~900ms (400x faster)
+/// Built from postgres at startup, serialized to disk for subsequent loads.
 #[derive(SerdeSerialize, SerdeDeserialize, Clone)]
 struct Bitmap {
+    // Gene universe: maps each gene UUID to a bit position index (encoding: symbol → index)
     columns: HashMap<Uuid, u32>,
+    // Reverse lookup: bit position index → gene symbol string (decoding: index → symbol, used for GMT export)
     columns_str: Vec<String>,
+
+    // Gene sets: (gene_set_hash, sparse bit vector of gene positions)
     values: Vec<(Uuid, SparseBitVec)>,
-    // Tuple: (gene_set_id, term, description, fda_approved, count, pert, moa, cid)
+
+    // Gene set metadata: gene_set_hash -> vec of (gene_set_id, term, description, fda_approved, count, pert, moa, cid)
     terms: HashMap<Uuid, Vec<(Uuid, String, String, bool, i32, String, String, String)>>,
-    signature_pairs: SignaturePairs, // Store pairs persistently
+
+    // Paired signatures: (up_index, down_index) into `values` for mimicker/reverser search
+    signature_pairs: SignaturePairs,
+
+    // Mechanism of action counts for consensus search
     moa_counts: HashMap<String, i32>,
 
-    // Library filtering support (see optimization docs above)
+    // Per-library state for library-specific Fisher's exact test backgrounds
     gene_set_libraries: HashMap<Uuid, String>,             // gene_set_hash -> library_name
-    library_backgrounds: HashMap<String, DenseBitVec>,     // library_name -> genes in that library
-    library_gene_set_indices: HashMap<String, Vec<usize>>, // library_name -> indices into values (O(1) lookup for filtering)
-    full_background: DenseBitVec,                          // all genes (for no-filter case)
+    library_backgrounds: HashMap<String, DenseBitVec>,     // library_name -> dense bit vector of all genes in that library
+    #[serde(default)]
+    library_background_counts: HashMap<String, u32>,            // library_name -> |B_lib| (pre-computed library-specific background size)
+    library_gene_set_indices: HashMap<String, Vec<usize>>, // library_name -> indices into `values`
+    #[serde(default)]
+    library_gene_set_counts: HashMap<String, usize>,      // library_name -> total gene sets in that library (BH denominator for single search)
+    #[serde(default)]
+    library_pair_counts: HashMap<String, usize>,           // library_name -> number of signature pairs in that library (BH denominator for paired search)
+    // Union of all library backgrounds. Not used in Fisher's test (per-library backgrounds are used instead).
+    // Retained for serialization compatibility.
+    full_background: DenseBitVec,
 }
 
 #[derive(SerdeSerialize, SerdeDeserialize, Clone)]
@@ -106,39 +109,55 @@ impl Bitmap {
             moa_counts: HashMap::new(),
             gene_set_libraries: HashMap::new(),
             library_backgrounds: HashMap::new(),
+            library_background_counts: HashMap::new(),
             library_gene_set_indices: HashMap::new(),
+            library_gene_set_counts: HashMap::new(),
+            library_pair_counts: HashMap::new(),
             full_background: DenseBitVec::empty(0),
         }
     }
 
-    /// Call this after inserting all terms to compute signature pairs
-    fn finalize(&mut self) {
-        self.signature_pairs = self.get_signature_pairs();
-        self.moa_counts = self.get_moa_counts();
+    // Look up which library a gene set belongs to by its index in `values`
+    fn get_library_for_index(&self, index: usize) -> Option<&String> {
+        let (uuid, _) = self.values.get(index)?;
+        self.gene_set_libraries.get(uuid)
+    }
+
+    // Count signature pairs per library (BH denominator for paired search)
+    fn get_library_pair_counts(&self) -> HashMap<String, usize> {
+        let mut counts: HashMap<String, usize> = HashMap::new();
+        // Both halves of a pair belong to same library, so we only check up_index
+        for (up_idx, _) in &self.signature_pairs.pairs {
+            if let Some(lib) = self.get_library_for_index(*up_idx) {
+                *counts.entry(lib.clone()).or_default() += 1;
+            }
+        }
+        counts
     }
 
     fn get_signature_pairs(&self) -> SignaturePairs {
-        let mut name_to_indices: HashMap<String, (Option<usize>, Option<usize>)> = HashMap::new();
+        let mut name_to_indices: HashMap<(String, String), (Option<usize>, Option<usize>)> = HashMap::new();
 
         // Iterate over values to ensure indices align with `values`
         for (idx, (uuid, _)) in self.values.iter().enumerate() {
+            let Some(lib) = self.gene_set_libraries.get(uuid) else { continue };
             if let Some(term_vec) = self.terms.get(uuid) {
                 for (_gene_set_id, full_name, _description, _fda_approved, _count, _pert, _moa, _cid) in term_vec {
                     if let Some(base_name) = full_name.strip_suffix(" up") {
-                        name_to_indices.entry(base_name.to_string()).or_insert((None, None)).0 = Some(idx);
+                        name_to_indices.entry((lib.clone(), base_name.to_string())).or_insert((None, None)).0 = Some(idx);
                     } else if let Some(base_name) = full_name.strip_suffix(" down") {
-                        name_to_indices.entry(base_name.to_string()).or_insert((None, None)).1 = Some(idx);
+                        name_to_indices.entry((lib.clone(), base_name.to_string())).or_insert((None, None)).1 = Some(idx);
                     }
                 }
             }
         }
-    
+
         // Extract valid pairs
         let pairs = name_to_indices
             .into_iter()
-            .filter_map(|(_base_name, (up_idx, down_idx))| Some((up_idx?, down_idx?)))
+            .filter_map(|(_key, (up_idx, down_idx))| Some((up_idx?, down_idx?)))
             .collect();
-    
+
         SignaturePairs { pairs }
     }
 
@@ -147,11 +166,42 @@ impl Bitmap {
 
         for term_list in self.terms.values() {
             for (_, _, _, _, _, _, moa, _cid) in term_list {
-                *moa_counts.entry(moa.clone()).or_insert(0) += 1;
+                if !moa.is_empty() {
+                    *moa_counts.entry(moa.clone()).or_insert(0) += 1;
+                }
             }
         }
         moa_counts
     }
+}
+
+// Odds ratio with continuity correction (adds 0.5 to all cells to handle zero counts)
+fn corrected_odds_ratio(a: usize, b: usize, c: usize, d: usize) -> f64 {
+    const CONTINUITY_CORRECTION: f64 = 0.5;
+    ((a as f64 + CONTINUITY_CORRECTION) * (d as f64 + CONTINUITY_CORRECTION))
+        / ((b as f64 + CONTINUITY_CORRECTION) * (c as f64 + CONTINUITY_CORRECTION))
+}
+
+// Frontend appends " up"/" down" (or trailing space for no direction) to filter_term; strip and return (search_term, is_up, is_down).
+fn parse_filter_term(filter_term: &str) -> (String, bool, bool) {
+    let lower = filter_term.to_lowercase();
+    if let Some(rest) = lower.strip_suffix(" up") {
+        (rest.trim().to_string(), true, false)
+    } else if let Some(rest) = lower.strip_suffix(" down") {
+        (rest.trim().to_string(), false, true)
+    } else {
+        (lower.trim().to_string(), false, false)
+    }
+}
+
+// Directional odds ratios for up/down consensus (same continuity correction)
+fn corrected_directional_odds_ratios(a_up: usize, b_up: usize, a_down: usize, b_down: usize) -> (f64, f64) {
+    const CONTINUITY_CORRECTION: f64 = 0.5;
+    let up = ((a_up as f64 + CONTINUITY_CORRECTION) / (b_up as f64 + CONTINUITY_CORRECTION))
+           / ((a_down as f64 + CONTINUITY_CORRECTION) / (b_down as f64 + CONTINUITY_CORRECTION));
+    let down = ((b_up as f64 + CONTINUITY_CORRECTION) / (a_up as f64 + CONTINUITY_CORRECTION))
+             / ((b_down as f64 + CONTINUITY_CORRECTION) / (a_down as f64 + CONTINUITY_CORRECTION));
+    (up, down)
 }
 
 #[derive(Eq, PartialEq, PartialOrd, Ord)]
@@ -168,15 +218,17 @@ struct BackgroundQueryPair {
 }
 
 // This structure stores a persistent many-reader single-writer hashmap containing cached indexes for a given background id
-struct PersistentState { 
+struct PersistentState {
     fisher: RwLock<FastFisher>,
     bitmaps: RwLockHashMap<Uuid, Bitmap>,
     latest: RwLock<Option<Uuid>>,
     cache: Cache<Arc<BackgroundQuery>, Arc<Vec<PartialQueryResult>>>,
     cachepair: Cache<Arc<BackgroundQueryPair>, Arc<Vec<PartialPairResult>>>,
+    s3_bucket: Box<::s3::Bucket>,
 }
 
 // The response data, containing the ids, and relevant metrics
+#[derive(Clone)] // Cloned from cache for per-request library filtering
 struct PartialQueryResult {
     index: usize,
     n_overlap: u32,
@@ -185,16 +237,17 @@ struct PartialQueryResult {
     adj_pvalue: f64,
 }
 
+#[derive(Clone)] // Cloned from cache for per-request library filtering
 struct PartialPairResult {
     index: usize,
-    index_up: usize,      
-    index_down: usize,    
-    mimicker_overlap: u32, 
-    reverser_overlap: u32, 
+    index_up: usize,
+    index_down: usize,
+    mimicker_overlap: u32,
+    reverser_overlap: u32,
     odds_ratio_mimic: f64,
-    odds_ratio_reverse: f64, 
-    pvalue_mimic: f64, 
-    adj_pvalue_mimic: f64, 
+    odds_ratio_reverse: f64,
+    pvalue_mimic: f64,
+    adj_pvalue_mimic: f64,
     pvalue_reverse: f64,
     adj_pvalue_reverse: f64,
 }
@@ -304,45 +357,24 @@ impl<'r> Responder<'r, 'static> for PairedQueryResponse {
 }
 
 
-/// Index persistence: serialize bitmap to disk using bincode for fast startup.
-/// Building the index from the database takes ~10 minutes; loading from disk takes ~1 second.
 #[derive(SerdeSerialize, SerdeDeserialize)]
 struct SerializableIndex {
     background_id: Uuid,
     bitmap: Bitmap,
 }
 
-/// Returns the path where the index file is stored for a given background_id.
-fn get_index_path(background_id: &Uuid) -> String {
-    format!("/data/index_{}.bin", background_id)
+async fn save_index(bucket: &::s3::Bucket, background_id: &Uuid, bitmap: &Bitmap) -> Result<(), String> {
+    let index = SerializableIndex { background_id: *background_id, bitmap: bitmap.clone() };
+    let bytes = bincode::serialize(&index).map_err(|e| e.to_string())?;
+    s3::put_index(bucket, background_id, &bytes).await
 }
 
-/// Saves the bitmap index to disk using bincode serialization.
-/// Called after building the index from the database to enable fast subsequent startups.
-fn save_index(background_id: &Uuid, bitmap: &Bitmap) -> Result<(), String> {
-    let path = get_index_path(background_id);
-    let file = File::create(&path).map_err(|e| e.to_string())?;
-    let writer = BufWriter::new(file);
-    let index = SerializableIndex {
-        background_id: *background_id,
-        bitmap: bitmap.clone(),
-    };
-    bincode::serialize_into(writer, &index).map_err(|e| e.to_string())?;
-    println!("[{}] saved index to {}", background_id, path);
-    Ok(())
-}
-
-/// Loads the bitmap index from disk using bincode deserialization.
-/// Returns an error if the file doesn't exist or the background_id doesn't match.
-fn load_index(background_id: &Uuid) -> Result<Bitmap, String> {
-    let path = get_index_path(background_id);
-    let file = File::open(&path).map_err(|e| e.to_string())?;
-    let reader = BufReader::new(file);
-    let index: SerializableIndex = bincode::deserialize_from(reader).map_err(|e| e.to_string())?;
+async fn load_index(bucket: &::s3::Bucket, background_id: &Uuid) -> Result<Bitmap, String> {
+    let bytes = s3::get_index(bucket, background_id).await?;
+    let index: SerializableIndex = bincode::deserialize(&bytes).map_err(|e| e.to_string())?;
     if index.background_id != *background_id {
-        return Err(format!("Index file background_id mismatch: expected {}, got {}", background_id, index.background_id));
+        return Err(format!("Index background_id mismatch: expected {}, got {}", background_id, index.background_id));
     }
-    println!("[{}] loaded index from {}", background_id, path);
     Ok(index.bitmap)
 }
 
@@ -354,18 +386,22 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
     }
 
     // Try to load from disk
-    if let Ok(bitmap) = load_index(&background_id) {
-        let start = Instant::now();
-        // Extend fisher table to handle this background
-        {
-            let mut fisher = state.fisher.write().await;
-            fisher.extend_to(bitmap.columns.len() * 4);
+    if let Ok(bitmap) = load_index(&state.s3_bucket, &background_id).await {
+        if bitmap.library_backgrounds.len() == bitmap.library_background_counts.len() {
+            let start = Instant::now();
+            // Extend fisher table to handle this background
+            {
+                let mut fisher = state.fisher.write().await;
+                fisher.extend_to(bitmap.columns.len() * 4);
+            }
+            state.bitmaps.insert(background_id, bitmap).await;
+            *state.latest.write().await = Some(background_id);
+            let duration = start.elapsed();
+            println!("[{}] loaded from S3 in {:?}", background_id, duration);
+            return Ok(());
         }
-        state.bitmaps.insert(background_id, bitmap).await;
-        *state.latest.write().await = Some(background_id);
-        let duration = start.elapsed();
-        println!("[{}] loaded from disk in {:?}", background_id, duration);
-        return Ok(());
+        println!("[{}] stale S3 index (library_backgrounds/library_background_counts out of sync); rebuilding from postgres", background_id);
+        let _ = s3::delete_index(&state.s3_bucket, &background_id).await;
     }
 
     println!("[{}] initializing from database", background_id);
@@ -399,7 +435,7 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
             .fetch(&mut **db)
             .for_each(|row| {
                 let count = progress_counter.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-                if count % 100000 == 0 {
+                if count % INDEX_BUILD_LOG_INTERVAL == 0 {
                     println!("[{}] loaded {} gene sets...", background_id, count);
                 }
                 let row = row.unwrap();
@@ -452,10 +488,16 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
             }
             // Also add to full background
             full_background.union_mut(&lib_background);
+            // Insert into library_background_counts HashMap: library name --> number of set bits (unique genes) in the library's background bitvector
+            bitmap.library_background_counts.insert(lib_name.clone(), lib_background.count_ones() as u32);
             bitmap.library_backgrounds.insert(lib_name.clone(), lib_background);
         }
         bitmap.full_background = full_background;
         bitmap.library_gene_set_indices = library_gene_sets;
+        // Pre-compute gene set counts per library (BH denominator for single search)
+        bitmap.library_gene_set_counts = bitmap.library_gene_set_indices.iter()
+            .map(|(lib_name, indices)| (lib_name.clone(), indices.len()))
+            .collect();
 
         // Debug logging for background sizes
         println!("[{}] loaded {} libraries with backgrounds", background_id, bitmap.library_backgrounds.len());
@@ -466,12 +508,14 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
             println!("[{}]   {}: {} genes, {} gene sets", background_id, lib_name, lib_bg.count_ones(), gs_count);
         }
 
-        // compute and store pairs
-        bitmap.finalize();
+        // Compute derived data structures from the loaded gene sets
+        bitmap.signature_pairs = bitmap.get_signature_pairs();
+        bitmap.moa_counts = bitmap.get_moa_counts();
+        bitmap.library_pair_counts = bitmap.get_library_pair_counts();
 
-        // Save to disk for faster subsequent startups
-        if let Err(e) = save_index(&background_id, &bitmap) {
-            println!("[{}] warning: failed to save index to disk: {}", background_id, e);
+        // Save to S3 for faster subsequent startups
+        if let Err(e) = save_index(&state.s3_bucket, &background_id, &bitmap).await {
+            println!("[{}] warning: failed to save index to S3: {}", background_id, e);
         }
     }
 
@@ -552,11 +596,11 @@ async fn delete(
             Uuid::parse_str(&background_id).map_err(|e| Custom(Status::BadRequest, e.to_string()))?
         }
     };
-    if !state.bitmaps.contains_key(&background_id).await {
-        return Err(Custom(Status::NotFound, String::from("Not Found")));
-    }
     if state.bitmaps.remove(&background_id).await {
-        println!("[{}] deleted", background_id);
+        println!("[{}] deleted from memory", background_id);
+    }
+    if let Err(e) = s3::delete_index(&state.s3_bucket, &background_id).await {
+        println!("[{}] warning: failed to delete index from S3: {}", background_id, e);
     }
     Ok(())
 }
@@ -564,7 +608,7 @@ async fn delete(
 // query a specific background_id, providing the bitset vector as input
 //  the result are the gene_set_ids & relevant metrics
 // this can be pretty fast since the index is saved in memory and the overlaps can be computed in parallel
-#[post("/<background_id>?<filter_term>&<overlap_ge>&<pvalue_le>&<adj_pvalue_le>&<offset>&<limit>&<filter_fda>&<sortby>&<filter_ko>&<top_n>&<library_names>&<post_search_filter_library_names>", data = "<input_gene_set>")]
+#[post("/<background_id>?<filter_term>&<overlap_ge>&<pvalue_le>&<adj_pvalue_le>&<offset>&<limit>&<filter_fda>&<sortby>&<filter_ko>&<top_n>&<library_names>", data = "<input_gene_set>")]
 async fn query(
     mut db: Connection<Postgres>,
     state: &State<PersistentState>,
@@ -581,7 +625,6 @@ async fn query(
     filter_ko: Option<bool>,
     top_n: Option<usize>,
     library_names: Option<String>,
-    post_search_filter_library_names: Option<String>,
 ) -> Result<QueryResponse, Custom<String>> {
     let background_id = {
         if background_id == "latest" {
@@ -597,139 +640,152 @@ async fn query(
     let bitmap = state.bitmaps.get_read(&background_id).await.ok_or(Custom(Status::NotFound, String::from("Can't find background")))?;
     let input_gene_set = DenseBitVec::new(&bitmap.columns, &input_gene_set);
     let filter_term = filter_term.and_then(|filter_term| Some(filter_term.to_lowercase()));
-    let overlap_ge = overlap_ge.unwrap_or(1);
-    let pvalue_le =  pvalue_le.unwrap_or(1.0);
-    let adj_pvalue_le =  adj_pvalue_le.unwrap_or(1.0);
+    let overlap_ge = overlap_ge.unwrap_or(DEFAULT_MIN_GENE_OVERLAP);
+    let pvalue_le =  pvalue_le.unwrap_or(DEFAULT_PVALUE_CUTOFF);
+    let adj_pvalue_le =  adj_pvalue_le.unwrap_or(DEFAULT_ADJ_PVALUE_CUTOFF);
     let sortby = sortby.and_then(|sortby| Some(sortby));
-    let top_n = top_n.unwrap_or(1000);
+    let top_n = top_n.unwrap_or(DEFAULT_CONSENSUS_TOP_N_SIGNATURES);
 
     // Parse library_names filter (comma-separated string -> HashSet)
     let library_filter: Option<std::collections::HashSet<String>> = library_names.map(|names| {
         names.split(',').map(|s| s.trim().to_string()).collect()
     });
 
-    // Parse post-search library filter (filters results AFTER Fisher's, doesn't affect background)
-    let post_search_library_filter: Option<std::collections::HashSet<String>> = post_search_filter_library_names.map(|names| {
-        names.split(',').map(|s| s.trim().to_string()).collect()
-    });
-
-    // Compute filtered background and gene set count based on selected libraries
-    // Also collect the indices to iterate (optimization: only iterate matching libraries)
-    let (n_background, filtered_background, gene_set_count, filtered_indices) = if let Some(ref libs) = library_filter {
-        // OR together the backgrounds of selected libraries
-        let mut combined = DenseBitVec::empty(bitmap.columns.len());
-        let mut indices: Vec<usize> = Vec::new();
-        for lib_name in libs {
-            if let Some(lib_bg) = bitmap.library_backgrounds.get(lib_name) {
-                combined.union_mut(lib_bg);
-            }
-            // Collect indices for this library (O(1) lookup instead of O(n) iteration)
-            if let Some(lib_indices) = bitmap.library_gene_set_indices.get(lib_name) {
-                indices.extend(lib_indices.iter().copied());
-            }
-        }
-        let gs_count = indices.len();
-        (combined.count_ones() as u32, Some(combined), gs_count, Some(indices))
-    } else {
-        // No filter - use full background and all gene sets
-        (bitmap.full_background.count_ones() as u32, None, bitmap.values.len(), None)
-    };
-    // Debug: log query parameters
-    println!("[{}] query: n_background={}, gene_set_count={}, input_genes={}",
-             background_id, n_background, gene_set_count, input_gene_set.n);
+    // For each library, count how many of the user's query genes fall within that library's
+    // gene universe. This is |Q ∩ B_lib| — used as the library-specific query size in the
+    // Fisher's contingency table (the "b" cell = library_query_overlap_counts - overlap).
+    let library_query_overlap_counts: HashMap<String, u32> = bitmap.library_backgrounds.iter()
+        .map(|(name, lib_bg)| (name.clone(), intersect_count(&input_gene_set, lib_bg)))
+        .collect();
+    // e.g. {"LINCS L1000 CP": 198, "Tahoe-100M": 241, "CREEDS Gene": 253, ...}
+    // A 265-gene query has 198 genes in L1000's universe, 241 in Tahoe's, etc.
+    println!("[{}] query: input_genes={}, libraries={}",
+             background_id, input_gene_set.n, library_query_overlap_counts.len());
+    // Cache key: (background_id + query bitvec).
     let background_query = Arc::new(BackgroundQuery { background_id, input_gene_set });
 
-    // Only use cache if no library filter is applied (cache doesn't account for library filter)
-    let use_cache = library_filter.is_none();
-
+    // Full unfiltered results are cached per query. On cache hit, clone and filter by request
+    // parameters (library, FDA, etc.). On cache miss, compute from scratch and cache for reuse.
     let results = {
-        let cached_results = if use_cache {
-            state.cache.get(&background_query).await
-        } else {
-            None
-        };
+        let cached_results = state.cache.get(&background_query).await;
 
         if let Some(results) = cached_results {
             results.value().clone()
         } else {
-            // Parallel overlap computation
-            // OPTIMIZATION: When library filter is active, iterate only pre-indexed gene sets
-            // instead of all 1.8M gene sets. Complexity: O(M) instead of O(N) where M << N
-            let n_user_gene_id = background_query.input_gene_set.n as u32;
             let fisher = state.fisher.read().await;
 
-            // Helper closure for computing enrichment result
+            // Closure: compute Fisher's exact test for one gene set against the user's query.
+            // Returns None if the gene set doesn't pass overlap or p-value thresholds.
             let compute_result = |index: usize| -> Option<PartialQueryResult> {
-                let (_, gene_set) = &bitmap.values[index];
+                // Look up this gene set's hash and sparse bitvector from the index
+                let (gene_set_uuid, gene_set) = &bitmap.values[index];
+                // Find which library this gene set belongs to (e.g. "LINCS L1000 CP")
+                let lib_name = bitmap.gene_set_libraries.get(gene_set_uuid)?;
+                // Get the library-specific background size (e.g. 10,730 for L1000)
+                let n_background = *bitmap.library_background_counts.get(lib_name)?;
+                // Get how many query genes are in this library's universe (e.g. 198 of 265 for L1000)
+                let n_user_gene_id = *library_query_overlap_counts.get(lib_name)?;
+
+                // Count genes present in both the query and this gene set
                 let n_overlap = compute_overlap(&background_query.input_gene_set, gene_set) as u32;
+                // Skip if overlap is below the minimum threshold
                 if n_overlap < overlap_ge {
                     return None;
                 }
+                // Number of genes in this gene set (length of sparse vector = number of set bits)
                 let n_gs_gene_id = gene_set.v.len() as u32;
+                // Build the 2x2 contingency table for Fisher's exact test:
+                //   |              | In gene set | Not in gene set |
+                //   | In query     | a           | b               |
+                //   | Not in query | c           | d               |
                 let a = n_overlap;
                 let b = n_user_gene_id - a;
                 let c = n_gs_gene_id - a;
-                let d = n_background - b - c + a;
+                let d = n_background - a - b - c;
+                // Compute one-tailed Fisher's exact test p-value
                 let pvalue = fisher.get_p_value(a as usize, b as usize, c as usize, d as usize);
+                // Skip if p-value exceeds threshold
                 if pvalue > pvalue_le {
                     return None;
                 }
+                // Odds ratio: (overlap / query size) / (gene set size / background size)
                 let odds_ratio = ((n_overlap as f64) / (n_user_gene_id as f64)) / ((n_gs_gene_id as f64) / (n_background as f64));
+                // Return result with placeholder adj_pvalue (BH correction applied later)
                 Some(PartialQueryResult { index, n_overlap, odds_ratio, pvalue, adj_pvalue: 1.0 })
             };
 
-            let mut results: Vec<_> = if let Some(ref indices) = filtered_indices {
-                // FAST PATH: Iterate only gene sets in selected libraries
-                // Complexity: O(M) where M = gene sets in selected libraries
-                indices.par_iter()
-                    .filter_map(|&index| compute_result(index))
-                    .collect()
-            } else {
-                // NO FILTER: Iterate all gene sets
-                // Complexity: O(N) where N = total gene sets
-                (0..bitmap.values.len())
-                    .into_par_iter()
-                    .filter_map(|index| compute_result(index))
-                    .collect()
-            };
-            let pre_adj_count = results.len();
-            // Compute adj_pvalues using Benjamini-Hochberg.
-            // When library filtering is active, use compact indexing so BH only corrects
-            // over the filtered gene sets, not the entire database.
-            if library_filter.is_some() {
-                let pvalues: Vec<f64> = results.iter().map(|r| r.pvalue).collect();
+            // Run compute_result against every gene set in parallel across all CPU cores (rayon).
+            // Collect into per-library result vectors for independent BH correction.
+            let all_results: Vec<_> = (0..bitmap.values.len())
+                .into_par_iter()
+                .filter_map(|index| compute_result(index))
+                .collect();
+            let pre_adj_count = all_results.len();
+
+            // Group results by library
+            let mut per_library: HashMap<String, Vec<PartialQueryResult>> = HashMap::new();
+            for result in all_results {
+                if let Some(lib) = bitmap.get_library_for_index(result.index) {
+                    per_library.entry(lib.clone()).or_default().push(result);
+                }
+            }
+
+            // Per-library Benjamini-Hochberg correction.
+            // BH is applied within each library independently: passing p-values first, padded
+            // with 1.0 to the library's total gene set count so BH knows the full test count.
+            let mut results: Vec<PartialQueryResult> = Vec::with_capacity(pre_adj_count);
+            for (lib_name, mut lib_results) in per_library {
+                // Safe to unwrap: library_gene_set_counts is populated by ensure_index for all libraries
+                let lib_size = *bitmap.library_gene_set_counts.get(&lib_name).unwrap();
+                // Extract p-values from this library's passing results for BH input
+                let mut pvalues: Vec<f64> = lib_results.iter().map(|r| r.pvalue).collect();
+                // Pad to total gene sets in library so BH corrects over all tests, not just passing ones
+                pvalues.resize(lib_size, 1.0);
                 let adj_pvalues = adjust(&pvalues, Procedure::BenjaminiHochberg);
-                for (i, result) in results.iter_mut().enumerate() {
+                for (i, result) in lib_results.iter_mut().enumerate() {
                     result.adj_pvalue = adj_pvalues[i];
                 }
-                results.retain(|result| result.adj_pvalue <= adj_pvalue_le);
-            } else {
-                let mut pvalues = vec![1.0; bitmap.values.len()];
-                for result in &results {
-                    pvalues[result.index] = result.pvalue;
-                }
-                let adj_pvalues = adjust(&pvalues, Procedure::BenjaminiHochberg);
-                results.retain_mut(|result| {
-                    if let Some(adj_pvalue) = adj_pvalues.get(result.index) {
-                        result.adj_pvalue = *adj_pvalue;
-                    }
-                    result.adj_pvalue <= adj_pvalue_le
-                });
+                lib_results.retain(|r| r.adj_pvalue <= adj_pvalue_le);
+                // Append this library's surviving results into the combined output
+                results.extend(lib_results);
             }
+
             let post_adj_count = results.len();
             println!("[{}] filter stats: {} passed pvalue, {} passed adj_pvalue", background_id, pre_adj_count, post_adj_count);
+            // Sort by raw p-value (most significant first)
             results.sort_unstable_by(|a, b| a.pvalue.partial_cmp(&b.pvalue).unwrap_or(std::cmp::Ordering::Equal));
             let results = Arc::new(results);
 
-            // Only cache if no library filter (cache key doesn't include library filter)
-            if use_cache {
-                state.cache.insert(background_query, results.clone(), 30000).await;
-            }
+            // Cache full unfiltered results (library filtering applied post-cache)
+            state.cache.insert(background_query, results.clone(), CACHE_TTL_MS).await;
 
             let duration = start.elapsed();
-            println!("[{}] {} genes enriched in {:?} (library_filter: {})", background_id, n_user_gene_id, duration, !use_cache);
+            println!("[{}] enriched in {:?}", background_id, duration);
             results
         }
+    };
+
+    // Post-cache library filter: cached results contain all libraries, filter to user's selection
+    let results: Arc<Vec<PartialQueryResult>> = if let Some(ref libs) = library_filter {
+        let filtered: Vec<PartialQueryResult> = results.iter()
+            .filter(|r| {
+                bitmap.get_library_for_index(r.index)
+                    .map_or(false, |lib| libs.contains(lib))
+            })
+            .cloned()
+            .collect();
+        Arc::new(filtered)
+    } else {
+        results // no filter, use all cached results
+    };
+
+    // Total gene sets searched (for response metadata), scoped to selected libraries if filtered
+    let gene_set_count: usize = if let Some(ref libs) = library_filter {
+        libs.iter()
+            .filter_map(|lib| bitmap.library_gene_set_counts.get(lib))
+            .sum()
+    } else {
+        bitmap.values.len() // no filter, count all gene sets
     };
 
     // CID-based consensus grouping: use CID as group key when available, fall back to perturbation name
@@ -746,17 +802,6 @@ async fn query(
 
     for result in (*results).iter().take(top_n) {
         if let Some((gene_set_hash, _gene_set)) = bitmap.values.get(result.index) {
-            // Post-search library filter: user selected specific datasets in the frontend dropdown.
-            // Enrichment runs against all libraries, but consensus only counts gene sets from selected ones.
-            if let Some(ref post_libs) = post_search_library_filter {
-                // Look up which library this gene set belongs to
-                if let Some(lib_name) = bitmap.gene_set_libraries.get(gene_set_hash) {
-                    // Skip this gene set if its library wasn't selected
-                    if !post_libs.contains(lib_name) {
-                        continue;
-                    }
-                }
-            }
             let current_lib = bitmap.gene_set_libraries.get(gene_set_hash).cloned().unwrap_or_default();
             if let Some(terms) = bitmap.terms.get(gene_set_hash) {
                 // Iterate over the terms for the current gene set
@@ -806,10 +851,12 @@ async fn query(
                             drug_counts.insert(group_key.clone(), (*count as usize, *fda_approved));
                         }
 
-                        let moa_entry = moa_signifigance_counts.entry(moa.clone()).or_insert((0, 0, 0));
-                        moa_entry.0 += 1; // Increment significant count
-                        if gene_set_term.contains(" up") {
-                            moa_entry.2 += 1;
+                        if !moa.is_empty() {
+                            let moa_entry = moa_signifigance_counts.entry(moa.clone()).or_insert((0, 0, 0));
+                            moa_entry.0 += 1; // Increment significant count
+                            if gene_set_term.contains(" up") {
+                                moa_entry.2 += 1;
+                            }
                         }
                     }
                 }
@@ -895,7 +942,7 @@ async fn query(
                 }
             }
 
-            let odds_ratio = ((a as f64 + 0.5)  * (d as f64 + 0.5)) / ((b as f64 + 0.5) * (c as f64 + 0.5));
+            let odds_ratio = corrected_odds_ratio(a, b, c, d);
 
             let p_value = fisher.get_p_value(a as usize, b as usize, c as usize, d as usize); // Calculate p-value using FastFisher, b, c, d)
             // Store the result with Fisher's Exact Test p-value
@@ -906,8 +953,7 @@ async fn query(
             let a_down = (total_terms_by_dir as usize).saturating_sub(*sig_up); // Upregulated and insignificant
             let b_down = (*count_insig).saturating_sub(a_down); // Downregulated and insignificant
 
-            let odds_ratio_up = ((a_up as f64 + 0.5) / (b_up as f64 + 0.5)) / ((a_down as f64 + 0.5) / (b_down as f64 + 0.5));
-            let odds_ratio_down = ((b_up as f64 + 0.5) / (a_up as f64 + 0.5)) / ((b_down as f64 + 0.5) / (a_down as f64 + 0.5));
+            let (odds_ratio_up, odds_ratio_down) = corrected_directional_odds_ratios(a_up, b_up, a_down, b_down);
 
             let p_value_up = fisher.get_p_value(a_up as usize, b_up as usize, a_down as usize, b_down as usize);
 
@@ -1021,7 +1067,7 @@ async fn query(
             }
         }
 
-        let odds_ratio = ((a as f64 + 0.5)  * (d as f64 + 0.5)) / ((b as f64 + 0.5) * (c as f64 + 0.5));
+        let odds_ratio = corrected_odds_ratio(a, b, c, d);
 
         let p_value = fisher.get_p_value(a as usize, b as usize, c as usize, d as usize); // Calculate p-value using FastFisher, b, c, d)
         // Store the result with Fisher's Exact Test p-value
@@ -1032,8 +1078,7 @@ async fn query(
         let a_down = (total_terms_by_dir as usize).saturating_sub(*sig_up); // Upregulated and insignificant
         let b_down = (*count_insig).saturating_sub(a_down); // Downregulated and insignificant
 
-        let odds_ratio_up = ((a_up as f64 + 0.5) / (b_up as f64 + 0.5)) / ((a_down as f64 + 0.5) / (b_down as f64 + 0.5));
-        let odds_ratio_down = ((b_up as f64 + 0.5) / (a_up as f64 + 0.5)) / ((b_down as f64 + 0.5) / (a_down as f64 + 0.5));
+        let (odds_ratio_up, odds_ratio_down) = corrected_directional_odds_ratios(a_up, b_up, a_down, b_down);
 
         let p_value_up = fisher.get_p_value(a_up as usize, b_up as usize, a_down as usize, b_down as usize);
 
@@ -1115,9 +1160,7 @@ async fn query(
     }
 
     if let Some(filter_term) = &filter_term {
-        let is_up = filter_term.contains(" up");
-        let is_down = filter_term.contains(" down");
-        let filter_term_clean = filter_term.replace(" up", "").replace(" down", "").trim().to_lowercase();
+        let (filter_term_clean, is_up, is_down) = parse_filter_term(filter_term);
         let filter_terms: Vec<String> = filter_term_clean.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
         if !filter_terms.is_empty() {
             consensus_results.retain(|result| {
@@ -1158,9 +1201,7 @@ async fn query(
         .filter_map(|result| {
             let (gene_set_hash, _gene_set) = bitmap.values.get(result.index)?;
             if let Some(filter_term) = &filter_term {
-                let is_up = filter_term.contains(" up");
-                let is_down = filter_term.contains(" down");
-                let filter_term_clean = filter_term.replace(" up", "").replace(" down", "").trim().to_lowercase();
+                let (filter_term_clean, is_up, is_down) = parse_filter_term(filter_term);
                 let filter_terms: Vec<String> = filter_term_clean.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
                 if let Some(terms) = bitmap.terms.get(gene_set_hash) {
                     if is_up && !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)|  gene_set_term.to_lowercase().contains(" up")) {
@@ -1173,14 +1214,6 @@ async fn query(
                         let term_lower = gene_set_term.to_lowercase();
                         filter_terms.iter().any(|ft| term_lower.contains(ft))
                     }) {
-                        return None
-                    }
-                }
-            }
-            // Post-search library filter: filter by dataset name AFTER Fisher's (doesn't affect p-values)
-            if let Some(ref post_libs) = post_search_library_filter {
-                if let Some(lib_name) = bitmap.gene_set_libraries.get(gene_set_hash) {
-                    if !post_libs.contains(lib_name) {
                         return None
                     }
                 }
@@ -1217,8 +1250,8 @@ async fn query(
     if let Some(sortby) = sortby {
         match sortby.as_str() {
             "adj_pvalue" => {
-                consensus_results.sort_unstable_by(|a, b| a.pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
-                moa_consensus_results.sort_unstable_by(|a, b| a.pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
+                consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
+                moa_consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
                 results.sort_unstable_by(|a, b| a.adj_pvalue.partial_cmp(&b.adj_pvalue).unwrap_or(std::cmp::Ordering::Equal));
             },
             "pvalue" => {
@@ -1245,7 +1278,7 @@ async fn query(
             },
             "adj_pvalue_up" => {
                 consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
-                moa_consensus_results.sort_unstable_by(|a, b| a.pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
+                moa_consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
                 results.sort_unstable_by(|a, b| a.adj_pvalue.partial_cmp(&b.adj_pvalue).unwrap_or(std::cmp::Ordering::Equal));
             },
             "pvalue_down" => {
@@ -1331,7 +1364,7 @@ async fn query(
     })
 }
 
-#[post("/pairs/<background_id>?<filter_term>&<overlap_ge>&<pvalue_le>&<adj_pvalue_le>&<offset>&<limit>&<filter_fda>&<sortby>&<filter_ko>&<top_n>&<library_names>&<post_search_filter_library_names>", data = "<input_gene_sets>")]
+#[post("/pairs/<background_id>?<filter_term>&<overlap_ge>&<pvalue_le>&<adj_pvalue_le>&<offset>&<limit>&<filter_fda>&<sortby>&<filter_ko>&<top_n>&<library_names>", data = "<input_gene_sets>")]
 async fn query_pairs(
     mut db: Connection<Postgres>,
     state: &State<PersistentState>,
@@ -1348,7 +1381,6 @@ async fn query_pairs(
     filter_ko: Option<bool>,
     top_n: Option<usize>,
     library_names: Option<String>,
-    post_search_filter_library_names: Option<String>,
 ) -> Result<PairedQueryResponse, Custom<String>> {
 
     let background_id = {
@@ -1380,8 +1412,8 @@ async fn query_pairs(
 
 
     let filter_term = filter_term.and_then(|filter_term| Some(filter_term.to_lowercase()));
-    let adj_pvalue_le =  adj_pvalue_le.unwrap_or(1.0);
-    let top_n = top_n.unwrap_or(1000);
+    let adj_pvalue_le =  adj_pvalue_le.unwrap_or(DEFAULT_ADJ_PVALUE_CUTOFF);
+    let top_n = top_n.unwrap_or(DEFAULT_CONSENSUS_TOP_N_SIGNATURES);
 
     let fisher = state.fisher.read().await;
 
@@ -1390,76 +1422,29 @@ async fn query_pairs(
         names.split(',').map(|s| s.trim().to_string()).collect()
     });
 
-    // Parse post-search library filter (filters results AFTER Fisher's, doesn't affect background)
-    let post_search_library_filter: Option<std::collections::HashSet<String>> = post_search_filter_library_names.map(|names| {
-        names.split(',').map(|s| s.trim().to_string()).collect()
-    });
+    let library_query_overlap_counts_up: HashMap<String, u32> = bitmap.library_backgrounds.iter()
+        .map(|(name, lib_bg)| (name.clone(), intersect_count(&input_gene_set_up, lib_bg)))
+        .collect();
+    let library_query_overlap_counts_down: HashMap<String, u32> = bitmap.library_backgrounds.iter()
+        .map(|(name, lib_bg)| (name.clone(), intersect_count(&input_gene_set_down, lib_bg)))
+        .collect();
 
-    // Compute filtered background and gene set count based on selected libraries
-    let (n_background, gene_set_count) = if let Some(ref libs) = library_filter {
-        // OR together the backgrounds of selected libraries
-        let mut combined = DenseBitVec::empty(bitmap.columns.len());
-        for lib_name in libs {
-            if let Some(lib_bg) = bitmap.library_backgrounds.get(lib_name) {
-                combined.union_mut(lib_bg);
-            }
-        }
-        // Count signature pairs that match the library filter (both up and down must match)
-        let pair_count = bitmap.signature_pairs.pairs.iter()
-            .filter(|(up_idx, down_idx)| {
-                let up_hash = &bitmap.values[*up_idx].0;
-                let down_hash = &bitmap.values[*down_idx].0;
-                let up_matches = bitmap.gene_set_libraries.get(up_hash)
-                    .map(|lib| libs.contains(lib))
-                    .unwrap_or(false);
-                let down_matches = bitmap.gene_set_libraries.get(down_hash)
-                    .map(|lib| libs.contains(lib))
-                    .unwrap_or(false);
-                up_matches && down_matches
-            })
-            .count();
-        (combined.count_ones() as u32, pair_count)
-    } else {
-        // No filter - use full background and all pairs
-        (bitmap.full_background.count_ones() as u32, bitmap.signature_pairs.pairs.len())
-    };
-
-    let n_user_gene_id = input_gene_set_up.n as u32 + input_gene_set_down.n as u32;
-
-    // Only use cache if no library filter is applied
-    let use_cache = library_filter.is_none();
-
-    println!("[{}] Computing mimickers and reversers (library_filter: {})", background_id, !use_cache);
+    println!("[{}] Computing mimickers and reversers", background_id);
     let start = Instant::now();
     let background_query = Arc::new(BackgroundQueryPair { background_id, input_gene_set_up, input_gene_set_down });
     let mut results = {
-        let cached_results = if use_cache {
-            state.cachepair.get(&background_query).await
-        } else {
-            None
-        };
+        let cached_results = state.cachepair.get(&background_query).await;
         if let Some(results) = cached_results {
             results.value().clone()
         } else {
-            let mut results: Vec<_> = bitmap.signature_pairs.pairs.par_iter().enumerate()
+            let all_results: Vec<_> = bitmap.signature_pairs.pairs.par_iter().enumerate()
             .filter_map(|(index, (up_idx, down_idx))| {
-                // Filter by library if library_filter is set (both up and down must match)
-                if let Some(ref libs) = library_filter {
-                    let up_hash = &bitmap.values[*up_idx].0;
-                    let down_hash = &bitmap.values[*down_idx].0;
-                    let up_matches = bitmap.gene_set_libraries.get(up_hash)
-                        .map(|lib| libs.contains(lib))
-                        .unwrap_or(false);
-                    let down_matches = bitmap.gene_set_libraries.get(down_hash)
-                        .map(|lib| libs.contains(lib))
-                        .unwrap_or(false);
-                    if !up_matches || !down_matches {
-                        return None;  // Skip pairs not in selected libraries
-                    }
-                }
+                let (up_hash, gene_set_up) = &bitmap.values[*up_idx];
+                let (_down_hash, gene_set_down) = &bitmap.values[*down_idx];
 
-                let gene_set_up = &bitmap.values[*up_idx].1;
-                let gene_set_down = &bitmap.values[*down_idx].1;
+                let lib_name = bitmap.gene_set_libraries.get(up_hash)?;
+                let n_background = *bitmap.library_background_counts.get(lib_name)?;
+                let n_user_gene_id = *library_query_overlap_counts_up.get(lib_name)? + *library_query_overlap_counts_down.get(lib_name)?;
 
                 // Compute four different overlaps
                 let overlap_up_up = compute_overlap(&background_query.input_gene_set_up, &gene_set_up) as u32;
@@ -1472,7 +1457,7 @@ async fn query_pairs(
                 let reverser_overlap = overlap_up_down + overlap_down_up;
 
                 // Apply overlap filters
-                if mimicker_overlap < overlap_ge.unwrap_or(1) && reverser_overlap < overlap_ge.unwrap_or(1) {
+                if mimicker_overlap < overlap_ge.unwrap_or(DEFAULT_MIN_GENE_OVERLAP) && reverser_overlap < overlap_ge.unwrap_or(DEFAULT_MIN_GENE_OVERLAP) {
                     return None;
                 }
 
@@ -1480,20 +1465,19 @@ async fn query_pairs(
                 let a_mimic = mimicker_overlap;
                 let b_mimic = n_user_gene_id - a_mimic;
                 let c_mimic = (gene_set_up.v.len() + gene_set_down.v.len()) as u32 - a_mimic;
-                let d_mimic = n_background - b_mimic - c_mimic + a_mimic;
+                let d_mimic = n_background - a_mimic - b_mimic - c_mimic;
 
-                
                 let pvalue_mimic = fisher.get_p_value(a_mimic as usize, b_mimic as usize, c_mimic as usize, d_mimic as usize);
-                
+
                 // Compute Fisher test for reverser
                 let a_reverse = reverser_overlap;
                 let b_reverse = n_user_gene_id - a_reverse;
                 let c_reverse = (gene_set_up.v.len() + gene_set_down.v.len()) as u32 - a_reverse;
-                let d_reverse = n_background - b_reverse - c_reverse + a_reverse;
+                let d_reverse = n_background - a_reverse - b_reverse - c_reverse;
 
                 let pvalue_reverse = fisher.get_p_value(a_reverse as usize, b_reverse as usize, c_reverse as usize, d_reverse as usize);
 
-                if pvalue_mimic > pvalue_le.unwrap_or(1.0) && pvalue_reverse > pvalue_le.unwrap_or(1.0) {
+                if pvalue_mimic > pvalue_le.unwrap_or(DEFAULT_PVALUE_CUTOFF) && pvalue_reverse > pvalue_le.unwrap_or(DEFAULT_PVALUE_CUTOFF) {
                     return None;
                 }
 
@@ -1516,51 +1500,71 @@ async fn query_pairs(
             })
             .collect();
 
-            // Compute adj_pvalues using Benjamini-Hochberg.
-            // When library filtering is active, use compact indexing so BH only corrects
-            // over the filtered gene sets, not the entire database.
-            if library_filter.is_some() {
-                let pvalues_mimic: Vec<f64> = results.iter().map(|r| r.pvalue_mimic).collect();
-                let pvalues_reverse: Vec<f64> = results.iter().map(|r| r.pvalue_reverse).collect();
-                let adj_pvalues_mimic = adjust(&pvalues_mimic, Procedure::BenjaminiHochberg);
-                let adj_pvalues_reverse = adjust(&pvalues_reverse, Procedure::BenjaminiHochberg);
-                for (i, result) in results.iter_mut().enumerate() {
-                    result.adj_pvalue_mimic = adj_pvalues_mimic[i];
-                    result.adj_pvalue_reverse = adj_pvalues_reverse[i];
+            // Group results by library
+            let pre_adj_count = all_results.len();
+            let mut per_library: HashMap<String, Vec<PartialPairResult>> = HashMap::new();
+            for result in all_results {
+                if let Some(lib) = bitmap.get_library_for_index(result.index_up) {
+                    per_library.entry(lib.clone()).or_default().push(result);
                 }
-                results.retain(|result| result.adj_pvalue_mimic <= adj_pvalue_le || result.adj_pvalue_reverse <= adj_pvalue_le);
-            } else {
-                let mut pvalues_mimic = vec![1.0; bitmap.values.len()];
-                let mut pvalues_reverse = vec![1.0; bitmap.values.len()];
-                for result in &results {
-                    pvalues_mimic[result.index] = result.pvalue_mimic;
-                    pvalues_reverse[result.index] = result.pvalue_reverse;
+            }
+
+            // Per-library BH correction for mimic and reverse p-values
+            let mut results: Vec<PartialPairResult> = Vec::with_capacity(pre_adj_count);
+            for (lib_name, mut lib_results) in per_library {
+                // Safe to unwrap: library_pair_counts is populated by ensure_index for all libraries
+                let lib_pair_count = *bitmap.library_pair_counts.get(&lib_name).unwrap();
+                let mut pvalues_mimic: Vec<f64> = lib_results.iter().map(|r| r.pvalue_mimic).collect();
+                let mut pvalues_reverse: Vec<f64> = lib_results.iter().map(|r| r.pvalue_reverse).collect();
+                pvalues_mimic.resize(lib_pair_count, 1.0);
+                pvalues_reverse.resize(lib_pair_count, 1.0);
+                let adj_mimic = adjust(&pvalues_mimic, Procedure::BenjaminiHochberg);
+                let adj_reverse = adjust(&pvalues_reverse, Procedure::BenjaminiHochberg);
+                for (i, result) in lib_results.iter_mut().enumerate() {
+                    result.adj_pvalue_mimic = adj_mimic[i];
+                    result.adj_pvalue_reverse = adj_reverse[i];
                 }
-                let adj_pvalues_mimic = adjust(&pvalues_mimic, Procedure::BenjaminiHochberg);
-                let adj_pvalues_reverse = adjust(&pvalues_reverse, Procedure::BenjaminiHochberg);
-                results.retain_mut(|result| {
-                    if let Some(adj_pvalue_mimic) = adj_pvalues_mimic.get(result.index) {
-                        result.adj_pvalue_mimic = *adj_pvalue_mimic;
-                    }
-                    if let Some(adj_pvalue_reverse) = adj_pvalues_reverse.get(result.index) {
-                        result.adj_pvalue_reverse = *adj_pvalue_reverse;
-                    }
-                    result.adj_pvalue_mimic <= adj_pvalue_le || result.adj_pvalue_reverse <= adj_pvalue_le
-                });
+                lib_results.retain(|r| r.adj_pvalue_mimic <= adj_pvalue_le || r.adj_pvalue_reverse <= adj_pvalue_le);
+                // Append this library's surviving results into the combined output
+                results.extend(lib_results);
             }
             results.sort_unstable_by(|a, b| a.pvalue_mimic.partial_cmp(&b.pvalue_mimic).unwrap_or(std::cmp::Ordering::Equal));
 
             let results = Arc::new(results);
-
-            // Only cache if no library filter (cache key doesn't include library filter)
-            if use_cache {
-                state.cachepair.insert(background_query, results.clone(), 30000).await;
-            }
+            state.cachepair.insert(background_query, results.clone(), CACHE_TTL_MS).await;
 
             let duration = start.elapsed();
-            println!("[{}] {} up and down genes enriched in {:?} (library_filter: {})", background_id, n_user_gene_id, duration, !use_cache);
+            println!("[{}] enriched pairs in {:?}", background_id, duration);
             results
         }
+    };
+
+    // Post-cache library filter: both halves of a pair must be in selected libraries
+    if let Some(ref libs) = library_filter {
+        let filtered: Vec<PartialPairResult> = results.iter()
+            .filter(|r| {
+                let up_lib = bitmap.get_library_for_index(r.index_up);
+                let down_lib = bitmap.get_library_for_index(r.index_down);
+                up_lib.map_or(false, |l| libs.contains(l)) && down_lib.map_or(false, |l| libs.contains(l))
+            })
+            .cloned()
+            .collect();
+        results = Arc::new(filtered);
+    }
+
+    // Total signature pairs searched (for response metadata), scoped to selected libraries if filtered
+    let gene_set_count: usize = if let Some(ref libs) = library_filter {
+        bitmap.signature_pairs.pairs.iter()
+            .filter(|(up_idx, down_idx)| {
+                let up_matches = bitmap.get_library_for_index(*up_idx)
+                    .map_or(false, |lib| libs.contains(lib));
+                let down_matches = bitmap.get_library_for_index(*down_idx)
+                    .map_or(false, |lib| libs.contains(lib));
+                up_matches && down_matches
+            })
+            .count()
+    } else {
+        bitmap.signature_pairs.pairs.len()
     };
 
     // CID-based consensus grouping for paired query
@@ -1576,17 +1580,6 @@ async fn query_pairs(
 
     for result in (*results).iter().take(top_n) {
         if let Some((gene_set_hash, _gene_set)) = bitmap.values.get(result.index_up) {
-            // Post-search library filter: user selected specific datasets in the frontend dropdown.
-            // Enrichment runs against all libraries, but consensus only counts gene sets from selected ones.
-            if let Some(ref post_libs) = post_search_library_filter {
-                // Look up which library this gene set belongs to
-                if let Some(lib_name) = bitmap.gene_set_libraries.get(gene_set_hash) {
-                    // Skip this gene set if its library wasn't selected
-                    if !post_libs.contains(lib_name) {
-                        continue;
-                    }
-                }
-            }
             let current_lib = bitmap.gene_set_libraries.get(gene_set_hash).cloned().unwrap_or_default();
             if let Some(terms) = bitmap.terms.get(gene_set_hash) {
                 // Iterate over the terms for the current gene set
@@ -1664,7 +1657,7 @@ async fn query_pairs(
 
     let total_terms = bitmap.terms.values().len() / 2 as usize;
 
-    let n_significant_drugs = results.len() / 2 as usize;
+    let n_significant_drugs = results.len();
 
     let n_insignificant_drugs = total_terms - n_significant_drugs;
 
@@ -1712,7 +1705,7 @@ async fn query_pairs(
                 }
             }
 
-            let odds_ratio = ((a as f64 + 0.5)  * (d as f64 + 0.5)) / ((b as f64 + 0.5) * (c as f64 + 0.5));
+            let odds_ratio = corrected_odds_ratio(a, b, c, d);
 
             let p_value = fisher.get_p_value(a as usize, b as usize, c as usize, d as usize); // Calculate p-value using FastFisher, b, c, d)
             // Store the result with Fisher's Exact Test p-value
@@ -1723,8 +1716,7 @@ async fn query_pairs(
             let a_down = (total_terms_by_dir as usize).saturating_sub(*sig_up); // Upregulated and insignificant
             let b_down = (*count_insig).saturating_sub(a_down); // Downregulated and insignificant
 
-            let odds_ratio_up = ((a_up as f64 + 0.5) / (b_up as f64 + 0.5)) / ((a_down as f64 + 0.5) / (b_down as f64 + 0.5));
-            let odds_ratio_down = ((b_up as f64 + 0.5) / (a_up as f64 + 0.5)) / ((b_down as f64 + 0.5) / (a_down as f64 + 0.5));
+            let (odds_ratio_up, odds_ratio_down) = corrected_directional_odds_ratios(a_up, b_up, a_down, b_down);
 
             let p_value_up = fisher.get_p_value(a_up as usize, b_up as usize, a_down as usize, b_down as usize);
 
@@ -1838,7 +1830,7 @@ async fn query_pairs(
             }
         }
 
-        let odds_ratio = ((a as f64 + 0.5)  * (d as f64 + 0.5)) / ((b as f64 + 0.5) * (c as f64 + 0.5));
+        let odds_ratio = corrected_odds_ratio(a, b, c, d);
 
         let p_value = fisher.get_p_value(a as usize, b as usize, c as usize, d as usize); // Calculate p-value using FastFisher, b, c, d)
         // Store the result with Fisher's Exact Test p-value
@@ -1849,8 +1841,7 @@ async fn query_pairs(
         let a_down = (total_terms_by_dir as usize).saturating_sub(*sig_up); // Upregulated and insignificant
         let b_down = (*count_insig).saturating_sub(a_down); // Downregulated and insignificant
 
-        let odds_ratio_up = ((a_up as f64 + 0.5) / (b_up as f64 + 0.5)) / ((a_down as f64 + 0.5) / (b_down as f64 + 0.5));
-        let odds_ratio_down = ((b_up as f64 + 0.5) / (a_up as f64 + 0.5)) / ((b_down as f64 + 0.5) / (a_down as f64 + 0.5));
+        let (odds_ratio_up, odds_ratio_down) = corrected_directional_odds_ratios(a_up, b_up, a_down, b_down);
 
         let p_value_up = fisher.get_p_value(a_up as usize, b_up as usize, a_down as usize, b_down as usize);
 
@@ -1932,9 +1923,7 @@ async fn query_pairs(
     }
 
     if let Some(filter_term) = &filter_term {
-        let is_up = filter_term.contains(" up");
-        let is_down = filter_term.contains(" down");
-        let filter_term_clean = filter_term.replace(" up", "").replace(" down", "").trim().to_lowercase();
+        let (filter_term_clean, is_up, is_down) = parse_filter_term(filter_term);
         let filter_terms: Vec<String> = filter_term_clean.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
         if !filter_terms.is_empty() {
             consensus_results.retain(|result| {
@@ -1967,7 +1956,7 @@ async fn query_pairs(
 
     let consensus_len = consensus_results.len();
 
-    let moa_consensus_len = consensus_results.len();
+    let moa_consensus_len = moa_consensus_results.len();
 
     println!("Consensus results computed for {} perturbations and {} MoAs", consensus_len, moa_consensus_len);
 
@@ -1977,10 +1966,8 @@ async fn query_pairs(
         .filter_map(|result| {
             let (gene_set_hash, _gene_set) = bitmap.values.get(result.index_up)?;
             if let Some(filter_term) = &filter_term {
-                let filter_term_clean = filter_term.replace(" up", "").replace(" down", "").trim().to_lowercase();
+                let (filter_term_clean, is_up, is_down) = parse_filter_term(filter_term);
                 let filter_terms: Vec<String> = filter_term_clean.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
-                let is_up = filter_term.contains(" up");
-                let is_down = filter_term.contains(" down");
                 if let Some(terms) = bitmap.terms.get(gene_set_hash) {
                     if !filter_terms.is_empty() && !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)| {
                         let term_lower = gene_set_term.to_lowercase();
@@ -1988,18 +1975,13 @@ async fn query_pairs(
                     }) {
                         return None
                     }
-                } else if is_up && (result.pvalue_mimic > result.pvalue_reverse) {
-                    return None
-                } else if is_down && (result.pvalue_mimic < result.pvalue_reverse) {
+                }
+                let threshold = pvalue_le.unwrap_or(DEFAULT_PVALUE_CUTOFF);
+                if is_up && result.pvalue_mimic > threshold {
                     return None
                 }
-            }
-            // Post-search library filter: filter by dataset name AFTER Fisher's (doesn't affect p-values)
-            if let Some(ref post_libs) = post_search_library_filter {
-                if let Some(lib_name) = bitmap.gene_set_libraries.get(gene_set_hash) {
-                    if !post_libs.contains(lib_name) {
-                        return None
-                    }
+                if is_down && result.pvalue_reverse > threshold {
+                    return None
                 }
             }
             if let Some(filter_fda) = filter_fda {
@@ -2183,7 +2165,8 @@ fn rocket() -> _ {
             bitmaps: RwLockHashMap::new(),
             latest: RwLock::new(None),
             cache: Cache::new(),
-            cachepair: Cache::new()
+            cachepair: Cache::new(),
+            s3_bucket: s3::create_bucket(),
         })
         .attach(Postgres::init())
         .mount("/", routes![ensure, get_gmt, query, query_pairs, delete])

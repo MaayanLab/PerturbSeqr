@@ -28,8 +28,9 @@ if not s3.bucket_exists(bucket):
 else:
     print(f"Bucket exists: {bucket}")
 
-# Set public download policy
-print(f"Setting public download policy on {bucket}")
+# Set public download policy on root-level files only.
+# The enrich/ prefix stores internal binary indexes and must stay private.
+print(f"Setting public download policy on {bucket} (root-level files only)")
 policy = {
     'Version': '2012-10-17',
     'Statement': [
@@ -44,6 +45,12 @@ policy = {
             'Principal': {'AWS': '*'},
             'Action': 's3:GetObject',
             'Resource': f"arn:aws:s3:::{bucket}/*"
+        },
+        {
+            'Effect': 'Deny',
+            'Principal': {'AWS': '*'},
+            'Action': 's3:GetObject',
+            'Resource': f"arn:aws:s3:::{bucket}/enrich/*"
         },
     ],
 }

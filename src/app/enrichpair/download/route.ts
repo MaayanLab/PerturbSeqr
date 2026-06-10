@@ -8,6 +8,7 @@ import { getClient } from "@/lib/apollo/client";
 import ensureArray from "@/utils/ensureArray";
 import streamTsv from "@/utils/streamTsv";
 import {paginatedPairNodeGenerator, paginatedPairConsensusGenerator, paginatedPairMoAsGenerator} from "@/utils/paginatedGenerators";
+import { DEFAULT_CONSENSUS_TOP_N_SIGNATURES, DEFAULT_PVALUE_CUTOFF, MAX_DOWNLOAD_RESULT_COUNT } from "@/constants/enrichment";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
@@ -21,15 +22,11 @@ export async function GET(request: Request) {
   const filterFda = searchParams.get("fda") || "false";
   const dir = searchParams.get("dir") || "";
   const sort = searchParams.get("sort") || "pvalue";
-  const topN = searchParams.get("topn") || "10000";
-  const maxTotal = searchParams.get("maxTotal") || "100000";
-  const pvalueLe = searchParams.get("pvaluele") || "0.05";
-  const ds = searchParams.get("ds") || "";
-  const dsArray = ds ? ds.split(",").filter(Boolean) : null;
-  const libraries = searchParams.get("libraries") || "";
-  const librariesArray = libraries ? libraries.split(",").filter(Boolean) : null;
-
-  console.log(datasetUp, datasetDown)
+  const topN = searchParams.get("topn") || String(DEFAULT_CONSENSUS_TOP_N_SIGNATURES);
+  const maxTotal = searchParams.get("maxTotal") || String(MAX_DOWNLOAD_RESULT_COUNT);
+  const pvalueLe = searchParams.get("pvaluele") || String(DEFAULT_PVALUE_CUTOFF);
+  const libraryFilter = (searchParams.get("libraries") || "").split(",").filter(Boolean);
+  const libraryNames = libraryFilter.length > 0 ? libraryFilter : null;
 
   const { data: userGeneSetUp, error: userGeneSetErrorUp } =
     await getClient().query<FetchUserGeneSetQuery>({
@@ -158,8 +155,7 @@ export async function GET(request: Request) {
               sort,
               parseInt(maxTotal),
               parseFloat(pvalueLe),
-              dsArray,
-              librariesArray
+              libraryNames
             ),
             (item) => item
           ),

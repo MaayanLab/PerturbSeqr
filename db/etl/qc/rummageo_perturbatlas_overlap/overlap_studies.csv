@@ -1,0 +1,483 @@
+sra_id,geo_id,perturbatlas_term,rummageo_term
+SRP018779,GSE44461,TCF21::::in vitro cultured primary coronary artery smooth muscle cells::::::KD::::SRP018779::9418 up,tcf21::::::::::::::human::GSE44461::1::0 up
+SRP028864,GSE49929,Irf4::::CD8+ T cells::::::KO::::SRP028864::3395 up,"irf4::::::::::::::mouse::GSE49929,GSE49931::1::0 up"
+SRP034660,GSE53538,Cd2bp2::::Podocytes::::::KO::::SRP034660::14916 up,cd2bp2::::::::::::::mouse::GSE53538::1::0 up
+SRP040577,GSE56235,PRDM11::Diffused Large B cell lymphoma U2392::::::::KD::::SRP040577::4406 up,prdm11::::::::::::::human::GSE56235::1::0 up
+SRP042158,GSE57871,PSDM13::colon cancer cell vorinostat-resistant HCT116::::::::KD::::SRP042158::3768 up,vorinostat::::::::::human::GSE57871::11::10 up
+SRP042164,GSE57875,Hnrnpl::::fetal liver::::::KO::::SRP042164::5833 up,hnrnpl::::::::::::::mouse::GSE57875::1::0 up
+SRP043436,GSE58498,Dgcr8::::FAC-sorted cones from retina::::::KO::::SRP043436::5710 up,"dgcr8::::::::::::::mouse::GSE58498,GSE58501::2::3 up"
+SRP045727,GSE60691,Ar::::muscle::::::Mut::::SRP045727::13467 up,glutamine::::::::::mouse::GSE60691::0::1 up
+SRP045828,GSE60837,Bcl9l|Bcl9::::AOM-DSS colorectal tumor::::::KO|KO::::SRP045828::1006 up,bcl9::::::::::::::mouse::GSE60837::0::3 up
+SRP048893,GSE62292,Col4a3::::kidney::::::KO::::SRP048893::10302 up,"col4a3::::::::::::::mouse::GSE62292,GSE62295::2::0 up"
+SRP049514,GSE62974,Epas1::human umbilical vein endothelial cells::::::::KD::::SRP049514::9132 up,epas1::::::::::::::human::GSE62974::1::0 up
+SRP050547,GSE63857,Brca1::::mammary glands::::::KO::::SRP050547::12084 up,tamoxifen::::::::::mouse::GSE63857::3::1 up
+SRP051544,GSE64513,FOXD3::::Non-small-cell lung cancer (NSCLC) cells::::::KD::::SRP051544::14092 up,foxd3::::::::::::::human::GSE64513::0::1 up
+SRP056141,GSE66870,Mecp2::::hypothalamus::::::KO::::SRP056141::9219 up,"mecp2::::::::::::::mouse::GSE66870,GSE66871::1::0 up"
+SRP057556,GSE68156,Nrf2::::colon epithelial cells::::::OE::::SRP057556::3796 up,dextran::::::::::mouse::GSE68156::0::1 up
+SRP057560,GSE68147,Mef2c::::outflow tracts of heart::::::KO::::SRP057560::14299 up,mef2c::::::::::::::mouse::GSE68147::0::1 up
+SRP057563,GSE68155,Gpr34::::bone marrow dendritic cells::::::KO::::SRP057563::1610 up,gpr3::::::::::::::mouse::GSE68155::1::0 up
+SRP058071,GSE68628,Abcc5::::whole brain::::::KO::::SRP058071::17944 up,abcc5::::::::::::::mouse::GSE68628::1::0 up
+SRP058396,GSE68958,Runx1c::::bone marrow Pre-Megakaryocyte/Erythroid progenitor::::::KO::::SRP058396::2025 up,runx1::::::::::::::mouse::GSE68958::0::2 up
+SRP060296,GSE70499,Bmal1::::liver::::::KO::::SRP060296::11291 up,bmal1::::::::::::::mouse::GSE70499::0::2 up
+SRP061192,GSE70935,CYFIP1::553.C2(NPCs derived from iPSCs)::::::::KD::::SRP061192::239 up,cyfip1::::::::::::::human::GSE70935::1::0 up
+SRP061642,GSE71385,Cdk8::::small intestine::::::KO::::SRP061642::16549 up,cdk8::::::::::::::mouse::GSE71385::1::0 up
+SRP061948,GSE71674,Cbfa2t2::embryonic stem cell KH2::::::::KO::::SRP061948::4940 up,"cbfa2t2::::::::::::::mouse::GSE71674,GSE71676::0::2 up"
+SRP062946,GSE72491,Pcbp2::::fetal liver::::::KO::::SRP062946::5829 up,pcbp2::::::::::::::mouse::GSE72491::0::1 up
+SRP063560,GSE72895,Foxo1::::uterus::::::KO::::SRP063560::17680 up,"progesterone::::::::::mouse::GSE72895,GSE72896::0::1 up"
+SRP064143,GSE73376,DGCR8::HeLa::::::::KD::::SRP064143::7799 up,dgcr8::::::::::::::human::GSE73376::1::0 up
+SRP064307,GSE73561,Mef2c|Mef2d::proB-cells::::::::KO|KO::::SRP064307::15364 up,"mef2c::::::::::::::mouse::GSE73561,GSE73563::0::1 up"
+SRP064353,GSE73628,AKT1::::breast epithelial cells::::::OE::::SRP064353::2825 up,igf1::::::::::::::human::GSE73628::1::2 up
+SRP065310,GSE74383,ROR2::breast cancer cell MCF7::::::::OE::::SRP065310::2585 up,ror2::::::::::::::human::GSE74383::1::0 up
+SRP065542,GSE74528,Trex2::::back skin::::::KO::::SRP065542::1289 up,trex2::::::::::::::mouse::GSE74528::0::1 up
+SRP067339,GSE75976,Ikaros::::CD19+IgM- cell BCR-ABL1(P190) transgenic spleen::::::KD::::SRP067339::3236 up,abl1::::::::::::::mouse::GSE75976::3::1 up
+SRP068106,GSE76476,RBFOX2|HNRNPM::HEK293T::::::::KO|KD::::SRP068106::7429 up,"rbfox1::::::::::::::human::GSE71468,GSE76476::0::1 up"
+SRP068733,GSE77108,EP300::::Diabetic endothelial cells::::::KD::::SRP068733::4352 up,saha::::::::::human::GSE77108::0::1 up
+SRP068801,GSE77005,Satb2::::hippocampal CA1 region::::::KO::::SRP068801::8515 up,satb2::::::::::::::mouse::GSE77005::5::3 up
+SRP068942,GSE77260,E2F1::Mesenchymal stem cells::::::::KD::::SRP068942::12687 up,e2f1::::::::::::::human::GSE77260::0::2 down
+SRP069873,GSE77795,Ppargc1a::::heart::::::OE::::SRP069873::7098 down,pparg::::::::::::::mouse::GSE77795::0::3 up
+SRP070694,GSE78199,BASP1::breast cancer cell MCF7::::::::KD::::SRP070694::2517 up,tamoxifen::::::::::human::GSE78199::0::3 up
+SRP072458,GSE79663,Tcf4::::dorsal telencephalon::::::KO::::SRP072458::4491 up,tcf4::::::::::::::mouse::GSE79663::2::0 down
+SRP073189,GSE80182,MEP50::A549::::::::KD::::SRP073189::439 up,prmt5::::::::::::::human::GSE80182::2::1 down
+SRP073333,GSE80305,COP1::gastrointestinal stromal tumor cell GIST882::::::::KD::::SRP073333::6372 up,cop1::::::::::::::human::GSE80305::2::0 up
+SRP073667,GSE80537,ADHFE1::Mammary epithelial cell MCF12A::::::::OE::::SRP073667::12039 up,adhfe1::::::::::::::human::GSE80537::0::2 up
+SRP074478,GSE81193,Irf3::adipocytes 3T3-L1::::::::OE::::SRP074478::785 up,irf3::::::::::::::mouse::GSE81193::0::2 up
+SRP075646,GSE81803,Fmr1::cortical neurons::::::::KO::::SRP075646::4198 up,"fmr1::::::::::::::mouse::GSE81803,GSE81912::0::1 up"
+SRP076338,GSE83145,Ppp1r8::::testes::::::KO::::SRP076338::17299 up,tamoxifen::::::::::mouse::GSE83145::1::0 up
+SRP078142,GSE84175,Ctcf::::hippocampus::::::KO::::SRP078142::8613 up,"ctcf::::::::::::::mouse::GSE84175,GSE84176::0::1 up"
+SRP081081,GSE85302,Kat6a::::CD8+ T cells::::::KO::::SRP081081::3376 up,kat6a::::::::::::::mouse::GSE85302::0::1 up
+SRP081229,GSE85427,Igfbp7::::adult liver::::::KO::::SRP081229::852 up,igfbp7::::::::::::::mouse::GSE85427::1::0 up
+SRP081577,GSE85565,TCF21::::human coronary artery smooth muscle cells (HCASMC)::::::OE::::SRP081577::8874 up,tcf21::::::::::::::human::GSE85565::1::0 down
+SRP082357,GSE85723,Huwe1::::murine bone marrow hematopoietic stem cells::::::KO::::SRP082357::13413 up,"huwe1::::::::::::::mouse::GSE85723,GSE85833::1::0 up"
+SRP090360,GSE87299,Bmal1::::liver::::::KO::::SRP090360::10792 up,nr1d1::::::::::::::mouse::GSE87299::2::3 up
+SRP090515,GSE87404,Hoxa9::::satellite cells::::::KO::::SRP090515::16082 up,"hoxa9::::::::::::::mouse::GSE87404,GSE87812::1::0 up"
+SRP091426,GSE87862,Mov10::Neuro2A::::::::KO::::SRP091426::13837 up,mov10::::::::::::::mouse::GSE87862::0::1 up
+SRP091584,GSE88777,Cnot7::::cultured hippocampal neurons::::::KD::::SRP091584::4236 up,cnot7::::::::::::::mouse::GSE88777::0::1 up
+SRP091906,GSE89018,Cry2::::mouse embryonic fibroblast::::::KO::::SRP091906::13069 up,cry2::::::::::::::mouse::GSE89018::10::8 up
+SRP091919,GSE89032,Sfpq::embryonic carcinoma cell P19::::::::KD::::SRP091919::4704 up,"sfpq::::::::::::::mouse::GSE89032,GSE89033::0::1 up"
+SRP091936,GSE89057,SOX5::::primary human neuronal progenitors::::::OE::::SRP091936::15191 up,sox5::::::::::::::human::GSE89057::0::1 up
+SRP092641,GSE89569,NR0B1::lung cancer cell H460::::::::KD::::SRP092641::11523 up,nr0b1::::::::::::::human::GSE89569::3::0 up
+SRP093797,GSE90019,Phf8::::prefrontal cortex::::::KO::::SRP093797::14988 up,"phf8::::::::::::::mouse::GSE90019,GSE90020::1::3 up"
+SRP094120,GSE90710,MED13::::embryos::::::KD::::SRP094120::5372 up,med13::::::::::::::mouse::GSE90710::1::0 up
+SRP094428,GSE90754,Foxo1::::liver::::::KO::::SRP094428::11159 up,foxo1::::::::::::::mouse::GSE90754::0::1 up
+SRP094724,GSE91015,Aire::mTEC 3.10::::::::KO::::SRP094724::13385 up,aire::::::::::::::mouse::GSE91015::0::1 up
+SRP095167,GSE92434,Ebf1::::Fetal Liver ProB cells::::::KO::::SRP095167::5823 up,ebf1::::::::::::::mouse::GSE92434::1::0 up
+SRP095334,GSE92548,Ezh2::::CD44+ NK1.1- Thymic natural killer T cells::::::KO::::SRP095334::3347 up,ezh2::::::::::::::mouse::GSE92548::1::0 up
+SRP095340,GSE92562,Cpeb1::::Neurites from cultured neurons::::::KO::::SRP095340::13835 up,cpeb1::::::::::::::mouse::GSE92562::1::0 up
+SRP095359,GSE92589,Tsc2::::middle limb dermis::::::KO::::SRP095359::12829 up,sirolimus::::::::::mouse::GSE92589::0::1 up
+SRP095406,GSE92614,Pten::::Region I epididymis::::::KO::::SRP095406::15687 up,pten::::::::::::::mouse::GSE92614::1::0 up
+SRP095733,GSE92965,Klf2::::Primary cardiac microvascular endothelial cells from heart::::::KO::::SRP095733::15040 up,klf2::::::::::::::mouse::GSE92965::0::1 up
+SRP096837,GSE93674,Ezh2::::retina::::::KO::::SRP096837::15752 up,ezh2::::::::::::::mouse::GSE93674::1::0 up
+SRP097469,GSE93902,BCL11B::::Cord blood CD34+ cells::::::KD::::SRP097469::3993 down,"bcl11b::::::::::::::human::GSE84678,GSE93902::1::2 up"
+SRP097585,GSE93918,Hdac2::::prefrontal cortex::::::KO::::SRP097585::14983 up,clozapine::::::::::mouse::GSE93918::1::0 up
+SRP099194,GSE94768,Pofut1::::Quadriceps muscle::::::KO::::SRP099194::15622 up,pofut1::::::::::::::mouse::GSE94768::0::4 up
+SRP100743,GSE95386,EGFR|TRIM24::glioblastoma cell LN-229::::::::OE|KD::::SRP100743::6446 up,trim24::::::::::::::human::GSE95386::0::1 up
+SRP100902,GSE95543,Klhl41::::skeletal muscle::::::KO::::SRP100902::16404 up,klhl41::::::::::::::mouse::GSE95543::1::0 up
+SRP101373,GSE95688,Gss::::lens cortical fiber cells::::::KO::::SRP101373::10631 up,glutathione::::::::::mouse::GSE95688::1::0 up
+SRP101942,GSE96641,Esrp2-as::M6(murine cell line)::::::::KD::::SRP101942::11974 up,esrp2::::::::::::::mouse::GSE96641::1::2 up
+SRP102432,GSE96991,Il11ra::::cardiac fibroblasts_basal::::::KO::::SRP102432::3022 up,"il11::::::::::::::mouse::GSE96991,GSE97117::3::0 up"
+SRP104987,GSE98082,Ino80::::Whole Heart::::::KO::::SRP104987::18105 down,ino80::::::::::::::mouse::GSE98082::1::0 up
+SRP105534,GSE98360,Uhrf2::::brain::::::KO::::SRP105534::2262 up,"uhrf2::::::::::::::mouse::GSE98360,GSE98362::1::0 up"
+SRP106520,GSE98579,Tfam::::heart::::::KO::::SRP106520::7037 up,tfam::::::::::::::mouse::GSE98579::0::1 up
+SRP107176,GSE98898,7p15.2::RWPE1::::::::KO::::SRP107176::16003 up,hoxa1::::::::::::::human::GSE98898::4::1 up
+SRP107211,GSE98964,Tet2::::tumor associated macrophages::::::KO::::SRP107211::17589 down,tet2::::::::::::::mouse::GSE98964::0::2 up
+SRP109699,GSE100217,Trp53::::brain somatosensory cortex::::::KO::::SRP109699::2205 up,ethanol::::::::::mouse::GSE100217::1::0 up
+SRP110576,GSE100528,Mettl3::::brain::::::KO::::SRP110576::2272 up,mettl3::::::::::::::mouse::GSE100528::1::0 up
+SRP110979,GSE100732,Lrpprc::::heart::::::KO::::SRP110979::7066 up,"lrpprc::::::::::::::mouse::GSE100732,GSE100733::0::1 up"
+SRP111192,GSE100863,Tet2::::embryonic stem cell::::::Mut::::SRP111192::4983 up,"tet2::::::::::::::mouse::GSE100863,GSE100864::2::1 up"
+SRP113307,GSE101748,Apela::::whole embryo::::::KO::::SRP113307::18032 up,apela::::::::::::::mouse::GSE101748::0::1 up
+SRP113332,GSE101767,Wdr11::::MB cells::::::OE::::SRP113332::12137 up,wdr11::::::::::::::mouse::GSE101767::1::0 up
+SRP114539,GSE102132,IRF3::::lymphatic endothelial cells (LEC)::::::OE::::SRP114539::11920 up,irf3::::::::::::::human::GSE102132::0::1 up
+SRP114840,GSE102269,Clpp::::GV (germinal vesicle) oocytes::::::KO::::SRP114840::6584 up,clpp::::::::::::::mouse::GSE102269::1::0 up
+SRP115380,GSE102486,Dnmt1::mouse embryonic fibroblast::::::::KD::::SRP115380::13129 up,"setdb1::::::::::::::mouse::GSE102486,GSE102490::1::5 up"
+SRP115904,GSE102870,NR1H4::iPSC-derived hepatocytes::::::::Mut::::SRP115904::9666 up,nr1h4::::::::::::::human::GSE102870::11::9 up
+SRP116036,GSE102756,Clpp::::cumulus cells::::::KO::::SRP116036::4240 up,clpp::::::::::::::mouse::GSE102756::3::2 up
+SRP116196,GSE103122,RIOK3::::cord blood derived CD34+ cells::::::KD::::SRP116196::3998 up,riok3::::::::::::::human::GSE103122::0::1 down
+SRP116199,GSE103124,Bmpr1a::::CD4+ T cells::::::KO::::SRP116199::3299 up,bmpr1a::::::::::::::mouse::GSE103124::1::0 up
+SRP119259,GSE104508,Dnmt3a::adipoyctes 3T3-L1::::::::KD::::SRP119259::814 up,dnmt3a::::::::::::::mouse::GSE104508::0::1 up
+SRP120501,GSE105169,DHX36::HEK293T::::::::KO::::SRP120501::7456 up,"dhx36::::::::::::::human::GSE105169,GSE105175::0::1 up"
+SRP120502,GSE105170,DHX36::HEK293T::::::::KO::::SRP120502::7457 up,"dhx36::::::::::::::human::GSE105170,GSE105175::1::0 up"
+SRP120505,GSE105173,DHX36::HEK293T::::::::KO::::SRP120505::7458 up,"dhx36::::::::::::::human::GSE105173,GSE105175::1::0 up"
+SRP120583,GSE105406,Ptcd1::::heart::::::KO::::SRP120583::6989 up,ptcd1::::::::::::::mouse::GSE105406::2::3 up
+SRP120965,GSE105781,Grhl2::::murine lung epithelium::::::KO::::SRP120965::13438 down,grhl2::::::::::::::mouse::GSE105781::1::0 up
+SRP121364,GSE106130,Grhl2::::first pharyngeal arch::::::KO::::SRP121364::6120 up,grhl2::::::::::::::mouse::GSE106130::0::1 up
+SRP121475,GSE106170,NAP1L3::::FACS sorted cells(Lin-CD34+CD38-)::::::KD::::SRP121475::5735 up,nap1l3::::::::::::::human::GSE106170::1::0 up
+SRP124543,GSE106654,Klf2::::peritoneal macrophages::::::KO::::SRP124543::14804 up,klf2::::::::::::::mouse::GSE106654::0::1 up
+SRP125837,GSE107505,Nanog::::embryo::::::KO::::SRP125837::4637 up,nanog::::::::::::::mouse::GSE107505::0::2 up
+SRP125952,GSE107594,HMGA2::::cord blood derived CD34+ cells::::::OE::::SRP125952::4003 up,hmga2::::::::::::::human::GSE107594::0::1 up
+SRP125995,GSE107581,CD274::glioblastoma cell U251::::::::OE::::SRP125995::6482 up,cd27::::::::::::::human::GSE107581::0::1 up
+SRP126652,GSE107956,YTHDF2::::umbilical cord blood CD34+ HSPCs::::::KD::::SRP126652::17635 up,"ythdf2::::::::::::::human::GSE107956,GSE107957::0::1 up"
+SRP127520,GSE108500,FOXP1::A549::::::::KD::::SRP127520::446 up,foxp1::::::::::::::human::GSE108500::1::0 up
+SRP127587,GSE108547,A1cf::::liver::::::KO::::SRP127587::11092 up,a1cf::::::::::::::mouse::GSE108547::2::0 down
+SRP127682,GSE108614,"Setd1a::MLL-AF9,leukemia cells::::::::KO::::SRP127682::12883 up","setd1a::::::::::::::mouse::GSE108614,GSE108615::0::2 up"
+SRP128928,GSE109111,STIM1::Human embryonic stem cell (H9 hESC) derived neural progenitor cells::::::::KD::::SRP128928::8901 up,stim1::::::::::::::human::GSE109111::2::0 up
+SRP132362,GSE110268,TAFAZZIN::human embryonic stem cells::::::::KO::::SRP132362::8910 up,foxd1::::::::::::::human::GSE110268::0::3 up
+SRP132400,GSE110300,Esr1::::Mandibular condylar fibrocartilage::::::KO::::SRP132400::12103 up,"estradiol::::::::::mouse::GSE110300,GSE110304::0::1 up"
+SRP132407,GSE110303,Esr1::::mandibular condylar fibrocartilage::::::KO::::SRP132407::12104 up,"estradiol::::::::::mouse::GSE110303,GSE110304::1::0 up"
+SRP132471,GSE110341,Lmna::::heart::::::KD::::SRP132471::7092 up,lmna::::::::::::::mouse::GSE110341::1::0 up
+SRP132608,GSE110440,Rad21::::bone marrow hematopoietic stem/progenitor cell::::::KD::::SRP132608::1706 up,rad21::::::::::::::mouse::GSE110440::1::0 up
+SRP132963,GSE110708,Adar::B16::::::::KO::::SRP132963::1271 up,adar::::::::::::::mouse::GSE110708::0::3 up
+SRP133348,GSE111035,Plag1::::endometrium from uterus::::::KO::::SRP133348::5428 down,"plag1::::::::::::::mouse::GSE111035,GSE111040::3::12 up"
+SRP133656,GSE111245,Ezh2::::calverial osteoblasts::::::KO::::SRP133656::3003 up,ezh2::::::::::::::mouse::GSE111245::0::1 up
+SRP136501,GSE112358,Med23::::bone marrow hematopoietic stem cells::::::KO::::SRP136501::1703 up,"med23::::::::::::::mouse::GSE112358,GSE112359::0::1 up"
+SRP137216,GSE112714,CTNNB1::hESC-derived MGE-like progenitor cells::::::::KO::::SRP137216::8474 up,ctnnb1::::::::::::::human::GSE112714::2::0 up
+SRP137727,GSE112760,Ddx6::embryonic stem cell::::::::KO::::SRP137727::5205 up,"ddx6::::::::::::::mouse::GSE112760,GSE112767::1::3 up"
+SRP137728,GSE112761,Ddx6::::embryonic stem cell::::::KO::::SRP137728::5280 up,"ddx6::::::::::::::mouse::GSE112761,GSE112767::1::0 up"
+SRP137729,GSE112762,Dgcr8::::embryonic stem cell::::::KO::::SRP137729::5206 up,"dgcr8::::::::::::::mouse::GSE112762,GSE112767::1::0 up"
+SRP137730,GSE112763,Dgcr8::::embryonic stem cells (RNA bound to high polysome)::::::KO::::SRP137730::5292 up,"dgcr8::::::::::::::mouse::GSE112763,GSE112767::0::1 up"
+SRP137732,GSE112765,Ddx6::::embryonic stem cell::::::KO::::SRP137732::5207 up,"ddx6::::::::::::::mouse::GSE112765,GSE112767::1::0 up"
+SRP139509,GSE112962,DDX5::breast cancer cell BT-549::::::::KD::::SRP139509::2294 up,"ddx5::::::::::::::human::GSE112962,GSE112963::2::1 up"
+SRP139918,GSE113106,Dnm2::::Sciatic nerve::::::KO::::SRP139918::16105 up,dnm2::::::::::::::mouse::GSE113106::0::4 up
+SRP140675,GSE113267,Rfx7::::spleen natural killer (NK) cells::::::KO::::SRP140675::16670 up,rfx7::::::::::::::mouse::GSE113267::0::1 up
+SRP141147,GSE113375,DICER1::::embryonic stem cell::::::KO::::SRP141147::5209 up,dicer1::::::::::::::human::GSE113375::0::1 up
+SRP141174,GSE113385,Six1::::fibroblast tumor::::::OE::::SRP141174::5876 up,six1::::::::::::::mouse::GSE113385::0::1 down
+SRP143388,GSE113734,QPRT::neuroblastoma cell SH-SY5Y::::::::KO::::SRP143388::13908 up,qprt::::::::::::::human::GSE113734::1::0 up
+SRP143680,GSE113817,BACH1::::embryonic stem cell::::::KO::::SRP143680::5006 up,bach1::::::::::::::human::GSE113817::0::1 up
+SRP144331,GSE113952,Chtopl::HEK293T::::::::KD::::SRP144331::7474 up,"chtop::::::::::::::human::GSE113952,GSE113953::1::0 up"
+SRP145105,GSE114258,Foxk2::adipocytes 3T3-L1::::::::OE::::SRP145105::786 up,foxk1::::::::::::::mouse::GSE114258::1::0 up
+SRP145144,GSE114272,Clk3::::heart::::::KO::::SRP145144::7113 down,clk3::::::::::::::mouse::GSE114272::0::1 up
+SRP147748,GSE114553,LHX6::induced pluripotent stem cells::::::::OE::::SRP147748::9461 up,lhx6::::::::::::::human::GSE114553::0::1 up
+SRP148550,GSE114690,Tnfsf14::pre-adipose 3T3-L1 (after differentiation into beige adipocytes)::::::::OE::::SRP148550::14952 up,tnfsf14::::::::::::::mouse::GSE114690::1::0 up
+SRP149661,GSE115264,Bmal1::::liver adipocyte::::::KO::::SRP149661::10684 down,bmal1::::::::::::::mouse::GSE115264::12::11 down
+SRP149816,GSE115363,Esrrb::T-ALL cell line (Tal1/Lmo2)::::::::KD::::SRP149816::17030 up,esrrb::::::::::::::mouse::GSE115363::1::5 up
+SRP150445,GSE115763,KLF6::786-M1A renal cancer cell::::::::KD::::SRP150445::256 up,klf6::::::::::::::human::GSE115763::3::1 up
+SRP151481,GSE116354,lincRNA-Cox2::::Lung::::::KO::::SRP151481::11766 up,"cox2::::::::::::::mouse::GSE116354,GSE117379::2::4 up"
+SRP151648,GSE116433,Ogt::::bone marrow Lineage- Sca1+ Kit+::::::KO::::SRP151648::1749 up,glucosamine::::::::::mouse::GSE116433::1::0 up
+SRP151746,GSE116492,STAG2::A673::::::::KO::::SRP151746::536 up,"stag2::::::::::::::human::GSE116492,GSE116495::3::1 up"
+SRP152980,GSE116894,Tle3::::inguinal white adipose tissue::::::KO::::SRP152980::9499 up,tle3::::::::::::::mouse::GSE116894::1::0 up
+SRP153047,GSE116930,DLL3::iPSC line (201B7) iPSC (induced pluripotent stem cell)::::::::KO::::SRP153047::9640 up,"hes7::::::::::::::human::GSE116930,GSE116935::1::0 up"
+SRP154124,GSE117212,ZBTB10::HEK293T::::::::KO::::SRP154124::7484 up,"zbtb1::::::::::::::human::GSE117212,GSE117214::0::1 up"
+SRP155196,GSE117643,Irx5::::day 4 differentiating BMSCs during osteoblastogenesis::::::KO::::SRP155196::4277 up,irx5::::::::::::::mouse::GSE117643::1::0 up
+SRP155395,GSE117730,Apobec2::myoblasts C2C12::::::::KD::::SRP155395::13555 up,"apobec2::::::::::::::mouse::GSE117730,GSE117732::0::1 up"
+SRP156276,GSE118077,LINC00941::::Organotypic human epidermis::::::KD::::SRP156276::14261 up,sprr5::::::::::::::human::GSE118077::1::2 up
+SRP157113,GSE118430,Xbp1::::CD45+CD3+CD4+ peritoneal wash samples::::::KO::::SRP157113::3358 up,xbp1::::::::::::::mouse::GSE118430::0::1 down
+SRP157910,GSE118532,RNF168::::esophagus cancer cell NEC::::::KD::::SRP157910::5619 up,rnf168::::::::::::::human::GSE118532::0::1 up
+SRP158103,GSE118617,Foxp1::::Luminal epithelial cell::::::KO::::SRP158103::11488 up,"foxp1::::::::::::::mouse::GSE118617,GSE118619::0::1 up"
+SRP158445,GSE118816,MYO1C::AALE (immortalized human bronchial epithelial cells)::::::::KD::::SRP158445::560 up,myo1c::::::::::::::human::GSE118816::0::1 up
+SRP158623,GSE118939,NRAS::AALE (immortalized human bronchial epithelial cells)::::::::KO::::SRP158623::565 up,nras::::::::::::::human::GSE118939::1::0 up
+SRP160525,GSE119701,Phf7::::round spermatids::::::KO::::SRP160525::15982 up,phf7::::::::::::::mouse::GSE119701::0::1 up
+SRP162254,GSE120248,MACF1::::Osteoblast::::::KD::::SRP162254::14270 up,"macf1::::::::::::::mouse::GSE120248,GSE120252::1::0 up"
+SRP162521,GSE120413,Bap1::::embryonic stem cell::::::KO::::SRP162521::5216 up,"bap1::::::::::::::mouse::GSE120413,GSE120447::0::1 up"
+SRP162523,GSE120415,Bap1::::mesothelial cells::::::KO::::SRP162523::12710 up,"bap1::::::::::::::mouse::GSE120415,GSE120447::0::1 up"
+SRP163132,GSE120756,TET2::breast cancer cell CAL5-1::::::::KO::::SRP163132::2371 up,tet2::::::::::::::human::GSE120756::2::9 up
+SRP164778,GSE121043,ALDH1A1::colorectal cancer cell COLO320::::::::KD::::SRP164778::3908 up,aldh1a1::::::::::::::human::GSE121043::0::1 up
+SRP165862,GSE121319,GPRC5A::prostate cancer cell PC3::::::::KO::::SRP165862::15456 up,gprc5a::::::::::::::human::GSE121319::1::0 up
+SRP166969,GSE121866,SIX4::lung cancer cell PC9::::::::OE::::SRP166969::11568 up,six4::::::::::::::human::GSE121866::0::2 up
+SRP167695,GSE122101,Ssu72::::embryonic fibroblast::::::KO::::SRP167695::4732 up,"ssu72::::::::::::::mouse::GSE122101,GSE122103::0::1 up"
+SRP167892,GSE122191,ZBTB24::Jurkat::::::::KD::::SRP167892::9824 up,zbtb24::::::::::::::human::GSE122191::1::0 up
+SRP167954,GSE122215,Peg10::::pluripotent trophoblast stem cells::::::KO::::SRP167954::14909 up,"peg10::::::::::::::mouse::GSE122215,GSE122217::0::1 up"
+SRP168358,GSE122378,Carmil3::4T1::::::::KO::::SRP168358::202 up,carmil3::::::::::::::mouse::GSE122378::0::1 up
+SRP169609,GSE122708,PCF11::HeLa cells (chromatin-bound RNA)::::::::KD::::SRP169609::7639 up,"pcf11::::::::::::::human::GSE122708,GSE123105::2::1 up"
+SRP172565,GSE123372,Mecp2::::cortex whole cell::::::KO::::SRP172565::4123 up,"mecp2::::::::::::::mouse::GSE123372,GSE123373::10::2 up"
+SRP173193,GSE123502,Chd4::::bone marrow Pro-B cells (Lin-CD19+c-Kit+IgM-IgD-CD25-)::::::KO::::SRP173193::2029 up,"chd4::::::::::::::mouse::GSE123502,GSE123504::1::0 up"
+SRP173284,GSE123638,PSMD2::breast cancer cell T47D::::::::KD::::SRP173284::2794 up,"bortezomib::::::::::human::GSE123638,GSE123639::0::1 up"
+SRP173465,GSE123861,SIN3A::HEK293T::::::::KD::::SRP173465::7489 up,sin3a::::::::::::::human::GSE123861::1::0 up
+SRP173633,GSE123958,MTA1::HCT116::::::::KO::::SRP173633::6831 up,"mta1::::::::::::::human::GSE123958,GSE123959::0::1 up"
+SRP173793,GSE124014,Nnmt::fibroblast 3T3::::::::OE::::SRP173793::5849 up,nnmt::::::::::::::mouse::GSE124014::0::1 up
+SRP173804,GSE124048,Irf6::::Skin::::::KO::::SRP173804::16482 up,"irf6::::::::::::::mouse::GSE124048,GSE124067::1::0 down"
+SRP173901,GSE124097,Trem2::::bone marrow macrophages::::::Mut::::SRP173901::1893 up,trem2::::::::::::::mouse::GSE124097::3::0 up
+SRP174350,GSE124304,Fubp1::::bone marrow Lineage- BCR-ABL1+::::::KO::::SRP174350::1716 up,abl1::::::::::::::mouse::GSE124304::1::0 up
+SRP175016,GSE124556,PCF11::HeLa::::::::KD::::SRP175016::7739 up,"pcf11::::::::::::::human::GSE123105,GSE124556::0::2 up"
+SRP175165,GSE124621,Pgrmc2::::brown adipose tissue::::::KO::::SRP175165::2891 up,pgrmc2::::::::::::::mouse::GSE124621::0::1 up
+SRP178236,GSE124920,Prmt1::::E14 embryonic stem cell (ESC)::::::KO::::SRP178236::4568 up,prmt1::::::::::::::mouse::GSE124920::1::2 up
+SRP178846,GSE125011,CD83::ovarian adenocarcinoma cell SKOV3::::::::KD::::SRP178846::14310 up,cd83::::::::::::::human::GSE125011::0::1 up
+SRP178865,GSE125014,GATA2::LNCaP::::::::KD::::SRP178865::11380 up,enzalutamide::::::::::human::GSE125014::1::2 up
+SRP179031,GSE125025,Scl|Tal1::::Primary megakaryocyte::::::KO|KO::::SRP179031::15235 up,lyl1::::::::::::::mouse::GSE125025::2::3 up
+SRP179718,GSE125153,Bcl3::::Neonatal Calvarial Osteoblasts::::::KO::::SRP179718::13750 up,bcl3::::::::::::::mouse::GSE125153::1::0 up
+SRP181053,GSE125403,CLPB::MOLM-13-Cas9-dBSD cells::::::::KO::::SRP181053::12924 up,venetoclax::::::::::human::GSE125403::3::0 up
+SRP181219,GSE125486,Rrpd1b::::embryonic fibroblast::::::KD::::SRP181219::4740 up,rprd1b::::::::::::::mouse::GSE125486::0::1 up
+SRP183800,GSE126127,Prmt1::::Whole brain::::::KO::::SRP183800::17945 up,prmt1::::::::::::::mouse::GSE126127::0::1 up
+SRP185722,GSE126463,"ARID2::MM.1S, human cell line, peripheral blood::::::::KD::::SRP185722::12893 up",arid2::::::::::::::human::GSE126463::0::2 up
+SRP185818,GSE126504,HPSE::colorectal adenocarcinoma cell SW480::::::::KD::::SRP185818::3847 up,hpse::::::::::::::human::GSE126504::0::1 up
+SRP186285,GSE126762,Klf15::::Liver::::::KO::::SRP186285::11172 up,klf15::::::::::::::mouse::GSE126762::1::0 up
+SRP187429,GSE127790,Zcchc8::::blastocyst stage embryos::::::KD::::SRP187429::1385 up,zcchc8::::::::::::::mouse::GSE127790::10::2 up
+SRP187713,GSE127916,RPS6KB1::NRAS-mutant melanoma cells M93-047::::::::KD::::SRP187713::14116 up,nras::::::::::::::human::GSE127916::1::0 up
+SRP187954,GSE128054,MYT1::neuroblastoma cell SK-N-BE(2)::::::::KO::::SRP187954::13935 up,myt1::::::::::::::human::GSE128054::1::0 up
+SRP188140,GSE128145,Ctbp2::::liver::::::Mut::::SRP188140::11173 up,ctbp2::::::::::::::mouse::GSE128145::2::0 up
+SRP188318,GSE128232,PHF20L1::MDA-MB-231::::::::KD::::SRP188318::12324 up,"phf2::::::::::::::human::GSE128232,GSE128233::1::0 up"
+SRP188467,GSE128333,TCF4::IPSC-derived glutamatergic neurons::::::::KD::::SRP188467::9664 up,tcf4::::::::::::::human::GSE128333::2::0 up
+SRP188991,GSE128634,FOXO1A3::human umbilical vein endothelial cells::::::::OE::::SRP188991::9110 up,"foxo1::::::::::::::human::GSE128634,GSE128636::1::0 up"
+SRP190500,GSE129293,CHD4::MDA-MB-231::::::::KD::::SRP190500::12235 up,chd4::::::::::::::human::GSE129293::0::1 up
+SRP190930,GSE129370,Sirt6::::liver::::::KO::::SRP190930::10858 up,ethanol::::::::::mouse::GSE129370::0::1 up
+SRP191419,GSE129465,Phf6::::bone marrow LT-HSCs::::::KO::::SRP191419::1780 up,phf6::::::::::::::mouse::GSE129465::3::2 up
+SRP192390,GSE129733,Kdm4a::::preimplantation embryo::::::KO::::SRP192390::15012 up,"kdm4a::::::::::::::mouse::GSE129733,GSE129735::1::0 up"
+SRP192519,GSE129779,ARID1A::Human Endometrial Epithelial 12Z::::::::KD::::SRP192519::8921 up,"arid1a::::::::::::::human::GSE121198,GSE129779::0::1 up"
+SRP192521,GSE129782,ARID1A::Human Endometrial Epithelial 12Z::::::::KD::::SRP192521::8922 up,"arid1a::::::::::::::human::GSE121198,GSE129782::1::0 up"
+SRP193096,GSE130081,Apex1::embryonic stem cell E14Tg2A (embryoid bodies (EBs))::::::::KO::::SRP193096::4813 up,"neil2::::::::::::::mouse::GSE130081,GSE130082::0::10 up"
+SRP193147,GSE129858,Id1|ld3::4T1::::::::KD|KD::::SRP193147::203 up,"robo1::::::::::::::mouse::GSE129858,GSE129859::1::3 down"
+SRP193504,GSE130217,Sesn2::::Left ventricle::::::KO::::SRP193504::10622 up,sesn2::::::::::::::mouse::GSE130217::0::2 up
+SRP194000,GSE130396,PTEN::A375::::::::KO::::SRP194000::333 up,braf::::::::::::::human::GSE130396::0::2 up
+SRP194022,GSE130401,YAP1::neuroblastoma-derived cell NLF::::::::KO::::SRP194022::13957 up,trametinib::::::::::human::GSE130401::1::0 up
+SRP194543,GSE130620,KDM4B::prostate cancer cell line LNCaP::::::::OE::::SRP194543::15418 up,kdm4b::::::::::::::human::GSE130620::1::0 up
+SRP194754,GSE130676,PHF12::HEK293T::::::::KD::::SRP194754::7502 up,suds3::::::::::::::human::GSE130676::0::1 up
+SRP196877,GSE130864,Tfap2b::::whole kidney::::::KO::::SRP196877::18120 up,tincr::::::::::::::mouse::GSE130864::0::1 up
+SRP198795,GSE131425,Arg2::::lung::::::KO::::SRP198795::11761 up,arg2::::::::::::::mouse::GSE131425::2::0 up
+SRP199112,GSE131588,Setd2::::primary proB cells::::::KO::::SRP199112::15318 up,"setd2::::::::::::::mouse::GSE131588,GSE131690::1::0 up"
+SRP199215,GSE131633,Slamf9::::bone marrow plasmacytoid dendritic cells::::::KO::::SRP199215::2015 up,slamf9::::::::::::::mouse::GSE131633::1::0 up
+SRP199224,GSE131649,ARID3a::K562::::::::KD::::SRP199224::9879 up,hemin::::::::::human::GSE131649::2::0 up
+SRP199287,GSE131680,macroH2A1::hepatoma Huh 7 cells::::::::KD::::SRP199287::8431 up,macroh2a1::::::::::::::human::GSE131680::1::0 up
+SRP199754,GSE131903,ABCA12::::hTERT human mammary epithelial cells (hMEC)::::::KO::::SRP199754::8750 down,abca12::::::::::::::human::GSE131903::0::2 up
+SRP200662,GSE132313,Fosl2::::Naive CD4+ T cells::::::KO::::SRP200662::13627 up,fosl2::::::::::::::mouse::GSE132313::1::0 up
+SRP200817,GSE132408,TET2::acute myeloid leukemia cell THP-1::::::::KO::::SRP200817::701 up,tet2::::::::::::::human::GSE132408::0::3 up
+SRP201342,GSE132694,HOXB13::CWR22Rv1::::::::KD::::SRP201342::4258 up,"meis1::::::::::::::human::GSE132694,GSE132717::0::2 up"
+SRP212102,GSE133329,TRIM28::lung epithelial carcinoma::::::::Mut::::SRP212102::11583 up,trim28::::::::::::::human::GSE133329::0::3 up
+SRP212302,GSE133505,Myf6::::satellite cells::::::KO::::SRP212302::16080 up,myf6::::::::::::::mouse::GSE133505::5::4 up
+SRP212620,GSE133516,KAT7::MOLM-13::::::::KO::::SRP212620::12930 up,kat7::::::::::::::human::GSE133516::0::1 up
+SRP212737,GSE133661,C19orf12::::human lung adenocarcinoma cell A549::::::KD::::SRP212737::9004 up,c19orf12::::::::::::::human::GSE133661::0::1 up
+SRP212876,GSE133763,CHCHD2::IPSC derived motor neuron(46_11)::::::::KO::::SRP212876::9637 up,chd1::::::::::::::human::GSE133763::0::1 up
+SRP212886,GSE133764,CHCHD2::IPSC derived motor neuron(46_11)::::::::KO::::SRP212886::9639 up,chd2::::::::::::::human::GSE133764::1::0 up
+SRP213607,GSE133927,MEOX1::triple negative breast cancer BT-549::::::::KD::::SRP213607::17528 up,meox1::::::::::::::human::GSE133927::1::0 down
+SRP213792,GSE133995,Hic1::::Whole Tibialis anterior muscle::::::KO::::SRP213792::18398 down,"hic1::::::::::::::mouse::GSE110038,GSE133995::3::0 up"
+SRP214434,GSE134191,Cbfb::::MO5 cell::::::KO::::SRP214434::12916 up,metformin::::::::::mouse::GSE134191::2::1 up
+SRP214471,GSE134214,ELL2::prostate cancer cell line PC4::::::::KD::::SRP214471::15421 up,ell2::::::::::::::human::GSE134214::0::1 up
+SRP215303,GSE134515,Sh2d2a::::CD4+CD25high regulatory T cells::::::KO::::SRP215303::3332 down,sh2d2a::::::::::::::mouse::GSE134515::1::2 up
+SRP215863,GSE134608,Kat6a::::1st and 2nd pharyngeal arches::::::KO::::SRP215863::50 up,"dlx5::::::::::::::mouse::GSE134608,GSE134609::2::6 up"
+SRP215870,GSE134615,LATS1|LATS2::breast cancer cell  MCF-7::::::::KO|KO::::SRP215870::2286 up,lats1::::::::::::::human::GSE134615::1::0 up
+SRP216004,GSE134693,Msr1::::bone marrow macrophages::::::KO::::SRP216004::1906 up,msr1::::::::::::::mouse::GSE134693::0::1 up
+SRP216477,GSE134923,Ncor1::::left ventricle::::::KO::::SRP216477::10604 up,ncor1::::::::::::::mouse::GSE134923::1::0 up
+SRP216602,GSE134986,DELE1::HEK293T::::::::KO::::SRP216602::7605 up,oma1::::::::::::::human::GSE134986::1::3 up
+SRP217200,GSE135309,Tcf7::::CD8+ T cells::::::KO::::SRP217200::3389 up,tcf7::::::::::::::mouse::GSE135309::0::1 up
+SRP217219,GSE135244,TRDMT1::HEK293T::::::::KD::::SRP217219::7518 up,trdmt1::::::::::::::human::GSE135244::0::1 up
+SRP218370,GSE135842,RBL1::::Human Foreskin Fibroblasts::::::KD::::SRP218370::8972 up,doxorubicin::::::::::human::GSE135842::0::3 up
+SRP219147,GSE136232,Zpbp2::::lung::::::KO::::SRP219147::11875 up,"zpbp2::::::::::::::mouse::GSE136232,GSE136234::0::1 up"
+SRP219148,GSE136233,Zpbp2::::lung::::::KO::::SRP219148::11876 up,"zpbp2::::::::::::::mouse::GSE136233,GSE136234::0::1 up"
+SRP219834,GSE136627,Hdac4::::denervated leg::::::KO::::SRP219834::4314 up,hdac4::::::::::::::mouse::GSE136627::2::1 up
+SRP220107,GSE136742,Setd2::::liver tumor::::::KO::::SRP220107::10720 up,"setd2::::::::::::::mouse::GSE136742,GSE136744::0::3 up"
+SRP220340,GSE136869,Lpar2::::hippocampus::::::KO::::SRP220340::8570 up,lpar2::::::::::::::mouse::GSE136869::1::0 up
+SRP220423,GSE136894,Psen1::::blastocysts::::::KO::::SRP220423::1397 up,psen1::::::::::::::mouse::GSE136894::1::0 up
+SRP222324,GSE137653,mir-155::::FACS sorted alveolar macrophages (CD45+SiglecF+CD11c+)::::::KO::::SRP222324::5730 down,siglecf::::::::::::::mouse::GSE137653::2::3 up
+SRP223218,GSE137954,Smyd3::myoblasts C2C12::::::::OE::::SRP223218::13551 up,smyd3::::::::::::::mouse::GSE137954::4::2 up
+SRP223388,GSE138050,PGR::::Primary uterine leiomyoma cells P1::::::KD::::SRP223388::15343 up,"progesterone::::::::::human::GSE138050,GSE148257::1::2 up"
+SRP225128,GSE138741,LIN28B::neuroblastoma cell BE(2)-C::::::::OE::::SRP225128::13874 up,"lin28b::::::::::::::human::GSE138741,GSE138743::0::1 up"
+SRP225522,GSE138815,Kdm6a::::mouse embryonic fibroblast::::::OE::::SRP225522::13086 up,"kdm6a::::::::::::::mouse::GSE138815,GSE138817::0::1 up"
+SRP225661,GSE138841,TRIM6::A549::::::::KO::::SRP225661::402 up,trim6::::::::::::::human::GSE138841::0::1 up
+SRP225889,GSE138938,FOXP2::U2OS(osteosarcoma epithelial cells)::::::::KI::::SRP225889::17613 up,foxp2::::::::::::::human::GSE138938::1::2 up
+SRP226048,GSE139016,MLL1|MLL2::Primary glioblastoma patient-derived stem cells (GPC16)::::::::KD|KD::::SRP226048::15123 up,disulfiram::::::::::human::GSE139016::0::1 up
+SRP226170,GSE139072,Pabpn1l::::1 cell embryo::::::KO::::SRP226170::4 up,pabpn1::::::::::::::mouse::GSE139072::0::2 up
+SRP226321,GSE139120,Urod::::Lewis Lung Carcinoma cells::::::KD::::SRP226321::10660 up,urod::::::::::::::mouse::GSE139120::1::0 up
+SRP226863,GSE139348,Dicer1::mouse embryonic stem::::::::KO::::SRP226863::13276 up,"dicer1::::::::::::::mouse::GSE139348,GSE139349::1::0 down"
+SRP227057,GSE139427,Csk::::left heart atria::::::KO::::SRP227057::10589 down,ibrutinib::::::::::mouse::GSE139427::2::1 up
+SRP228490,GSE139966,Figla::::ovaries::::::KO::::SRP228490::14455 up,figla::::::::::::::mouse::GSE139966::1::0 up
+SRP228497,GSE139975,Gata4|Gata6::::FACS sorted adulthood cardiomyocytes::::::KO|KO::::SRP228497::5729 up,rnf2::::::::::::::mouse::GSE139975::3::0 up
+SRP229081,GSE140074,KIF20A::HT-1080(Fibrosarcoma cell line)::::::::KD::::SRP229081::8733 up,kif20a::::::::::::::human::GSE140074::1::0 up
+SRP229490,GSE140200,Trim59::RAW 264.7::::::::OE::::SRP229490::15650 up,trim59::::::::::::::mouse::GSE140200::1::0 up
+SRP229734,GSE140322,SRSF1::K562::::::::OE::::SRP229734::10146 up,imatinib::::::::::human::GSE140322::0::1 up
+SRP230607,GSE140646,BATF3::T-cell leukemia cell TL-Om1::::::::KD::::SRP230607::17045 up,atf3::::::::::::::human::GSE140646::0::1 up
+SRP233180,GSE140936,SLFN11::acute lymphoblastic leukemia CCRF-CEM::::::::KO::::SRP233180::615 up,"slfn11::::::::::::::human::GSE140936,GSE140938::0::1 up"
+SRP233181,GSE140937,SLFN11::acute lymphoblastic leukemia CCRF-CEM::::::::KO::::SRP233181::610 up,"slfn11::::::::::::::human::GSE140937,GSE140938::0::2 up"
+SRP233222,GSE140997,NSUN6::embryonic stem cell H9::::::::KO::::SRP233222::4898 up,nsun6::::::::::::::human::GSE140997::10::1 up
+SRP234708,GSE141453,Cd274::::Myc-transgenic lymphoma cells::::::OE::::SRP234708::13508 up,"card11::::::::::::::mouse::GSE141453,GSE141454::0::4 up"
+SRP237541,GSE142019,Ythdf2::::Haematopoietic stem cell::::::KO::::SRP237541::6653 up,"ythdf2::::::::::::::mouse::GSE142019,GSE142021::10::3 up"
+SRP237943,GSE142210,ATF3::pancreatic cancer cell PANC-1::::::::KD::::SRP237943::14584 up,panobinostat::::::::::human::GSE142210::11::0 up
+SRP238015,GSE142232,Gcgr::::alpha cell from pancreatic islet::::::KO::::SRP238015::938 up,"gcgr::::::::::::::mouse::GSE142232,GSE142234::0::2 up"
+SRP238361,GSE142430,E2F1::HCT116::::::::KD::::SRP238361::6843 up,prmt5::::::::::::::human::GSE142430::3::0 up
+SRP238935,GSE142684,Prdm16::::ventricular zone embryonic cortical tissue::::::KO::::SRP238935::17765 up,prdm16::::::::::::::mouse::GSE142684::0::1 up
+SRP241683,GSE143499,GATA6-AS1::HuES8::::::::KD::::SRP241683::8784 up,gata6::::::::::::::human::GSE143499::0::1 up
+SRP242009,GSE143692,POU3F2::IPSC-derived neural progenitor cells::::::::KD::::SRP242009::9684 up,trim8::::::::::::::human::GSE143692::0::1 up
+SRP242090,GSE143743,C9orf72::iPSC-derived motor neurons::::::::Mut::::SRP242090::9675 up,c9orf72::::::::::::::human::GSE143743::0::2 up
+SRP242206,GSE143790,BCL9::DCIS-breast cancer cell line::::::::KD::::SRP242206::4298 up,bcl9::::::::::::::human::GSE143790::0::1 up
+SRP244261,GSE144115,Stag1::::embryonic stem cells v6.5::::::KD::::SRP244261::5321 up,stag2::::::::::::::mouse::GSE144115::0::3 up
+SRP245546,GSE144347,CRNKL1::Jurkat::::::::KD::::SRP245546::9828 up,crnkl1::::::::::::::human::GSE144347::1::0 up
+SRP245819,GSE144443,Nampt::::whole liver::::::KO::::SRP245819::18143 up,nicotinamide::::::::::mouse::GSE144443::0::1 up
+SRP245840,GSE144453,TFDP1::eHAP::::::::KO::::SRP245840::4598 up,"tfdp1::::::::::::::human::GSE144453,GSE144454::1::0 up"
+SRP245883,GSE144484,MLLT6::U2OS::::::::KO::::SRP245883::17619 up,mllt6::::::::::::::human::GSE144484::0::1 up
+SRP247491,GSE144838,Egfr::::aorta vascular smooth muscle cells::::::KO::::SRP247491::1014 up,egfr::::::::::::::mouse::GSE144838::1::5 up
+SRP248437,GSE145171,PROX1::Rhabdomyosarcoma cell RD::::::::KD::::SRP248437::15868 up,prox1::::::::::::::human::GSE145171::0::1 up
+SRP248501,GSE145215,Krt13::::tongue::::::KO::::SRP248501::17489 up,krt13::::::::::::::mouse::GSE145215::0::1 up
+SRP250165,GSE145639,ADAR1::patient-derived colorectal cancer#92::::::::KD::::SRP250165::14734 up,adar::::::::::::::human::GSE145639::1::2 up
+SRP250282,GSE145682,NBDY::HEK293T::::::::KO::::SRP250282::7531 up,nbdy::::::::::::::human::GSE145682::1::0 up
+SRP250973,GSE146074,Ly6e::::liver::::::KO::::SRP250973::10922 up,ly6e::::::::::::::mouse::GSE146074::0::11 up
+SRP251113,GSE146070,EDEM3::hepatoblastoma cell HepG2::::::::KO::::SRP251113::8345 up,edem3::::::::::::::human::GSE146070::1::0 up
+SRP251706,GSE146425,Tcf7|Lef1::::inguinal lymph nodes::::::KO|KO::::SRP251706::9484 up,"lef1::::::::::::::mouse::GSE146425,GSE146428::1::0 up"
+SRP251874,GSE146546,IGF2BP1::A549::::::::KO::::SRP251874::463 up,"igf2bp1::::::::::::::human::GSE146546,GSE146807::0::1 up"
+SRP252595,GSE146894,Hira::::GV (germinal vesicle) oocytes::::::KO::::SRP252595::6587 up,hira::::::::::::::mouse::GSE146894::3::8 up
+SRP252759,GSE146962,OGT::::heart::::::KO::::SRP252759::7075 up,glucosamine::::::::::mouse::GSE146962::0::1 up
+SRP252809,GSE146982,GPD1::786-O::::::::OE::::SRP252809::264 up,gpd1::::::::::::::human::GSE146982::0::1 up
+SRP253323,GSE147210,Kmt2d::::Hematopoietic stem and progenitor cells::::::KD::::SRP253323::7980 up,kmt2d::::::::::::::mouse::GSE147210::2::5 up
+SRP254362,GSE147669,YAP::breast cancer cell MCF10A::::::::OE::::SRP254362::2478 up,tram2::::::::::::::human::GSE147669::2::1 up
+SRP254653,GSE147771,App::::olfactory epithelium(male)::::::KO::::SRP254653::14214 up,aplp2::::::::::::::mouse::GSE147771::2::3 up
+SRP254967,GSE147959,Stat1::immortalized bone marrow macrophages::::::::KD::::SRP254967::9292 up,"stat1::::::::::::::mouse::GSE147959,GSE147960::5::3 up"
+SRP255180,GSE148066,N4bp1::::bone marrow macrophages::::::KO::::SRP255180::1812 up,"n4bp1::::::::::::::mouse::GSE148066,GSE157787::0::10 up"
+SRP255645,GSE148269,ARID4B::K562::::::::KO::::SRP255645::10153 up,"arid4b::::::::::::::human::GSE148269,GSE148273::0::1 up"
+SRP256218,GSE148494,HOXD13::ewing sarcoma TC32::::::::KD::::SRP256218::5663 up,"hoxd13::::::::::::::human::GSE148494,GSE182513::1::0 up"
+SRP256345,GSE148657,CD44::MDA-MB-231::::::::KO::::SRP256345::12344 up,cd44::::::::::::::human::GSE148657::2::0 up
+SRP256351,GSE148658,SIX6::Jurkat::::::::KO::::SRP256351::9831 up,six6::::::::::::::human::GSE148658::1::0 up
+SRP256439,GSE148692,Satb2::::Cecum::::::KO::::SRP256439::3418 up,"satb2::::::::::::::mouse::GSE148692,GSE148695::1::0 up"
+SRP257754,GSE149035,HEPACAM2::NCI-H1299::::::::OE::::SRP257754::13693 up,hepacam::::::::::::::human::GSE149035::1::5 up
+SRP257907,GSE149123,Cdk7a::::perigonadal white adipose::::::KO::::SRP257907::14784 up,"cdk7::::::::::::::mouse::GSE149123,GSE149128::1::0 down"
+SRP257915,GSE149124,Cdk7b::::Interscapular brown adipose tissue::::::KO::::SRP257915::9546 up,"cdk7::::::::::::::mouse::GSE149124,GSE149128::2::0 up"
+SRP258574,GSE149359,ASAP2::MiaPaCa2(pancreatic ductal adenocarcinoma (PDAC) cells)::::::::KO::::SRP258574::12739 up,asap2::::::::::::::human::GSE149359::2::0 up
+SRP259197,GSE149621,FOSL1|JUN::breast cancer cell BT549::::::::KD|KD::::SRP259197::2366 down,olaparib::::::::::human::GSE149621::0::1 up
+SRP260070,GSE149880,Card14::::Whole Ear::::::Mut::::SRP260070::18007 up,tamoxifen::::::::::mouse::GSE149880::0::1 up
+SRP260805,GSE150134,SCN5A::colorectal adenocarcinoma cell SW480::::::::KD::::SRP260805::3851 up,scn5a::::::::::::::human::GSE150134::1::0 down
+SRP261181,GSE150349,Msx1::myoblasts C2C12::::::::OE::::SRP261181::13577 up,msx1::::::::::::::mouse::GSE150349::0::1 up
+SRP261597,GSE150557,DNMT1::WM266.4 human melanoma cells::::::::KD::::SRP261597::18482 up,dnmt1::::::::::::::human::GSE150557::1::0 down
+SRP261798,GSE150634,Lrch1::::Splenic CD8+ T cells::::::KO::::SRP261798::16770 up,cd28::::::::::::::mouse::GSE150634::1::0 up
+SRP261899,GSE150691,HDLBP::::A549 tumor::::::KO::::SRP261899::378 up,"hdlbp::::::::::::::human::GSE148262,GSE150691::1::0 up"
+SRP262047,GSE150721,Hmces::::bone marrow LT-HSCs::::::KO::::SRP262047::1781 up,hmces::::::::::::::mouse::GSE150721::0::1 down
+SRP262423,GSE150895,KIF15::prostate cancer cell C4-2B-ENZR::::::::KD::::SRP262423::15398 up,"kif15::::::::::::::human::GSE150895,GSE150896::0::1 down"
+SRP263204,GSE151119,Hsf1::::murine embryonic fibroblasts::::::KO::::SRP263204::13431 up,hsf1::::::::::::::mouse::GSE151119::2::0 up
+SRP265252,GSE151435,GDF11::::human dental pulp stem cells (hDPSCs)::::::KD::::SRP265252::8879 up,gdf11::::::::::::::human::GSE151435::1::0 up
+SRP266340,GSE151967,Setd::::Intestinal epithelial cells::::::KO::::SRP266340::9566 up,"setd2::::::::::::::mouse::GSE151967,GSE151968::0::1 up"
+SRP266491,GSE152055,Mpc1::::heart::::::KO::::SRP266491::6979 up,mpc1::::::::::::::mouse::GSE152055::0::1 up
+SRP267072,GSE152358,DDX5::Rh30::::::::KD::::SRP267072::15858 down,ddx5::::::::::::::human::GSE152358::1::0 up
+SRP267100,GSE152379,Bach2::::CD8+ gp33 tetramer from Spleen::::::KO::::SRP267100::3360 up,bach2::::::::::::::mouse::GSE152379::0::4 up
+SRP268582,GSE153124,Dsg2::::heart::::::KO::::SRP268582::6992 up,dsg2::::::::::::::mouse::GSE153124::4::0 up
+SRP268611,GSE153137,Mettl5::::embryonic stem cell::::::KO::::SRP268611::4991 up,"mettl5::::::::::::::mouse::GSE153137,GSE153140::2::0 up"
+SRP269012,GSE153354,TCF19::oral squamous carcinoma cell CAL-27::::::::KO::::SRP269012::14252 up,tcf19::::::::::::::human::GSE153354::0::1 up
+SRP269619,GSE153663,Zeb1::::bone marrow Lineage- Sca1+ Kit+ CD48- CD150+::::::KO::::SRP269619::1726 up,"zeb1::::::::::::::mouse::GSE153663,GSE153664::1::0 up"
+SRP270331,GSE153867,CEBPB::ovarian cancer cell C13*::::::::KD::::SRP270331::14318 up,olaparib::::::::::human::GSE153867::6::3 up
+SRP271084,GSE154081,Eif2ak3::::heart::::::KO::::SRP271084::7096 up,sildenafil::::::::::mouse::GSE154081::3::0 up
+SRP271267,GSE154197,INTS13::retinal epithelial cells ARPE-19::::::::KD::::SRP271267::15800 up,ints13::::::::::::::human::GSE154197::1::0 up
+SRP271373,GSE154246,Haspin::E14 embryonic stem cell (ESC)::::::::KO::::SRP271373::4574 up,haspin::::::::::::::mouse::GSE154246::2::0 up
+SRP271403,GSE154253,TNFAIP8::K562::::::::KD::::SRP271403::10160 up,tnfaip8::::::::::::::human::GSE154253::1::0 up
+SRP271644,GSE154350,ASCL2::trophoblast stem cells::::::::KD::::SRP271644::17578 up,ascl2::::::::::::::human::GSE154350::1::0 up
+SRP273250,GSE154961,CHD4::HUDEP-2(umbilical cord blood cells derived)::::::::OE::::SRP273250::8772 up,"chd4::::::::::::::human::GSE154961,GSE154963::4::0 up"
+SRP273454,GSE155087,Zfp36|Zfp36l1::::Spleen CD4+ T cells::::::KO|KO::::SRP273454::16663 up,glutamine::::::::::mouse::GSE155087::2::3 up
+SRP273704,GSE155162,TFAP2A::colorectal cancer cell HCT116::::::::KO::::SRP273704::3933 up,"buparlisib::::::::::human::GSE155162,GSE155169::1::0 up"
+SRP275597,GSE155567,PTPN6::acute myeloid leukemia cell THP-1 monocytes::::::::KD::::SRP275597::691 up,cd33::::::::::::::human::GSE155567::1::0 up
+SRP278122,GSE156505,Dis3::::testes::::::KO::::SRP278122::17328 up,dis3::::::::::::::mouse::GSE156505::1::0 up
+SRP278534,GSE156708,FBXO11::MDS-L::::::::KO::::SRP278534::12538 up,fbxo11::::::::::::::human::GSE156708::1::0 up
+SRP279638,GSE157296,KBTBD4::OCI-AML1::::::::KO::::SRP279638::14145 up,"kbtbd4::::::::::::::human::GSE157296,GSE157298::4::1 up"
+SRP280272,GSE157555,Foxa2::::Placenta::::::KO::::SRP280272::14855 up,"foxa2::::::::::::::mouse::GSE157555,GSE157556::0::1 up"
+SRP280274,GSE157557,PARP1::Renal tubular epithelial cells(HK-2)::::::::KD::::SRP280274::15699 up,"parp1::::::::::::::human::GSE157557,GSE157559::1::0 up"
+SRP281173,GSE157609,IFI16::A549::::::::KO::::SRP281173::514 up,"ifi16::::::::::::::human::GSE157609,GSE158123::0::1 down"
+SRP281631,GSE157684,RGCC::::cerebral organoid::::::KO::::SRP281631::3507 up,"rgcc::::::::::::::human::GSE157684,GSE173391::0::1 up"
+SRP281955,GSE157777,Yap1::::liver::::::KO::::SRP281955::11129 up,foxa3::::::::::::::mouse::GSE157777::1::0 up
+SRP282343,GSE157911,Hnf4a::::kidney::::::KO::::SRP282343::10321 up,hnf4a::::::::::::::mouse::GSE157911::1::0 up
+SRP284247,GSE158285,Ddx5::::testes::::::KO::::SRP284247::17317 up,ddx5::::::::::::::mouse::GSE158285::0::1 up
+SRP284310,GSE158320,LIN28B::neuroblastoma cell BE(2)-C::::::::KO::::SRP284310::13865 up,"lin28b::::::::::::::human::GSE158320,GSE183351::0::1 up"
+SRP285760,GSE158715,Ahr::::CD45-EpCAM+ lung epithelial cells::::::KO::::SRP285760::3352 up,cyp1b1::::::::::::::mouse::GSE158715::2::4 up
+SRP285793,GSE158743,NFKBIA::bone osteosarcoma epithelial cells U2OS::::::::KD::::SRP285793::2124 up,nfkbia::::::::::::::human::GSE158743::1::2 up
+SRP285935,GSE158834,ADIPOR2::HEK293T::::::::KO::::SRP285935::7232 up,palm::::::::::::::human::GSE158834::0::13 up
+SRP286041,GSE158893,BATF3::Karpas 299 cell line::::::::KD::::SRP286041::10183 up,"atf3::::::::::::::human::GSE158893,GSE158916::0::1 up"
+SRP286288,GSE158975,circCSPP1::prostatic carcinoma cell DU145::::::::OE::::SRP286288::15571 up,spp1::::::::::::::human::GSE158975::0::1 up
+SRP286421,GSE159049,GLI1::::subcutaneous melanoma metastasis::::::KD::::SRP286421::16934 up,sox2::::::::::::::human::GSE159049::1::0 up
+SRP286584,GSE159148,Sdc1::blast crisis chronic myeloid leukemia cell bcCML::::::::KO::::SRP286584::1382 up,sdc1::::::::::::::mouse::GSE159148::0::1 up
+SRP288317,GSE159937,Tfcp2l1::::embryonic stem cell::::::KO::::SRP288317::5247 up,tfcp2::::::::::::::mouse::GSE159937::1::0 up
+SRP288358,GSE159967,Arid5a::::KPC (LSL-KrasG12D/+; LSL-Trp53R172H/+; Pdx-1-Cre) cells::::::KO::::SRP288358::10360 up,arid5a::::::::::::::mouse::GSE159967::3::0 up
+SRP288463,GSE160001,FOXA1::breat cancer cell SK-BR-3::::::::KD::::SRP288463::2844 up,"lapatinib::::::::::human::GSE160001,GSE160670::0::2 up"
+SRP289451,GSE160293,Celf6::::brain(total RNA)::::::KO::::SRP289451::2225 up,celf6::::::::::::::mouse::GSE160293::2::4 up
+SRP289525,GSE160343,Zfp36l1::::liver::::::KD::::SRP289525::11193 up,zfp36l1::::::::::::::human::GSE160343::1::0 down
+SRP289705,GSE160373,Pparg::::liver::::::KO::::SRP289705::10742 up,pparg::::::::::::::mouse::GSE160373::1::2 up
+SRP291481,GSE161027,Foxo1|Hnf4a::::FAC-sorted pancreatic beta cells::::::KO|KO::::SRP291481::5723 down,"foxo1::::::::::::::mouse::GSE161027,GSE161028::1::3 up"
+SRP291685,GSE161064,Kdm5b::skin melanoma cell line YUMMER1.7::::::::KO::::SRP291685::16446 up,"kdm5b::::::::::::::mouse::GSE161064,GSE161065::0::1 up"
+SRP291997,GSE161184,Ifnar1::::lacrimal gland::::::KO::::SRP291997::10406 up,tlr7::::::::::::::mouse::GSE161184::0::1 down
+SRP292182,GSE161170,MED19::LNCaP::::::::OE::::SRP292182::11360 up,"med1::::::::::::::human::GSE161170,GSE161268::0::2 up"
+SRP292215,GSE161295,Cdk8::breast cancer cell E0771::::::::KD::::SRP292215::2376 up,cdk8::::::::::::::mouse::GSE161295::0::1 up
+SRP292229,GSE161302,METTL3::LNCaP::::::::KD::::SRP292229::11353 up,"enzalutamide::::::::::human::GSE161302,GSE161304::1::0 up"
+SRP293297,GSE161846,SMARCA4::::human small airway epithelial cells (hSAEC)::::::KD::::SRP293297::9093 up,"smarca4::::::::::::::human::GSE161846,GSE161849::1::0 up"
+SRP293436,GSE161864,ROR2::breast cancer cell line BT-474::::::::OE::::SRP293436::2383 up,"ror2::::::::::::::human::GSE161864,GSE161866::0::2 up"
+SRP294559,GSE162276,Pparg::::liver::::::KO::::SRP294559::11195 up,pparg::::::::::::::mouse::GSE162276::2::0 up
+SRP295330,GSE162384,TFAM::A549::::::::OE::::SRP295330::481 up,tfam::::::::::::::human::GSE162384::1::0 up
+SRP295638,GSE162590,Gsx2::::Lateral ganglionic eminence (LGE)::::::KO::::SRP295638::10440 up,gsx2::::::::::::::mouse::GSE162590::1::0 up
+SRP295699,GSE162623,EZH2::K562::::::::KO::::SRP295699::10167 up,ezh2::::::::::::::human::GSE162623::0::1 up
+SRP297132,GSE162892,ALS|FUS|SOX9::induced pluripotent stem cell-derived astrocytes::::::::OE|OE|OE::::SRP297132::9449 up,sox9::::::::::::::human::GSE162892::3::0 up
+SRP298085,GSE163297,BCKDK::breast cancer cell MDA-MB-231::::::::KD::::SRP298085::2733 up,doxorubicin::::::::::human::GSE163297::0::1 up
+SRP298688,GSE163589,AURKA::LP-1(B lymphoblast)::::::::KO::::SRP298688::11468 up,rora::::::::::::::human::GSE163589::1::0 up
+SRP299611,GSE163884,SUMO1::::bone osteosarcoma epithelial cells U2OS::::::KO::::SRP299611::2126 up,sumo2::::::::::::::human::GSE163884::1::0 up
+SRP299730,GSE152050,Arid1a::immortalized primary hepatocytes AB17::::::::KO::::SRP299730::9390 up,"arid1a::::::::::::::mouse::GSE152050,GSE152052::1::0 up"
+SRP300523,GSE164306,Tsc1::::hippocampus::::::KO::::SRP300523::8594 up,tsc1::::::::::::::mouse::GSE164306::5::0 up
+SRP301121,GSE164505,RBM39::BE2C neuroblasoma cell line::::::::KD::::SRP301121::1323 up,"indisulam::::::::::human::GSE164505,GSE164506::3::1 up"
+SRP301562,GSE164726,PHF10::A375::::::::KD::::SRP301562::334 up,phf10::::::::::::::human::GSE164726::0::1 up
+SRP302333,GSE165074,Fam114a1::::Cardiac cells::::::KO::::SRP302333::3018 down,fam114a1::::::::::::::mouse::GSE165074::0::1 up
+SRP302743,GSE165274,Poldip2::::Left-over carotid artery::::::KO::::SRP302743::10626 up,poldip2::::::::::::::mouse::GSE165274::1::2 up
+SRP302850,GSE165308,GFI1::neuroendocrine large cell lung cancer cell H1155::::::::KD::::SRP302850::13964 up,gfi1::::::::::::::human::GSE165308::1::0 up
+SRP302855,GSE165307,GFI1::A549::::::::OE::::SRP302855::405 up,gfi1::::::::::::::human::GSE165307::1::0 up
+SRP303502,GSE165647,Cry2::::mouse embryonic fibroblasts with Cry2 KO and Myc overexpression::::::Mut::::SRP303502::13180 up,cry2::::::::::::::mouse::GSE165647::0::1 up
+SRP303606,GSE165678,STAT5A::breast cancer cell MCF7::::::::KD::::SRP303606::2673 up,stat5a::::::::::::::human::GSE165678::0::5 up
+SRP304304,GSE166004,Pld1::::bladder tissue::::::KO::::SRP304304::1373 up,pld1::::::::::::::mouse::GSE166004::1::0 up
+SRP304470,GSE166054,Klf12::::fetus::::::OE::::SRP304470::5846 up,klf1::::::::::::::mouse::GSE166054::1::0 up
+SRP304972,GSE166294,Etv5::Macrophage line Raw264.7::::::::KD::::SRP304972::11979 up,etv5::::::::::::::mouse::GSE166294::0::1 up
+SRP305656,GSE166536,Itgb3::4T1::::::::KO::::SRP305656::167 up,docetaxel::::::::::mouse::GSE166536::0::2 up
+SRP306444,GSE166767,CTCFL::ovarian cancer cell OVCAR3::::::::KD::::SRP306444::14339 up,ctcfl::::::::::::::human::GSE166767::1::2 up
+SRP307505,GSE167218,Hoxd12::::embryonic stem cell from embryo::::::KO::::SRP307505::4844 up,hoxd12::::::::::::::mouse::GSE167218::1::0 up
+SRP307573,GSE167281,Satb2::::colon::::::KO::::SRP307573::3820 up,"satb2::::::::::::::mouse::GSE148695,GSE167281::0::1 up"
+SRP307576,GSE167284,Satb2::::Intestine epithelium(Colon)::::::KO::::SRP307576::9601 up,"satb2::::::::::::::mouse::GSE148695,GSE167284::0::1 up"
+SRP307800,GSE167373,RBFOX1::HEK293T::::::::OE::::SRP307800::7357 up,rbfox1::::::::::::::human::GSE167373::0::3 up
+SRP308012,GSE167474,NAA40::HCT116::::::::KD::::SRP308012::6716 up,naa40::::::::::::::human::GSE167474::1::0 up
+SRP308220,GSE167546,ATRX::143B::::::::KD::::SRP308220::38 up,atrx::::::::::::::human::GSE167546::1::2 down
+SRP308699,GSE167956,HIF1A|HIF2A::breast cancer cell line SUM159::::::::KD|KD::::SRP308699::2390 up,trim28::::::::::::::human::GSE167956::1::0 up
+SRP308727,GSE167984,Setd1b::::GV (germinal vesicle) oocytes::::::KO::::SRP308727::6583 up,"setd1b::::::::::::::mouse::GSE167984,GSE167987::0::1 up"
+SRP309086,GSE168147,HNRNPK::HCT116::::::::OE::::SRP309086::6709 up,"hnrnpk::::::::::::::human::GSE167224,GSE168147::1::5 up"
+SRP309134,GSE168171,DDX41::bone osteosarcoma epithelial cells U2OS::::::::KD::::SRP309134::2128 up,"ddx41::::::::::::::human::GSE168171,GSE168173::0::1 down"
+SRP310017,GSE168596,Trib1::::adipocytes::::::KO::::SRP310017::792 up,adiponectin::::::::::mouse::GSE168596::1::3 up
+SRP310440,GSE168829,Cns4::::CD4+Foxp3+ regulatory T cells::::::KO::::SRP310440::3339 up,"foxp3::::::::::::::mouse::GSE164118,GSE168829::2::3 up"
+SRP311327,GSE169205,SIRT5::Melanoma cell line A2058::::::::KD::::SRP311327::12630 up,sirt5::::::::::::::human::GSE169205::0::1 up
+SRP311417,GSE169263,Armc5::::adrenal gland::::::KO::::SRP311417::819 up,armc5::::::::::::::mouse::GSE169263::1::0 up
+SRP312040,GSE169590,METTL1::::esophageal epithelial(polyribosome)::::::KD::::SRP312040::5604 up,rptor::::::::::::::human::GSE169590::0::1 up
+SRP313259,GSE171401,Adnp::::embryonic stem cell::::::Mut::::SRP313259::5042 up,adnp::::::::::::::human::GSE171401::1::0 up
+SRP313537,GSE171486,DDX60L::human cancer cell line MiaPaCa2::::::::KD::::SRP313537::8824 up,ddx6::::::::::::::human::GSE171486::4::0 up
+SRP314027,GSE171712,Yap1|Wwtr1::::Flow-sorted Scgb1a1 lineage traced lung epithelial cells::::::KO|KO::::SRP314027::6137 up,scgb1a1::::::::::::::mouse::GSE171712::0::1 up
+SRP314053,GSE171724,Ezh2::::Stromal cells from decidua::::::KO::::SRP314053::16910 up,ezh2::::::::::::::mouse::GSE171724::1::5 up
+SRP314965,GSE172146,METTL1::HNSCC cells::::::::KO::::SRP314965::8693 up,mettl1::::::::::::::human::GSE172146::2::0 up
+SRP315081,GSE172201,ZKSCAN3::colorectal carcinoma cell HCT116::::::::KO::::SRP315081::3979 up,zkscan3::::::::::::::human::GSE172201::1::0 up
+SRP315284,GSE172295,Sh3gl1::::transitional B cells::::::KO::::SRP315284::17514 up,sh3gl1::::::::::::::mouse::GSE172295::0::2 up
+SRP315598,GSE172458,DNTM3B::::2102Ep::::::KD::::SRP315598::72 up,cisplatin::::::::::human::GSE172458::0::1 up
+SRP316008,GSE173169,HOXA13::Primary immortalized human squamous esophageal cell line::::::::KO::::SRP316008::15203 up,"epc2::::::::::::::human::GSE173169,GSE173170::0::1 up"
+SRP316095,GSE173232,SF3B1::::orthochromatic erythroblasts::::::KD::::SRP316095::14266 up,sf3b1::::::::::::::human::GSE173232::1::0 up
+SRP316360,GSE173307,RGCC::::human induced pluripotent stem cells(2D NSCs)::::::KO::::SRP316360::8995 up,"rgcc::::::::::::::human::GSE173307,GSE173391::0::1 up"
+SRP318570,GSE173910,Morc3::embryonic stem cell::::::::KO::::SRP318570::5255 up,"morc3::::::::::::::mouse::GSE173910,GSE173917::1::0 up"
+SRP318571,GSE173911,Morc3::embryonic stem cell::::::::KO::::SRP318571::5256 up,"morc3::::::::::::::mouse::GSE173911,GSE173917::0::1 up"
+SRP318617,GSE173840,Trp53::::neutrophils from peripheral blood::::::KO::::SRP318617::14034 up,doxorubicin::::::::::mouse::GSE173840::1::0 up
+SRP318761,GSE173997,Clic4::6DT1::::::::KO::::SRP318761::244 up,clic4::::::::::::::mouse::GSE173997::1::0 up
+SRP319706,GSE174406,Fst|Lin28b::::cochlear supporting cells::::::OE|OE::::SRP319706::3703 up,lin28b::::::::::::::mouse::GSE174406::2::0 up
+SRP319889,GSE174418,Mettl5::::liver::::::KO::::SRP319889::11202 down,"mettl5::::::::::::::mouse::GSE174418,GSE174421::0::1 up"
+SRP319995,GSE174506,Ror2::Lineage-depleted tumor cells::::::::KD::::SRP319995::10680 up,ror2::::::::::::::mouse::GSE174506::0::1 up
+SRP320511,GSE174701,MAML3::neuroblastoma SK-N-SH::::::::OE::::SRP320511::13955 up,maml3::::::::::::::human::GSE174701::1::0 up
+SRP320666,GSE174751,Dpy30::::pancreatic islet::::::KO::::SRP320666::14683 up,postn::::::::::::::mouse::GSE174751::0::1 up
+SRP321472,GSE175571,Acsl6::::cerebellum::::::KO::::SRP321472::3443 up,acsl6::::::::::::::mouse::GSE175571::3::2 up
+SRP321648,GSE175683,Plod1::::abdominal aorta::::::KO::::SRP321648::572 up,angiotensin ii::::::::::mouse::GSE175683::1::2 up
+SRP322105,GSE175883,Dis3l2::::testes::::::KO::::SRP322105::17325 up,dis3::::::::::::::mouse::GSE175883::0::1 up
+SRP322699,GSE176144,ZFC3H1::bone osteosarcoma epithelial cells U2OS::::::::KD::::SRP322699::2079 up,zfc3h1::::::::::::::human::GSE176144::0::1 up
+SRP323245,GSE176389,Tet1::::embryonic stem cell::::::KO::::SRP323245::5257 up,tet1::::::::::::::mouse::GSE176389::0::1 up
+SRP323952,GSE178113,Atrx::glioblastoma neurosphere cell C54B::::::::KO::::SRP323952::6492 up,"atrx::::::::::::::mouse::GSE178113,GSE178116::0::1 up"
+SRP324271,GSE178312,Nmnat1::::retina::::::KO::::SRP324271::15773 up,nat1::::::::::::::mouse::GSE178312::0::1 up
+SRP324468,GSE178370,Asgr1::::liver::::::KO::::SRP324468::10945 up,asgr1::::::::::::::mouse::GSE178370::1::0 down
+SRP324755,GSE178521,PRMT5::NCI-H460::::::::KD::::SRP324755::13732 up,prmt5::::::::::::::human::GSE178521::1::0 up
+SRP324802,GSE178532,SMARCA4::MDA-MB-231::::::::KO::::SRP324802::12379 up,cisplatin::::::::::human::GSE178532::1::0 up
+SRP324838,GSE178560,Irf7::::bone marrow c-kit+ leukemic cells::::::OE::::SRP324838::1419 up,irf7::::::::::::::mouse::GSE178560::0::1 up
+SRP327839,GSE179868,DDX21::human umbilical vein endothelial cells::::::::KD::::SRP327839::9151 up,"ddx21::::::::::::::human::GSE179868,GSE180330::1::0 up"
+SRP327850,GSE179880,Atf3::::skin fibroblast::::::KD::::SRP327850::16427 up,e2f4::::::::::::::mouse::GSE179880::10::12 up
+SRP328785,GSE180304,Cat::::Femoral shaft::::::KO::::SRP328785::5799 up,ethanol::::::::::mouse::GSE180304::3::1 up
+SRP328944,GSE180377,LIPA::::liver::::::OE::::SRP328944::10874 up,lipa::::::::::::::mouse::GSE180377::2::1 up
+SRP329785,GSE180789,HNRNPC::human highly metastatic HCC cell::::::::KD::::SRP329785::8988 up,hnrnpc::::::::::::::human::GSE180789::1::0 up
+SRP330127,GSE180982,LST8::Non-small cell lung cancer(H1299)::::::::Mut::::SRP330127::14087 up,mlst8::::::::::::::human::GSE180982::1::0 up
+SRP330291,GSE181059,RUNX3::::CD34+ haematopoietic stem and progenitor cells::::::OE::::SRP330291::3245 up,runx3::::::::::::::human::GSE181059::2::1 up
+SRP331068,GSE181431,CALR::MDA-MB-231::::::::KD::::SRP331068::12380 down,calr::::::::::::::human::GSE181431::0::1 up
+SRP331117,GSE181461,MTOR::bladder cancer cell UM-UC-3::::::::KD::::SRP331117::1359 up,trim28::::::::::::::human::GSE181461::1::4 up
+SRP333135,GSE182382,METTL3::::KRAS mutant colorectal cancer::::::KD::::SRP333135::10371 up,mettl3::::::::::::::human::GSE182382::1::0 up
+SRP333852,GSE182640,Hbb::::knee joint cartilaginous tissues::::::KO::::SRP333852::10353 up,postn::::::::::::::mouse::GSE182640::1::0 up
+SRP334258,GSE182854,IGF2BP2::MDA-MB-231::::::::KD::::SRP334258::12260 up,sirt1::::::::::::::human::GSE182854::2::0 up
+SRP334376,GSE182888,JMJD6::786-O::::::::KD::::SRP334376::287 up,jmjd6::::::::::::::human::GSE182888::0::1 up
+SRP334730,GSE183041,CDK12::A2780::::::::KO::::SRP334730::326 up,cisplatin::::::::::human::GSE183041::1::0 up
+SRP335446,GSE183327,DDIT3::::CD34+ Healthy cells::::::OE::::SRP335446::3247 up,"ddit3::::::::::::::human::GSE183327,GSE183328::1::0 up"
+SRP335506,GSE183335,LIN28B::neuroblastoma cell BE(2)-C::::::::KO::::SRP335506::13875 up,"lin28b::::::::::::::human::GSE183335,GSE183351::1::0 up"
+SRP335596,GSE183413,Ash1l::MLL-AF9-transformed esc::::::::KO::::SRP335596::12882 up,ash1l::::::::::::::mouse::GSE183413::0::2 up
+SRP335747,GSE183474,LATS1::HEK293T::::::::KD::::SRP335747::7570 up,lats1::::::::::::::human::GSE183474::1::0 up
+SRP337013,GSE184087,MIR181A1HG::::marrow stromal cell::::::KD::::SRP337013::12110 up,tert::::::::::::::human::GSE184087::0::1 up
+SRP337625,GSE184356,TFAM::::Primary dermal fibroblast::::::KD::::SRP337625::15089 up,tfam::::::::::::::human::GSE184356::1::0 up
+SRP337789,GSE184399,CNOT1::cervical cancer cell HeLa::::::::KD::::SRP337789::3522 up,cnot1::::::::::::::human::GSE184399::0::2 up
+SRP339096,GSE184902,Adipor1::::retina::::::KO::::SRP339096::15758 up,adipor1::::::::::::::mouse::GSE184902::3::0 up
+SRP339661,GSE185163,Clic4::::6DT1-derived orthograft::::::KO::::SRP339661::243 up,clic4::::::::::::::mouse::GSE185163::5::1 up
+SRP340404,GSE185519,DHODH::MOLM-13::::::::KD::::SRP340404::12932 up,gilteritinib::::::::::human::GSE185519::1::0 up
+SRP341248,GSE185865,CELF6::A549::::::::OE::::SRP341248::416 up,celf6::::::::::::::human::GSE185865::0::1 up
+SRP341470,GSE185944,Pth1r::::Bone cells::::::KO::::SRP341470::1407 up,pth1r::::::::::::::mouse::GSE185944::0::1 up
+SRP341542,GSE185953,TLR3::prostatic carcinoma cell DU145::::::::OE::::SRP341542::15567 up,tlr3::::::::::::::human::GSE185953::1::0 up
+SRP341620,GSE186005,Klf5::::Mouse embryonic stem cells derived from C57BL/6J mice::::::OE::::SRP341620::13229 up,klf5::::::::::::::mouse::GSE186005::1::2 up
+SRP342076,GSE186112,MED23::::Vein Endothelial::::::KD::::SRP342076::17724 up,med23::::::::::::::human::GSE186112::1::0 up
+SRP342906,GSE186483,Lrrk2::::primary microglia::::::KO::::SRP342906::15246 up,lrrk2::::::::::::::mouse::GSE186483::1::0 up
+SRP343455,GSE186707,Hdac4::MC3T3-E1::::::::KD::::SRP343455::12146 up,hdac4::::::::::::::mouse::GSE186707::1::0 up
+SRP343587,GSE186739,ASIC3::primary culture of skin fibroblasts::::::::OE::::SRP343587::15078 up,asic3::::::::::::::human::GSE186739::0::1 up
+SRP344236,GSE187005,Atf4::::heart::::::KO::::SRP344236::7111 up,atf4::::::::::::::mouse::GSE187005::3::4 up
+SRP345542,GSE188599,Cmklr1::::Whole liver-Lean (10% kcal from fat)::::::KO::::SRP345542::18142 up,resolvin e1::::::::::mouse::GSE188599::0::10 up
+SRP345831,GSE188721,MESP1::::Human cardiac progenitor cells::::::KO::::SRP345831::8832 up,mesp1::::::::::::::human::GSE188721::2::4 up
+SRP346010,GSE188774,HKDC1::hepatoblastoma cell HepG2::::::::KO::::SRP346010::8356 up,hkdc1::::::::::::::human::GSE188774::1::0 up
+SRP346204,GSE188869,Kat7::::Thymic epithelial cells from fetal thymic organ cultures::::::KO::::SRP346204::17409 up,"kat7::::::::::::::mouse::GSE188869,GSE188871::0::3 up"
+SRP346205,GSE188870,Kat7::::Thymic epithelial cells::::::KO::::SRP346205::17410 up,"kat7::::::::::::::mouse::GSE188870,GSE188871::0::2 up"
+SRP348014,GSE189599,Bend2::::leptotene spermatocytes::::::KO::::SRP348014::10646 up,"bend2::::::::::::::mouse::GSE189599,GSE196004::0::1 up"
+SRP348098,GSE189637,Parg::3T3::::::::OE::::SRP348098::159 up,parg::::::::::::::mouse::GSE189637::0::1 down
+SRP348198,GSE189683,Rif1::::trophoblast stem cells::::::KO::::SRP348198::17580 up,rif1::::::::::::::mouse::GSE189683::1::0 up
+SRP350011,GSE190555,ARID1A::Human Endometrial Epithelial 12Z::::::::KD::::SRP350011::8927 up,"chd4::::::::::::::human::GSE190555,GSE190557::2::0 up"
+SRP350289,GSE190681,Rtcb::::oocyte::::::KO::::SRP350289::14234 up,rtcb::::::::::::::mouse::GSE190681::1::0 up
+SRP351317,GSE190947,Xbp1::::isolated hepatocyte::::::KO::::SRP351317::9762 up,xbp1::::::::::::::mouse::GSE190947::1::0 up
+SRP351321,GSE190950,NONO::glioblastoma cell U251(glioblastoma cell)::::::::KD::::SRP351321::6473 up,nono::::::::::::::human::GSE190950::1::0 down

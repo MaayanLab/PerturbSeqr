@@ -53,6 +53,8 @@ DRUG_DIR = DATA_DIR / 'drug_perturbation'
 GENE_DIR = DATA_DIR / 'gene_perturbation'
 METADATA_DIR = DATA_DIR / 'metadata'
 
+INPUTS_DIR = DB_DIR / 'etl' / 'inputs'
+
 # Load configs
 assert LIBRARY_CONFIG_PATH.exists(), f"Missing {LIBRARY_CONFIG_PATH}"
 LIBRARY_CONFIG = json.load(open(LIBRARY_CONFIG_PATH))

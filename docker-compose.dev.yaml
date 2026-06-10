@@ -1,7 +1,9 @@
 services:
   perturbseqr-postgres:
     build: db
-    image: johnkgardner/perturbseqr-postgres:0.1.0
+    image: johnkgardner/perturbseqr-postgres:0.2.44
+    platform: linux/amd64
+    restart: unless-stopped
     shm_size: 1Gb
     environment:
       - POSTGRES_PASSWORD
@@ -19,6 +21,8 @@ services:
   perturbseqr-minio:
     image: quay.io/minio/minio
     pull_policy: missing
+    platform: linux/amd64
+    restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
       - MINIO_ROOT_USER=minio
@@ -44,34 +48,41 @@ services:
 
   perturbseqr-enrich:
     build: enrich
-    image: johnkgardner/perturbseqr-enrich:0.1.0
-    x-kubernetes:
-      imagePullPolicy: Always
+    image: johnkgardner/perturbseqr-enrich:0.2.44
+    platform: linux/amd64
+    restart: unless-stopped
     deploy:
       resources:
         reservations:
           memory: 5Gb
     environment:
       - ROCKET_DATABASES={postgres={url="postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres"}}
+      - MINIO_ENDPOINT=perturbseqr-minio:9000
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD
+      - MINIO_SECURE=false
     ports:
       - 8000:8000
-    volumes:
-      - enrich-data:/data
     depends_on:
       perturbseqr-postgres:
         condition: service_healthy
+      perturbseqr-minio:
+        condition: service_healthy
 
   perturbseqr-app:
-    build: .
-    image: johnkgardner/perturbseqr-app:0.1.0-dev
-    x-kubernetes:
-      imagePullPolicy: Always
+    build:
+      context: .
+      args:
+        - NEXT_PUBLIC_MINIO_URL=https://s3.perturbseqr.k8s.dev.maayanlab.cloud/data
+    image: johnkgardner/perturbseqr-app:0.2.44-dev
+    platform: linux/amd64
+    restart: unless-stopped
     environment:
       - PUBLIC_URL=https://perturbseqr.k8s.dev.maayanlab.cloud
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres
       - NODE_ENV=production
       - ENRICH_URL=http://perturbseqr-enrich:8000
-      - NEXT_PUBLIC_MINIO_URL=https://s3.perturbseqr.k8s.dev.maayanlab.cloud
+      - NEXT_PUBLIC_MINIO_URL=https://s3.perturbseqr.k8s.dev.maayanlab.cloud/data
       - MINIO_ENDPOINT=perturbseqr-minio:9000
     ports:
       - target: 3000
@@ -85,7 +96,11 @@ services:
 
   minio-setup:
     build: minio
-    image: johnkgardner/perturbseqr-minio-setup:0.1.0
+    image: johnkgardner/perturbseqr-minio-setup:0.2.44
+    platform: linux/amd64
+    restart: "no"
+    x-kubernetes:
+      exclude: true   # k8s uses k8s/minio-setup-job.yaml instead
     environment:
       - S3_URL=http://minio:${MINIO_ROOT_PASSWORD}@perturbseqr-minio:9000/data
       - PUBLIC_S3_URL=https://s3.perturbseqr.k8s.dev.maayanlab.cloud/data
@@ -96,6 +111,7 @@ services:
 
   dbmate:
     image: ghcr.io/amacneil/dbmate
+    restart: "no"
     volumes:
       - ./db/migrations:/db/migrations:ro
     environment:
@@ -110,9 +126,11 @@ services:
     build:
       context: .
       dockerfile: ingest/Dockerfile
-    image: johnkgardner/perturbseqr-ingest:0.1.0
+    image: johnkgardner/perturbseqr-ingest:0.2.44
+    platform: linux/amd64
+    restart: "no"
     x-kubernetes:
-      imagePullPolicy: Always
+      exclude: true   # k8s uses k8s/ingest-{clean,incremental}-job.yaml instead
     environment:
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres?sslmode=disable
       - MINIO_ENDPOINT=perturbseqr-minio:9000
@@ -120,6 +138,7 @@ services:
       - MINIO_ROOT_PASSWORD
       - MINIO_SECURE=false
       - ENRICH_URL=http://perturbseqr-enrich:8000
+      - INGEST_CLEAN
     depends_on:
       perturbseqr-postgres:
         condition: service_healthy
@@ -132,10 +151,6 @@ volumes:
   perturbseqr-data:
     x-kubernetes:
       size: 50Gi
-      class: local-path
-  enrich-data:
-    x-kubernetes:
-      size: 10Gi
       class: local-path
   minio-data:
     x-kubernetes:

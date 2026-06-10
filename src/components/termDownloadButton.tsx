@@ -41,8 +41,6 @@ export default function TermDownloadButton({dataFiltered, filterTerm}: {dataFilt
     setLoading(false);
   };
 
-  console.log(filterTerm)
-
   return (
     <div className="relative">
       <div className="tooltip" data-tip="Download results">

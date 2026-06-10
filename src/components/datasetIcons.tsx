@@ -8,7 +8,7 @@ const logoMap: Record<string, { src: string; darkSrc?: string; type: 'image' | '
   'Tahoe-100M': { src: '/images/tahoe-logo-new.png', type: 'image' },
   'LINCS L1000 CP': { src: '/images/cmap-logo.svg', type: 'svg' },
   'LINCS L1000 XPR': { src: '/images/cmap-logo.svg', type: 'svg' },
-  'Microarrays CMap': { src: '/images/broad-logo.png', type: 'image' },
+  'Microarrays CMAP': { src: '/images/broad-logo.png', type: 'image' },
   'NIBR DRUG-seq': { src: '/images/nibr-logo.png', type: 'image' },
   'SciPlex': { src: '/images/sciplex-logo.svg', darkSrc: '/images/sciplex-logo-dark.svg', type: 'svg' },
   'DeepCover MoA': { src: '/images/deepcovermoa-logo.png', type: 'image' },
@@ -27,7 +27,7 @@ const logoMap: Record<string, { src: string; darkSrc?: string; type: 'image' | '
 const shortLabels: Record<string, string> = {
   'LINCS L1000 CP': 'L1000 CP',
   'LINCS L1000 XPR': 'L1000 XPR',
-  'Microarrays CMap': 'CMap Arrays',
+  'Microarrays CMAP': 'CMAP Arrays',
   'NIBR DRUG-seq': 'NIBR DR-seq',
   'DeepCover MoA': 'DeepCover',
   'Ginkgo Bioworks': 'Ginkgo DR-seq',
@@ -40,18 +40,24 @@ const shortLabels: Record<string, string> = {
 const customSizes: Record<string, number> = {
   'RummaGEO Chem': 60,
   'RummaGEO Gene': 60,
-  'Microarrays CMap': 100,
+  'Microarrays CMAP': 100,
   'SciPlex': 75,
   'NIBR DRUG-seq': 100,
   'Replogle et al.': 200,
 }
 const defaultSize = 80
 
-// Build per-library entries from config, sorted alphabetically by display name
+// Build per-library entries from config. Drug libraries first (alphabetical
+// within), then gene libraries (alphabetical within). Same category color
+// theme (cyan / fuchsia) carries over from the button styling, so the
+// grouping is visually obvious in the grid.
 const allLibraries = Object.values(libraryConfig.libraries).map((l: any) => ({
   name: l.displayName as string,
   category: l.category as 'drug' | 'gene',
-})).sort((a, b) => a.name.localeCompare(b.name))
+})).sort((a, b) => {
+  if (a.category !== b.category) return a.category === 'drug' ? -1 : 1;
+  return a.name.localeCompare(b.name);
+})
 
 // Export counts for use in subtitle
 export const resourceCount = new Set(allLibraries.map(l => logoMap[l.name]?.src).filter(Boolean)).size
@@ -77,7 +83,7 @@ export default function DatasetIcons({
   const getButtonStyle = (name: string, category: 'drug' | 'gene') => {
     const hasAnySelection = selectedLibraries.length > 0
     const isSelected = selectedLibraries.includes(name)
-    const categoryBg = category === 'drug' ? 'bg-cyan-200 dark:bg-cyan-900' : 'bg-fuchsia-200 dark:bg-fuchsia-900'
+    const categoryBg = category === 'drug' ? 'bg-cyan-300 dark:bg-cyan-800' : 'bg-fuchsia-100 dark:bg-fuchsia-900'
 
     if (!hasAnySelection) {
       return categoryBg

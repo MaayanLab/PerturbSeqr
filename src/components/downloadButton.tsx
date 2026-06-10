@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export default function DownloadButton({ queryString, libraryNames }: { queryString: Record<string, string | null>; libraryNames?: string[] | null }) {
+export default function DownloadButton({ queryString }: { queryString: Record<string, string | null> }) {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [maxTotal, setMaxTotal] = useState<number>(1000);
@@ -8,7 +8,7 @@ export default function DownloadButton({ queryString, libraryNames }: { queryStr
   const handleDownload = async () => {
     setLoading(true);
     setShowModal(false);
-    const downloadUrl = `/enrich/download?dataset=${queryString.dataset}&q=${queryString.q}&fda=${queryString.fda}&consensus=${queryString.consensus}&dir=${queryString.dir}&ko=${queryString.ko}&sort=${queryString.sort}&topn=${queryString.topN}&moas=${queryString.moas}&maxTotal=${maxTotal}&ds=${queryString.ds || ''}&pvaluele=${queryString.pvaluele || '0.05'}&libraries=${libraryNames?.join(',') || ''}`;
+    const downloadUrl = `/enrich/download?dataset=${queryString.dataset}&q=${queryString.q}&fda=${queryString.fda}&consensus=${queryString.consensus}&dir=${queryString.dir}&ko=${queryString.ko}&sort=${queryString.sort}&topn=${queryString.topN}&moas=${queryString.moas}&maxTotal=${maxTotal}&pvaluele=${queryString.pvaluele || '0.05'}&libraries=${queryString.libraries || ''}`;
 
     try {
       const response = await fetch(downloadUrl);

@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 
-const NEXT_PUBLIC_MINIO_URL = process.env.NEXT_PUBLIC_MINIO_URL ?? (process.env.NODE_ENV === 'production' ? process.env.PROD_PUBLIC_S3_URL : process.env.PUBLIC_S3_URL)
+const NEXT_PUBLIC_MINIO_URL = process.env.NEXT_PUBLIC_MINIO_URL ?? process.env.PUBLIC_S3_URL
 if (!NEXT_PUBLIC_MINIO_URL) throw new Error("Please configure PUBLIC_S3_URL");
 
 const nextConfig = {

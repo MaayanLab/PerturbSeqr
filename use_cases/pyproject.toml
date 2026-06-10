@@ -1,0 +1,17 @@
+[project]
+name = "perturbseqr-use-cases"
+version = "0.0.0"
+description = "Shared environment for Perturb-Seqr use case notebooks"
+requires-python = ">=3.11"
+dependencies = [
+    "perturbseqr",
+    "pandas>=2.0",
+    "openpyxl>=3.1",
+    "ipykernel>=6.29",
+    "matplotlib>=3.8",
+    "seaborn>=0.13",
+    "requests>=2.31",
+]
+
+[tool.uv.sources]
+perturbseqr = { path = "../perturbseqr-py", editable = true }

@@ -4,7 +4,8 @@ export default function JSONLD() {
     dangerouslySetInnerHTML={{ __html: JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'WebSite',
-      'url': 'https://rummagene.com',
+      'name': "Ma'ayan Lab",
+      'url': 'https://perturbseqr.maayanlab.cloud',
     }) }}
   />
 }

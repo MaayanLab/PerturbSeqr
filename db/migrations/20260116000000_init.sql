@@ -358,8 +358,7 @@ CREATE FUNCTION app_private.indexed_enrich(
   sortby VARCHAR DEFAULT NULL,
   filter_ko BOOLEAN DEFAULT FALSE,
   top_n INTEGER DEFAULT 10000,
-  library_names VARCHAR[] DEFAULT NULL,
-  post_search_filter_library_names VARCHAR[] DEFAULT NULL
+  library_names VARCHAR[] DEFAULT NULL
 )
 RETURNS app_public.paginated_enrich_result
 LANGUAGE plpython3u IMMUTABLE PARALLEL SAFE AS $$
@@ -379,7 +378,6 @@ LANGUAGE plpython3u IMMUTABLE PARALLEL SAFE AS $$
   if first: params['limit'] = first
   if sortby: params['sortby'] = sortby
   if library_names: params['library_names'] = ','.join(library_names)
-  if post_search_filter_library_names: params['post_search_filter_library_names'] = ','.join(post_search_filter_library_names)
   req = requests.post(
     f"{os.environ.get('ENRICH_URL', 'http://enrich:8000')}/{background['id']}",
     params=params,
@@ -406,8 +404,7 @@ CREATE FUNCTION app_public.background_enrich(
   sortby VARCHAR DEFAULT NULL,
   filter_ko BOOLEAN DEFAULT FALSE,
   top_n INTEGER DEFAULT 10000,
-  library_names VARCHAR[] DEFAULT NULL,
-  post_search_filter_library_names VARCHAR[] DEFAULT NULL
+  library_names VARCHAR[] DEFAULT NULL
 )
 RETURNS app_public.paginated_enrich_result
 LANGUAGE sql IMMUTABLE SECURITY DEFINER PARALLEL SAFE AS $$
@@ -425,8 +422,7 @@ LANGUAGE sql IMMUTABLE SECURITY DEFINER PARALLEL SAFE AS $$
     background_enrich.sortby,
     background_enrich.filter_ko,
     background_enrich.top_n,
-    background_enrich.library_names,
-    background_enrich.post_search_filter_library_names
+    background_enrich.library_names
   ) r;
 $$;
 GRANT EXECUTE ON FUNCTION app_public.background_enrich TO guest, authenticated;
@@ -445,8 +441,7 @@ CREATE FUNCTION app_private.indexed_paired_enrich(
   sortby VARCHAR DEFAULT NULL,
   filter_ko BOOLEAN DEFAULT FALSE,
   top_n INTEGER DEFAULT 10000,
-  library_names VARCHAR[] DEFAULT NULL,
-  post_search_filter_library_names VARCHAR[] DEFAULT NULL
+  library_names VARCHAR[] DEFAULT NULL
 )
 RETURNS app_public.paginated_paired_enrich_result
 LANGUAGE plpython3u IMMUTABLE PARALLEL SAFE AS $$
@@ -466,7 +461,6 @@ LANGUAGE plpython3u IMMUTABLE PARALLEL SAFE AS $$
   if first: params['limit'] = first
   if sortby: params['sortby'] = sortby
   if library_names: params['library_names'] = ','.join(library_names)
-  if post_search_filter_library_names: params['post_search_filter_library_names'] = ','.join(post_search_filter_library_names)
   req = requests.post(
     f"{os.environ.get('ENRICH_URL', 'http://enrich:8000')}/pairs/{background['id']}",
     params=params,
@@ -494,8 +488,7 @@ CREATE FUNCTION app_public.background_paired_enrich(
   sortby VARCHAR DEFAULT NULL,
   filter_ko BOOLEAN DEFAULT FALSE,
   top_n INTEGER DEFAULT 10000,
-  library_names VARCHAR[] DEFAULT NULL,
-  post_search_filter_library_names VARCHAR[] DEFAULT NULL
+  library_names VARCHAR[] DEFAULT NULL
 )
 RETURNS app_public.paginated_paired_enrich_result
 LANGUAGE sql IMMUTABLE SECURITY DEFINER PARALLEL SAFE AS $$
@@ -514,8 +507,7 @@ LANGUAGE sql IMMUTABLE SECURITY DEFINER PARALLEL SAFE AS $$
     background_paired_enrich.sortby,
     background_paired_enrich.filter_ko,
     background_paired_enrich.top_n,
-    background_paired_enrich.library_names,
-    background_paired_enrich.post_search_filter_library_names
+    background_paired_enrich.library_names
   ) r;
 $$;
 GRANT EXECUTE ON FUNCTION app_public.background_paired_enrich TO guest, authenticated;

@@ -9,7 +9,7 @@ const DATASETS = {
     { id: 'deepcovermoa', name: 'DeepCover MoA', signatures: '1,748' },
     { id: 'ginkgo', name: 'Ginkgo Bioworks', signatures: '9,310' },
     { id: 'lincs-l1000-cp', name: 'LINCS L1000 CP', signatures: '156,926' },
-    { id: 'cmap-build02', name: 'Microarrays CMap', signatures: '12,200' },
+    { id: 'cmap-build02', name: 'Microarrays CMAP', signatures: '12,200' },
     { id: 'drugseqr', name: 'NIBR DRUG-seq', signatures: '26,316' },
     { id: 'geo-chem', name: 'RummaGEO Chem', signatures: '1,860' },
     { id: 'sciplex', name: 'SciPlex', signatures: '4,604' },

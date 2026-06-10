@@ -6,6 +6,7 @@ import Image from 'next/image'
 import useQsState from '@/utils/useQsState'
 import Stats from '@/components/stats'
 import LibraryFilter from '@/components/libraryFilter'
+import ShareButton from '@/components/shareButton'
 import DatasetIcons, { resourceCount, libraryCount, drugLibraryCount, geneLibraryCount } from '@/components/datasetIcons'
 import libraryConfig from '@/config/libraries.json'
 
@@ -37,7 +38,10 @@ export function TermSearchResults({ terms, libraryNames }: { terms: string, libr
   }
   return (
     <div className="flex flex-col gap-2 my-2">
-      <h2 className="text-md font-bold">
+      <ul className="menu menu-horizontal gap-3 text-base justify-center py-0">
+        <ShareButton />
+      </ul>
+      <h2 className="text-lg font-bold">
         After rummaging through <Stats show_gene_sets />. Perturb-Seqr <Image className="inline-block rounded dark:invert" src="/images/perturbseqr-logo.png" width={50} height={50} alt="Perturb-Seqr"></Image> found your search term in {data.geneSetTermSearch?.totalCount} gene sets.
       </h2>
       {data.geneSetTermSearch?.nodes && data.geneSetTermSearch?.nodes.length > 0 ? <TermTable terms={data.geneSetTermSearch?.nodes}></TermTable> : null}

@@ -78,3 +78,9 @@ impl DenseBitVec {
 pub fn compute_overlap(a: &DenseBitVec, b: &SparseBitVec) -> u32 {
     b.v.iter().map(|i| a.v[*i as usize] as u32).sum()
 }
+
+// AND two dense bit vectors and sum: "how many of the user's query genes exist in library X's background?"
+// This is |Q ∩ B_lib| — the effective query size scoped to a specific library.
+pub fn intersect_count(a: &DenseBitVec, b: &DenseBitVec) -> u32 {
+    a.v.iter().zip(b.v.iter()).map(|(x, y)| (x & y) as u32).sum()
+}

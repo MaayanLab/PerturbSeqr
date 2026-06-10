@@ -24,7 +24,7 @@ function HomeContent() {
   const datasetIds = searchParams?.getAll('dataset') ?? []
   const librariesParam = searchParams?.get('libraries') ?? null
 
-  const [inputSingle, setInputSingle] = React.useState(datasetIds.length !== 2)
+  const [inputSingle, setInputSingle] = React.useState(datasetIds.length === 1)
   // State for selected libraries - passed to enrich page via URL params
   // Default to all libraries selected, or restore from URL params when returning from results
   const [selectedLibraries, setSelectedLibraries] = React.useState<string[]>(() => {

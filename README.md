@@ -1,20 +1,37 @@
 # Perturb-Seqr
 
-## Quick Start
+A comprehensive perturbation-signature search engine integrating connectivity maps from L1000, Tahoe-100M, NIBR DRUG-seq, CMap, Ginkgo Bioworks, SciPlex, DeepCover MoA, Perturb Atlas, Replogle Perturb-seq, CREEDS, and RummaGEO.
+
+## Deployments
+
+- **Production:** https://perturbseqr.maayanlab.cloud
+- **Dev:** https://perturbseqr.k8s.dev.maayanlab.cloud
+- **GraphQL API:** https://perturbseqr.maayanlab.cloud/graphiql
+
+## Local Quick Start
+
+Runs the full stack (postgres, MinIO, enrich, app) via docker compose.
 
 ```bash
 cp .env.example .env
-# Build all images including one-off job containers
+# Build all images including the one-off job containers (minio-setup, ingest)
 COMPOSE_PROFILES=jobs docker compose build
 docker compose up -d
+# Create the MinIO bucket and apply the access policy
 COMPOSE_PROFILES=jobs docker compose run --rm minio-setup
-# Upload .gmt.gz files to MinIO console at http://localhost:9001 (login: minio / password from .env)
+# Upload .gmt.gz files via the MinIO console at http://localhost:9001
+#   login: minio / password from .env
+# Then ingest the gene sets into Postgres
 COMPOSE_PROFILES=jobs docker compose run --rm ingest
 ```
 
-App: http://localhost:3000
+- App: http://localhost:3000
+- MinIO console: http://localhost:9001
+- GraphiQL: http://localhost:3000/graphiql
 
-## Development
+## Frontend Development
+
+Run only the backend services in docker; run the Next.js app with hot reload:
 
 ```bash
 cp .env.example .env
@@ -24,14 +41,16 @@ npm install && npm run dev
 
 ## Reset
 
+Wipe local postgres + MinIO volumes and rebuild from scratch:
+
 ```bash
 docker compose down -v
 docker compose up -d
 COMPOSE_PROFILES=jobs docker compose run --rm minio-setup
-# Re-upload GMT files to MinIO
+# Re-upload GMT files via MinIO console
 COMPOSE_PROFILES=jobs docker compose run --rm ingest
 ```
 
 ## Deploy
 
-See [DEV_DEPLOY.md](DEV_DEPLOY.md) for deploying to the dev Kubernetes cluster.
+See [DEV_DEPLOY.md](DEV_DEPLOY.md) for the dev Kubernetes cluster deployment workflow.
