@@ -1,0 +1,815 @@
+cell_name,Cell_ID_DepMap,Cell_ID_Cellosaur,Organ,cell_line_names,datasets,n_datasets,n_gene_sets
+12Z,,CVCL_0Q73,,12Z,Perturb Atlas Human,1,26
+1321N1,ACH-001000,CVCL_0110,CNS/Brain,1321N1,Perturb Atlas Human,1,10
+143B,ACH-001001,CVCL_2270,Bone,143B,Perturb Atlas Human,1,10
+1455,,CVCL_UT96,,1455,Perturb Atlas Human,1,2
+184-hTERT,,CVCL_K053,,184-hTert,Perturb Atlas Human,1,2
+201B7,,CVCL_A324,,201B7,Perturb Atlas Human,1,10
+2102EP,,CVCL_C522,,2102Ep,Perturb Atlas Human,1,4
+21NT,ACH-002399,CVCL_7933,Breast,21NT,Perturb Atlas Human,1,4
+22RV1,ACH-000956,CVCL_1045,Prostate,22Rv1 | CWR22Rv1,Perturb Atlas Human,1,34
+2fTGH,,CVCL_0115,,2fTGH,Perturb Atlas Human,1,3
+3Ao,,CVCL_C6VI,,3AO,Perturb Atlas Human,1,2
+3T3-L1,,CVCL_0123,,3T3-L1,Perturb Atlas Mouse,1,98
+3T3-Swiss albino,,CVCL_0120,,3T3,Perturb Atlas Mouse,1,4
+45.6,,CVCL_1D02,,456,Perturb Atlas Human,1,2
+451LU,ACH-001002,CVCL_6357,Skin,451LU,Perturb Atlas Human,1,2
+46C,,CVCL_Y482,,46C,Perturb Atlas Mouse,1,16
+4T07,,CVCL_B383,,4T07,Perturb Atlas Mouse,1,5
+4T1,,CVCL_0125,,4T1,Perturb Atlas Mouse,1,94
+5-8F,,CVCL_C528,,5-8F,Perturb Atlas Human,1,2
+501-mel,,CVCL_4633,,501-mel,Perturb Atlas Human,1,14
+537-mel,,CVCL_8052,,mel537,Perturb Atlas Human,1,2
+5637,ACH-000905,CVCL_0126,Bladder/Urinary Tract,5637,Perturb Atlas Human,1,10
+585B1,,CVCL_DQ07,,585B1,Perturb Atlas Human,1,4
+621-101,,CVCL_S879,,621-101,Perturb Atlas Human,1,2
+697,ACH-000070,CVCL_0079,Lymphoid,697 | line 697,Perturb Atlas Human,1,14
+6DT1,,CVCL_C8PZ,,6DT1,Perturb Atlas Mouse,1,4
+769P,ACH-000411,CVCL_1050,Kidney,769-P,Perturb Atlas Human,1,2
+76NE6,,CVCL_S909,,76NE6,Perturb Atlas Human,1,4
+78-1,,CVCL_E7YB,,781,Perturb Atlas Mouse,1,2
+786-M1A,,CVCL_VR30,,786-M1A,Perturb Atlas Human,1,4
+786O,ACH-000649,CVCL_1051,Kidney,786-O,Perturb Atlas Human,1,74
+8505C,ACH-001307,CVCL_1054,Thyroid,8505C,Perturb Atlas Human,1,2
+A-20,,CVCL_B3QH,,A20,Perturb Atlas Mouse,1,2
+A172,ACH-000558,CVCL_0131,CNS/Brain,A-172 | A172,Perturb Atlas Human | Tahoe-100M,2,2272
+A1847,,CVCL_9724,,A1847,Perturb Atlas Human,1,8
+A2058,ACH-000788,CVCL_1059,Skin,A2058,Perturb Atlas Human,1,4
+A253,ACH-000740,CVCL_1060,Head and Neck,A253,Perturb Atlas Human,1,5
+A2780,ACH-000657,CVCL_0134,Ovary/Fallopian Tube,A2780,Perturb Atlas Human,1,22
+A375,ACH-000219,CVCL_0132,Skin,A375,LINCS L1000 CP | LINCS L1000 XPR | Perturb Atlas Human,3,16015
+A427,ACH-000757,CVCL_1055,Lung,A-427,Tahoe-100M,1,2266
+A431,ACH-001328,CVCL_0037,Skin,A431,Perturb Atlas Human,1,4
+A498,ACH-000555,CVCL_1056,Kidney,A498,Perturb Atlas Human | Tahoe-100M,2,2270
+A549,ACH-000681,CVCL_0023,Lung,A-549 | A549,Ginkgo Bioworks | LINCS L1000 CP | LINCS L1000 XPR | Perturb Atlas Human | SciPlex | Tahoe-100M,6,29806
+A549-ACE2,,CVCL_C0Q5,,A549-ACE2,Perturb Atlas Human,1,7
+A673,ACH-000052,CVCL_0080,Bone,A673,LINCS L1000 CP | Perturb Atlas Human,2,63
+AB2.2,,CVCL_C261,,AB2.2,Perturb Atlas Mouse,1,11
+ACC-LC-48,,CVCL_7018,,OT-1,Perturb Atlas Mouse,1,4
+ACHN,ACH-000046,CVCL_1067,Kidney,ACHN,Perturb Atlas Human,1,6
+AGS,ACH-000880,CVCL_0139,Esophagus/Stomach,AGS,LINCS L1000 CP | LINCS L1000 XPR | Perturb Atlas Human,3,4069
+ALLSIL,ACH-000105,CVCL_1805,Lymphoid,ALL-SIL,Perturb Atlas Human,1,2
+AML12,,CVCL_0140,,AML12,Perturb Atlas Mouse,1,11
+AMO1,ACH-000838,CVCL_1806,Lymphoid,AMO-1,Perturb Atlas Human,1,6
+AN3CA,ACH-000940,CVCL_0028,Uterus,AN3 CA,Tahoe-100M,1,1825
+ARP-1,,CVCL_D523,,ARP-1,Perturb Atlas Human,1,4
+ARPE-19,,CVCL_0145,,ARPE-19,Perturb Atlas Human,1,14
+ASPC1,ACH-000222,CVCL_0152,Pancreas,AsPC-1 | Aspc1,Perturb Atlas Human | Tahoe-100M,2,2291
+AT-2,,CVCL_JK53,,AT2,Perturb Atlas Mouse,1,10
+ATDC-5,,CVCL_3894,,ATDC5,Perturb Atlas Mouse,1,2
+Ab17,,CVCL_B6TD,,AB17,Perturb Atlas Mouse,1,2
+AtT-20,,CVCL_2300,,AtT20,Perturb Atlas Mouse,1,2
+B16,,CVCL_F936,,B16,Perturb Atlas Mouse,1,8
+B16-F10,,CVCL_0159,,B16-F10 | B16.F10,Perturb Atlas Mouse,1,30
+B16-R2L,,CVCL_ZF69,,B16R2L,Perturb Atlas Mouse,1,3
+B16V,,CVCL_1950,,B16V,Perturb Atlas Mouse,1,2
+BC3,ACH-002215,CVCL_1080,Lymphoid,BC-3,Perturb Atlas Human,1,12
+BCPAP,ACH-000456,CVCL_0153,Thyroid,B-CPAP,Perturb Atlas Human,1,6
+BEAS-2B,,CVCL_0168,,BEAS2B,Perturb Atlas Human,1,56
+BEP2D H3A,,CVCL_B4J4,,H3A,Perturb Atlas Human,1,4
+BGC823,ACH-001017,CVCL_3360,Cervix,BGC-823,Perturb Atlas Human,1,6
+BICR6,ACH-000415,CVCL_2314,Head and Neck,BICR6,LINCS L1000 XPR,1,4110
+BJ-TERT,,CVCL_C8QN,,BJ-TERT,Perturb Atlas Human,1,2
+BJAB,ACH-001447,CVCL_5711,Lymphoid,BJAB,LINCS L1000 CP,1,640
+BJHTERT,ACH-001018,CVCL_6573,Fibroblast,BJ-hTERT,Perturb Atlas Human,1,8
+BL41,ACH-000245,CVCL_1087,Lymphoid,BL-41,Perturb Atlas Human,1,2
+BLaER1,,CVCL_VQ57,,BLaER1,Perturb Atlas Human,1,1
+BPH1,ACH-001453,CVCL_1091,Prostate,BPH-1,Perturb Atlas Human,1,2
+BT145,,CVCL_IP10,,BT145,Perturb Atlas Human,1,2
+BT187,,CVCL_WW46,,BT187,Perturb Atlas Human,1,2
+BT20,ACH-000536,CVCL_0178,Breast,BT20,LINCS L1000 CP | Perturb Atlas Human,2,1152
+BT474,ACH-000927,CVCL_0179,Breast,BT-474,Perturb Atlas Human | Tahoe-100M,2,2271
+BT549,ACH-000288,CVCL_1092,Breast,BT-549 | BT549,Perturb Atlas Human,1,139
+BV-2,,CVCL_0182,,BV2,Perturb Atlas Mouse,1,6
+BV173,ACH-000432,CVCL_0181,Myeloid,BV-173,Perturb Atlas Human,1,2
+BXPC3,ACH-000535,CVCL_0186,Pancreas,BxPC-3,Perturb Atlas Human,1,2
+Ba/F3,,CVCL_0161,,Ba/F3 | BaF3,Perturb Atlas Mouse,1,4
+BeWo,,CVCL_0044,,BeWo,Perturb Atlas Human,1,3
+Beta-TC-3,,CVCL_0172,,BTC3,Perturb Atlas Mouse,1,4
+Beta-TC-6,,CVCL_0605,,BetaTC6,Perturb Atlas Mouse,1,8
+Bone marrow macrophage immortalized BALB/c,,CVCL_C0MS,,BALB/c,Perturb Atlas Mouse,1,2
+Bone marrow macrophage immortalized C57BL/6,,CVCL_C0MU,,C57bl/6,Perturb Atlas Mouse,1,8
+C-28/I2,,CVCL_0187,,C28/I2,Perturb Atlas Human,1,2
+C13,,CVCL_E8Q7,,C13*,Perturb Atlas Human,1,2
+C166,,CVCL_6581,,C166,Perturb Atlas Mouse,1,2
+C22 (Clara),,CVCL_F277,,C22,Perturb Atlas Mouse,1,1
+C2C12,,CVCL_0188,,C2C12,Perturb Atlas Mouse,1,82
+C32,ACH-000580,CVCL_F0WX,Skin,C32,Tahoe-100M,1,2267
+C33A,ACH-001333,CVCL_1094,Cervix,C-33 A,Tahoe-100M,1,2247
+C3A,ACH-001021,CVCL_1098,Liver,HepG2/C3A,Tahoe-100M,1,2261
+C3H/10T1/2 clone 8,,CVCL_0190,,C3H10T1/2,Perturb Atlas Mouse,1,13
+C666-1,,CVCL_7949,,C666-1,Perturb Atlas Human,1,2
+CACO2,ACH-000003,CVCL_0025,Bowel,Caco2,Perturb Atlas Human,1,11
+CAD,,CVCL_0199,,CAD,Perturb Atlas Mouse,1,2
+CADOES1,ACH-000210,CVCL_1103,Bone,Cado-ES1,Perturb Atlas Human,1,2
+CAKI1,ACH-000433,CVCL_0234,Kidney,Caki1,Perturb Atlas Human,1,4
+CAKI2,ACH-000234,CVCL_0235,Kidney,Caki2,Perturb Atlas Human,1,2
+CAL-1 [Human melanoma],,CVCL_G085,,CAL1,Perturb Atlas Human,1,6
+CAL27,ACH-000832,CVCL_1107,Head and Neck,CAL-27 | Cal 27,Perturb Atlas Human,1,9
+CAL33,ACH-000518,CVCL_1108,Head and Neck,CAL-33,Perturb Atlas Human,1,2
+CAL51,ACH-000856,CVCL_1110,Breast,CAL5-1 | CAL51,Perturb Atlas Human,1,50
+CAL62,ACH-000174,CVCL_1112,Thyroid,Cal62,Perturb Atlas Human,1,2
+CALU3,ACH-000392,CVCL_0609,Lung,Calu-3,Perturb Atlas Human,1,14
+CAMA1,ACH-000783,CVCL_1115,Breast,CAMA-1,Perturb Atlas Human,1,2
+CAPAN2,ACH-000107,CVCL_0026,Pancreas,CAPAN-2,Perturb Atlas Human,1,2
+CASKI,ACH-001336,CVCL_1100,Cervix,CaSki,Perturb Atlas Human,1,2
+CC14,,CVCL_G099,,CC14,Perturb Atlas Human,1,4
+CCC-HEH-2,,CVCL_VU29,,CCC-HEH-2,Perturb Atlas Human,1,2
+CCD-18Co,,CVCL_2379,,CCD-18Co,Perturb Atlas Human,1,4
+CCE,,CVCL_C313,,CCE,Perturb Atlas Mouse,1,4
+CCLP1,ACH-001959,CVCL_0205,Biliary Tract,CCLP1,Perturb Atlas Human,1,7
+CCRF-HSB-2,,CVCL_1859,,HSB2,Perturb Atlas Human,1,4
+CCRFCEM,ACH-001738,CVCL_0207,Lymphoid,CCRF-CEM,Perturb Atlas Human,1,26
+CFBE41o-,,CVCL_HL93,,CFBE41o-,Perturb Atlas Human,1,4
+CFPAC1,ACH-000138,CVCL_1119,Pancreas,CFPAC-1,Perturb Atlas Human | Tahoe-100M,2,2272
+CGTHW1,ACH-001023,CVCL_1120,Head and Neck,CGTH-W-1,Perturb Atlas Human,1,4
+CH12,,CVCL_6818,,CH12,Perturb Atlas Mouse,1,56
+CHAGOK1,ACH-000867,CVCL_1121,Lung,ChaGo-K-1,Perturb Atlas Human,1,2
+CHB-8,,CVCL_A819,,CHB8,Perturb Atlas Human,1,2
+CHLA-20,,CVCL_6602,,CHLA-20,Perturb Atlas Human,1,2
+CHLA10,ACH-001029,CVCL_6583,Bone,CHLA-10,Perturb Atlas Human,1,6
+CHLA15,ACH-001300,CVCL_6594,Peripheral Nervous System,CHLA-15,Perturb Atlas Human,1,2
+CHP212,ACH-000120,CVCL_1125,Peripheral Nervous System,CHP-212,Tahoe-100M,1,1877
+CIHP-1,,CVCL_W186,,AB8/13,Perturb Atlas Human,1,2
+CIN-612,,CVCL_ER24,,CIN612,Perturb Atlas Human,1,4
+CJ7,,CVCL_C316,,CJ7,Perturb Atlas Mouse,1,4
+CL34,ACH-000895,CVCL_1980,Bowel,CL34,LINCS L1000 CP,1,22
+COLO 320DM,,CVCL_0219,,COLO320DM,Perturb Atlas Human,1,4
+COLO205,ACH-001039,CVCL_0218,Bowel,COLO 205 | COLO205,Perturb Atlas Human | Tahoe-100M,2,2270
+COLO320,ACH-000202,CVCL_1989,Bowel,COLO320,Perturb Atlas Human,1,2
+CORL23,ACH-000662,CVCL_1139,Lung,CORL23,LINCS L1000 CP,1,16
+CORL311,ACH-000187,CVCL_2412,Lung,CORL311,Perturb Atlas Human,1,4
+CORL47,ACH-000695,CVCL_2415,Lung,CORL47,Perturb Atlas Human,1,4
+COV318,ACH-000256,CVCL_2419,Ovary/Fallopian Tube,COV318,Perturb Atlas Human,1,4
+COV644,ACH-000608,CVCL_2425,Ovary/Fallopian Tube,COV644,LINCS L1000 CP,1,10
+CP-A,,CVCL_C451,,CP-A,Perturb Atlas Human,1,2
+CT26,,CVCL_7254,,CT26,Perturb Atlas Mouse,1,7
+CT26.WT,,CVCL_7256,,CT26.WT,Perturb Atlas Mouse,1,6
+CT27,,CVCL_A7AZ,,CT27,Perturb Atlas Human,1,2
+CUTLL1,,CVCL_4966,,CUTLL1,Perturb Atlas Human,1,2
+CWR-R1-AD1,,CVCL_ZC60,,R1-AD1,Perturb Atlas Human,1,7
+Caco-2/15,,CVCL_0232,,Caco2/15,Perturb Atlas Human,1,4
+Caov-2,,CVCL_6861,,CAOV2,Perturb Atlas Human,1,2
+D04,,CVCL_H604,,D04,Perturb Atlas Human,1,2
+D492M,,CVCL_D1HK,,D492M,Perturb Atlas Human,1,2
+DANG,ACH-000243,CVCL_0243,Pancreas,DANG,LINCS L1000 XPR,1,2014
+DAOY,ACH-000211,CVCL_1167,CNS/Brain,DAOY,Perturb Atlas Human,1,19
+DLD1,ACH-001061,CVCL_0248,Bowel,DLD-1 | DLD1,Perturb Atlas Human,1,40
+DMS454,ACH-000844,CVCL_2438,Lung,DMS454,Perturb Atlas Human,1,2
+DMS53,ACH-000698,CVCL_1177,Lung,DMS-53,Perturb Atlas Human,1,7
+DND41,ACH-000981,CVCL_2022,Lymphoid,DND41,Perturb Atlas Human,1,4
+DU145,ACH-000979,CVCL_0105,Prostate,DU145,Perturb Atlas Human,1,46
+DV90,ACH-000925,CVCL_1184,Lung,DV90,LINCS L1000 CP,1,10
+E14,,CVCL_B4P5,,E14,Perturb Atlas Mouse,1,109
+EA.hy 926,,CVCL_3901,,EA.hy926,Perturb Atlas Human,1,8
+EC9706,,CVCL_E307,,EC9706,Perturb Atlas Human,1,6
+EFO27,ACH-000936,CVCL_1192,Ovary/Fallopian Tube,EFO27,LINCS L1000 CP,1,30
+EML clone 1,,CVCL_9107,,EML,Perturb Atlas Mouse,1,1
+EO771,,CVCL_GR23,,E0771,Perturb Atlas Mouse,1,10
+ES-E14,,CVCL_C320,,ES-E14,Perturb Atlas Mouse,1,19
+ES-E14TG2a,,CVCL_9108,,E14Tg2A | ES-E14TG2a,Perturb Atlas Mouse,1,31
+ES2,ACH-000906,CVCL_3509,Ovary/Fallopian Tube,ES-2 | ES2,LINCS L1000 XPR | Perturb Atlas Human,2,8104
+ESO26,ACH-001496,CVCL_2035,Esophagus/Stomach,ESO26,Perturb Atlas Human,1,2
+EW1,ACH-002110,CVCL_1208,Bone,EW1,Perturb Atlas Human,1,4
+Eca-109,,CVCL_6898,,EC109 | ECA109,Perturb Atlas Human,1,3
+EndoC-betaH1,,CVCL_L909,,EndoC-BH1,Perturb Atlas Human,1,6
+FADU,ACH-000846,CVCL_1218,Head and Neck,FaDu,Perturb Atlas Human,1,8
+FARAGE,ACH-001498,CVCL_3302,Lymphoid,Farage,Perturb Atlas Human,1,2
+FIBRNPC,,CVCL_UK07,,FIBRNPC,LINCS L1000 CP,1,46
+FL83B,,CVCL_4691,,FL83B,Perturb Atlas Mouse,1,2
+FT194,,CVCL_UH58,,FT-194,Perturb Atlas Human,1,4
+Flp-In-293,,CVCL_U421,,HEK-293 Flp-In,Perturb Atlas Human,1,8
+Flp-In-T-REx-293,,CVCL_U427,,Flp-In T-Rex | HEK293 Flp-In T-REx,Perturb Atlas Human,1,8
+G144,,CVCL_DG64,,G144,Perturb Atlas Human,1,12
+G361,ACH-000572,CVCL_1220,Skin,G361,Perturb Atlas Human,1,4
+G401,ACH-000096,CVCL_0270,Kidney,G401,Perturb Atlas Human,1,4
+G411,,CVCL_C8ZZ,,G411,Perturb Atlas Human,1,4
+G510,,CVCL_C8ZR,,G510NS,Perturb Atlas Human,1,2
+G523,,CVCL_B4P6,,G523,Perturb Atlas Human,1,4
+G797,,CVCL_C9A8,,G797,Perturb Atlas Human,1,6
+GB-3,,CVCL_S827,,GB3,Perturb Atlas Human,1,2
+GIST48,,CVCL_7041,,GIST48,Perturb Atlas Human,1,4
+GIST882,,CVCL_7044,,GIST882,Perturb Atlas Human,1,8
+GL261,,CVCL_Y003,,GL261,Perturb Atlas Mouse,1,2
+GM12878,,CVCL_7526,,GM12878,Perturb Atlas Human,1,5
+GM19238,,CVCL_9633,,GM19238,Perturb Atlas Human,1,24
+GM25256,,CVCL_Y803,,GM25256 | WTC11 | WTc,Perturb Atlas Human,1,28
+GRANTA519,ACH-000073,CVCL_1818,Lymphoid,Granta-519,Perturb Atlas Human,1,2
+GSC-0131,,CVCL_C9EE,,GSC-0131,Perturb Atlas Human,1,2
+GSC-0827,,CVCL_C9EF,,GSC-0827,Perturb Atlas Human,1,2
+GSC11,,CVCL_DR55,,GSC-11,Perturb Atlas Human,1,2
+H2595,ACH-002127,CVCL_A545,Pleura,H-2595,Perturb Atlas Human,1,2
+H357,ACH-001509,CVCL_2462,Head and Neck,H357,Perturb Atlas Human,1,2
+H4,ACH-000389,CVCL_1239,CNS/Brain,H4,Tahoe-100M,1,2248
+HA1E,ACH-001310,CVCL_VU89,Kidney,HA1E,LINCS L1000 CP,1,10362
+HAP1,ACH-002475,CVCL_5G07,Myeloid,HAP1,LINCS L1000 CP | Perturb Atlas Human,2,245
+HAP1 BRD4 (-) 1,,CVCL_SF59,Myeloid,HAP1.BRD4,LINCS L1000 CP,1,102
+HAP1 CDK4 (-) 1,,CVCL_SI36,Myeloid,HAP1.CDK4,LINCS L1000 CP,1,116
+HAP1 HDAC5 (-) 1,,CVCL_SR11,Myeloid,HAP1.HDAC5,LINCS L1000 CP,1,114
+HAP1 ITGA4 (-) 1,,CVCL_ST27,Myeloid,HAP1.ITGA4,LINCS L1000 CP,1,102
+HAP1 MAPK8 (-) 1,,CVCL_SW99,Myeloid,HAP1.MAPK8,LINCS L1000 CP,1,100
+HAP1 PIK3CA (-) 1,,CVCL_TD60,Myeloid,HAP1.PIK3CA,LINCS L1000 CP,1,94
+HAP1 PRKACA (-) 1,,CVCL_TG70,Myeloid,HAP1.PRKACA,LINCS L1000 CP,1,106
+HAP1 PRKCQ (-),,CVCL_TG92,,HAP1.PRKCQ,LINCS L1000 CP,1,96
+HAP1 RELA (-) 1,,CVCL_TI75,Myeloid,HAP1.RELA,LINCS L1000 CP,1,118
+HAP1 SRC (-) 1,,CVCL_TQ36,Myeloid,HAP1.SRC,LINCS L1000 CP,1,90
+HAP1 TP53 (-) 1,,CVCL_RJ70,Myeloid,HAP1.TP53,LINCS L1000 CP,1,122
+HBEC1-KT,,CVCL_X489,,HBEC1,Perturb Atlas Human,1,2
+HBEC2-KT,,CVCL_X490,,HBEC2,Perturb Atlas Human,1,2
+HBL-1 [Human AIDS-related non-Hodgkin lymphoma],,CVCL_M572,,HBL1,LINCS L1000 CP,1,536
+HC11,,CVCL_0288,,HC11,Perturb Atlas Mouse,1,2
+HCA7,,CVCL_0289,,HCA-7 | HCA7,Perturb Atlas Human,1,6
+HCC1143,ACH-000374,CVCL_1245,Breast,HCC1143,Perturb Atlas Human,1,2
+HCC1428,ACH-000352,CVCL_1252,Breast,HCC1428,Perturb Atlas Human,1,6
+HCC15,ACH-000878,CVCL_2057,Lung,HCC15,LINCS L1000 CP,1,8
+HCC1806,ACH-000624,CVCL_1258,Breast,HCC1806,LINCS L1000 XPR | Perturb Atlas Human,2,1438
+HCC2302,,CVCL_V636,,HCC2302,Perturb Atlas Human,1,4
+HCC366,ACH-000840,CVCL_2059,Lung,HCC366,Perturb Atlas Human,1,1
+HCC515,ACH-000872,CVCL_5136,Lung,HCC515,LINCS L1000 CP,1,5006
+HCC70,ACH-000668,CVCL_1270,Breast,HCC70,Perturb Atlas Human,1,9
+HCC95,ACH-000454,CVCL_5137,Lung,HCC95,Perturb Atlas Human,1,8
+HCCLM3,,CVCL_6832,,HCCLM3,Perturb Atlas Human,1,6
+HCT116,ACH-000971,CVCL_0291,Bowel,HCT-116 | HCT116 | HCT116.WT | Hct116,DeepCover MoA | LINCS L1000 CP | Perturb Atlas Human,3,2322
+HCT15,ACH-000997,CVCL_0292,Bowel,HCT15,Tahoe-100M,1,2247
+HCT8,ACH-001084,CVCL_2478,Bowel,HCT8,Perturb Atlas Human,1,2
+HD-MB03,,CVCL_S506,,HDMB03,Perturb Atlas Human,1,2
+HEC108,ACH-000990,CVCL_2923,Uterus,HEC108,LINCS L1000 CP,1,8
+HEC1A,ACH-000954,CVCL_0293,Uterus,HEC-1-A,Tahoe-100M,1,2268
+HEC1B,ACH-000941,CVCL_0294,Uterus,HEC-1-B,Perturb Atlas Human,1,10
+HEC50B,ACH-000831,CVCL_2929,Uterus,HEC50B,Perturb Atlas Human,1,2
+HEK,,CVCL_M624,,human embryonic kidney,Perturb Atlas Human,1,4
+HEK293,,CVCL_0045,,HEK293,LINCS L1000 CP | Perturb Atlas Human,2,1864
+HEK293 FRT,,CVCL_D4C4,,HEK293FRT,Perturb Atlas Human,1,6
+HEK293-F,,CVCL_6642,,HEK293F,Perturb Atlas Human,1,4
+HEK293-FT,,CVCL_6911,,293FT | HEK293FT,Perturb Atlas Human,1,44
+HEK293T,,CVCL_0063,,293T | HEK293T,LINCS L1000 CP | Perturb Atlas Human,2,669
+HEL,ACH-000004,CVCL_0001,Myeloid,HEL,Perturb Atlas Human,1,9
+HELA,ACH-001086,CVCL_0030,Cervix,HELA | HeLa,LINCS L1000 CP | Perturb Atlas Human | Perturb Atlas Mouse,3,5550
+HEP3B217,ACH-000625,CVCL_0326,Liver,HEP3B,Perturb Atlas Human,1,4
+HEPG2,ACH-000739,CVCL_0027,Liver,HEPG2 | HepG2,LINCS L1000 CP | Perturb Atlas Human,2,6438
+HEY,ACH-002140,CVCL_0297,Ovary/Fallopian Tube,HEY,Perturb Atlas Human,1,8
+HEYA8,ACH-000542,CVCL_8878,Ovary/Fallopian Tube,HEYA8 | HeyA8,Perturb Atlas Human,1,14
+HFF,,CVCL_XB54,,HFF,Perturb Atlas Human,1,9
+HFL1,,CVCL_0298,,HFL1,LINCS L1000 CP,1,210
+HGC27,ACH-000847,CVCL_1279,Esophagus/Stomach,HGC-27 | HGC27,Perturb Atlas Human,1,14
+HK-1,,CVCL_7047,,HK1,Perturb Atlas Human,1,4
+HK2,ACH-001087,CVCL_0302,Kidney,HK-2,Perturb Atlas Human,1,8
+HKC,,CVCL_WZ51,,HKC,Perturb Atlas Human,1,6
+HL-1,,CVCL_0303,,HL-1,Perturb Atlas Mouse,1,6
+HL60,ACH-000002,CVCL_0002,Myeloid,HL-60 | HL60,LINCS L1000 CP | Microarrays CMAP | Perturb Atlas Human,3,2525
+HLE,ACH-001089,CVCL_1281,Liver,HLE,Perturb Atlas Human,1,4
+HN-6,,CVCL_8129,,HN6,Perturb Atlas Human,1,4
+HO1N1,ACH-002244,CVCL_1284,Head and Neck,HO-1-N-1,Perturb Atlas Human,1,2
+HOC313,,CVCL_8695,,HOC313,Perturb Atlas Human,1,2
+HOP62,ACH-000861,CVCL_1285,Lung,HOP62,Tahoe-100M,1,2268
+HPAC,ACH-000270,CVCL_3517,Pancreas,HPAC,Perturb Atlas Human,1,6
+HPAFII,ACH-000094,CVCL_0313,Pancreas,HPAF-II,Perturb Atlas Human,1,6
+HPC-7,,CVCL_RB19,,HPC-7 | HPC7,Perturb Atlas Mouse,1,8
+HPDE6c7,,CVCL_0P38,,HPDE6-C7,Perturb Atlas Human,1,4
+HR-1,,CVCL_ZE75,,HR1,Perturb Atlas Human,1,8
+HS-5,,CVCL_3720,,HS-5,Perturb Atlas Human,1,1
+HS360,,CVCL_C202,,HS360,Perturb Atlas Human,1,1
+HS578T,ACH-000148,CVCL_0332,Breast,HS-578T | HS578T | Hs-578T | Hs578T,LINCS L1000 CP | Perturb Atlas Human | Tahoe-100M,3,3310
+HS766T,ACH-000178,CVCL_0334,Pancreas,Hs 766T,Tahoe-100M,1,2266
+HS944T,ACH-000632,CVCL_1040,Skin,HS944T,LINCS L1000 XPR,1,2140
+HSJDDIPG007,ACH-002348,CVCL_VU70,CNS/Brain,DIPG007,Perturb Atlas Human,1,4
+HT1080,ACH-000054,CVCL_0317,Soft Tissue,HT-1080,Perturb Atlas Human,1,2
+HT115,ACH-000986,CVCL_2520,Bowel,HT115,LINCS L1000 CP,1,8
+HT1376,ACH-000724,CVCL_1292,Bladder/Urinary Tract,HT1376,Perturb Atlas Human,1,4
+HT144,ACH-000322,CVCL_0318,Skin,HT-144,Perturb Atlas Human,1,8
+HT29,ACH-000552,CVCL_0320,Bowel,HT-29 | HT29,LINCS L1000 CP | LINCS L1000 XPR | Perturb Atlas Human | Tahoe-100M,4,15308
+HT55,ACH-000926,CVCL_1294,Bowel,HT55,Perturb Atlas Human,1,2
+HTR-8/SVneo,,CVCL_7162,,HTR8/SVneo,Perturb Atlas Human,1,14
+HUCCT1,ACH-000976,CVCL_0324,Biliary Tract,HUCCT1,Perturb Atlas Human,1,2
+HUDEP-2,,CVCL_VI06,,HUDEP-2,Perturb Atlas Human,1,16
+HUES 13,,CVCL_B143,,HUES13,Perturb Atlas Human,1,4
+HUES 3,,CVCL_B161,,HUES3,LINCS L1000 CP | Perturb Atlas Human,2,108
+HUES 64,,CVCL_B199,,HUES64,Perturb Atlas Human,1,2
+HUES 8,,CVCL_B207,,HUES8 | HuES8,Perturb Atlas Human,1,16
+HUES 9,,CVCL_0057,,HUES9,Perturb Atlas Human,1,4
+HUH28,ACH-000808,CVCL_2955,Biliary Tract,HuH28,Perturb Atlas Human,1,2
+HUH7,ACH-000480,CVCL_0336,Liver,HUH7 | Huh 7 | Huh-7 | Huh7,LINCS L1000 CP | Perturb Atlas Human,2,251
+HUT78,ACH-000509,CVCL_0337,Lymphoid,HuT 78 | HuT78,Perturb Atlas Human,1,8
+HUVEC-C,,CVCL_2959,,HUVEC,LINCS L1000 CP | Perturb Atlas Human,2,467
+HaCaT,,CVCL_0038,,HaCAT | HaCaT,Perturb Atlas Human,1,6
+HeLa Kyoto,,CVCL_1922,,HeLa Kyoto,Perturb Atlas Human,1,2
+HeLa S3,,CVCL_0058,,HeLa S3,Perturb Atlas Human,1,24
+HeLa Tet-Off,,CVCL_V352,,HeLa tet-off,Perturb Atlas Human,1,6
+Hep-G2/2.2.15,,CVCL_L855,,HepG2.2.15,Perturb Atlas Human,1,3
+Hepa 1-6,,CVCL_0327,,Hepa1-6,Perturb Atlas Mouse,1,12
+Hermes 3A,,CVCL_VS10,,Hermes 3A,Perturb Atlas Human,1,4
+Hs 700T,,CVCL_0858,,Hs700T,Perturb Atlas Human,1,4
+HuLEC-5a,,CVCL_0A11,,HULEC-5a,Perturb Atlas Human,1,1
+Huker,,CVCL_9T09,,human keratinocytes,Perturb Atlas Human,1,6
+I 3,,CVCL_C376,,TE03,Perturb Atlas Human,1,18
+ID8,,CVCL_IU14,,ID8,Perturb Atlas Mouse,1,4
+IGROV1,ACH-000966,CVCL_1304,Ovary/Fallopian Tube,IGROV-1,Perturb Atlas Human,1,6
+IM-HA,,CVCL_B5WG,,immortalized human astrocytes,Perturb Atlas Human,1,2
+IMEC,,CVCL_U969,,Immortalized Mammary Epithelial Cells,Perturb Atlas Human,1,2
+IMR-5/75,,CVCL_M473,,IMR-5/75 | IMR5-75 | IMR5/75,Perturb Atlas Human,1,27
+IMR-90,,CVCL_0347,,IMR90,LINCS L1000 CP | Perturb Atlas Human,2,478
+IMR32,ACH-000310,CVCL_0346,Peripheral Nervous System,IMR-32,Perturb Atlas Human,1,4
+IPC298,ACH-000915,CVCL_1307,Skin,IPC298,LINCS L1000 XPR,1,1778
+J774,,CVCL_4692,,J774,Perturb Atlas Mouse,1,12
+J82,ACH-000396,CVCL_0359,Bladder/Urinary Tract,J82,Perturb Atlas Human | Tahoe-100M,2,2274
+JEG3,ACH-001530,CVCL_0363,Uterus,JEG-3,Perturb Atlas Human,1,2
+JEKO1,ACH-000357,CVCL_1865,Lymphoid,JeKo-1,Perturb Atlas Human,1,2
+JHH7,ACH-000848,CVCL_2805,Liver,JHH-7,Perturb Atlas Human,1,10
+JHOC5,ACH-000324,CVCL_4640,Ovary/Fallopian Tube,JHOC5,Perturb Atlas Human,1,1
+JHUEM2,ACH-000909,CVCL_4656,Uterus,JHUEM2,LINCS L1000 CP,1,24
+JIYOYEP2003,ACH-002252,CVCL_1317,Lymphoid,Jiyoye,Perturb Atlas Human,1,4
+JJN3,ACH-000653,CVCL_2078,Lymphoid,JJN3,Perturb Atlas Human,1,4
+JMAR C42,,CVCL_WI17,,C4-2 | C42,Perturb Atlas Human,1,20
+JS-1,,CVCL_B6RW,,JS1,Perturb Atlas Mouse,1,4
+JURKAT,ACH-000995,CVCL_0065,Lymphoid,JURKAT | Jurkat,LINCS L1000 CP | Perturb Atlas Human,2,1576
+JVM2,ACH-000106,CVCL_1319,Lymphoid,JVM-2,Perturb Atlas Human,1,2
+K562,ACH-000551,CVCL_0004,Myeloid,K562 | k562,LINCS L1000 CP | Perturb Atlas Human | Replogle et al. | SciPlex,4,8985
+K562/G01,,CVCL_4V47,,K562/G01,Perturb Atlas Human,1,2
+KARPAS299,ACH-000053,CVCL_1324,Lymphoid,Karpas 299,Perturb Atlas Human,1,8
+KARPAS45,ACH-002256,CVCL_1326,Lymphoid,KARPAS-45,Perturb Atlas Human,1,4
+KASUMI1,ACH-000263,CVCL_0589,Myeloid,Kasumi-1,Perturb Atlas Human,1,26
+KATO II,,CVCL_M882,,KatoII,Perturb Atlas Human,1,2
+KATOIII,ACH-000793,CVCL_0371,Esophagus/Stomach,KATO III,Tahoe-100M,1,2268
+KBM-7,,CVCL_A426,,KBM-7 | KBM7,Perturb Atlas Human,1,6
+KELLY,ACH-000259,CVCL_2092,Peripheral Nervous System,KELLY | Kelly,LINCS L1000 XPR | Perturb Atlas Human,2,924
+KG-1a,,CVCL_1824,,KG-1a,Perturb Atlas Human,1,2
+KGN,ACH-002149,CVCL_0375,Ovary/Fallopian Tube,KGN,Perturb Atlas Human,1,5
+KH-2,,CVCL_JF67,,KH2,Perturb Atlas Mouse,1,8
+KIJK,ACH-000773,CVCL_2093,Lymphoid,KI-JK,Perturb Atlas Human,1,2
+KKU100,ACH-001536,CVCL_3996,Biliary Tract,KKU-100,Perturb Atlas Human,1,2
+KKU213,ACH-001538,CVCL_M261,Biliary Tract,KKU-213A,Perturb Atlas Human,1,2
+KLM1,ACH-001101,CVCL_5146,Pancreas,KLM-1,Perturb Atlas Human,1,4
+KM12,ACH-000969,CVCL_1331,Bowel,KM12,Perturb Atlas Human,1,2
+KMS11,ACH-000714,CVCL_2989,Lymphoid,KMS11,Perturb Atlas Human,1,6
+KMS27,ACH-000576,CVCL_2993,Lymphoid,KMS27,Perturb Atlas Human,1,2
+KMS34,ACH-000541,CVCL_2996,Lymphoid,KMS34,LINCS L1000 CP,1,420
+KNS42,ACH-000622,CVCL_0378,CNS/Brain,KNS42,Perturb Atlas Human,1,2
+KOPT-K1,,CVCL_4965,,KOPT-K1,Perturb Atlas Human,1,2
+KP 1,,CVCL_A1IF,,KP1,Perturb Atlas Mouse,1,10
+KP4,ACH-000265,CVCL_1338,Pancreas,KP-4,Perturb Atlas Human,1,4
+KTC-1,,CVCL_6300,,KTC1,Perturb Atlas Human,1,2
+KURAMOCHI,ACH-000524,CVCL_1345,Ovary/Fallopian Tube,Kuramochi,Perturb Atlas Human,1,2
+KYSE150,ACH-000855,CVCL_1348,Esophagus/Stomach,KYSE150,Perturb Atlas Human,1,6
+KYSE180,ACH-000693,CVCL_1349,Esophagus/Stomach,KYSE180,Perturb Atlas Human,1,4
+KYSE30,ACH-000777,CVCL_1351,Esophagus/Stomach,KYSE-30 | KYSE30,LINCS L1000 XPR | Perturb Atlas Human,2,2364
+KYSE410,ACH-000809,CVCL_1352,Esophagus/Stomach,KYSE410,Perturb Atlas Human,1,4
+KYSE450,ACH-000865,CVCL_1353,Esophagus/Stomach,KYSE450,Perturb Atlas Human,1,2
+KYSE510,ACH-000824,CVCL_1354,Esophagus/Stomach,KYSE510,Perturb Atlas Human,1,2
+KYSE70,ACH-000784,CVCL_1356,Esophagus/Stomach,KYSE-70 | KYSE70,Perturb Atlas Human,1,9
+Kasumi-7,,CVCL_8486,,Kasumi-7,Perturb Atlas Human,1,2
+L-02,,CVCL_6926,,L02,Perturb Atlas Human,1,4
+L1236,ACH-000702,CVCL_2096,Lymphoid,L1236,Perturb Atlas Human,1,2
+L3.6pl,,CVCL_0384,,L3.6pl,Perturb Atlas Human,1,4
+LAPC-4,,CVCL_4744,,LAPC4,Perturb Atlas Human,1,4
+LCLC103H,ACH-000627,CVCL_1375,Lung,LCLC103H,LINCS L1000 XPR,1,2734
+LHCN-M2,,CVCL_8890,,LHCN-M2,Perturb Atlas Human,1,7
+LL/2 (LLC1),,CVCL_4358,,Lewis lung carcinoma,Perturb Atlas Mouse,1,2
+LM2,,CVCL_5V02,,LM2,Perturb Atlas Human,1,6
+LM205 subclone RS-4,,CVCL_D4CA,,RS4,Perturb Atlas Human,1,8
+LN18,ACH-000819,CVCL_0392,CNS/Brain,LN18,Perturb Atlas Human,1,2
+LN229,ACH-000595,CVCL_0393,CNS/Brain,LN-229 | LN229,Perturb Atlas Human,1,12
+LNCaP,,CVCL_0395,,LNCAP | LNCaP,LINCS L1000 CP | Perturb Atlas Human,2,573
+LNCaP C4-2,,CVCL_4782,,LNCaP-C4-2,Perturb Atlas Human,1,4
+LNCaP C4-2B,,CVCL_4784,,C4-2B | C4-2b | C42B,Perturb Atlas Human,1,16
+LNCaP-95,,CVCL_ZC87,,LNCAP95,Perturb Atlas Human,1,2
+LNCaP-abl,,CVCL_4793,,LNCaP-abl,Perturb Atlas Human,1,8
+LO #2,,CVCL_C7SD,,LO2,Perturb Atlas Human,1,2
+LOVO,ACH-000950,CVCL_0399,Bowel,LOVO | LoVo,LINCS L1000 CP | Perturb Atlas Human | Tahoe-100M,3,2342
+LOXIMVI,ACH-000750,CVCL_1381,Skin,LOX-IMVI,Tahoe-100M,1,2268
+LP1,ACH-000204,CVCL_0012,Lymphoid,LP-1,Perturb Atlas Human,1,6
+LS1034,ACH-000252,CVCL_1382,Bowel,LS1034,Perturb Atlas Human,1,1
+LS174T,,CVCL_1384,,LS174T | Ls174t,Perturb Atlas Human,1,6
+LS180,ACH-000957,CVCL_0397,Bowel,LS 180 | LS180,Perturb Atlas Human | Tahoe-100M,2,2270
+LS411N,ACH-000985,CVCL_1385,Bowel,LS411N,Perturb Atlas Human,1,2
+LX-2,,CVCL_5792,,LX2,Perturb Atlas Human,1,6
+Ly2,,CVCL_ZU84,,LY2,Perturb Atlas Human,1,2
+M-17,,CVCL_D028,,-m17,Perturb Atlas Human,1,4
+M00921,ACH-002386,CVCL_S808,Skin,M000921,Perturb Atlas Human,1,8
+M010817,,CVCL_S674,,M010817,Perturb Atlas Human,1,8
+M14,ACH-002159,CVCL_9203,Skin,M14,Perturb Atlas Human,1,6
+M93-047,,CVCL_G298,,M93-047,Perturb Atlas Human,1,8
+MA-10,,CVCL_D789,,MA-10,Perturb Atlas Mouse,1,2
+MB49,,CVCL_7076,,MB49,Perturb Atlas Mouse,1,6
+MC-38,,CVCL_B288,,MC-38 | MC38,Perturb Atlas Mouse,1,16
+MC3T3-E1,,CVCL_0409,,MC3T3-E1,Perturb Atlas Mouse,1,4
+MCEC,,CVCL_D355,,MCEC,Perturb Atlas Mouse,1,2
+MCF-10-2A,,CVCL_3743,,MCF-10-2A,Perturb Atlas Human,1,4
+MCF-10AT,,CVCL_5555,,MCF10AT,Perturb Atlas Human,1,2
+MCF-7-Luc,,CVCL_J259,,MCF7-Luc,Perturb Atlas Human,1,30
+MCF-7/182R-6,,CVCL_W536,,MCF-7/182R-6,Perturb Atlas Human,1,1
+MCF-7M,,CVCL_6672,,MCF-7M,Perturb Atlas Human,1,6
+MCF-7aro,,CVCL_9580,,MCF-7aro,Perturb Atlas Human,1,4
+MCF-7aro Let-R,,CVCL_W348,,LetR,Perturb Atlas Human,1,2
+MCF10A,ACH-001357,CVCL_0598,Breast,MCF 10A | MCF10A,LINCS L1000 CP | Perturb Atlas Human,2,4153
+MCF10CA1a,,CVCL_6675,,MCF10CA1a,Perturb Atlas Human,1,2
+MCF10DCIS.com,,CVCL_5552,,DCIS,Perturb Atlas Human,1,7
+MCF12A,ACH-002327,CVCL_3744,Breast,MCF12A,Perturb Atlas Human,1,2
+MCF7,ACH-000019,CVCL_0031,Breast,MCF-7 | MCF7 | ssMCF7,LINCS L1000 CP | LINCS L1000 XPR | Microarrays CMAP | Perturb Atlas Human | SciPlex,5,28566
+MCF7-TamR,,CVCL_EG55,,MCF7 TamR,Perturb Atlas Human,1,6
+MCF7/LCC9,,CVCL_DP52,,LCC9,Perturb Atlas Human,1,4
+MD901,,CVCL_D709,,MD901,Perturb Atlas Human,1,6
+MDA-MB-231br,,CVCL_A0YY,,MDA-MB-231br,Perturb Atlas Human,1,2
+MDAMB134VI,ACH-000044,CVCL_0617,Breast,MDA_MB134VI | MM134,Perturb Atlas Human,1,12
+MDAMB157,ACH-000621,CVCL_0618,Breast,MDA-MB-157,Perturb Atlas Human,1,4
+MDAMB231,ACH-000768,CVCL_0062,Breast,MDA-231 | MDA-MB-231 | MDAMB231,LINCS L1000 CP | Perturb Atlas Human | Perturb Atlas Mouse,3,3475
+MDAMB436,ACH-000573,CVCL_0623,Breast,MDA-MB-436,Perturb Atlas Human,1,19
+MDAMB453,ACH-000910,CVCL_0418,Breast,MDA-MB-453,Perturb Atlas Human,1,4
+MDAMB468,ACH-000849,CVCL_0419,Breast,MB468 | MDA-MB-468,Perturb Atlas Human,1,26
+MDAPCA2B,ACH-000952,CVCL_4748,Prostate,MDA-PCa-2b,Perturb Atlas Human,1,2
+MDS-L,,CVCL_A8QV,,MDS-L,Perturb Atlas Human,1,6
+MDST8,ACH-000935,CVCL_2588,Bowel,MDST8,LINCS L1000 CP,1,24
+ME-3,,CVCL_RM25,,ME3,Perturb Atlas Mouse,1,4
+MEC1,ACH-000405,CVCL_1870,Lymphoid,MEC-1 | MEC1,Perturb Atlas Human | Perturb Atlas Mouse,2,10
+MEG01,ACH-000072,CVCL_0425,Myeloid,MEG-01,Perturb Atlas Human,1,2
+MEL202,ACH-001554,CVCL_C301,Eye,MEL202,Perturb Atlas Human,1,8
+MELJUSO,ACH-000881,CVCL_1403,Skin,MelJuSo,Perturb Atlas Human,1,2
+MGC-803,,CVCL_5334,,MGC-803,Perturb Atlas Human,1,6
+MHCC97-H,,CVCL_4972,,MHCC97H,Perturb Atlas Human,1,2
+MIAPACA2,ACH-000601,CVCL_0428,Pancreas,MIA PaCa-2 | MIAPaCa2 | MiaPaCa2 | PaCa-2,Perturb Atlas Human | Tahoe-100M,2,2305
+MIN6,,CVCL_0431,,MIN6,Perturb Atlas Mouse,1,9
+MINO,ACH-000220,CVCL_UW35,Lymphoid,MINO,LINCS L1000 CP,1,468
+MKL1,ACH-001122,CVCL_2600,Skin,MKL-1,Perturb Atlas Human,1,8
+MKN28,ACH-002161,CVCL_1416,Esophagus/Stomach,MKN28,Perturb Atlas Human,1,4
+MKN45,ACH-000356,CVCL_0434,Esophagus/Stomach,MKN45,Perturb Atlas Human,1,7
+MKN74,ACH-000758,CVCL_2791,Esophagus/Stomach,MKN74,Perturb Atlas Human,1,2
+MLE-12,,CVCL_3751,,MLE-12,Perturb Atlas Mouse,1,1
+MM-C1,,CVCL_M537,,MMC1,Perturb Atlas Human,1,4
+MM1S,ACH-000763,CVCL_8792,Lymphoid,MM.1S | MM1.S | MM1S,Perturb Atlas Human,1,30
+MMNK1,ACH-001854,CVCL_M266,Biliary Tract,MMNK-1,Perturb Atlas Human,1,2
+MNNG/HOS Cl #5,,CVCL_0439,,MNNG/HOS,Perturb Atlas Human,1,4
+MNT-1,,CVCL_5624,,MNT-1,Perturb Atlas Human,1,4
+MOC2,,CVCL_ZD33,,Moc2,Perturb Atlas Mouse,1,1
+MOLM13,ACH-000362,CVCL_2119,Myeloid,MOLM-13,Perturb Atlas Human,1,66
+MOLT4,ACH-001127,CVCL_0013,Lymphoid,MOLT4,Perturb Atlas Human,1,10
+MONOMAC6,ACH-000006,CVCL_1426,Myeloid,MONO-MAC-6 | Mono Mac 6 | MonoMac 6,Perturb Atlas Human,1,42
+MPC-5,,CVCL_AS87,,MPC5,Perturb Atlas Mouse,1,2
+MRC-5,,CVCL_0440,,MRC-5,Perturb Atlas Human,1,9
+MRC-iPS-38,,CVCL_D951,,Twist-ER,Perturb Atlas Human,1,2
+MSC 80,,CVCL_S187,,Msc80,Perturb Atlas Mouse,1,2
+MUTZ3,ACH-000084,CVCL_1433,Myeloid,MUTZ-3,Perturb Atlas Human,1,2
+MV3,,CVCL_W280,,MV3,Perturb Atlas Human,1,4
+MV411,ACH-000045,CVCL_0064,Myeloid,MV4-11,Perturb Atlas Human,1,14
+Mac-1,,CVCL_H631,,Mac1,Perturb Atlas Human,1,2
+MeT-5A,,CVCL_3749,,Met-5A,Perturb Atlas Human,1,2
+MuM-2B,,CVCL_3447,,MUM2B,Perturb Atlas Human,1,2
+Mvt1,,CVCL_C8Q2,,Mvt-1,Perturb Atlas Mouse,1,4
+My-La CD4+,,CVCL_2633,,Myla CD4+,Perturb Atlas Human,1,2
+N/TERT-2,,CVCL_UZ62,,N/TERT-2G,Perturb Atlas Human,1,2
+NALM6,ACH-000938,CVCL_0092,Lymphoid,NALM-6 | NALM6,LINCS L1000 CP | Perturb Atlas Human,2,446
+NAMALWA,ACH-000944,CVCL_0067,Lymphoid,Namalwa,Perturb Atlas Human,1,4
+NB-1691,,CVCL_5628,,NB-1691,Perturb Atlas Human,1,2
+NB1,ACH-000804,CVCL_GZ01,Peripheral Nervous System,NB1,Perturb Atlas Human,1,4
+NB1643,ACH-001303,CVCL_5627,Peripheral Nervous System,NB-1643,Perturb Atlas Human,1,2
+NB4,ACH-000294,CVCL_0005,Myeloid,NB4,Perturb Atlas Human,1,19
+NCH421k,,CVCL_X910,,NCH421k,Perturb Atlas Human,1,4
+NCH644,,CVCL_X914,,NCH644,Perturb Atlas Human,1,4
+NCI-H2107,,CVCL_1527,,NCI-H2107,Perturb Atlas Human,1,4
+NCI-H69AR,,CVCL_3513,,H69AR,Perturb Atlas Human,1,2
+NCIH1048,ACH-000866,CVCL_1453,Lung,NCIH1048,Perturb Atlas Human,1,4
+NCIH1155,ACH-000980,CVCL_1456,Lung,H1155,Perturb Atlas Human,1,2
+NCIH1299,ACH-000510,CVCL_0060,Lung,H1299 | NCI-H1299,LINCS L1000 CP | Perturb Atlas Human,2,55
+NCIH1573,ACH-000916,CVCL_1478,Lung,NCI-H1573,Tahoe-100M,1,2268
+NCIH1623,ACH-000744,CVCL_1481,Lung,NCI-H1623,Perturb Atlas Human,1,1
+NCIH1650,ACH-000035,CVCL_1483,Lung,NCI-H1650,Perturb Atlas Human,1,1
+NCIH1694,ACH-000431,CVCL_1489,Lung,NCI-H1694 | NCIH1694,LINCS L1000 CP | Perturb Atlas Human,2,18
+NCIH1703,ACH-000747,CVCL_1490,Lung,H1703,Perturb Atlas Human,1,4
+NCIH1792,ACH-000496,CVCL_1495,Lung,H1792 | NCI-H1792,Perturb Atlas Human | Tahoe-100M,2,2268
+NCIH1836,ACH-000559,CVCL_1498,Lung,NCIH1836,LINCS L1000 CP,1,10
+NCIH187,ACH-001136,CVCL_1501,Lung,NCI-H187,Perturb Atlas Human,1,2
+NCIH1876,ACH-000586,CVCL_1503,Lung,NCI-H1876,Perturb Atlas Human,1,2
+NCIH1944,ACH-000414,CVCL_1508,Lung,NCI-H1944,Perturb Atlas Human,1,4
+NCIH1963,ACH-000729,CVCL_1510,Lung,NCI-H1963,Perturb Atlas Human,1,24
+NCIH1975,ACH-000587,CVCL_1511,Lung,H1975,Perturb Atlas Human,1,2
+NCIH2009,ACH-000886,CVCL_1514,Lung,NCI-H2009,Perturb Atlas Human,1,2
+NCIH2023,ACH-000781,CVCL_1515,Lung,H2023,Perturb Atlas Human,1,2
+NCIH2030,ACH-000521,CVCL_1517,Lung,NCI-H2030,Tahoe-100M,1,2268
+NCIH2073,ACH-000590,CVCL_1521,Lung,NCIH2073,LINCS L1000 CP,1,36
+NCIH2087,ACH-000841,CVCL_1524,Lung,NCI-H2087,Perturb Atlas Human,1,2
+NCIH211,ACH-000639,CVCL_1529,Lung,NCIH211,Perturb Atlas Human,1,4
+NCIH2122,ACH-000311,CVCL_1531,Lung,H2122 | NCI-H2122,Perturb Atlas Human | Tahoe-100M,2,103
+NCIH226,ACH-000367,CVCL_1544,Pleura,H226,Perturb Atlas Human,1,2
+NCIH23,ACH-000900,CVCL_1547,Lung,H23 | NCI-H23,Perturb Atlas Human | Tahoe-100M,2,2269
+NCIH2347,ACH-000875,CVCL_1550,Lung,NCI-H2347,Tahoe-100M,1,2266
+NCIH292,ACH-001075,CVCL_0455,Lung,H292 | NCI-H292,Perturb Atlas Human,1,8
+NCIH358,ACH-000860,CVCL_1559,Lung,H358 | NCI-H358,Perturb Atlas Human,1,16
+NCIH441,ACH-000638,CVCL_1561,Lung,NCI-H441,Perturb Atlas Human,1,4
+NCIH446,ACH-000800,CVCL_1562,Lung,H446,Perturb Atlas Human,1,12
+NCIH460,ACH-000463,CVCL_0459,Lung,H460 | NCI-H460,Perturb Atlas Human | Tahoe-100M,2,2283
+NCIH508,ACH-000360,CVCL_1564,Bowel,NCIH508,LINCS L1000 CP,1,38
+NCIH526,ACH-000767,CVCL_1569,Lung,NCIH526,Perturb Atlas Human,1,4
+NCIH596,ACH-000628,CVCL_1571,Lung,NCI-H596 | NCIH596,LINCS L1000 CP | Perturb Atlas Human,2,14
+NCIH660,ACH-000177,CVCL_1576,Prostate,NCI-H660,Perturb Atlas Human,1,2
+NCIH661,ACH-000853,CVCL_1577,Lung,NCI-H661,Tahoe-100M,1,1904
+NCIH727,ACH-000775,CVCL_1584,Lung,H727,Perturb Atlas Human,1,4
+NCIH82,ACH-000355,CVCL_1591,Lung,NCI-H82,Perturb Atlas Human,1,2
+NCIH929,ACH-000050,CVCL_1600,Lymphoid,H929,Perturb Atlas Human,1,6
+NCIN87,ACH-000427,CVCL_1603,Esophagus/Stomach,NCI-N87,Perturb Atlas Human,1,4
+ND29510,,CVCL_Y813,,ND29510,Perturb Atlas Human,1,2
+ND38530,,CVCL_EZ28,,ND38530,Perturb Atlas Human,1,2
+NIH 3T3,,CVCL_0594,,NIH/3T3,Perturb Atlas Mouse,1,39
+NIH/3T3 Tet-On 3G,,CVCL_V360,,NIH/3T3 tet-on 3G,Perturb Atlas Mouse,1,4
+NIHOVCAR3,ACH-000001,CVCL_0465,Ovary/Fallopian Tube,NIHOVCAR-3 | OVCAR-3 | OVCAR3,Perturb Atlas Human,1,20
+NL20,,CVCL_3756,,NL20,LINCS L1000 CP,1,192
+NLF,,CVCL_E217,,NLF,Perturb Atlas Human,1,8
+NMuMG,,CVCL_0075,,NMuMG,Perturb Atlas Mouse,1,51
+NOMO1,ACH-000168,CVCL_1609,Myeloid,NOMO-1 | NOMO1,LINCS L1000 CP | Perturb Atlas Human,2,44
+NS-5,,CVCL_D1HI,,NS5,Perturb Atlas Mouse,1,2
+NSC-34,,CVCL_D356,,NSC-34 | NSC34,Perturb Atlas Mouse,1,6
+NTERA-2,,CVCL_0034,,NTERA2,Perturb Atlas Human,1,8
+NTERA2CLD1,ACH-002291,CVCL_3407,Testis,NT2/D1,Perturb Atlas Human,1,4
+NUGC3,ACH-000911,CVCL_1612,Esophagus/Stomach,NUGC3,Perturb Atlas Human,1,4
+Neuro-2a,,CVCL_0470,,N2A | N2a | Neuro2A,Perturb Atlas Mouse,1,41
+OCI-AML-1,,CVCL_5228,,OCI-AML1,Perturb Atlas Human,1,26
+OCI-Ly1,,CVCL_1879,,OCI-Ly1,Perturb Atlas Human,1,1
+OCIAML2,ACH-000113,CVCL_1619,Myeloid,OCI-AML2,Perturb Atlas Human,1,11
+OCIAML3,ACH-000336,CVCL_1844,Myeloid,OCI-AML3,Perturb Atlas Human,1,28
+OCIAML5,ACH-000065,CVCL_1620,Myeloid,OCI-AML5,Perturb Atlas Human,1,8
+OCILY10,ACH-001146,CVCL_8795,Lymphoid,OCI-LY10 | OCILY10,LINCS L1000 CP | Perturb Atlas Human,2,219
+OCILY19,ACH-000124,CVCL_1878,Lymphoid,OCILY19,LINCS L1000 CP,1,594
+OCILY3,ACH-000158,CVCL_8800,Lymphoid,OCI-Ly3 | OCILY3,LINCS L1000 CP | Perturb Atlas Human,2,602
+OCILY7,ACH-001617,CVCL_1881,Lymphoid,OCI-Ly7,Perturb Atlas Human,1,2
+OE19,ACH-000679,CVCL_1622,Esophagus/Stomach,OE19,Perturb Atlas Human,1,12
+OPM2,ACH-000024,CVCL_1625,Lymphoid,OPM2,Perturb Atlas Human,1,8
+OV56,ACH-000091,CVCL_2673,Ovary/Fallopian Tube,OV56,Perturb Atlas Human,1,2
+OV7,ACH-000688,CVCL_2675,Ovary/Fallopian Tube,OV7,LINCS L1000 CP,1,18
+OVCA420,ACH-002181,CVCL_3935,Ovary/Fallopian Tube,OVCA420,Perturb Atlas Human,1,2
+OVCA429,,CVCL_3936,,OVCA429,Perturb Atlas Human,1,2
+OVCAR4,ACH-000617,CVCL_1627,Ovary/Fallopian Tube,OVCAR4,Perturb Atlas Human,1,6
+OVCAR5,ACH-001151,CVCL_1628,Ovary/Fallopian Tube,OVCAR-5,Perturb Atlas Human,1,2
+OVCAR8,ACH-000696,CVCL_1629,Ovary/Fallopian Tube,OVCAR8,Perturb Atlas Human,1,9
+OVISE,ACH-000527,CVCL_3116,Ovary/Fallopian Tube,OVISE,Perturb Atlas Human,1,11
+Ocy454,,CVCL_UW31,,Ocy454,Perturb Atlas Mouse,1,1
+P19,,CVCL_2153,,P19,Perturb Atlas Mouse,1,19
+P493-6,,CVCL_6783,,P493-6,Perturb Atlas Human,1,2
+P815,,CVCL_2154,,P815,Perturb Atlas Mouse,1,4
+PA1,ACH-001374,CVCL_0479,Ovary/Fallopian Tube,PA1,Perturb Atlas Human,1,12
+PANC0327,ACH-000139,CVCL_1635,Pancreas,PANC0327 | Panc 03.27,Perturb Atlas Human | Tahoe-100M,2,2277
+PANC0403,ACH-000235,CVCL_1636,Pancreas,PANC0403,Perturb Atlas Human,1,2
+PANC1,ACH-000164,CVCL_0480,Pancreas,PANC-1 | Panc1,Perturb Atlas Human | Tahoe-100M,2,2334
+PATU8902,ACH-000599,CVCL_1845,Pancreas,PATU8902,Perturb Atlas Human,1,8
+PC-3M,,CVCL_9555,,PC-3M | PC3M,Perturb Atlas Human,1,22
+PC-4,,CVCL_X128,,PC4,Perturb Atlas Human,1,2
+PC-9/GR,,CVCL_E7RA,,PC9/GR,Perturb Atlas Human,1,4
+PC3,ACH-000090,CVCL_0035,Prostate,PC3,LINCS L1000 CP | LINCS L1000 XPR | Microarrays CMAP | Perturb Atlas Human,4,20288
+PC9,ACH-000779,CVCL_B260,Lung,PC9,Perturb Atlas Human,1,26
+PC9-BrM3,,CVCL_XA19,,PC9-BrM3,Perturb Atlas Human,1,2
+PH5CH8,,CVCL_VL00,,PH5CH8,Perturb Atlas Human,1,6
+PHMLER,,CVCL_DG85,,HMLER,Perturb Atlas Human,1,1
+PL21,ACH-000218,CVCL_2161,Myeloid,PL21,LINCS L1000 CP,1,54
+PLB985,ACH-000034,CVCL_2162,Myeloid,PLB-985,Perturb Atlas Human,1,56
+PLCPRF5,ACH-001318,CVCL_0485,Liver,PLC/PRF/5,Perturb Atlas Human,1,2
+POE,,CVCL_EJ01,,POE,Perturb Atlas Human,1,4
+Pam 212,,CVCL_7694,,PAM212,Perturb Atlas Mouse,1,2
+Py8119,,CVCL_AQ09,,Py8119,Perturb Atlas Mouse,1,2
+QBC939,,CVCL_6942,,QBC-939,Perturb Atlas Human,1,4
+RAJI,ACH-000654,CVCL_0511,Lymphoid,Raji,Perturb Atlas Human,1,2
+RAMOS,ACH-001636,CVCL_0597,Lymphoid,Ramos,Perturb Atlas Human,1,2
+RAW 264.7,,CVCL_0493,,RAW 264.7 | Raw264.7,Perturb Atlas Mouse,1,66
+RBE,ACH-001856,CVCL_4896,Biliary Tract,RBE,Perturb Atlas Human,1,2
+RCHACV,ACH-000922,CVCL_1851,Lymphoid,RCH-ACV,Perturb Atlas Human,1,10
+RDES,ACH-000041,CVCL_2169,Bone,RDES,Perturb Atlas Human,1,4
+REH,ACH-000960,CVCL_1650,Lymphoid,REH | Reh,Perturb Atlas Human,1,24
+REN,,CVCL_M202,,REN,Perturb Atlas Human,1,2
+RH4,ACH-001765,CVCL_C357,Soft Tissue,RH4,Perturb Atlas Human,1,6
+RH41,ACH-000100,CVCL_2176,Soft Tissue,Rh41,Perturb Atlas Human,1,8
+RKO,ACH-000943,CVCL_0504,Bowel,RKO,LINCS L1000 CP | Perturb Atlas Human | Tahoe-100M,3,2296
+RM-1 [Mouse prostate carcinoma],,CVCL_B459,,RM-1,Perturb Atlas Mouse,1,2
+RMGI,ACH-000719,CVCL_1662,Ovary/Fallopian Tube,RMGI,LINCS L1000 CP,1,20
+RMS,,CVCL_W527,,RMS,Perturb Atlas Human,1,2
+RMS13,,CVCL_S112,,RMS13,Perturb Atlas Human,1,2
+RMUGS,ACH-000701,CVCL_3158,Ovary/Fallopian Tube,RMUGS,LINCS L1000 CP,1,10
+RPMI7951,ACH-000348,CVCL_1666,Skin,RPMI-7951,Tahoe-100M,1,2265
+RPTEC/TERT1,,CVCL_K278,,RPTEC,Perturb Atlas Human,1,4
+RS411,ACH-000874,CVCL_0093,Lymphoid,RS4-11,Perturb Atlas Human,1,6
+RT112,ACH-000473,CVCL_1670,Bladder/Urinary Tract,RT-112 | RT112,Perturb Atlas Human,1,6
+RWPE-1,,CVCL_3791,,RWPE-1 | RWPE1,Perturb Atlas Human,1,24
+Rael,,CVCL_7208,,Rael,Perturb Atlas Human,1,4
+RenCa,,CVCL_2174,,renal carcinoma,Perturb Atlas Human,1,4
+S18,,CVCL_B0U9,,S18,Perturb Atlas Human,1,2
+S2-VP10,,CVCL_F972,,S2-VP10,Perturb Atlas Human,1,2
+S462.TY,,CVCL_JK02,,S462TY,Perturb Atlas Human,1,2
+SAOS2,ACH-000410,CVCL_0548,Bone,SaOS-2,Perturb Atlas Human,1,2
+SCC15,ACH-000254,CVCL_1681,Head and Neck,SCC15,Perturb Atlas Human,1,4
+SCC25,ACH-000188,CVCL_1682,Head and Neck,SCC25,Perturb Atlas Human,1,8
+SEM,ACH-000782,CVCL_0095,Lymphoid,SEM,Perturb Atlas Human,1,2
+SF268,ACH-000655,CVCL_1689,CNS/Brain,SF268,Perturb Atlas Human,1,9
+SF295,ACH-000376,CVCL_1690,CNS/Brain,SF295,Perturb Atlas Human,1,2
+SF8628,,CVCL_IT46,,SF8628,Perturb Atlas Human,1,2
+SGC-7901,,CVCL_0520,,SGC7901,Perturb Atlas Human,1,10
+SGC7901/ADR,,CVCL_VU57,,SGC7901/ADR,Perturb Atlas Human,1,4
+SGC7901/VCR,,CVCL_VU58,,SGC7901/VCR,Perturb Atlas Human,1,4
+SH-EP,,CVCL_0524,,SH-EP,Perturb Atlas Human,1,2
+SHP77,ACH-000790,CVCL_1693,Lung,SHP-77,Tahoe-100M,1,2238
+SHSY5Y,ACH-001188,CVCL_0019,Peripheral Nervous System,SH-SY5Y | SHSY5Y | SY5Y,LINCS L1000 CP | Perturb Atlas Human,2,380
+SIHA,ACH-000556,CVCL_0032,Cervix,SiHa,Perturb Atlas Human,1,12
+SJRH30,ACH-001189,CVCL_0041,Soft Tissue,RH30 | Rh30 | SJRH30,Perturb Atlas Human,1,15
+SK-MEL-147,,CVCL_3876,,SKmel147,Perturb Atlas Human,1,6
+SK-N-BE(2)-C,,CVCL_0529,,BE2C,Perturb Atlas Human,1,4
+SKBR3,ACH-000017,CVCL_0033,Breast,SK-BR-3 | SKBR3,LINCS L1000 CP | Perturb Atlas Human,2,1280
+SKH1 [Human leukemia],,CVCL_C124,,SKH-1,Perturb Atlas Human,1,1
+SKHEP1,ACH-000361,CVCL_0525,Liver,SK-HEP-1,Perturb Atlas Human,1,8
+SKLU1,ACH-000309,CVCL_0629,Lung,SKLU1,LINCS L1000 CP,1,16
+SKM1,ACH-000373,CVCL_0098,Myeloid,SKM1,LINCS L1000 CP,1,8
+SKMEL1,ACH-000465,CVCL_0068,Skin,SKMEL1,LINCS L1000 CP,1,24
+SKMEL2,ACH-001190,CVCL_0069,Skin,SK-MEL-2 | SKMEL2,Perturb Atlas Human | Tahoe-100M,2,2269
+SKMEL28,ACH-000615,CVCL_0526,Skin,SKMEL28 | SKmel28 | Sk-mel-28 | SkMel28,LINCS L1000 CP | Perturb Atlas Human,2,20
+SKMEL5,ACH-000730,CVCL_0527,Skin,SKMEL5,LINCS L1000 CP | Microarrays CMAP,2,486
+SKNAS,ACH-000260,CVCL_1700,Peripheral Nervous System,SK-N-AS | SKNAS,Perturb Atlas Human,1,20
+SKNBE2,ACH-000312,CVCL_0528,Peripheral Nervous System,SK-N-BE | SK-N-BE2,Perturb Atlas Human,1,10
+SKNMC,ACH-000039,CVCL_0530,Bone,SK-N-MC,Perturb Atlas Human,1,11
+SKNO1,ACH-001656,CVCL_2196,Myeloid,SKNO-1,Perturb Atlas Human,1,2
+SKNSH,ACH-000149,CVCL_0531,Peripheral Nervous System,SK-N-SH | SKNSH,LINCS L1000 CP | Perturb Atlas Human,2,94
+SKOV3,ACH-000811,CVCL_0532,Ovary/Fallopian Tube,SKOV3,Perturb Atlas Human,1,22
+SKOV3.ip1,,CVCL_0C84,,SKOV3.ip1 | SKOV3ip1,Perturb Atlas Human,1,12
+SLK,,CVCL_9569,,SLK,Perturb Atlas Human,1,4
+SMMC-7721,,CVCL_0534,,SMMC-7721,Perturb Atlas Human,1,4
+SNGM,ACH-000974,CVCL_1707,Uterus,SNGM,LINCS L1000 CP | LINCS L1000 XPR,2,1578
+SNK-1,,CVCL_A671,,SNK1,Perturb Atlas Human,1,2
+SNU1,ACH-000932,CVCL_0099,Esophagus/Stomach,SNU-1,Perturb Atlas Human | Tahoe-100M,2,2236
+SNU1040,ACH-000999,CVCL_5003,Bowel,SNU1040,LINCS L1000 CP,1,16
+SNU423,ACH-000493,CVCL_0366,Liver,SNU-423,Perturb Atlas Human | Tahoe-100M,2,2269
+SNU475,ACH-000422,CVCL_0497,Liver,SNU-475,Perturb Atlas Human,1,2
+SNU638,ACH-001664,CVCL_0102,Esophagus/Stomach,SNU-638,Perturb Atlas Human,1,6
+SNU761,ACH-000537,CVCL_5089,Liver,SNU761,LINCS L1000 XPR,1,1532
+SNUC4,ACH-000959,CVCL_5111,Bowel,SNUC4,LINCS L1000 CP,1,16
+SNUC5,ACH-000970,CVCL_5112,Bowel,SNUC5,LINCS L1000 CP,1,20
+SQD9,,CVCL_D774,,SQD9,Perturb Atlas Human,1,1
+SSP25,ACH-001858,CVCL_4902,Biliary Tract,SSP25,Perturb Atlas Human,1,2
+SUDHL1,ACH-000664,CVCL_0538,Lymphoid,SU-DHL-1,Perturb Atlas Human,1,4
+SUDHL4,ACH-000365,CVCL_0539,Lymphoid,SU-DHL-4 | SUDHL4,Perturb Atlas Human,1,10
+SUIT2,ACH-000652,CVCL_3172,Pancreas,SUIT2,Perturb Atlas Human,1,5
+SUM1315MO2,ACH-001389,CVCL_5589,Breast,SUM-1315,Perturb Atlas Human,1,1
+SUM149PT,ACH-001390,CVCL_3422,Breast,SUM149,Perturb Atlas Human,1,2
+SUM159PT,ACH-001391,CVCL_5423,Breast,SUM159 | SUM159PT,Perturb Atlas Human,1,30
+SUMB002,ACH-001201,CVCL_VU79,CNS/Brain,SU_MB002,Perturb Atlas Human,1,2
+SUNE1,,CVCL_6946,,SUNE1,Perturb Atlas Human,1,2
+SUPT1,ACH-000953,CVCL_1714,Lymphoid,SUP-T1,Perturb Atlas Human,1,16
+SV-HUC-1,,CVCL_3798,,SV-HUC-1,Perturb Atlas Human,1,2
+SVEC4-10,,CVCL_4393,,SVEC4-10,Perturb Atlas Mouse,1,2
+SW1088,ACH-000437,CVCL_1715,CNS/Brain,SW 1088,Tahoe-100M,1,1210
+SW1271,ACH-000890,CVCL_1716,Lung,SW 1271,Tahoe-100M,1,1183
+SW13,ACH-001401,CVCL_0542,Adrenal Gland,SW-13,Perturb Atlas Human,1,4
+SW1353,ACH-000418,CVCL_0543,Bone,SW1353,Perturb Atlas Human,1,2
+SW1417,ACH-000236,CVCL_1717,Bowel,SW1417,Tahoe-100M,1,2268
+SW1463,ACH-000470,CVCL_1718,Bowel,SW1463,Perturb Atlas Human,1,2
+SW1710,ACH-000566,CVCL_1721,Bladder/Urinary Tract,SW1710,Perturb Atlas Human,1,2
+SW1990,ACH-000155,CVCL_1723,Pancreas,SW1990,Perturb Atlas Human,1,2
+SW403,ACH-000820,CVCL_0545,Bowel,SW403,Perturb Atlas Human,1,2
+SW48,ACH-000958,CVCL_1724,Bowel,SW48,Perturb Atlas Human | Tahoe-100M,2,2227
+SW480,ACH-000842,CVCL_0546,Bowel,SW480 | Sw480,LINCS L1000 CP | Perturb Atlas Human | Tahoe-100M,3,2383
+SW620,ACH-000651,CVCL_0547,Bowel,SW620,LINCS L1000 CP | Perturb Atlas Human,2,35
+SW780,ACH-000384,CVCL_1728,Bladder/Urinary Tract,SW780,Perturb Atlas Human,1,4
+SW837,ACH-000421,CVCL_1729,Bowel,SW837,Perturb Atlas Human,1,2
+SW900,ACH-000669,CVCL_1731,Lung,SW 900,Tahoe-100M,1,2268
+SW948,ACH-000680,CVCL_0632,Bowel,SW948,LINCS L1000 CP,1,24
+ShiPS-miFF3,,CVCL_1E70,,MIFF3,Perturb Atlas Human,1,6
+T HESCs,,CVCL_C464,,T HESCs,Perturb Atlas Human,1,3
+T-REx-293,,CVCL_D585,,HEK293T-Rex,Perturb Atlas Human,1,1
+T24,ACH-000018,CVCL_0554,Bladder/Urinary Tract,T24,Perturb Atlas Human,1,11
+T3M10,ACH-000813,CVCL_8067,Lung,T3M10,LINCS L1000 CP,1,34
+T47D,ACH-000147,CVCL_0553,Breast,T-47D | T47D,Perturb Atlas Human,1,150
+T98,,CVCL_B368,,T98,Perturb Atlas Human,1,2
+T98G,ACH-000571,CVCL_0556,CNS/Brain,T98G,Perturb Atlas Human,1,14
+TC32,ACH-001205,CVCL_7151,Bone,TC32,Perturb Atlas Human,1,8
+TC71,ACH-000424,CVCL_2213,Bone,TC71,Perturb Atlas Human,1,20
+TCam-2,,CVCL_T012,,TCam-2,Perturb Atlas Human,1,4
+TE6,ACH-000605,CVCL_1765,Esophagus/Stomach,TE6,Perturb Atlas Human,1,4
+TF1,ACH-000387,CVCL_0559,Myeloid,TF-1,Perturb Atlas Human,1,2
+THP1,ACH-000146,CVCL_0006,Myeloid,THP-1 | THP1,LINCS L1000 CP | Perturb Atlas Human,2,2593
+TJ1,,CVCL_LB73,,TJ-1#,Perturb Atlas Human,1,8
+TL-Om1,,CVCL_B473,,TL-Om1,Perturb Atlas Human,1,12
+TMD8,,CVCL_A442,,TMD8,LINCS L1000 CP | Perturb Atlas Human,2,1150
+TOM1,ACH-001209,CVCL_1895,Lymphoid,TOM1,Perturb Atlas Human,1,6
+TOV21G,ACH-000885,CVCL_3613,Ovary/Fallopian Tube,TOV21G,Perturb Atlas Human,1,5
+TPC-1,,CVCL_6298,,TPC1,Perturb Atlas Human,1,5
+TRAMP-C1,,CVCL_3614,,TRAMP-C1,Perturb Atlas Mouse,1,2
+TYKNU,ACH-000430,CVCL_1776,Ovary/Fallopian Tube,TYKNU,LINCS L1000 CP,1,6
+TeloHAEC,,CVCL_Z065,,TeloHAEC,Perturb Atlas Human,1,15
+Tet2,,CVCL_HF70,,Shep2,Perturb Atlas Human,1,2
+Tet21N,,CVCL_9812,,Tet-21/N,Perturb Atlas Human,1,2
+Tu 177,,CVCL_4913,,TU-177,Perturb Atlas Human,1,2
+U-1810,,CVCL_D054,,U1810,Perturb Atlas Human,1,2
+U-343MG,,CVCL_S471,,U-343_Mg,Perturb Atlas Human,1,2
+U-373MG ATCC,,CVCL_2219,,U373,Perturb Atlas Human,1,2
+U118MG,ACH-000040,CVCL_0633,CNS/Brain,U118,Perturb Atlas Human,1,4
+U251MG,ACH-000232,CVCL_0021,CNS/Brain,U251 | U251MG,LINCS L1000 XPR | Perturb Atlas Human,2,8616
+U266B1,ACH-000626,CVCL_0566,Lymphoid,U266,Perturb Atlas Human,1,4
+U2OS,ACH-000364,CVCL_0042,Bone,U-2 OS | U2OS,NIBR DRUG-seq | Perturb Atlas Human,2,18958
+U3031MG,,CVCL_IR71,,U3031MG,Perturb Atlas Human,1,2
+U343,ACH-000036,CVCL_4773,CNS/Brain,U-343_Mga,Perturb Atlas Human,1,2
+U87MG,ACH-000075,CVCL_0022,CNS/Brain,U87 | U87 MG | U87MG,Perturb Atlas Human,1,53
+U937,ACH-000406,CVCL_0007,Myeloid,U-937 | U937,LINCS L1000 CP | Perturb Atlas Human,2,86
+UACC62,ACH-000425,CVCL_1780,Skin,UACC-62,Perturb Atlas Human,1,8
+UACC812,ACH-000568,CVCL_1781,Breast,UACC-812,Perturb Atlas Human,1,4
+UM139-2 PGD,,CVCL_X366,,UM 139-2,Perturb Atlas Human,1,1
+UMRC2,ACH-001224,CVCL_2739,Kidney,UM-RC-2,Perturb Atlas Human,1,4
+UMUC3,ACH-000522,CVCL_1783,Bladder/Urinary Tract,UM-UC-3 | UMUC3,Perturb Atlas Human,1,18
+UROtsa,,CVCL_0571,,UROtsa,Perturb Atlas Human,1,2
+UT-SCC-14,,CVCL_7810,,UT-SCC-14,Perturb Atlas Human,1,1
+UT-SCC-42A,,CVCL_7847,,UT-SCC-42A,Perturb Atlas Human,1,2
+UT-SCC-42B,,CVCL_7848,,UT-SCC-42B,Perturb Atlas Human,1,1
+UT-SCC-8,,CVCL_7869,,UT-SCC-8,Perturb Atlas Human,1,1
+UW228-3,,CVCL_0573,,UW228-3,Perturb Atlas Human,1,2
+UtE-iPS-1,,CVCL_E031,,center,Perturb Atlas Human,1,6
+VACO 481,,CVCL_8638,,V481,Perturb Atlas Human,1,2
+VACO 703,,CVCL_9T33,,V703,Perturb Atlas Human,1,2
+VCAF8,,CVCL_A9BI,,VCAF8,Perturb Atlas Human,1,1
+VCAP,ACH-000115,CVCL_2235,Prostate,VCAP | VCaP,LINCS L1000 CP | Perturb Atlas Human,2,7704
+WA01,,CVCL_9771,,WA01,Perturb Atlas Human,1,6
+WA09,,CVCL_9773,,H9 hESCs | WA09 | h9ESC,Perturb Atlas Human,1,14
+WA14,,CVCL_9775,,H14,Perturb Atlas Human,1,2
+WI-38,,CVCL_0579,,WI-38 | WI38,LINCS L1000 CP | Perturb Atlas Human,2,268
+WI-38 VA13 subline 2RA,,CVCL_2759,,WI-38 VA-13 subline 2RA,Perturb Atlas Human,1,2
+WI38-hTERT,,CVCL_F0KD,,WI38 hTERT,Perturb Atlas Human,1,12
+WIBR3,,CVCL_9767,,WiBR3,Perturb Atlas Human,1,2
+WM2664,ACH-001239,CVCL_2765,Skin,WM266.4,Perturb Atlas Human,1,2
+WM35,ACH-002207,CVCL_0580,Skin,WC00060,Perturb Atlas Human,1,2
+WM902B,,CVCL_6807,,WM902B,Perturb Atlas Human,1,2
+WM983B,ACH-000765,CVCL_6809,Skin,WM983B | WM983b,Perturb Atlas Human,1,6
+WPMY-1,,CVCL_3814,,WPMY-1,Perturb Atlas Human,1,2
+WS1,,CVCL_2766,,WS1,Perturb Atlas Human,1,4
+WSU-HN30,,CVCL_5525,,HN30,Perturb Atlas Human,1,4
+WSUDLCL2,ACH-000534,CVCL_1902,Lymphoid,WSU-DLCL2 | WSUDLCL2,LINCS L1000 CP | Perturb Atlas Human,2,20
+WT 9-12,,CVCL_K230,,WT 9-12,Perturb Atlas Human,1,6
+WT-31,,CVCL_CW51,,WT31,Perturb Atlas Mouse,1,4
+X-01,,CVCL_C656,,X01,Perturb Atlas Human,1,2
+XP12RO,,CVCL_VP50,,XP12RO,Perturb Atlas Human,1,2
+Y79,ACH-001295,CVCL_1893,Eye,Y79,Perturb Atlas Human,1,2
+YAPC,ACH-000332,CVCL_1794,Pancreas,YAPC,LINCS L1000 CP | LINCS L1000 XPR,2,6934
+YUMMER1.7,,CVCL_A2AX,,YUMMER1.7,Perturb Atlas Mouse,1,2
+ZR751,ACH-000097,CVCL_0588,Breast,ZR-75-1,Perturb Atlas Human,1,1
+alphaTC1,,CVCL_B035,,AlphaTC1,Perturb Atlas Mouse,1,2
+delta-47,,CVCL_2887,,Delta47,Perturb Atlas Human,1,4
+eHAP E9,,CVCL_5J33,,eHAP,Perturb Atlas Human,1,2
+hTERT-HME1,,CVCL_3383,,HME1,LINCS L1000 CP,1,680
+hTERT-HPNE,,CVCL_C466,,hTERT-HPNE,Tahoe-100M,1,2264
+hTERT-RPE1,,CVCL_4388,,RPE1 | hTERT-RPE-1,Perturb Atlas Human | Replogle et al.,2,2743
+iSLK,,CVCL_B6YU,,iSLK,Perturb Atlas Human,1,2
+mDCT15,,CVCL_B6H8,,mDCT15,Perturb Atlas Mouse,1,2
+mIMCD-3,,CVCL_0429,,IMCD3,Perturb Atlas Mouse,1,12
+v6.5,,CVCL_C865,,V6.5 | v6.5,Perturb Atlas Mouse,1,50
+1HAE,,,,1HAE,LINCS L1000 CP,1,224
+ASC,,,,ASC,LINCS L1000 CP,1,1240
+ASC.C,,,,ASC.C,LINCS L1000 CP,1,346
+CD34,,,,CD34,LINCS L1000 CP,1,538
+HCT116.TP53.HR,,,,HCT116.TP53.HR,LINCS L1000 CP,1,330
+HCT116.TP53.M,,,,HCT116.TP53.M,LINCS L1000 CP,1,294
+HIMG001,,,,HIMG001,LINCS L1000 CP,1,298
+HIMG002,,,,HIMG002,LINCS L1000 CP,1,240
+HMELZ,,,,HMELZ,LINCS L1000 CP,1,114
+HPTEC,,,,HPTEC,LINCS L1000 CP,1,650
+HUVEC.A,,,,HUVEC.A,LINCS L1000 CP,1,692
+MCF10A.BRCA1.HD,,,,MCF10A.BRCA1.HD,LINCS L1000 CP,1,224
+MCF10A.EGFR.HL,,,,MCF10A.EGFR.HL,LINCS L1000 CP,1,290
+MCF10A.KRAS.HG,,,,MCF10A.KRAS.HG,LINCS L1000 CP,1,686
+MCF10A.PIK3CA.HH,,,,MCF10A.PIK3CA.HH,LINCS L1000 CP,1,242
+MCF10A.TP53.M,,,,MCF10A.TP53.M,LINCS L1000 CP,1,562
+MCF10A.TP53.M.KRAS.HG,,,,MCF10A.TP53.M.KRAS.HG,LINCS L1000 CP,1,150
+MCF10A.WT,,,,MCF10A.WT,LINCS L1000 CP,1,956
+MCF10A.WT.HP,,,,MCF10A.WT.HP,LINCS L1000 CP,1,476
+MCF10A.WTLP,,,,MCF10A.WTLP,LINCS L1000 CP,1,84
+MNEU.E,,,,MNEU.E,LINCS L1000 CP,1,100
+NEU,,,,NEU,LINCS L1000 CP,1,520
+NKDBA,,,,NKDBA,LINCS L1000 CP,1,112
+NPC,,,,NPC,LINCS L1000 CP,1,1552
+NPC.170,,,,NPC.170,LINCS L1000 CP,1,166
+NPC.177,,,,NPC.177,LINCS L1000 CP,1,114
+NPC.179,,,,NPC.179,LINCS L1000 CP,1,224
+NPC.215,,,,NPC.215,LINCS L1000 CP,1,132
+NPC.8330,,,,NPC.8330,LINCS L1000 CP,1,226
+NPC.CAS9,,,,NPC.CAS9,LINCS L1000 CP,1,566
+NPC.TAK,,,,NPC.TAK,LINCS L1000 CP,1,326
+P1A82,,,,P1A82,LINCS L1000 CP,1,366
+PHH,,,,PHH,LINCS L1000 CP,1,648
+PHH.MGH,,,,PHH.MGH,LINCS L1000 CP,1,130
+SKB,,,,SKB,LINCS L1000 CP,1,1142
+SKL,,,,SKL,LINCS L1000 CP,1,356
+SKL.C,,,,SKL.C,LINCS L1000 CP,1,312
+WA09.AST,,,,WA09.AST,LINCS L1000 CP,1,250
+XC.L10,,,,XC.L10,LINCS L1000 CP,1,1700
+XC.P026,,,,XC.P026,LINCS L1000 CP,1,308
+XC.P031,,,,XC.P031,LINCS L1000 CP,1,286
+XC.P033,,,,XC.P033,LINCS L1000 CP,1,382
+XC.P091,,,,XC.P091,LINCS L1000 CP,1,330
+XC.P092,,,,XC.P092,LINCS L1000 CP,1,186
+XC.P901,,,,XC.P901,LINCS L1000 CP,1,286
+XC.P904,,,,XC.P904,LINCS L1000 CP,1,312
+XC.P905,,,,XC.P905,LINCS L1000 CP,1,360
+XC.P906,,,,XC.P906,LINCS L1000 CP,1,304
+XC.P907,,,,XC.P907,LINCS L1000 CP,1,268
+XC.P908,,,,XC.P908,LINCS L1000 CP,1,306
+XC.P909,,,,XC.P909,LINCS L1000 CP,1,208
+XC.P910,,,,XC.P910,LINCS L1000 CP,1,252
+XC.P911,,,,XC.P911,LINCS L1000 CP,1,276
+XC.P912,,,,XC.P912,LINCS L1000 CP,1,284
+XC.P914,,,,XC.P914,LINCS L1000 CP,1,260
+XC.P915,,,,XC.P915,LINCS L1000 CP,1,240
+XC.P922,,,,XC.P922,LINCS L1000 CP,1,260
+XC.P930,,,,XC.P930,LINCS L1000 CP,1,338
+XC.P931,,,,XC.P931,LINCS L1000 CP,1,304
+XC.P932,,,,XC.P932,LINCS L1000 CP,1,216
+XC.P933,,,,XC.P933,LINCS L1000 CP,1,250
+XC.P934,,,,XC.P934,LINCS L1000 CP,1,232
+XC.P935,,,,XC.P935,LINCS L1000 CP,1,260
+XC.P936,,,,XC.P936,LINCS L1000 CP,1,140
+XC.R10,,,,XC.R10,LINCS L1000 CP,1,1012
