@@ -328,6 +328,7 @@ type Dataset = {
   gmtUrl?: string
   fullSignaturesUrl?: string
   fullSignatures?: FullSignature[]
+  metadata?: FullSignature[]  // per-dataset metadata files (cell line / drug / gene-set genes)
   note?: string
   noteLinkText?: string
   noteUrl?: string
@@ -464,6 +465,11 @@ const drugPerturbationDatasets: Dataset[] = [
     gmtUrl: `${MINIO_BASE}/tahoe-100m.gmt.gz`,
     fullSignatures: [
       { url: 'https://huggingface.co/datasets/tahoebio/Tahoe-100M/viewer/pseudobulk_differential_expression', label: 'DESeq2 log2FC' },
+    ],
+    metadata: [
+      { url: `${MINIO_BASE}/tahoe-100m-cell_line_metadata.parquet`, label: 'Cell Line' },
+      { url: `${MINIO_BASE}/tahoe-100m-drug_metadata.parquet`, label: 'Drug' },
+      { url: `${MINIO_BASE}/tahoe-100m-geneset_genes_metadata.parquet`, label: 'Gene Set Genes' },
     ],
     termKey: 'tahoe-100m',
   },
@@ -646,7 +652,7 @@ const metadataDatasets: Dataset[] = [
 
 // --- Components ---
 
-function DatasetCard({ dataset, showDownloads = true, liveCount }: { dataset: Dataset, showDownloads?: boolean, liveCount?: number }) {
+function DatasetCard({ dataset, showDownloads = true, liveCount, gmtSize }: { dataset: Dataset, showDownloads?: boolean, liveCount?: number, gmtSize?: string }) {
   const structure = dataset.termKey ? termStructures[dataset.termKey] : null
   const displayValue = dataset.libraryName
     ? (liveCount != null ? `${liveCount.toLocaleString()} signatures` : '…')
@@ -684,12 +690,13 @@ function DatasetCard({ dataset, showDownloads = true, liveCount }: { dataset: Da
         )}
         {showDownloads && (
           <>
-            {' · '}
+            <br />
             {dataset.gmtUrl ? (
               <a href={dataset.gmtUrl} download className="link link-neutral">Gene Matrix Transposed</a>
             ) : (
               <span className="text-gray-400">Gene Matrix Transposed</span>
             )}
+            {gmtSize && <span className="text-gray-400">{` (${gmtSize} compressed)`}</span>}
             <br />
             {dataset.fullSignatures ? (
               <>
@@ -705,6 +712,18 @@ function DatasetCard({ dataset, showDownloads = true, liveCount }: { dataset: Da
               <a href={dataset.fullSignaturesUrl} target="_blank" rel="noopener noreferrer" className="link link-neutral">Full Signatures</a>
             ) : (
               <span className="text-gray-400">Full Signatures</span>
+            )}
+            {dataset.metadata && (
+              <>
+                <br />
+                {'Metadata: '}
+                {dataset.metadata.map((m, i) => (
+                  <span key={m.label}>
+                    <a href={m.url} download className="link link-neutral">{m.label}</a>
+                    {i < dataset.metadata!.length - 1 && ', '}
+                  </span>
+                ))}
+              </>
             )}
           </>
         )}
@@ -727,7 +746,7 @@ function DatasetCard({ dataset, showDownloads = true, liveCount }: { dataset: Da
   )
 }
 
-export default function DownloadClientPage() {
+export default function DownloadClientPage({ gmtSizes }: { gmtSizes: Record<string, string> }) {
   const { data } = useAllLibrariesQuery()
   const counts = Object.fromEntries(
     data?.geneSetLibraries?.nodes.map(n => [n.name, n.geneSetsByLibraryId.totalCount]) ?? []
@@ -742,14 +761,14 @@ export default function DownloadClientPage() {
       <h3 className="text-lg font-medium mt-4 mb-2">Drug/Chemical Perturbation Datasets</h3>
       <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-3 my-3">
         {drugPerturbationDatasets.map(dataset => (
-          <DatasetCard key={dataset.title} dataset={dataset} liveCount={dataset.libraryName ? counts[dataset.libraryName] : undefined} />
+          <DatasetCard key={dataset.title} dataset={dataset} liveCount={dataset.libraryName ? counts[dataset.libraryName] : undefined} gmtSize={dataset.gmtUrl ? gmtSizes[dataset.gmtUrl] : undefined} />
         ))}
       </div>
 
       <h3 className="text-lg font-medium mt-4 mb-2">Gene Perturbation Datasets</h3>
       <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-3 my-3">
         {genePerturbationDatasets.map(dataset => (
-          <DatasetCard key={dataset.title} dataset={dataset} liveCount={dataset.libraryName ? counts[dataset.libraryName] : undefined} />
+          <DatasetCard key={dataset.title} dataset={dataset} liveCount={dataset.libraryName ? counts[dataset.libraryName] : undefined} gmtSize={dataset.gmtUrl ? gmtSizes[dataset.gmtUrl] : undefined} />
         ))}
       </div>
 
