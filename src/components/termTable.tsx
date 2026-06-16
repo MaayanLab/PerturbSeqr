@@ -5,7 +5,8 @@ import useQsState from '@/utils/useQsState';
 import Pagination from '@/components/pagination';
 import TermDownloadButton from '@/components/termDownloadButton';
 import { parseTerm, getCellDisplay, formatPerturbationWithType } from '@/utils/parseTerm';
-import { preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary, getDatasetUrl } from '@/utils/metadataLookup';
+import { preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary } from '@/utils/metadataLookup';
+import { DatasetCell } from '@/components/DatasetCell';
 import Image from 'next/image';
 import { FaFilter } from 'react-icons/fa';
 import libraryConfig from '@/config/libraries.json';
@@ -325,21 +326,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
               if (!el) return null
               return (
                   <tr key={el?.term}>
-                    <td className="font-medium max-w-[120px]">
-                      {getDatasetUrl(el._dataset) ? (
-                        <a
-                          href={getDatasetUrl(el._dataset)!}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="link link-neutral hover:link-hover truncate block"
-                          title={`View ${el._dataset} source`}
-                        >
-                          {el._dataset}
-                        </a>
-                      ) : (
-                        <span className="truncate block" title={el._dataset}>{el._dataset}</span>
-                      )}
-                    </td>
+                    <DatasetCell dataset={el._dataset} term={el.term} className="font-medium max-w-[120px]" />
                     <td>
                     {el.term}
                   </td>

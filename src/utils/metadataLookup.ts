@@ -237,3 +237,8 @@ export function getDatasetUrl(datasetName: string): string | null {
   if (!datasetName) return null
   return DATASET_URLS[datasetName.toLowerCase()] || null
 }
+
+/** GEO accession-viewer URL for a GSE series accession. */
+export function getGeoUrl(gse: string): string {
+  return `https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=${gse}`
+}

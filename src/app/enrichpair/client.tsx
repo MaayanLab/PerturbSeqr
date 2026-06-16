@@ -21,7 +21,8 @@ import type { ContributingSignature } from "@/components/signaturesModal";
 import { FaFilter, FaSortUp } from "react-icons/fa6";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { parseTerm, getCellDisplay, formatPerturbationWithType } from "@/utils/parseTerm";
-import { preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary, getDatasetUrl } from "@/utils/metadataLookup";
+import { preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary } from "@/utils/metadataLookup";
+import { DatasetCell } from "@/components/DatasetCell";
 import { useRouter } from "next/navigation";
 import libraryConfig from "@/config/libraries.json";
 import { LibraryBarGraphGrid, LibraryCardPaired } from "@/components/BarGraph";
@@ -1283,21 +1284,7 @@ function EnrichmentResults({
                   return (
                     <tr key={genesetIndex} className="text-left">
                       <td className={"hidden"}>{term}</td>
-                      <td className="max-w-[120px]">
-                        {getDatasetUrl(dataset) ? (
-                          <a
-                            href={getDatasetUrl(dataset)!}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="link link-neutral hover:link-hover truncate block"
-                            title={`View ${dataset} source`}
-                          >
-                            {dataset}
-                          </a>
-                        ) : (
-                          <span className="truncate block" title={dataset}>{dataset}</span>
-                        )}
-                      </td>
+                      <DatasetCell dataset={dataset} term={term} />
                       <td className="max-w-[130px]">
                         {/* Perturbation with appropriate link (PubChem for drugs, NCBI Gene for genes) */}
                         <div>

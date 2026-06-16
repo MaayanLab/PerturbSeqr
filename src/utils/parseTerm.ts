@@ -91,3 +91,16 @@ export function formatPerturbationWithType(
     })
     .join(' | ')
 }
+
+/**
+ * GEO series accession(s) embedded in a GEO-mined term (e.g. RummaGEO), in source order; [] if none.
+ * Usually a single GSE; a comma-joined value is a SubSeries + its parent SuperSeries (SubSeries-first per the ETL).
+ */
+export function getGeoAccessions(term: string): string[] {
+  const hit = parseTerm(term).extras.find((p) => /^GSE\d/.test(p))
+  if (!hit) return []
+  return hit
+    .split(',')
+    .map((a) => a.match(/^GSE\d+/)?.[0])
+    .filter((a): a is string => !!a)
+}
