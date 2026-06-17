@@ -1,14 +1,12 @@
-import { getDatasetUrl, getGeoUrl } from '@/utils/metadataLookup'
-import { getGeoAccessions } from '@/utils/parseTerm'
+import { getDatasetUrl, getGeoUrl, getEnaUrl } from '@/utils/metadataLookup'
+import { getGeoAccessions, getSraStudyAccessions } from '@/utils/parseTerm'
 
 /**
  * Renders the "Dataset" `<td>` shared by the enrichment / term-search result tables.
  *
- * For RummaGEO rows the dataset name is replaced by the GEO study accession(s) parsed from the
- * term, each linked to the GEO accession viewer (a comma-joined SubSeries+SuperSeries pair shows
- * both links). 
- * 
- * All other datasets keep the existing name + source-URL link.
+ * When a dataset's terms carry a source study accession, the dataset name is replaced by that
+ * accession linked to its archive: RummaGEO/CREEDS → GEO (GSE/GDS), PerturbAtlas → ENA (SRP/ERP/DRP).
+ * A comma-joined RummaGEO pair shows both links. All other datasets keep the name + source-URL link.
  */
 export function DatasetCell({
   dataset,
@@ -19,29 +17,37 @@ export function DatasetCell({
   term?: string | null
   className?: string
 }) {
-  const isRummaGeo = dataset.toLowerCase().startsWith('rummageo')
-  const accessions = isRummaGeo && term ? getGeoAccessions(term) : []
+  const d = dataset.toLowerCase()
+  const links = !term
+    ? []
+    : d.startsWith('rummageo') || d.startsWith('creeds')
+      ? getGeoAccessions(term).map((acc) => ({ acc, url: getGeoUrl(acc) }))
+      : d.startsWith('perturb')
+        ? getSraStudyAccessions(term).map((acc) => ({ acc, url: getEnaUrl(acc) }))
+        : []
 
-  if (accessions.length > 0) {
+  if (links.length > 0) {
+    // Short subtitle (column is ~120px): RummaGEO→RGEO, Perturb Atlas→PAtlas, CREEDS as-is.
+    const subtitle = dataset.replace(/^RummaGEO/i, 'RGEO').replace(/^Perturb Atlas/i, 'PAtlas')
     return (
       <td className={className}>
         <div>
-          {accessions.map((acc, i) => (
+          {links.map(({ acc, url }, i) => (
             <span key={acc}>
               {i > 0 && ', '}
               <a
-                href={getGeoUrl(acc)}
+                href={url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="link link-neutral hover:link-hover"
-                title={`View ${acc} on GEO`}
+                title={`View ${acc}`}
               >
                 {acc}
               </a>
             </span>
           ))}
         </div>
-        <div className="text-xs text-gray-500 truncate" title={dataset}>{dataset.replace(/^RummaGEO/i, 'RGEO')}</div>
+        <div className="text-xs text-gray-500 truncate" title={dataset}>{subtitle}</div>
       </td>
     )
   }
