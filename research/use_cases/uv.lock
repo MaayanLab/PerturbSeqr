@@ -1047,7 +1047,7 @@ wheels = [
 [[package]]
 name = "perturbseqr"
 version = "0.0.2"
-source = { editable = "../perturbseqr-py" }
+source = { editable = "../../perturbseqr-py" }
 dependencies = [
     { name = "gql", extra = ["requests"] },
     { name = "pandas" },
@@ -1079,7 +1079,7 @@ requires-dist = [
     { name = "matplotlib", specifier = ">=3.8" },
     { name = "openpyxl", specifier = ">=3.1" },
     { name = "pandas", specifier = ">=2.0" },
-    { name = "perturbseqr", editable = "../perturbseqr-py" },
+    { name = "perturbseqr", editable = "../../perturbseqr-py" },
     { name = "requests", specifier = ">=2.31" },
     { name = "seaborn", specifier = ">=0.13" },
 ]

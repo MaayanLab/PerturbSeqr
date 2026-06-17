@@ -14,4 +14,4 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-perturbseqr = { path = "../perturbseqr-py", editable = true }
+perturbseqr = { path = "../../perturbseqr-py", editable = true }
