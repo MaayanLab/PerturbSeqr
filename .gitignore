@@ -86,17 +86,17 @@ public/umap/enrich/
 *.parquet
 *.gmt
 *.gmt.gz
-services/db/etl/inputs/_cache/
-services/db/etl/inputs/drug_perturbation/
-services/db/etl/inputs/gene_perturbation/
-services/db/etl/intermediate/
+etl/perturbseqr_etl/inputs/_cache/
+etl/perturbseqr_etl/inputs/drug_perturbation/
+etl/perturbseqr_etl/inputs/gene_perturbation/
+etl/perturbseqr_etl/intermediate/
 # Per-dataset module data artifacts (the .py code in inputs/<dataset>/ is tracked; its data isn't).
 # ** so nested families like inputs/lincs_l1000/cp/intermediate/ are covered too.
-services/db/etl/inputs/**/intermediate/
-services/db/etl/inputs/**/raw/
-services/db/etl/inputs/**/upstream/
-services/db/etl/rummageo_dge/
-services/db/etl/*.png
+etl/perturbseqr_etl/inputs/**/intermediate/
+etl/perturbseqr_etl/inputs/**/raw/
+etl/perturbseqr_etl/inputs/**/upstream/
+etl/perturbseqr_etl/rummageo_dge/
+etl/perturbseqr_etl/*.png
 
 # Working figures (manuscript figures are tracked separately)
 /*.png

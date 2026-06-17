@@ -7,7 +7,7 @@
 #   - dbmate installed (brew install dbmate)
 #   - uv installed for Python package management
 #   - GMT files in services/db/data/drug_perturbation/ and services/db/data/gene_perturbation/
-#   - public/metadata/drug_lookup.json (build with: uv run services/db/build_drug_lookup.py)
+#   - public/metadata/drug_lookup.json (build with: uv run --project etl python -m perturbseqr_etl.build_drug_lookup)
 #
 # Usage:
 #   ./scripts/setup_and_load_data.sh                   # Production mode (default) - Docker container frontend
@@ -121,7 +121,7 @@ fi
 DRUG_LOOKUP="$PROJECT_DIR/public/metadata/drug_lookup.json"
 if [ ! -f "$DRUG_LOOKUP" ]; then
     echo "ERROR: $DRUG_LOOKUP not found"
-    echo "  Build it with: uv run services/db/build_drug_lookup.py"
+    echo "  Build it with: uv run --project etl python -m perturbseqr_etl.build_drug_lookup"
     exit 1
 fi
 

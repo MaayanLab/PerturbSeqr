@@ -1,0 +1,25 @@
+[project]
+name = "perturbseqr-etl"
+version = "0.0.0"
+description = "PerturbSeqr ETL: build canonical GMTs and lookups from upstream datasets into services/db/data."
+requires-python = ">=3.11"
+dependencies = [
+    "maayanlab-bioinformatics",
+    "pandas",
+    "pyarrow",
+    "GEOparse",
+    "tqdm",
+    "requests",
+    "perturbseqr-ingest",
+]
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["perturbseqr_etl*"]
+
+[tool.uv.sources]
+perturbseqr-ingest = { path = "../services/ingest", editable = true }
+maayanlab-bioinformatics = { git = "https://github.com/MaayanLab/maayanlab-bioinformatics.git", branch = "python3.14-compat" }
