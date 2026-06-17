@@ -25,12 +25,11 @@ RUN set -x \
     && curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64 \
     && chmod +x /usr/local/bin/dbmate
 
-COPY services/ingest/requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Install the lean ingest runtime package (deps + the perturbseqr_ingest package)
+COPY services/ingest/pyproject.toml ./ingest_src/pyproject.toml
+COPY services/ingest/perturbseqr_ingest ./ingest_src/perturbseqr_ingest
+RUN pip install --no-cache-dir ./ingest_src
 
-# Copy ingest scripts (GMT data comes from MinIO or mounted volume)
-COPY services/db/ingest.py services/db/ingest_fda_counts.py services/db/ingest_gene_info.py services/db/update_background.py ./db/
-COPY services/db/db_utils.py services/db/gmt_parser.py services/db/perturbation_parser.py ./db/
 COPY src/config/libraries.json ./config/libraries.json
 COPY public/metadata/drug_lookup.json ./metadata/drug_lookup.json
 

@@ -1,6 +1,0 @@
-minio
-psycopg2-binary
-tqdm
-requests
-polars
-urllib3

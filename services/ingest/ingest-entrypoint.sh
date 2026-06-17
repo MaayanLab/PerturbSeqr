@@ -49,12 +49,12 @@ fi
 
 # Step 3: Ingest data from MinIO to Postgres
 echo "=== Step 3: Ingesting gene sets from MinIO ==="
-cd /app/db && python ingest.py --batch --minio
+python -m perturbseqr_ingest.ingest --batch --minio
 echo ""
 
 # Step 4: Ingest FDA counts
 echo "=== Step 4: Ingesting FDA counts ==="
-cd /app/db && python ingest_fda_counts.py
+python -m perturbseqr_ingest.ingest_fda_counts
 echo ""
 
 # Step 5: Refresh materialized views
@@ -66,12 +66,12 @@ echo ""
 
 # Step 6: Create background and trigger enrich
 echo "=== Step 6: Creating background and triggering enrich index ==="
-cd /app/db && python update_background.py
+python -m perturbseqr_ingest.update_background
 echo ""
 
 # Step 7: Ingest gene info from NCBI
 echo "=== Step 7: Ingesting gene info from NCBI ==="
-cd /app/db && python ingest_gene_info.py
+python -m perturbseqr_ingest.ingest_gene_info
 echo ""
 
 echo "=== Ingest Complete ==="

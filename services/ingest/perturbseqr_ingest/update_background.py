@@ -1,7 +1,3 @@
-# /// script
-# requires-python = ">=3.10"
-# dependencies = ["psycopg2-binary", "python-dotenv", "requests"]
-# ///
 """Update the background gene set after ingesting new data.
 
 Usage: uv run db/update_background.py
@@ -11,7 +7,7 @@ Set ENRICH_URL env var to override default (http://127.0.0.1:8000)
 import os
 import requests
 
-from db_utils import get_conn, query
+from .db_utils import get_conn, query
 
 ENRICH_URL = os.environ.get('ENRICH_URL', 'http://127.0.0.1:8000')
 

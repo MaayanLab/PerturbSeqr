@@ -1,12 +1,3 @@
-# /// script
-# requires-python = ">=3.14"
-# dependencies = [
-#   "psycopg2-binary",
-#   "tqdm",
-#   "polars",
-#   "minio",
-# ]
-# ///
 """
 Ingest GMT files into PerturbSeek database.
 
@@ -34,9 +25,9 @@ from pathlib import Path
 
 import polars as pl
 from tqdm import tqdm
-from gmt_parser import read_gmt
-from perturbation_parser import extract_perturbation
-from db_utils import get_conn, get_cid, get_or_create_library, query, discover_gmt_files, discover_minio_gmt_files, download_minio_gmt_file
+from .gmt_parser import read_gmt
+from .perturbation_parser import extract_perturbation
+from .db_utils import get_conn, get_cid, get_or_create_library, query, discover_gmt_files, discover_minio_gmt_files, download_minio_gmt_file
 
 # Helper lambdas
 extract_fallback_id = lambda term, lib: term.rsplit(" ", 1)[0].split("::")[5] if lib == "nibr-drug-seq" and len(term.rsplit(" ", 1)[0].split("::")) > 5 else None

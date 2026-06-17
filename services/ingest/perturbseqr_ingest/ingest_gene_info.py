@@ -1,7 +1,3 @@
-# /// script
-# requires-python = ">=3.10"
-# dependencies = ["psycopg2-binary", "polars", "python-dotenv"]
-# ///
 """Ingest gene descriptions and summaries from NCBI into the database.
 
 Note: L2S2 fetches summaries via the NCBI API, but that is rate-limited.
@@ -17,7 +13,7 @@ from pathlib import Path
 import polars as pl
 import psycopg2.extras
 
-from db_utils import get_conn, query
+from .db_utils import get_conn, query
 
 
 def load_gene_summary(path: Path) -> dict[int, str]:

@@ -1,7 +1,3 @@
-# /// script
-# requires-python = ">=3.10"
-# dependencies = ["psycopg2-binary", "python-dotenv", "tqdm"]
-# ///
 """Populate fda_counts table from drug_lookup.json.
 
 Usage: uv run db/ingest_fda_counts.py
@@ -13,7 +9,7 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-from db_utils import get_conn
+from .db_utils import get_conn
 
 # Support configurable path via INGEST_METADATA_DIR for container deployment
 if metadata_dir := os.environ.get('INGEST_METADATA_DIR'):
