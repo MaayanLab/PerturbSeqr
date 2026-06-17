@@ -54,13 +54,11 @@ else:
 if data_dir := os.environ.get('INGEST_DATA_DIR'):
     DATA_DIR = Path(data_dir)
 else:
-    DATA_DIR = PROJECT_ROOT / 'services' / 'db' / 'data'
+    DATA_DIR = PROJECT_ROOT / 'data'
 
 DRUG_DIR = DATA_DIR / 'drug_perturbation'
 GENE_DIR = DATA_DIR / 'gene_perturbation'
 METADATA_DIR = DATA_DIR / 'metadata'
-
-INPUTS_DIR = PROJECT_ROOT / 'services' / 'db' / 'etl' / 'inputs'
 
 # Load configs
 assert LIBRARY_CONFIG_PATH.exists(), f"Missing {LIBRARY_CONFIG_PATH}"

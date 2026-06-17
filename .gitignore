@@ -7,16 +7,16 @@ __pycache__
 
 # Data directories (large files, symlinks to external storage)
 data
-services/db/data/drug_perturbation
-services/db/data/gene_perturbation
-services/db/data/metadata
-services/db/data/metadata/original
-services/db/data/cache
-services/db/data/old
-services/db/data/tahoe_processing_output
-services/db/data/backup
-services/db/data/emeraldbay
-services/db/data/*.json
+data/drug_perturbation
+data/gene_perturbation
+data/metadata
+data/metadata/original
+data/cache
+data/old
+data/tahoe_processing_output
+data/backup
+data/emeraldbay
+data/*.json
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 

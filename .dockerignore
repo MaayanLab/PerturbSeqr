@@ -28,7 +28,7 @@ benchmarkingdb/data
 public/gmts
 
 # Database data files (GMT files are large, served from MinIO)
-services/db/data/
+data/
 
 # Scripts not needed by app (but upload_gmts_to_minio.py needed by ingest)
 scripts/*.sh
