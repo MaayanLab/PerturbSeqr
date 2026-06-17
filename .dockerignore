@@ -12,7 +12,7 @@ __pycache__
 /.pnp
 /build
 /coverage
-/enrich
+/services/enrich
 /figures
 /node_modules
 /out/
@@ -28,7 +28,7 @@ benchmarkingdb/data
 public/gmts
 
 # Database data files (GMT files are large, served from MinIO)
-db/data/
+services/db/data/
 
 # Scripts not needed by app (but upload_gmts_to_minio.py needed by ingest)
 scripts/*.sh

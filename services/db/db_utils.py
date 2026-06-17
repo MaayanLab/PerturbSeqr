@@ -30,8 +30,15 @@ except ImportError:
 # INGEST_CONFIG_DIR: path to config directory (default: project_root/src/config)
 # INGEST_METADATA_DIR: path to metadata directory (default: project_root/public/metadata)
 # INGEST_DATA_DIR: path to GMT data directory (default: db/data)
-PROJECT_ROOT = Path(__file__).parent.parent
-DB_DIR = Path(__file__).parent
+def _find_repo_root(start: Path) -> Path:
+    """Walk up to the repo root (dir with package.json/.git); fall back to start."""
+    for p in (start, *start.parents):
+        if (p / 'package.json').exists() or (p / '.git').exists():
+            return p
+    return start
+
+DB_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = _find_repo_root(DB_DIR)
 
 # Support configurable paths for container deployment
 if config_dir := os.environ.get('INGEST_CONFIG_DIR'):

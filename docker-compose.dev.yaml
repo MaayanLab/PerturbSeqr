@@ -1,6 +1,6 @@
 services:
   perturbseqr-postgres:
-    build: db
+    build: services/db
     image: johnkgardner/perturbseqr-postgres:0.2.44
     platform: linux/amd64
     restart: unless-stopped
@@ -47,7 +47,7 @@ services:
       retries: 5
 
   perturbseqr-enrich:
-    build: enrich
+    build: services/enrich
     image: johnkgardner/perturbseqr-enrich:0.2.44
     platform: linux/amd64
     restart: unless-stopped
@@ -95,7 +95,7 @@ services:
         condition: service_healthy
 
   minio-setup:
-    build: minio
+    build: services/minio
     image: johnkgardner/perturbseqr-minio-setup:0.2.44
     platform: linux/amd64
     restart: "no"
@@ -113,7 +113,7 @@ services:
     image: ghcr.io/amacneil/dbmate
     restart: "no"
     volumes:
-      - ./db/migrations:/db/migrations:ro
+      - ./services/db/migrations:/db/migrations:ro
     environment:
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres?sslmode=disable
     depends_on:
@@ -125,7 +125,7 @@ services:
   ingest:
     build:
       context: .
-      dockerfile: ingest/Dockerfile
+      dockerfile: services/ingest/Dockerfile
     image: johnkgardner/perturbseqr-ingest:0.2.44
     platform: linux/amd64
     restart: "no"

@@ -6,8 +6,8 @@
 #   - Docker and docker-compose installed
 #   - dbmate installed (brew install dbmate)
 #   - uv installed for Python package management
-#   - GMT files in db/data/drug_perturbation/ and db/data/gene_perturbation/
-#   - public/metadata/drug_lookup.json (build with: uv run db/build_drug_lookup.py)
+#   - GMT files in services/db/data/drug_perturbation/ and services/db/data/gene_perturbation/
+#   - public/metadata/drug_lookup.json (build with: uv run services/db/build_drug_lookup.py)
 #
 # Usage:
 #   ./scripts/setup_and_load_data.sh                   # Production mode (default) - Docker container frontend
@@ -121,7 +121,7 @@ fi
 DRUG_LOOKUP="$PROJECT_DIR/public/metadata/drug_lookup.json"
 if [ ! -f "$DRUG_LOOKUP" ]; then
     echo "ERROR: $DRUG_LOOKUP not found"
-    echo "  Build it with: uv run db/build_drug_lookup.py"
+    echo "  Build it with: uv run services/db/build_drug_lookup.py"
     exit 1
 fi
 
@@ -327,10 +327,10 @@ echo ""
 # Note: Large files like l1000-cp (718K gene sets) require ~4GB RAM on host machine
 if [ "$USE_MINIO" = true ]; then
     echo "Loading from MinIO..."
-    uv run db/ingest.py --batch --minio
+    uv run services/db/ingest.py --batch --minio
 else
     echo "Loading from local files..."
-    uv run db/ingest.py --batch
+    uv run services/db/ingest.py --batch
 fi
 step_time $STEP_START
 echo ""
@@ -340,7 +340,7 @@ echo ""
 # ------------------------------------------------------------------------------
 STEP_START=$(date +%s)
 echo "=== Step 7: Populating FDA counts from drug_lookup.json ==="
-uv run db/ingest_fda_counts.py
+uv run services/db/ingest_fda_counts.py
 step_time $STEP_START
 echo ""
 
@@ -349,7 +349,7 @@ echo ""
 # ------------------------------------------------------------------------------
 STEP_START=$(date +%s)
 echo "=== Step 8: Updating signature counts per perturbation ==="
-uv run db/ingest_fda_counts.py --update-counts
+uv run services/db/ingest_fda_counts.py --update-counts
 step_time $STEP_START
 echo ""
 
@@ -396,7 +396,7 @@ echo ""
 # ------------------------------------------------------------------------------
 STEP_START=$(date +%s)
 echo "=== Step 11: Updating background ==="
-uv run db/update_background.py
+uv run services/db/update_background.py
 step_time $STEP_START
 echo ""
 
@@ -405,7 +405,7 @@ echo ""
 # ------------------------------------------------------------------------------
 STEP_START=$(date +%s)
 echo "=== Step 12: Populating gene descriptions and summaries from NCBI ==="
-uv run db/ingest_gene_info.py
+uv run services/db/ingest_gene_info.py
 step_time $STEP_START
 echo ""
 
