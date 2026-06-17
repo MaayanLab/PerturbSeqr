@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Drug Repurposing Hub — helpers for using the data (the consumer half of this source).
 
@@ -18,10 +17,7 @@ PARQUET = Path(__file__).parent / "intermediate" / "drug_repurposing_hub.parquet
 def load() -> pd.DataFrame:
     """The merged DRH table (keyed by pert_iname). Raises if build.py hasn't run."""
     if not PARQUET.exists():
-        raise FileNotFoundError(
-            f"DRH parquet missing: {PARQUET}\n"
-            f"Build it: uv run db/etl/inputs/metadata/drug_repurposing_hub/build.py"
-        )
+        raise FileNotFoundError(f"DRH parquet missing: {PARQUET}\n")
     return pd.read_parquet(PARQUET)
 
 

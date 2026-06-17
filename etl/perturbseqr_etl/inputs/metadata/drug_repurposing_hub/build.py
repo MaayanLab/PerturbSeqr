@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Broad Drug Repurposing Hub — download into parquet file.
 
