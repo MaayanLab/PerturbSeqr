@@ -6,7 +6,7 @@ on:
       tag:
         description: 'Image tag'
         required: true
-        default: '0.2.44'
+        default: '0.2.45'
 
 jobs:
   build:
