@@ -237,3 +237,13 @@ export function getDatasetUrl(datasetName: string): string | null {
   if (!datasetName) return null
   return DATASET_URLS[datasetName.toLowerCase()] || null
 }
+
+/** GEO accession-viewer URL for a GEO accession (GSE/GDS). */
+export function getGeoUrl(gse: string): string {
+  return `https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=${gse}`
+}
+
+/** ENA Browser URL for an INSDC study accession (SRP/ERP/DRP). */
+export function getEnaUrl(acc: string): string {
+  return `https://www.ebi.ac.uk/ena/browser/view/${acc}`
+}

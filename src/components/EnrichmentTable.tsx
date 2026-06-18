@@ -10,8 +10,8 @@ import {
   getDrugInfo,
   getPerturbationUrl,
   isGenePerturbationLibrary,
-  getDatasetUrl,
 } from '@/utils/metadataLookup';
+import { DatasetCell } from '@/components/DatasetCell';
 
 export type GeneSetModalT =
   | { type: 'UserGeneSet'; description: string; genes: string[] }
@@ -190,21 +190,7 @@ export function EnrichmentTable({
           return (
             <tr key={genesetIndex} className="text-left">
               <td className={'hidden'}>{term}</td>
-              <td className="max-w-[120px]">
-                {getDatasetUrl(dataset) ? (
-                  <a
-                    href={getDatasetUrl(dataset)!}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="link link-neutral hover:link-hover truncate block"
-                    title={`View ${dataset} source`}
-                  >
-                    {dataset}
-                  </a>
-                ) : (
-                  <span className="truncate block" title={dataset}>{dataset}</span>
-                )}
-              </td>
+              <DatasetCell dataset={dataset} term={term} />
               <td className="max-w-[130px]">
                 <div>
                   <a
