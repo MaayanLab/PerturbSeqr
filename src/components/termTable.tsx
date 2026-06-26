@@ -1,5 +1,5 @@
 import React from 'react'
-import { useGeneSetGenesByIdQuery } from '@/graphql';
+import { useGeneSetGenesByIdQuery, useGeneSetDetailsByTermQuery } from '@/graphql';
 import GeneSetModal from '@/components/geneSetModal';
 import useQsState from '@/utils/useQsState';
 import Pagination from '@/components/pagination';
@@ -190,11 +190,26 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
     variables: { id: geneSetId }
   })
 
+  // Opposite-direction pair of the viewed term, fetched for the modal's PAIRED tab.
+  const pairedTerm = React.useMemo(() => {
+    const t = currTerm || ''
+    if (t.endsWith(' up')) return `${t.slice(0, -3)} down`
+    if (t.endsWith(' down')) return `${t.slice(0, -5)} up`
+    if (t.endsWith(' dn')) return `${t.slice(0, -3)} up`
+    return ''
+  }, [currTerm])
+  const pairQuery = useGeneSetDetailsByTermQuery({
+    skip: !showModal || !pairedTerm,
+    variables: { term: pairedTerm },
+  })
+  const viewedGenes = genesQuery?.data?.geneSet?.genes.nodes
+  const pairGenes = pairQuery?.data?.geneSetByTerm?.genes.nodes
+
   const anyFilterActive = datasetFilter.length > 0 || cellLineFilter.length > 0 || moaFilter.length > 0 || timepointFilter.length > 0 || concentrationFilter.length > 0 || !!dirFilter
 
   return (
     <>
-      <GeneSetModal geneset={genesQuery?.data?.geneSet?.genes.nodes} term={currTerm} dataset={currDataset} showModal={showModal} setShowModal={setShowModal}></GeneSetModal>
+      <GeneSetModal tabbed geneset={viewedGenes} geneset2={pairGenes ?? []} term={currTerm} dataset={currDataset} showModal={showModal} setShowModal={setShowModal}></GeneSetModal>
       {/* Filter bar — above the table, matching enrich page layout */}
       <div className="flex flex-col gap-2 mx-5">
         <div className="flex flex-row flex-wrap items-center gap-2">
@@ -426,10 +441,6 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
                   <td className='w-3/12'>
                     <button
                       className='btn btn-xs btn-outline p-2 h-auto'
-                      data-te-toggle="modal"
-                      data-te-target="#geneSetModal"
-                      data-te-ripple-init
-                      data-te-ripple-color="light"
                       onClick={evt => {
                         setCurrTerm(el?.term || '')
                         setGeneSetId(el?.id || '')
