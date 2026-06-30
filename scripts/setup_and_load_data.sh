@@ -6,7 +6,7 @@
 #   - Docker and docker-compose installed
 #   - dbmate installed (brew install dbmate)
 #   - uv installed for Python package management
-#   - GMT files in services/db/data/drug_perturbation/ and services/db/data/gene_perturbation/
+#   - GMT files in data/drug_perturbation/ and data/gene_perturbation/
 #   - public/metadata/drug_lookup.json (build with: uv run --project etl python -m perturbseqr_etl.build_drug_lookup)
 #
 # Usage:
@@ -327,10 +327,10 @@ echo ""
 # Note: Large files like l1000-cp (718K gene sets) require ~4GB RAM on host machine
 if [ "$USE_MINIO" = true ]; then
     echo "Loading from MinIO..."
-    uv run --project services/ingest python -m perturbseqr_ingest.ingest --batch --minio
+    uv run --project ingest python -m perturbseqr_ingest.ingest --batch --minio
 else
     echo "Loading from local files..."
-    uv run --project services/ingest python -m perturbseqr_ingest.ingest --batch
+    uv run --project ingest python -m perturbseqr_ingest.ingest --batch
 fi
 step_time $STEP_START
 echo ""
@@ -340,7 +340,7 @@ echo ""
 # ------------------------------------------------------------------------------
 STEP_START=$(date +%s)
 echo "=== Step 7: Populating FDA counts from drug_lookup.json ==="
-uv run --project services/ingest python -m perturbseqr_ingest.ingest_fda_counts
+uv run --project ingest python -m perturbseqr_ingest.ingest_fda_counts
 step_time $STEP_START
 echo ""
 
@@ -349,7 +349,7 @@ echo ""
 # ------------------------------------------------------------------------------
 STEP_START=$(date +%s)
 echo "=== Step 8: Updating signature counts per perturbation ==="
-uv run --project services/ingest python -m perturbseqr_ingest.ingest_fda_counts --update-counts
+uv run --project ingest python -m perturbseqr_ingest.ingest_fda_counts --update-counts
 step_time $STEP_START
 echo ""
 
@@ -396,7 +396,7 @@ echo ""
 # ------------------------------------------------------------------------------
 STEP_START=$(date +%s)
 echo "=== Step 11: Updating background ==="
-uv run --project services/ingest python -m perturbseqr_ingest.update_background
+uv run --project ingest python -m perturbseqr_ingest.update_background
 step_time $STEP_START
 echo ""
 
@@ -405,7 +405,7 @@ echo ""
 # ------------------------------------------------------------------------------
 STEP_START=$(date +%s)
 echo "=== Step 12: Populating gene descriptions and summaries from NCBI ==="
-uv run --project services/ingest python -m perturbseqr_ingest.ingest_gene_info
+uv run --project ingest python -m perturbseqr_ingest.ingest_gene_info
 step_time $STEP_START
 echo ""
 

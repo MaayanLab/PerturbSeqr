@@ -12,7 +12,7 @@ __pycache__
 /.pnp
 /build
 /coverage
-/services/enrich
+/enrich
 /figures
 /node_modules
 /out/

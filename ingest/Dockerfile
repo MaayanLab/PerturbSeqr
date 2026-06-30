@@ -26,26 +26,26 @@ RUN set -x \
     && chmod +x /usr/local/bin/dbmate
 
 # Install the lean ingest runtime package (deps + the perturbseqr_ingest package)
-COPY services/ingest/pyproject.toml ./ingest_src/pyproject.toml
-COPY services/ingest/perturbseqr_ingest ./ingest_src/perturbseqr_ingest
+COPY ingest/pyproject.toml ./ingest_src/pyproject.toml
+COPY ingest/perturbseqr_ingest ./ingest_src/perturbseqr_ingest
 RUN pip install --no-cache-dir ./ingest_src
 
 COPY src/config/libraries.json ./config/libraries.json
 COPY public/metadata/drug_lookup.json ./metadata/drug_lookup.json
 
 # Copy migrations for dbmate
-COPY services/db/migrations ./migrations/
+COPY db/migrations ./migrations/
 
 # Copy wipe_libraries.sql (used when INGEST_CLEAN=true)
-COPY services/db/sql/wipe_libraries.sql ./sql/wipe_libraries.sql
+COPY db/sql/wipe_libraries.sql ./sql/wipe_libraries.sql
 
 ENV INGEST_CONFIG_DIR=/app/config
 ENV INGEST_METADATA_DIR=/app/metadata
 ENV INGEST_DATA_DIR=/app/data
 
 # Copy entrypoints
-COPY services/ingest/entrypoint.sh ./entrypoint.sh
-COPY services/ingest/ingest-entrypoint.sh ./ingest-entrypoint.sh
+COPY ingest/entrypoint.sh ./entrypoint.sh
+COPY ingest/ingest-entrypoint.sh ./ingest-entrypoint.sh
 RUN chmod +x entrypoint.sh ingest-entrypoint.sh
 
 # Default entrypoint runs migrations + ingest
