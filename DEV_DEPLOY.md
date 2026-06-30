@@ -1,6 +1,8 @@
 # Dev Server Deployment
 
-kube-compose and kubectl require an active sshkube session. Run `eval "$(sshkube init)"` before the other commands.
+> Select the cluster with `sshkube use -s ssh.k8s.maayanlab.cloud` (sshkube >= 0.4 manages multiple clusters).
+
+kube-compose and kubectl require an active sshkube session. Run `eval "$(sshkube init -s ssh.k8s.maayanlab.cloud)"` before the other commands.
 
 ## Setup
 
@@ -10,17 +12,17 @@ cp .env.example .env
 #   - POSTGRES_PASSWORD: secure value
 #   - MINIO_ROOT_PASSWORD: secure value
 #   - S3_URL: http://minio:<MINIO_ROOT_PASSWORD>@perturbseqr-minio:9000/data
-#   - PUBLIC_S3_URL: https://s3.perturbseqr.k8s.dev.maayanlab.cloud/data
+#   - PUBLIC_S3_URL: https://s3.perturbseqr.k8s.maayanlab.cloud/data
 
-eval "$(sshkube init)"
+eval "$(sshkube init -s ssh.k8s.maayanlab.cloud)"
 kube-compose -f docker-compose.dev.yaml up
 ```
 
-If sshkube errors out, see [sshkube connection issues](https://docs.k8s.dev.maayanlab.cloud/00-user/70-common-issues/index.html#sshkube-connection-issues):
+If sshkube errors out, see [the cluster docs](https://docs.k8s.maayanlab.cloud/):
 
 ```bash
 sshkube kill-server
-eval "$(sshkube init)"
+eval "$(sshkube init -s ssh.k8s.maayanlab.cloud)"
 ```
 
 ## MinIO + Ingest
@@ -42,7 +44,7 @@ kubectl create -f k8s/minio-setup-job.yaml -n johnkgardner
 #provider = Minio
 #access_key_id = minio
 #secret_access_key = MINIO_ROOT_PASSWORD from .env
-#endpoint = https://s3.perturbseqr.k8s.dev.maayanlab.cloud
+#endpoint = https://s3.perturbseqr.k8s.maayanlab.cloud
 
 rclone copy --progress db/data/drug_perturbation/ perturbseqr-dev:data/
 rclone copy --progress db/data/gene_perturbation/ perturbseqr-dev:data/
@@ -99,5 +101,5 @@ kubectl create -f k8s/ingest-incremental-job.yaml -n johnkgardner
 
 ## URLs
 
-- App: https://perturbseqr.k8s.dev.maayanlab.cloud
-- MinIO Console: https://console.s3.perturbseqr.k8s.dev.maayanlab.cloud
+- App: https://perturbseqr.k8s.maayanlab.cloud
+- MinIO Console: https://console.s3.perturbseqr.k8s.maayanlab.cloud

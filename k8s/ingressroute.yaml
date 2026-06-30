@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`perturbseqr.k8s.dev.maayanlab.cloud`)
+    - match: Host(`perturbseqr.k8s.maayanlab.cloud`)
       kind: Rule
       services:
         - name: perturbseqr-app
@@ -22,7 +22,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`s3.perturbseqr.k8s.dev.maayanlab.cloud`)
+    - match: Host(`s3.perturbseqr.k8s.maayanlab.cloud`)
       kind: Rule
       services:
         - name: perturbseqr-minio
@@ -37,7 +37,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`console.s3.perturbseqr.k8s.dev.maayanlab.cloud`)
+    - match: Host(`console.s3.perturbseqr.k8s.maayanlab.cloud`)
       kind: Rule
       services:
         - name: perturbseqr-minio
