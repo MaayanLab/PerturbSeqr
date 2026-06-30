@@ -54,3 +54,8 @@ COMPOSE_PROFILES=jobs docker compose run --rm ingest
 ## Deploy
 
 See [DEV_DEPLOY.md](DEV_DEPLOY.md) for the dev Kubernetes cluster deployment workflow.
+
+## Citation
+Perturb-Seqr: Comprehensive Signature Search Engine Integrating Connectivity Maps from Multiple Sources
+John K. Gardner, Lily D. Taub, Daniel J. B. Clarke, Ido Diamant, Avi Ma'ayan
+Department of Pharmacological Sciences, Mount Sinai Center for Bioinformatics, Icahn School of Medicine at Mount Sinai, New York, New York; CFDE Data Resource Center
