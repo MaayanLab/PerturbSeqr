@@ -1,5 +1,5 @@
 """
-format_verification.py — validates that every dataset's canonical GMT in the unified term format:
+format_verification.py validates that every dataset's canonical GMT in the unified term format:
 
     perturbation::cellLine::cellType::timepoint::concentration[::extra1::extra2::...] up|down
 
@@ -20,11 +20,15 @@ import gzip
 import sys
 from pathlib import Path
 
-from perturbseqr_etl.inputs._utils import CANONICAL_GENE_PERTURBATION_TYPES, CANONICAL_GENE_PERTURBATION_METHODS, TERM_DELIMITER
+from perturbseqr_etl.data_sources import TERM_DELIMITER, DRUG_OUTPUT, GENE_OUTPUT
+from perturbseqr_etl.data_sources._pert_type import (
+    GENE_PERTURBATION_TYPES as CANONICAL_GENE_PERTURBATION_TYPES,
+    GENE_PERTURBATION_METHODS as CANONICAL_GENE_PERTURBATION_METHODS,
+)
 
-DATA_DIR = Path(__file__).parent.parent / "data"
-DRUG_DIR = DATA_DIR / "drug_perturbation"
-GENE_DIR = DATA_DIR / "gene_perturbation"
+DRUG_DIR = DRUG_OUTPUT
+GENE_DIR = GENE_OUTPUT
+DATA_DIR = DRUG_OUTPUT.parent   # top-level data/
 
 DIRECTIONS = (" up", " down")
 MIN_FIELDS = 5  # perturbation, cellLine, cellType, timepoint, concentration
@@ -32,7 +36,7 @@ MIN_FIELDS = 5  # perturbation, cellLine, cellType, timepoint, concentration
 
 def validate_term(term: str, *, is_gene: bool = False) -> str | None:
     """Return None if the term is canonical, else a human-readable reason it's not.
-    Direction must be exactly ' up' or ' down' — ' dn' / ' DN' / 'UP' etc. are non-canonical."""
+    Direction must be exactly ' up' or ' down'. ' dn' / ' DN' / 'UP' etc. are non-canonical."""
     if term.endswith(" dn"):
         return "direction ' dn' is non-canonical; use ' down'"
     if not any(term.endswith(d) for d in DIRECTIONS):
@@ -82,7 +86,7 @@ def validate_gmt(path: Path, max_warn: int = 5, *, is_gene: bool = False) -> tup
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Validate canonical GMTs in db/data/")
+    parser = argparse.ArgumentParser(description="Validate canonical GMTs in data/")
     parser.add_argument("--max-warn", type=int, default=5, help="Max bad-term examples per file (default 5)")
     args = parser.parse_args()
 
@@ -115,7 +119,7 @@ def main():
         print(f"\nFAIL: {len(files_with_errors)} file(s) contain non-canonical terms:")
         for name in files_with_errors:
             print(f"  - {name}")
-        print("\nFix the offending dataset.py modules in db/etl/inputs/ so they emit canonical format.")
+        print("\nFix the offending data_sources/<dataset>/gmt.py so they emit canonical format.")
         sys.exit(1)
     print("All GMTs are canonical ✓")
 

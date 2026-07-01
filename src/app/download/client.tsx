@@ -332,6 +332,7 @@ type Dataset = {
   note?: string
   noteLinkText?: string
   noteUrl?: string
+  noteLinks?: { text: string; url: string }[]
   termKey?: string  // key into termStructures
 }
 
@@ -350,6 +351,10 @@ const drugPerturbationDatasets: Dataset[] = [
       { url: `${MINIO_BASE}/cmap-ratio-matrix.txt.gz`, label: 'Fold Change Ratios' },
       { url: `${MINIO_BASE}/cmap-lfc.h5`, label: 'Limma log2FC' },
     ],
+    metadata: [
+      { url: `${MINIO_BASE}/microarrays-cmap-cell_line_metadata.parquet`, label: 'Cell Line' },
+      { url: `${MINIO_BASE}/microarrays-cmap-drug_metadata.parquet`, label: 'Drug' },
+    ],
     termKey: 'microarrays-cmap',
   },
   {
@@ -365,6 +370,9 @@ const drugPerturbationDatasets: Dataset[] = [
     fullSignatures: [
       { url: `${MINIO_BASE}/creeds-chem-full.json`, label: 'Fold Changes (JSON)' },
     ],
+    metadata: [
+      { url: `${MINIO_BASE}/creeds-chem-drug_metadata.parquet`, label: 'Drug' },
+    ],
     termKey: 'creeds-chem',
   },
   {
@@ -377,6 +385,10 @@ const drugPerturbationDatasets: Dataset[] = [
     gmtUrl: `${MINIO_BASE}/deepcover-moa.gmt.gz`,
     fullSignatures: [
       { url: `${MINIO_BASE}/deepcover-moa-full.txt.gz`, label: 'CD Coefficients' },
+    ],
+    metadata: [
+      { url: `${MINIO_BASE}/deepcover-moa-cell_line_metadata.parquet`, label: 'Cell Line' },
+      { url: `${MINIO_BASE}/deepcover-moa-drug_metadata.parquet`, label: 'Drug' },
     ],
     termKey: 'deepcover-moa',
   },
@@ -403,6 +415,11 @@ const drugPerturbationDatasets: Dataset[] = [
     note: 'See also ',
     noteLinkText: 'L2S2',
     noteUrl: 'https://l2s2.maayanlab.cloud/download',
+    noteLinks: [{ text: 'SigCom LINCS', url: 'https://maayanlab.cloud/sigcom-lincs/#/Download' }],
+    metadata: [
+      { url: `${MINIO_BASE}/lincs-l1000-cp-cell_line_metadata.parquet`, label: 'Cell Line' },
+      { url: `${MINIO_BASE}/lincs-l1000-cp-drug_metadata.parquet`, label: 'Drug' },
+    ],
     termKey: 'lincs-l1000-cp',
   },
   {
@@ -420,6 +437,10 @@ const drugPerturbationDatasets: Dataset[] = [
     note: 'See also ',
     noteLinkText: 'DRUGseqr',
     noteUrl: 'https://drugseqr.maayanlab.cloud/download',
+    metadata: [
+      { url: `${MINIO_BASE}/nibr-drug-seq-cell_line_metadata.parquet`, label: 'Cell Line' },
+      { url: `${MINIO_BASE}/nibr-drug-seq-drug_metadata.parquet`, label: 'Drug' },
+    ],
     termKey: 'nibr-drug-seq',
   },
   {
@@ -440,6 +461,9 @@ const drugPerturbationDatasets: Dataset[] = [
     note: 'See also ',
     noteLinkText: 'RummaGEO',
     noteUrl: 'https://rummageo.com',
+    metadata: [
+      { url: `${MINIO_BASE}/rummageo-chem-drug_metadata.parquet`, label: 'Drug' },
+    ],
     termKey: 'rummageo-chem',
   },
   {
@@ -452,6 +476,10 @@ const drugPerturbationDatasets: Dataset[] = [
     gmtUrl: `${MINIO_BASE}/sciplex.gmt.gz`,
     fullSignatures: [
       { url: `${MINIO_BASE}/sciplex-full.txt.gz`, label: 'CD Coefficients' },
+    ],
+    metadata: [
+      { url: `${MINIO_BASE}/sciplex-cell_line_metadata.parquet`, label: 'Cell Line' },
+      { url: `${MINIO_BASE}/sciplex-drug_metadata.parquet`, label: 'Drug' },
     ],
     termKey: 'sciplex',
   },
@@ -469,7 +497,6 @@ const drugPerturbationDatasets: Dataset[] = [
     metadata: [
       { url: `${MINIO_BASE}/tahoe-100m-cell_line_metadata.parquet`, label: 'Cell Line' },
       { url: `${MINIO_BASE}/tahoe-100m-drug_metadata.parquet`, label: 'Drug' },
-      { url: `${MINIO_BASE}/tahoe-100m-geneset_genes_metadata.parquet`, label: 'Gene Set Genes' },
     ],
     termKey: 'tahoe-100m',
   },
@@ -502,6 +529,9 @@ const genePerturbationDatasets: Dataset[] = [
     fullSignatures: [
       { url: `${MINIO_BASE}/creeds-gene-full.json`, label: 'Fold Changes (JSON)' },
     ],
+    metadata: [
+      { url: `${MINIO_BASE}/creeds-gene-gene_target_metadata.parquet`, label: 'Gene Targets' },
+    ],
     termKey: 'creeds-gene',
   },
   {
@@ -517,6 +547,11 @@ const genePerturbationDatasets: Dataset[] = [
     note: 'See also ',
     noteLinkText: 'L2S2',
     noteUrl: 'https://l2s2.maayanlab.cloud/download',
+    noteLinks: [{ text: 'SigCom LINCS', url: 'https://maayanlab.cloud/sigcom-lincs/#/Download' }],
+    metadata: [
+      { url: `${MINIO_BASE}/lincs-l1000-xpr-cell_line_metadata.parquet`, label: 'Cell Line' },
+      { url: `${MINIO_BASE}/lincs-l1000-xpr-gene_target_metadata.parquet`, label: 'Gene Targets' },
+    ],
     termKey: 'lincs-l1000-xpr',
   },
   {
@@ -530,6 +565,10 @@ const genePerturbationDatasets: Dataset[] = [
     fullSignatures: [
       { url: `${MINIO_BASE}/perturb-atlas-human-full.txt.gz`, label: 'CD Coefficients' },
     ],
+    metadata: [
+      { url: `${MINIO_BASE}/perturb-atlas-human-cell_line_metadata.parquet`, label: 'Cell Line' },
+      { url: `${MINIO_BASE}/perturb-atlas-human-gene_target_metadata.parquet`, label: 'Gene Targets' },
+    ],
     termKey: 'perturb-atlas-human',
   },
   {
@@ -542,6 +581,10 @@ const genePerturbationDatasets: Dataset[] = [
     gmtUrl: `${MINIO_BASE}/perturb-atlas-mouse.gmt.gz`,
     fullSignatures: [
       { url: `${MINIO_BASE}/perturb-atlas-mouse-full.txt.gz`, label: 'CD Coefficients' },
+    ],
+    metadata: [
+      { url: `${MINIO_BASE}/perturb-atlas-mouse-cell_line_metadata.parquet`, label: 'Cell Line' },
+      { url: `${MINIO_BASE}/perturb-atlas-mouse-gene_target_metadata.parquet`, label: 'Gene Targets' },
     ],
     termKey: 'perturb-atlas-mouse',
   },
@@ -557,6 +600,10 @@ const genePerturbationDatasets: Dataset[] = [
       { url: `${MINIO_BASE}/replogle-k562-genomewide-full.txt.gz`, label: 'K562 Genome-wide CD Coefficients' },
       { url: `${MINIO_BASE}/replogle-k562-essential-full.txt.gz`, label: 'K562 Essential CD Coefficients' },
       { url: `${MINIO_BASE}/replogle-rpe1-essential-full.txt.gz`, label: 'RPE1 Essential CD Coefficients' },
+    ],
+    metadata: [
+      { url: `${MINIO_BASE}/replogle-perturb-seq-cell_line_metadata.parquet`, label: 'Cell Line' },
+      { url: `${MINIO_BASE}/replogle-perturb-seq-gene_target_metadata.parquet`, label: 'Gene Targets' },
     ],
     termKey: 'replogle-perturb-seq',
   },
@@ -578,12 +625,39 @@ const genePerturbationDatasets: Dataset[] = [
     note: 'See also ',
     noteLinkText: 'RummaGEO',
     noteUrl: 'https://rummageo.com',
+    metadata: [
+      { url: `${MINIO_BASE}/rummageo-gene-gene_target_metadata.parquet`, label: 'Gene Targets' },
+    ],
     termKey: 'rummageo-gene',
   },
 ]
 
-// Metadata datasets (external links only)
+// Metadata datasets — our collated overall files (downloads) + external per-source links.
 const metadataDatasets: Dataset[] = [
+  {
+    title: 'PerturbSeqr Drug Metadata',
+    value: 'Drug metadata',
+    info: 'Collated drug annotations (PubChem CID, MoA, target, FDA) across all datasets',
+    publicationUrl: '',
+    sourceUrl: `${MINIO_BASE}/perturbseqr-drug_metadata.parquet`,
+    sourceLabel: 'Download',
+  },
+  {
+    title: 'PerturbSeqr Cell Line Metadata',
+    value: 'Cell line metadata',
+    info: 'Collated cell-line annotations (Cellosaurus, DepMap, Organ) across all datasets',
+    publicationUrl: '',
+    sourceUrl: `${MINIO_BASE}/perturbseqr-cell_line_metadata.parquet`,
+    sourceLabel: 'Download',
+  },
+  {
+    title: 'PerturbSeqr Gene Target Metadata',
+    value: 'Gene metadata',
+    info: 'Collated perturbed-gene annotations (+ perturbation type) across all gene datasets',
+    publicationUrl: '',
+    sourceUrl: `${MINIO_BASE}/perturbseqr-gene_target_metadata.parquet`,
+    sourceLabel: 'Download',
+  },
   {
     title: 'Drug Repurposing Hub',
     value: 'Drug metadata',
@@ -734,6 +808,9 @@ function DatasetCard({ dataset, showDownloads = true, liveCount, gmtSize }: { da
           {dataset.noteLinkText && dataset.noteUrl && (
             <a href={dataset.noteUrl} target="_blank" rel="noopener noreferrer" className="link link-neutral">{dataset.noteLinkText}</a>
           )}
+          {dataset.noteLinks?.map((l) => (
+            <span key={l.url}>, <a href={l.url} target="_blank" rel="noopener noreferrer" className="link link-neutral">{l.text}</a></span>
+          ))}
         </p>
       )}
       {structure && (
