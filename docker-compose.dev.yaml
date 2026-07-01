@@ -1,7 +1,7 @@
 services:
   perturbseqr-postgres:
     build: db
-    image: johnkgardner/perturbseqr-postgres:0.2.44
+    image: johnkgardner/perturbseqr-postgres:0.2.45
     platform: linux/amd64
     restart: unless-stopped
     shm_size: 1Gb
@@ -32,12 +32,12 @@ services:
         published: 9000
         x-kubernetes:
           annotations:
-            maayanlab.cloud/ingress: https://s3.perturbseqr.k8s.dev.maayanlab.cloud
+            maayanlab.cloud/ingress: https://s3.perturbseqr.k8s.maayanlab.cloud
       - target: 9001
         published: 9001
         x-kubernetes:
           annotations:
-            maayanlab.cloud/ingress: https://console.s3.perturbseqr.k8s.dev.maayanlab.cloud
+            maayanlab.cloud/ingress: https://console.s3.perturbseqr.k8s.maayanlab.cloud
     volumes:
       - minio-data:/data
     healthcheck:
@@ -48,7 +48,7 @@ services:
 
   perturbseqr-enrich:
     build: enrich
-    image: johnkgardner/perturbseqr-enrich:0.2.44
+    image: johnkgardner/perturbseqr-enrich:0.2.45
     platform: linux/amd64
     restart: unless-stopped
     deploy:
@@ -73,37 +73,37 @@ services:
     build:
       context: .
       args:
-        - NEXT_PUBLIC_MINIO_URL=https://s3.perturbseqr.k8s.dev.maayanlab.cloud/data
-    image: johnkgardner/perturbseqr-app:0.2.44-dev
+        - NEXT_PUBLIC_MINIO_URL=https://s3.perturbseqr.k8s.maayanlab.cloud/data
+    image: johnkgardner/perturbseqr-app:0.2.45-dev
     platform: linux/amd64
     restart: unless-stopped
     environment:
-      - PUBLIC_URL=https://perturbseqr.k8s.dev.maayanlab.cloud
+      - PUBLIC_URL=https://perturbseqr.k8s.maayanlab.cloud
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres
       - NODE_ENV=production
       - ENRICH_URL=http://perturbseqr-enrich:8000
-      - NEXT_PUBLIC_MINIO_URL=https://s3.perturbseqr.k8s.dev.maayanlab.cloud/data
+      - NEXT_PUBLIC_MINIO_URL=https://s3.perturbseqr.k8s.maayanlab.cloud/data
       - MINIO_ENDPOINT=perturbseqr-minio:9000
     ports:
       - target: 3000
         published: 3000
         x-kubernetes:
           annotations:
-            maayanlab.cloud/ingress: https://perturbseqr.k8s.dev.maayanlab.cloud
+            maayanlab.cloud/ingress: https://perturbseqr.k8s.maayanlab.cloud
     depends_on:
       perturbseqr-postgres:
         condition: service_healthy
 
   minio-setup:
     build: minio
-    image: johnkgardner/perturbseqr-minio-setup:0.2.44
+    image: johnkgardner/perturbseqr-minio-setup:0.2.45
     platform: linux/amd64
     restart: "no"
     x-kubernetes:
       exclude: true   # k8s uses k8s/minio-setup-job.yaml instead
     environment:
       - S3_URL=http://minio:${MINIO_ROOT_PASSWORD}@perturbseqr-minio:9000/data
-      - PUBLIC_S3_URL=https://s3.perturbseqr.k8s.dev.maayanlab.cloud/data
+      - PUBLIC_S3_URL=https://s3.perturbseqr.k8s.maayanlab.cloud/data
     depends_on:
       perturbseqr-minio:
         condition: service_healthy
@@ -126,7 +126,7 @@ services:
     build:
       context: .
       dockerfile: ingest/Dockerfile
-    image: johnkgardner/perturbseqr-ingest:0.2.44
+    image: johnkgardner/perturbseqr-ingest:0.2.45
     platform: linux/amd64
     restart: "no"
     x-kubernetes:
@@ -151,11 +151,11 @@ volumes:
   perturbseqr-data:
     x-kubernetes:
       size: 50Gi
-      class: local-path
+      class: ceph-block
   minio-data:
     x-kubernetes:
-      size: 5Gi
-      class: local-path
+      size: 50Gi
+      class: ceph-block-no-replicas
 
 x-kubernetes:
   name: perturbseqr

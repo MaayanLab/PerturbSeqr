@@ -8,13 +8,22 @@ export default function ShareButton() {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [url, setUrl] = useState("");
+  const [copied, setCopied] = useState(false);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
   const openShare = () => {
     setUrl(window.location.href);
+    setCopied(false);
     dialogRef.current?.showModal();
     requestAnimationFrame(() => inputRef.current?.select());
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
   };
 
   return (
@@ -43,6 +52,15 @@ export default function ShareButton() {
                 onFocus={(e) => e.currentTarget.select()}
                 className="input input-bordered w-full"
               />
+              <div className="mt-3 flex justify-center">
+                <button
+                  type="button"
+                  className="btn btn-sm btn-neutral"
+                  onClick={copyToClipboard}
+                >
+                  {copied ? "Copied!" : "Copy to Clipboard"}
+                </button>
+              </div>
             </div>
             <form method="dialog" className="modal-backdrop">
               <button aria-label="Close">close</button>

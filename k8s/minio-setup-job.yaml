@@ -11,7 +11,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: minio-setup
-        image: johnkgardner/perturbseqr-minio-setup:0.2.44
+        image: johnkgardner/perturbseqr-minio-setup:0.2.45
         env:
         - name: S3_URL
           valueFrom: { secretKeyRef: { name: perturbseqr-env, key: S3_URL } }

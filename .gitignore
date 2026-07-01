@@ -80,6 +80,9 @@ public/umap/enrich/
 # Use case data files
 *.xlsx
 
+# UMAP figures (too big for repo storage)
+research/manuscript/figures/umap
+
 # Data files
 *.tsv
 *.rpt
@@ -91,6 +94,7 @@ etl/perturbseqr_etl/data_sources/_cache/
 etl/perturbseqr_etl/data_sources/drug_perturbation/
 etl/perturbseqr_etl/data_sources/gene_perturbation/
 etl/perturbseqr_etl/intermediate/
+# Per-dataset + metadata-source data
 etl/perturbseqr_etl/data_sources/**/intermediate/
 etl/perturbseqr_etl/data_sources/**/raw/
 etl/perturbseqr_etl/data_sources/**/upstream/

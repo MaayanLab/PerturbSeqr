@@ -91,3 +91,27 @@ export function formatPerturbationWithType(
     })
     .join(' | ')
 }
+
+/** First `extras` field matching `re` (an accession prefix anchored at `^`), comma-split into bare
+ *  accessions; [] if none. Shared by the GEO/SRA extractors below. */
+function extractAccessions(term: string, re: RegExp): string[] {
+  const hit = parseTerm(term).extras.find((p) => re.test(p))
+  if (!hit) return []
+  return hit
+    .split(',')
+    .map((a) => a.match(re)?.[0])
+    .filter((a): a is string => !!a)
+}
+
+/**
+ * GEO accession(s) (GSE or GDS) embedded in a GEO-mined term (RummaGEO, CREEDS); [] if none.
+ * Strips any CREEDS `.NNN` suffix; a comma-joined RummaGEO value is a SubSeries + its parent SuperSeries.
+ */
+export function getGeoAccessions(term: string): string[] {
+  return extractAccessions(term, /^(GSE|GDS)\d+/)
+}
+
+/** SRA-study accession(s) (SRP/ERP/DRP) embedded in a term (e.g. PerturbAtlas); [] if none. */
+export function getSraStudyAccessions(term: string): string[] {
+  return extractAccessions(term, /^(SRP|ERP|DRP)\d+/)
+}
