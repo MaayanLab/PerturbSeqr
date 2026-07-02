@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from perturbseqr_etl.data_sources import DATA_SOURCES_DIR, METADATA_DIR
+from perturbseqr_etl.data_sources import METADATA_DIR
 from perturbseqr_etl.metadata import write_table
 
 KINDS = ("drug", "cell_line", "gene_target")
@@ -103,11 +103,12 @@ def _build_key(df: pd.DataFrame, kind: str) -> pd.Series:
     return key
 
 
-def collate(kind: str, *, data_sources_dir: Path = DATA_SOURCES_DIR, out_dir: Path = METADATA_DIR) -> Path:
-    files = sorted(data_sources_dir.glob(f"**/intermediate/*-{kind}_metadata.parquet"))
+def collate(kind: str, *, metadata_dir: Path = METADATA_DIR, out_dir: Path = METADATA_DIR) -> Path:
+    files = sorted(f for f in metadata_dir.glob(f"*-{kind}_metadata.parquet")
+                   if not f.name.startswith("perturbseqr-"))     # skip our own collated outputs
     if not files:
         raise FileNotFoundError(
-            f"No {kind} metadata under {data_sources_dir}. Run the per-dataset metadata builders first.")
+            f"No {kind} metadata in {metadata_dir}. Run the per-dataset metadata builders first.")
     df = pd.concat([_load_one(p, kind) for p in files], ignore_index=True)
     n_in = len(df)
     df, n_fill, n_amb = _backfill(df, kind)

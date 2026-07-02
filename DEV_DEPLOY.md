@@ -51,13 +51,8 @@ rclone copy --progress data/drug_perturbation/ perturbseqr-dev:data/
 rclone copy --progress data/gene_perturbation/ perturbseqr-dev:data/
 rclone copy --progress data/full-signatures/ perturbseqr-dev:data/
 
-# Collated metadata parquets (drug, cell_line, gene_target)
-rclone copy --progress data/metadata/ perturbseqr-dev:data/ --include "perturbseqr-*_metadata.parquet"
-
-# Per-dataset metadata parquets, flattened from each dataset's intermediate/ dir
-find etl/perturbseqr_etl/data_sources -path '*/intermediate/*_metadata.parquet' | while read -r f; do
-  rclone copyto --progress "$f" "perturbseqr-dev:data/$(basename "$f")"
-done
+# Metadata parquets (collated + per-dataset, all flat in data/metadata/; skips source inputs there)
+rclone copy --progress data/metadata/ perturbseqr-dev:data/ --include "*_metadata.parquet"
 ```
 
 `drug_lookup.json` ships inside the app image (served by Next from `public/metadata/`), so it does not need a MinIO upload.

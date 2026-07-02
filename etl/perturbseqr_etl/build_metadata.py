@@ -12,7 +12,7 @@ import argparse
 import importlib
 from pathlib import Path
 
-from perturbseqr_etl.data_sources import CACHE_DIR
+from perturbseqr_etl.data_sources import CACHE_DIR, DATA_SOURCES_DIR, METADATA_DIR
 from perturbseqr_etl.data_sources.metadata_registry import DATASETS
 from perturbseqr_etl.metadata.cell_line import build_cell_line_metadata
 from perturbseqr_etl.metadata.drug import build_drug_metadata
@@ -47,6 +47,17 @@ def _run_one(ds_name: str, kind: str, build, no_cache: bool) -> Path:
     return _BUILDERS[kind](gmt_path, out_dir, **kwargs)
 
 
+def _gather_metadata() -> int:
+    """Move each dataset's metadata files out of its intermediate/ dir into the flat METADATA_DIR,
+    next to the collated tables, so all metadata lives in one place for collation and upload."""
+    METADATA_DIR.mkdir(parents=True, exist_ok=True)
+    files = [*DATA_SOURCES_DIR.glob("**/intermediate/*_metadata.parquet"),
+             *DATA_SOURCES_DIR.glob("**/intermediate/*_metadata.csv")]
+    for f in files:
+        f.replace(METADATA_DIR / f.name)
+    return len(files)
+
+
 def run(no_cache: bool = False, only: str | None = None, only_kind: str | None = None) -> int:
     """Build metadata for the registry datasets (optionally one `only` dataset / `only_kind`).
     SKIP when a dataset's GMT is missing. Returns the number of failures."""
@@ -68,7 +79,8 @@ def run(no_cache: bool = False, only: str | None = None, only_kind: str | None =
             except Exception as e:
                 print(f"    FAIL: {type(e).__name__}: {e}")
                 n_fail += 1
-    print(f"\nMetadata summary: {n_ok} ok, {n_skip} skipped, {n_fail} failed")
+    n_moved = _gather_metadata()
+    print(f"\nMetadata summary: {n_ok} ok, {n_skip} skipped, {n_fail} failed  ({n_moved} files → {METADATA_DIR})")
     return n_fail
 
 
