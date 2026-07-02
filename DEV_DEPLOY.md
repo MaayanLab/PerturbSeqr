@@ -46,10 +46,21 @@ kubectl create -f k8s/minio-setup-job.yaml -n johnkgardner
 #secret_access_key = MINIO_ROOT_PASSWORD from .env
 #endpoint = https://s3.perturbseqr.k8s.maayanlab.cloud
 
-rclone copy --progress db/data/drug_perturbation/ perturbseqr-dev:data/
-rclone copy --progress db/data/gene_perturbation/ perturbseqr-dev:data/
-rclone copy --progress db/data/full-signatures/ perturbseqr-dev:data/
+# GMTs
+rclone copy --progress data/drug_perturbation/ perturbseqr-dev:data/
+rclone copy --progress data/gene_perturbation/ perturbseqr-dev:data/
+rclone copy --progress data/full-signatures/ perturbseqr-dev:data/
+
+# Collated metadata parquets (drug, cell_line, gene_target)
+rclone copy --progress data/metadata/ perturbseqr-dev:data/ --include "perturbseqr-*_metadata.parquet"
+
+# Per-dataset metadata parquets, flattened from each dataset's intermediate/ dir
+find etl/perturbseqr_etl/data_sources -path '*/intermediate/*_metadata.parquet' | while read -r f; do
+  rclone copyto --progress "$f" "perturbseqr-dev:data/$(basename "$f")"
+done
 ```
+
+`drug_lookup.json` ships inside the app image (served by Next from `public/metadata/`), so it does not need a MinIO upload.
 
 ```bash
 # Run ingest
