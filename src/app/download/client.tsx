@@ -506,14 +506,19 @@ const drugPerturbationDatasets: Dataset[] = [
 const genePerturbationDatasets: Dataset[] = [
   {
     title: 'CM4AI',
-    value: '0 signatures',
-    info: '',
-    publicationUrl: 'https://www.biorxiv.org/content/10.1101/2024.11.03.621734v2',
+    libraryName: 'CM4AI',
+    info: 'CRISPRi knockdown in KOLF2.1J hiPSCs (Characteristic Direction)',
+    publicationUrl: 'https://www.nature.com/articles/s41587-026-03199-w',
     sourceUrl: 'https://cm4ai.org',
     sourceLabel: 'CM4AI',
+    gmtUrl: `${MINIO_BASE}/cm4ai.gmt.gz`,
     fullSignatures: [
       { url: 'https://figshare.com/s/ee85bb1880921326249b', label: 'Figshare' },
       { url: `${MINIO_BASE}/cm4ai-cd-coefficients.h5ad`, label: 'CD Coefficients' },
+    ],
+    metadata: [
+      { url: `${MINIO_BASE}/cm4ai-cell_line_metadata.parquet`, label: 'Cell Line' },
+      { url: `${MINIO_BASE}/cm4ai-gene_target_metadata.parquet`, label: 'Gene Targets' },
     ],
   },
   {

@@ -79,7 +79,10 @@ DATASETS = [
     Dataset("creeds_gene", {
         "gene_target": Build(),
     }),
-    # cm4ai: embargoed, so it is skipped.
+    Dataset("cm4ai", {                      # upstream GMTs are manual placement
+        "cell_line": Build(),
+        "gene_target": Build(),
+    }),
 ]
 
 DATASET_NAMES = [d.name for d in DATASETS]   # replaces canonicalize_gmts.DATASET_MODULES
