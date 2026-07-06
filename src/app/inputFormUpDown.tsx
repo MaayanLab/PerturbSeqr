@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import example from './example.json'
-import uniqueArray from '@/utils/uniqueArray'
+import parseGenes from '@/utils/parseGenes'
 import { useAddUserGeneSetMutation, useFetchUserGeneSetQuery } from '@/graphql'
 import classNames from 'classnames'
 import { useRouter } from 'next/navigation'
@@ -52,8 +52,8 @@ export default function InputFormUpDown({setInputSingle, selectedLibraries = [],
       }
     }
   }, [initialGeneSetDown])
-  const genesUp = React.useMemo(() => uniqueArray(rawGenesUp.split(/[;,\t\r\n\s]+/).filter(v => v)), [rawGenesUp])
-  const genesDown = React.useMemo(() => uniqueArray(rawGenesDown.split(/[;,\t\r\n\s]+/).filter(v => v)), [rawGenesDown])
+  const genesUp = React.useMemo(() => parseGenes(rawGenesUp), [rawGenesUp])
+  const genesDown = React.useMemo(() => parseGenes(rawGenesDown), [rawGenesDown])
   const [addUserGeneSetMutation, { loading, error }] = useAddUserGeneSetMutation()
   var fileReader = React.useRef<FileReader | null>(null);
   const fileInputUpRef = React.useRef<HTMLInputElement>(null);
@@ -63,12 +63,12 @@ export default function InputFormUpDown({setInputSingle, selectedLibraries = [],
 
   const handleFileReadUp = React.useCallback(() => {
       const content = fileReader!.current!.result as string;
-      setRawGenesUp(content!);
+      setRawGenesUp(parseGenes(content!).join('\n'));
   }, [setRawGenesUp])
 
   const handleFileReadDown = React.useCallback(() => {
     const content = fileReader!.current!.result as string;
-    setRawGenesDown(content!);
+    setRawGenesDown(parseGenes(content!).join('\n'));
   }, [setRawGenesDown])
 
   const handleFileChosenUp = React.useCallback((file: File | null) => {

@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import example from './example.json'
-import uniqueArray from '@/utils/uniqueArray'
+import parseGenes from '@/utils/parseGenes'
 import { useAddUserGeneSetMutation, useFetchUserGeneSetQuery } from '@/graphql'
 import classNames from 'classnames'
 import { useRouter } from 'next/navigation'
@@ -37,14 +37,7 @@ export default function InputForm({setInputSingle, selectedLibraries = [], initi
       }
     }
   }, [initialGeneSet])
-  const genes = React.useMemo(() =>
-    uniqueArray(
-      rawGenes
-        .split(/[;,\t\r\n\s]+/) // Split on common delimiters
-        .filter(v => /^[A-Za-z0-9-]+$/.test(v) && v.length > 1) // Allow letters, numbers, and hyphens (e.g. MT-ATP6 has hyphen, C7orf50 has lowercase 'orf' - both appear in ginkgo-cd dataset)
-    ),
-    [rawGenes]
-  );
+  const genes = React.useMemo(() => parseGenes(rawGenes), [rawGenes]);
   
   const [addUserGeneSetMutation, { loading, error }] = useAddUserGeneSetMutation()
   var fileReader = React.useRef<FileReader | null>(null);
@@ -53,8 +46,7 @@ export default function InputForm({setInputSingle, selectedLibraries = [], initi
 
   const handleFileRead = React.useCallback(() => {
       const content = fileReader!.current!.result as string;
-      setRawGenes(content!.split(/[;,\t\r\n\s]+/) // Split on common delimiters
-      .filter(v => /^[A-Za-z0-9-]+$/.test(v) && v.length > 1).join('\n')); // Must match the genes useMemo filter on line 17
+      setRawGenes(parseGenes(content!).join('\n'));
   }, [setRawGenes])
 
 
