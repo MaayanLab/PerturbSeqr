@@ -138,6 +138,7 @@ MINIO_FILE_MAPPING = {
     "replogle-perturb-seq.gmt.gz": "replogle-perturb-seq",
     "creeds-gene.gmt.gz": "creeds-gene",
     "rummageo-gene.gmt.gz": "rummageo-gene",
+    "cm4ai.gmt.gz": "cm4ai",
 }
 
 
