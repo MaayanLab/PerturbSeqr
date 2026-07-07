@@ -26,21 +26,24 @@ kubectl create -f k8s/minio-setup-job.yaml -n perturbseqr
 ```
 
 ```bash
-# Add rclone config
+# Add rclone config for both prod (dest) and dev (source) MinIO:
 #[perturbseqr]
 #type = s3
 #provider = Minio
 #access_key_id = minio
-#secret_access_key = MINIO_ROOT_PASSWORD from .env
+#secret_access_key = prod MINIO_ROOT_PASSWORD from .env
 #endpoint = https://s3.perturbseqr.maayanlab.cloud
+#
+#[perturbseqr-dev]
+#type = s3
+#provider = Minio
+#access_key_id = minio
+#secret_access_key = dev MINIO_ROOT_PASSWORD
+#endpoint = https://s3.perturbseqr.k8s.maayanlab.cloud
 
-# GMTs
-rclone copy --progress data/drug_perturbation/ perturbseqr:data/
-rclone copy --progress data/gene_perturbation/ perturbseqr:data/
-rclone copy --progress data/full-signatures/ perturbseqr:data/
-
-# Metadata parquets (collated + per-dataset, all flat in data/metadata/; skips source inputs there)
-rclone copy --progress data/metadata/ perturbseqr:data/ --include "*_metadata.parquet"
+# Sync GMTs, metadata parquets, and full-signature files from dev MinIO to prod MinIO.
+# Everything is flat at data/ root. enrich/ is excluded since the ingest rebuilds it.
+rclone copy --progress perturbseqr-dev:data/ perturbseqr:data/ --exclude "enrich/**"
 ```
 
 `drug_lookup.json` ships inside the app image (served by Next from `public/metadata/`), so it does not need a MinIO upload.
@@ -87,7 +90,8 @@ kube-compose up
 kubectl create secret generic perturbseqr-env --from-env-file=.env -n perturbseqr
 kubectl create -f k8s/minio-setup-job.yaml -n perturbseqr
 
-# Re-upload GMT files
+# Re-sync data from dev MinIO (see MinIO + Ingest above)
+rclone copy --progress perturbseqr-dev:data/ perturbseqr:data/ --exclude "enrich/**"
 
 # Fresh ingest
 kubectl create -f k8s/ingest-incremental-job.yaml -n perturbseqr
