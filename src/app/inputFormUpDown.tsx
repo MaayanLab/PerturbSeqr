@@ -102,7 +102,7 @@ export default function InputFormUpDown({setInputSingle, selectedLibraries = [],
         className="flex flex-col place-items-end"
         onSubmit={async (evt) => {
           evt.preventDefault()
-          if (genesUp.length < 1 || genesDown.length < 1) return
+          if (genesUp.length < 1 || genesDown.length < 1 || genesUp.length > 3000 || genesDown.length > 3000) return
           
           const resultUp = await addUserGeneSetMutation({
             variables: {
@@ -171,7 +171,8 @@ export default function InputFormUpDown({setInputSingle, selectedLibraries = [],
         </div>
         <span className={classNames("loading", "w-6", { 'hidden': !loading })}></span>
         <div className={classNames("alert alert-error", { 'hidden': !error })}>{error?.message ?? null}</div>
-        <button className="btn btn-neutral mx-auto" type="submit" disabled={(genesUp.length < 1 || genesDown.length < 1)}>Submit</button>
+        <button className="btn btn-neutral mx-auto" type="submit" disabled={(genesUp.length < 1 || genesDown.length < 1 || genesUp.length > 3000 || genesDown.length > 3000)}>Submit</button>
+        {(genesUp.length > 3000 || genesDown.length > 3000) && <div className="alert alert-error">Gene set is too large. Please enter a gene set with less than 3000 genes.</div>}
         <button className="btn btn-outline btn-sm mx-auto mt-1" type="button" disabled={genesUp.length < 1 && genesDown.length < 1} onClick={() => { setRawGenesUp(''); setRawGenesDown(''); if (fileInputUpRef.current) fileInputUpRef.current.value = ''; if (fileInputDownRef.current) fileInputDownRef.current.value = '' }}>Clear</button>
       </form>
       <button className='btn btn-outline text-xs p-2' onClick={() => setInputSingle(true)}>SWITCH TO SINGLE SET INPUT</button>
