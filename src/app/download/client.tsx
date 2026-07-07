@@ -507,7 +507,7 @@ const genePerturbationDatasets: Dataset[] = [
   {
     title: 'CM4AI',
     libraryName: 'CM4AI',
-    info: 'CRISPRi knockdown in KOLF2.1J hiPSCs (Characteristic Direction)',
+    info: 'CRISPRi knockdown in KOLF2.1J hiPSCs (limma-voom)',
     publicationUrl: 'https://www.nature.com/articles/s41587-026-03199-w',
     sourceUrl: 'https://cm4ai.org',
     sourceLabel: 'CM4AI',
