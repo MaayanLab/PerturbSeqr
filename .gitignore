@@ -81,7 +81,7 @@ public/umap/enrich/
 *.xlsx
 
 # UMAP figures (too big for repo storage)
-research/manuscript/figures/umap
+manuscript/figures/umap
 
 # Data files
 *.tsv
