@@ -1140,7 +1140,7 @@ function EnrichmentResults({
                 <th>Dataset</th>
                 <th className="relative group">
                   <div className="absolute z-10 left-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
-                    Preclinical compound, drug, or gene targeted by CRISPR KO
+                    Preclinical compound, drug, or perturbed gene
                   </div>
                   <span className="inline-flex">
                     Perturbation
