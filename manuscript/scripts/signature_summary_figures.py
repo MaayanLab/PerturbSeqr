@@ -16,18 +16,27 @@ import re
 import warnings
 import argparse
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 warnings.filterwarnings("ignore")
 # Directories
 BASE_DIR = Path(__file__).parent.parent
 METADATA_DIR = BASE_DIR.parent / "public" / "metadata"
 FIG_DIR = BASE_DIR / "figures" / "summary"
+LOCAL_FIG_DIR = os.getenv('LOCAL_FIG_DIR')
 # Libraries
 DRUG_LIBS = ['LINCS L1000 CP', 'Tahoe-100M', 'RummaGEO Chem', 'NIBR DRUG-seq', 'Ginkgo Bioworks',
                 'Microarrays CMAP', 'SciPlex', 'CREEDS Chem', 'DeepCover MoA']
 GENE_LIBS = ['LINCS L1000 XPR', 'Perturb Atlas Human', 'Perturb Atlas Mouse', 'RummaGEO Gene',
                 'Replogle et al.', 'CREEDS Gene']
+FIG_NUMBER = 'Fig1'
+FIG_NAMES = {'counts':'signature_summary',
+             'features':'signature_features',
+             'drugs':'common_drug_perts',
+             'genes':'common_gene_perts',
+             'cells':'common_cell_lines'}
 
 os.makedirs(FIG_DIR, exist_ok=True)
 os.makedirs('cache', exist_ok=True)
@@ -150,9 +159,10 @@ def signature_barplot(signature_df, colors):
     ax.legend(title='Library', bbox_to_anchor=(1.02, 1), loc='upper left')
     plt.grid(visible=False)
     plt.tight_layout()
-    plt.savefig(FIG_DIR / 'signature_counts_barchar.png', dpi=400, format='png')
-    plt.close()       
-    print(f"Saved: {FIG_DIR}/signature_counts_barchar.png")
+    plt.savefig(FIG_DIR / f"{FIG_NUMBER}_{FIG_NAMES['counts']}.png", dpi=400, format='png')
+    plt.savefig(LOCAL_FIG_DIR / f"{FIG_NUMBER}_{FIG_NAMES['counts']}.svg", dpi=400, format='svg')    
+    print(f"Saved:\t{FIG_DIR}/{FIG_NUMBER}_{FIG_NAMES['counts']}.png\n\t{LOCAL_FIG_DIR}/{FIG_NUMBER}_{FIG_NAMES['counts']}.svg")
+    plt.close()
 
 def perturbation_barplot(drug_signatures, gene_signatures, all_signatures, cid_lookup, symbol_map, resolved_name_lookup):
     all_drugs = resolve_drug_names(drug_signatures.perturbation, cid_lookup, resolved_name_lookup)
@@ -192,9 +202,10 @@ def perturbation_barplot(drug_signatures, gene_signatures, all_signatures, cid_l
     ax.set_xticklabels(labels=[f'{int(x):,}' for x in ax.get_xticks()]) 
     plt.grid(visible=False)
     plt.tight_layout()
-    plt.savefig(FIG_DIR / 'signature_features_barchart.png', dpi=400, format='png')
+    plt.savefig(FIG_DIR / f"{FIG_NUMBER}_{FIG_NAMES['features']}.png", dpi=400, format='png')
+    plt.savefig(LOCAL_FIG_DIR / f"{FIG_NUMBER}_{FIG_NAMES['features']}.svg", dpi=400, format='svg')
+    print(f"Saved:\t{FIG_DIR}/{FIG_NUMBER}_{FIG_NAMES['features']}.png\n\t{LOCAL_FIG_DIR}/{FIG_NUMBER}_{FIG_NAMES['features']}.svg")
     plt.close()
-    print(f"Saved: {FIG_DIR}/signature_features_barchart.png")
 
 def drug_pert_barplot(drug_signatures, colors):
     pivot_df = drug_signatures.groupby(['library', 'resolved_pert']).agg('size')\
@@ -233,9 +244,10 @@ def drug_pert_barplot(drug_signatures, colors):
     ax.set_yticklabels(labels=[f'{int(y):,}' for y in ax.get_yticks()]) 
     plt.grid(visible=False)
     plt.tight_layout()
-    plt.savefig(FIG_DIR / 'drug_pert_histogram.png', dpi=400, format='png')
+    plt.savefig(FIG_DIR / f"{FIG_NUMBER}_{FIG_NAMES['drugs']}.png", dpi=400, format='png')
+    plt.savefig(LOCAL_FIG_DIR / f"{FIG_NUMBER}_{FIG_NAMES['drugs']}.svg", dpi=400, format='svg')
+    print(f"Saved:\t{FIG_DIR}/{FIG_NUMBER}_{FIG_NAMES['drugs']}.png\n\t{LOCAL_FIG_DIR}/{FIG_NUMBER}_{FIG_NAMES['drugs']}.svg")
     plt.close()
-    print(f"Saved: {FIG_DIR}/drug_pert_histogram.png")
 
 def gene_pert_barplot(gene_signatures, colors):
     pivot_df = gene_signatures.groupby(['library', 'resolved_pert']).agg('size')\
@@ -273,9 +285,10 @@ def gene_pert_barplot(gene_signatures, colors):
     ax.set_yticklabels(labels=[f'{int(y):,}' for y in ax.get_yticks()])
     plt.grid(visible=False)
     plt.tight_layout()
-    plt.savefig(FIG_DIR / 'gene_pert_histogram.png', dpi=400, format='png')
+    plt.savefig(FIG_DIR / f"{FIG_NUMBER}_{FIG_NAMES['genes']}.png", dpi=400, format='png')
+    plt.savefig(LOCAL_FIG_DIR / f"{FIG_NUMBER}_{FIG_NAMES['genes']}.svg", dpi=400, format='svg')
+    print(f"Saved:\t{FIG_DIR}/{FIG_NUMBER}_{FIG_NAMES['genes']}.png\n\t{LOCAL_FIG_DIR}/{FIG_NUMBER}_{FIG_NAMES['genes']}.svg")
     plt.close()
-    print(f"Saved: {FIG_DIR}/gene_pert_histogram.png")
 
 def cell_lines_barplot(all_signatures, colors):
     pivot_df = all_signatures.groupby(['library', 'clean_cell_line']).agg('size')\
@@ -313,9 +326,10 @@ def cell_lines_barplot(all_signatures, colors):
     ax.set_yticklabels(labels=[f'{int(y):,}' for y in ax.get_yticks()])
     plt.grid(visible=False)
     plt.tight_layout()
-    plt.savefig(FIG_DIR / 'cell_line_histogram.png', dpi=400, format='png')
+    plt.savefig(FIG_DIR / f"{FIG_NUMBER}_{FIG_NAMES['cells']}.png", dpi=400, format='png')
+    plt.savefig(LOCAL_FIG_DIR / f"{FIG_NUMBER}_{FIG_NAMES['cells']}.svg", dpi=400, format='svg')
+    print(f"Saved:\t{FIG_DIR}/{FIG_NUMBER}_{FIG_NAMES['cells']}.png\n\t{LOCAL_FIG_DIR}/{FIG_NUMBER}_{FIG_NAMES['cells']}.svg")
     plt.close()
-    print(f"Saved: {FIG_DIR}/cell_line_histogram.png")
 
 def main():
     parser = argparse.ArgumentParser(
@@ -396,7 +410,6 @@ def main():
 
     ########## CELL LINES SUMMARY BARPLOT ##########
     cell_lines_barplot(all_signatures, colors=COLORS)
-    
 
 if __name__ == "__main__":
     main()

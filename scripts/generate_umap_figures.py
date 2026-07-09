@@ -14,12 +14,8 @@
 # ]
 # ///
 """
-GO BP Enrichment for gene perturbation gene set libraries.
+Generate UMAPS of TF-IDF vectorized gene sets for manuscript
 
-Usage:
-    uv run generate_gene_perturbation_umap.py                     # Process all libraries
-    uv run generate_gene_perturbation_umap.py --library sciplex   # Process specific library
-    uv run generate_gene_perturbation_umap.py --list              # List available libraries
 """
 
 import gzip
@@ -32,8 +28,10 @@ from os import path, mkdir
 import re
 from textwrap import wrap
 import math
+import warnings
 
 from maayanlab_bioinformatics.parse.gmt import gmt_read_dict
+from maayanlab_bioinformatics.harmonization.ncbi_genes import ncbi_genes_fetch
 import pyenrichr as pye
 
 from scipy.stats import fisher_exact
@@ -47,7 +45,7 @@ import matplotlib.pyplot as plt
 from goatools.anno.broad_gos import NS2GOS
 
 # Configuration
-
+warnings.filterwarnings("ignore")
 # Base directory for GMT files
 BASE_DIR = Path(__file__).parent.parent / "db" / "data"
 # GMT directories
@@ -69,7 +67,8 @@ MIN_SET_SIZE = 5
 FIG_WIDTH = 12
 FIG_HEIGHT = 12
 MARKER_SIZE=7
-LEGEND_FONT_SIZE=12
+LEGEND_FONT_SIZE=16
+LABEL_FONT_SIZE=16
 # Figure parameters
 FIG_DPI=400
 
@@ -307,6 +306,14 @@ def add_moa(df:pd.DataFrame, drug_lookup):
     df['moa'] = df.apply(fill_moa, axis=1)
     return df
 
+def gene_lookup(organism: str, cache_dir: Path):
+    """UPPERCASE Symbol ∪ synonyms for every gene of `organism`."""
+    df = ncbi_genes_fetch(organism=organism, cache_dir=str(cache_dir), filters=None)
+    out = {}
+    for _, row in df.iterrows():
+        out |= {s.upper():row['Symbol'].upper() for s in row['All_synonyms']}
+    return out.get
+
 # Cluster / Term Specificity Calculations
 
 def calculate_specificity(top_terms_df:pd.DataFrame):
@@ -394,8 +401,13 @@ def create_drug_scatterplot(scatter_df: pd.DataFrame, title: str = "UMAP"):
     category_counts = category_counts.sort_values('count', ascending=False)
     top_common = category_counts[category_counts['moa_lower'] != 'not found'].moa_lower.to_list()[:20]
     df['moa_lower'] = df['moa_lower'].apply(lambda x: x if x in top_common + ['not found'] else 'other')
+    # restore moa capitalization
+    moa_cap_dict = df[~df['moa_lower'].isin(['not found','other'])][['moa_lower','moa']].set_index('moa_lower').to_dict()['moa']
+    moa_cap_dict['not found'] = 'Not found'
+    moa_cap_dict['other'] = 'Other'
     # wrapped moa for label
-    df['wrapped_moa'] = df['moa_lower'].apply(lambda x: "\n".join(wrap(str(x), 20)))
+    df['wrapped_moa'] = df['moa_lower'].apply(lambda x: "\n".join(wrap(str(moa_cap_dict.get(x, x)), 20)))
+    df['wrapped_moa'] = df['wrapped_moa'].apply(lambda x: x.capitalize() if x[0].islower() else x)
     # reorder for plotting
     plot_order = df.groupby('moa_lower').size().reset_index(name='count')
     df = df.merge(plot_order, how='left', on='moa_lower')
@@ -405,14 +417,14 @@ def create_drug_scatterplot(scatter_df: pd.DataFrame, title: str = "UMAP"):
     n_colors = max(3, min(20, len(top_common)))
     palette = sns.color_palette("tab20", n_colors).as_hex() 
     term_colors = {c: palette[i % len(palette)] for i, c in enumerate(df['wrapped_moa'].unique())}
-    term_colors['not found'] = '#CCCCCC'
-    term_colors['other'] = '#997570'
+    term_colors['Not found'] = '#CCCCCC'
+    term_colors['Other'] = '#997570'
     
     df['color'] = df['wrapped_moa'].map(term_colors)
     # alphabetize legend labels
-    hue_order= sorted([m for m in term_colors.keys() if m not in ['not found','other']])
+    hue_order= sorted([m for m in term_colors.keys() if m not in ['Not found','Other']])
 
-    hue_order = hue_order + ['other','not found']
+    hue_order = hue_order + ['Other','Not found']
 
     fig = plt.figure(figsize=(FIG_WIDTH, FIG_HEIGHT))
     ax = sns.scatterplot(
@@ -430,9 +442,8 @@ def create_drug_scatterplot(scatter_df: pd.DataFrame, title: str = "UMAP"):
     sns.despine(ax=ax, top=True, right=True)
     # labels/title
     ax.set(xticklabels=[], yticklabels=[])
-    plt.title(title)
-    plt.xlabel('UMAP 1')
-    plt.ylabel('UMAP 2')
+    plt.xlabel('UMAP 1', fontdict={'fontsize':LABEL_FONT_SIZE})
+    plt.ylabel('UMAP 2', fontdict={'fontsize':LABEL_FONT_SIZE})
     # legend aesthetics
     ax.get_legend().set_title('')
     plt.legend(markerscale=3, shadow=False, frameon=False) 
@@ -521,6 +532,72 @@ def create_gene_scatterplot(scatter_df: pd.DataFrame, top_terms_df: pd.DataFrame
     df[['go_id','wrapped_go','color_go_term']].drop_duplicates().to_csv(SCATTER_DIR / f'{title}_go_terms.csv', index=False)
     plt.close(fig)
 
+def create_gene_pert_scatterplot(scatter_df: pd.DataFrame, title: str = "UMAP"):
+    """
+    Create scatter plot colored by gene perturbation
+    Args:
+        scatter_df: DataFrame with x, y, direction, cluster, term, genes columns
+        title: Plot title
+    Saves png image
+    """
+    # remove outleirs
+    compute_outliers(scatter_df, 3)
+    df = scatter_df.copy()
+    df = df[~df['outlier']]
+    # create gene pert column
+    lookup = gene_lookup(organism='Mammalia/Homo_sapiens', cache_dir=Path('.'))
+    df['gene_pert'] = df['term'].apply(lambda x: lookup(x.split('::')[0].upper()) if lookup(x.split('::')[0].upper()) else x.split('::')[0].upper())
+    # reorder for plotting
+    category_counts = df.groupby('gene_pert').size().reset_index(name='count')
+    category_counts = category_counts.sort_values('count', ascending=False)
+    top_common = category_counts.gene_pert.to_list()[:30]
+    df = df.merge(category_counts, how='left', on='gene_pert')
+    df = df.sort_values('count', ascending=False)
+    df['gene_pert_color'] = df['gene_pert'].apply(lambda x: x if x in top_common else 'Other')
+
+    # Color mapping
+    n_colors = len(top_common)
+    palette = sns.color_palette("tab20", n_colors).as_hex() 
+    term_colors = {c: palette[i % len(palette)] for i, c in enumerate(df['gene_pert_color'].unique())}
+    term_colors['Other'] = '#CCCCCC'
+    
+    fig = plt.figure(figsize=(FIG_WIDTH,FIG_HEIGHT))
+    # Other/No Enrichment signatures
+    sns.scatterplot(
+        data=df[df['gene_pert_color']=='Other'],
+        x='x',
+        y='y',
+        alpha = 0.5,
+        hue='gene_pert_color',
+        palette=term_colors,
+        edgecolor=None,
+        s=MARKER_SIZE
+    )
+    # Signatures assigned to specific GO terms
+    ax = sns.scatterplot(
+        data=df[df['gene_pert_color']!='Other'],
+        x='x',
+        y='y',
+        alpha = 1,
+        hue='gene_pert_color',
+        palette=term_colors,
+        edgecolor=None,
+        s=MARKER_SIZE
+    )
+     # despine
+    sns.despine(ax=ax, top=True, right=True)
+    # labels/title
+    ax.set(xticklabels=[], yticklabels=[])
+    plt.title(title)
+    plt.xlabel('UMAP 1')
+    plt.ylabel('UMAP 2')
+    # legend aesthetics
+    ax.get_legend().set_title('')
+    plt.legend(markerscale=3, shadow=False, frameon=False, loc='upper left', bbox_to_anchor = (1,1), fontsize=LEGEND_FONT_SIZE) 
+
+    fig.savefig(f"{FIGURE_DIR}/{'_'.join(title.split(' '))}_gene_pert.png", dpi=FIG_DPI, bbox_inches='tight')
+    plt.close(fig)
+
 def create_scatterplot_cell_lines(scatter_df: pd.DataFrame, title: str = "UMAP"):
     """
     Create scatter plot colored by cell lines
@@ -538,7 +615,7 @@ def create_scatterplot_cell_lines(scatter_df: pd.DataFrame, title: str = "UMAP")
         cell_line = term.split('::')[1].lower()
         return re.sub(r'(,|\.311)+', '', cell_line.split(' ')[0].strip().lower()) if pd.notna(term) else term
     if title not in (['Ginkgo Bioworks', 'PerturbAtlas Mouse', 'PerturbAtlas Human'
-                      'RummaGEO Chem', 'RummaGEO Gene', 'CREEDS Chem','CREEDS Gene']):
+                      'RummaGEO Chem', 'RummaGEO Gene', 'CREEDS Chem','CREEDS Gene', 'Ginkgo Bioworks GDPx2']):
         df['cell_line'] = df['term'].map(_clean_cell_line)
     else:
         df['cell_line'] = df['term'].map(lambda x: x.split('::')[1].lower() if x.split('::')[1] != '' else x.split('::')[2].lower())
@@ -548,27 +625,26 @@ def create_scatterplot_cell_lines(scatter_df: pd.DataFrame, title: str = "UMAP")
     common_cell_lines = cell_line_counts.cell_line.to_list()[:20]
     df = df.merge(cell_line_counts, how='left', on='cell_line')
     df = df.sort_values('count', ascending=False)
-    df['cell_line_color'] = df['cell_line'].apply(lambda x: x if x in common_cell_lines else 'Other')
-    print(df.cell_line.unique())
-    print(df.cell_line_color.unique())
+    df['cell_line_color'] = df['cell_line'].apply(lambda x: x.upper() if x in common_cell_lines else 'Other')
     # Color mapping
     n_colors = max(3, min(20, len(common_cell_lines)))
     palette = sns.color_palette("tab20", n_colors).as_hex() 
-    cell_line_colors = {c: palette[i] for i, c in enumerate(common_cell_lines)}
+    cell_line_colors = {c.upper(): palette[i] for i, c in enumerate(common_cell_lines)}
     cell_line_colors['Other'] = '#CCCCCC'
     
     fig = plt.figure(figsize=(FIG_WIDTH,FIG_HEIGHT))
     # Other cell lines
-    sns.scatterplot(
-        data=df[df['cell_line_color']=='Other'],
-        x='x',
-        y='y',
-        alpha = 0.5,
-        hue='cell_line_color',
-        palette=cell_line_colors,
-        edgecolor=None,
-        s=MARKER_SIZE
-    )
+    if df[df['cell_line_color']=='Other'].shape[0] > 0:
+        sns.scatterplot(
+            data=df[df['cell_line_color']=='Other'],
+            x='x',
+            y='y',
+            alpha = 0.5,
+            hue='cell_line_color',
+            palette=cell_line_colors,
+            edgecolor=None,
+            s=MARKER_SIZE
+        )
     # Signatures assigned to most common cell lines
     ax = sns.scatterplot(
         data=df[df['cell_line_color']!='Other'],
@@ -601,6 +677,7 @@ def process_library(
     run_specificity: bool = True,
     save_umap: bool = True,
     cell_line: bool = False,
+    gene_pert: bool = False,
 ) -> pd.DataFrame:
     """
     Process a single library (combined up+down) and save outputs.
@@ -611,6 +688,7 @@ def process_library(
         run_specificity: Indicate to run GO Term cluster specificity analysis or use saved results
         save_umap: Indicator to save PNG UMAP
         cell_line: Indicator to color UMAP points by signature cell line
+        gene_pert: Indicator to color UMAP points by signature gene perturbation
 
     Saves enrichment results and specficity table
     """
@@ -619,7 +697,7 @@ def process_library(
     ENRICHMENT_DIR.mkdir(parents=True, exist_ok=True)
     csv_path = ENRICHMENT_DIR / f"{library_name}.csv"
     
-    if (library_name in GENE_LIBS) and (not cell_line):
+    if (library_name in GENE_LIBS) and (not cell_line) and (not gene_pert):
         if run_enrichment:
             print(f"\n{'='*60}")
             print(f"Processing: {library_name}")
@@ -648,7 +726,7 @@ def process_library(
     
     scatter_df = get_scatter(library_name)
 
-    if (library_name in GENE_LIBS) and (not cell_line):
+    if (library_name in GENE_LIBS) and (not cell_line) and (not gene_pert):
         # identify broad GO terms in enrichment results
         id_pattern = r"GO:\d+"
         go_id_dict = {re.search(id_pattern, id).group():id for id in enrich_pmat.index.values}
@@ -672,14 +750,17 @@ def process_library(
                 .agg('first')\
                     .reset_index()\
                         .rename(columns={'term':'cluster_go_term','count':'sig_count'})
-    else:
+    elif (library_name in DRUG_LIBS) and (not cell_line):
         lookup = drug_lookup()
         scatter_df = add_moa(scatter_df, lookup)
+
     # Save UMAP visualization
     if save_umap:
         if library_name in GENE_LIBS:
             if cell_line:
                 create_scatterplot_cell_lines(scatter_df, title=f"{GENE_TITLES[library_name]}")
+            elif gene_pert:
+                create_gene_pert_scatterplot(scatter_df, title=f"{GENE_TITLES[library_name]}")
             else:
                 create_gene_scatterplot(scatter_df,
                                         top_terms_df,
@@ -688,10 +769,24 @@ def process_library(
             print(f"Saved: {library_name} UMAP")
         else:
             if cell_line:
-                create_scatterplot_cell_lines(scatter_df, title=f"{DRUG_TITLES[library_name]}")
+                if library_name == 'ginkgo':
+                    gdpx1_scatter = scatter_df[scatter_df['term'].str.contains('A549')]
+                    gdpx2_scatter = scatter_df[~scatter_df['term'].str.contains('A549')]
+                    create_scatterplot_cell_lines(gdpx1_scatter, title=f"{DRUG_TITLES[library_name]} GDPx1")
+                    create_scatterplot_cell_lines(gdpx2_scatter, title=f"{DRUG_TITLES[library_name]} GDPx2")
+                else:
+                    create_scatterplot_cell_lines(scatter_df, title=f"{DRUG_TITLES[library_name]}")
             else:
-                create_drug_scatterplot(scatter_df,
-                                    title = f"{DRUG_TITLES[library_name]}")
+                if library_name == 'ginkgo':
+                    gdpx1_scatter = scatter_df[scatter_df['term'].str.contains('A549')]
+                    gdpx2_scatter = scatter_df[~scatter_df['term'].str.contains('A549')]
+                    create_drug_scatterplot(gdpx1_scatter,
+                                            title=f"{DRUG_TITLES[library_name]} GDPx1")
+                    create_drug_scatterplot(gdpx2_scatter,
+                                            title=f"{DRUG_TITLES[library_name]} GDPx2")
+                else:
+                    create_drug_scatterplot(scatter_df,
+                                        title = f"{DRUG_TITLES[library_name]}")
             print(f"Saved: {library_name} UMAP")
 
     return
@@ -704,7 +799,8 @@ def process_all_libraries(
     run_enrichment: bool = False,
     run_specificity: bool = False,
     save_umap: bool=False,
-    cell_line: bool=False
+    cell_line: bool=False,
+    gene_pert: bool=False
 ):
     """
     Process all configured libraries.
@@ -731,7 +827,8 @@ def process_all_libraries(
                 run_enrichment=run_enrichment,
                 run_specificity=run_specificity,
                 save_umap=save_umap,
-                cell_line=cell_line
+                cell_line=cell_line,
+                gene_pert=gene_pert
             )
         except FileNotFoundError as e:
             print(f"\nWarning: {e}")
@@ -812,6 +909,12 @@ Examples:
         action="store_true",
         help="Color UMAP points by signature cell line"
     )
+    parser.add_argument(
+        "--gene-pert",
+        action="store_true",
+        help="Color UMAP points by gene perturbation"
+    )
+
 
     args = parser.parse_args()
 
@@ -826,11 +929,15 @@ Examples:
                 run_enrichment= not args.skip_enrichment,
                 run_specificity = not args.skip_cluster_enrichment,
                 save_umap = not args.no_umap,
-                cell_line = args.cell_line
+                cell_line = args.cell_line,
+                gene_pert = args.gene_pert,
             )
         except FileNotFoundError as e:
             print(f"Error: {e}")
     else:
+        if args.skip_gene and args.gene_pert:
+            print("Flags skip-gene and gene-pert not compatible")
+            return
         process_all_libraries(
             skip_large=args.skip_large,
             skip_gene=args.skip_gene,
@@ -838,7 +945,8 @@ Examples:
             run_enrichment= not args.skip_enrichment,
             run_specificity = not args.skip_cluster_enrichment,
             save_umap = not args.no_umap,
-            cell_line = args.cell_line
+            cell_line = args.cell_line,
+            gene_pert=args.gene_pert,
         )
 
     print("\nDone!")

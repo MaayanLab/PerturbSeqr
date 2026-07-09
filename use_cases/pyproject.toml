@@ -11,7 +11,10 @@ dependencies = [
     "matplotlib>=3.8",
     "seaborn>=0.13",
     "requests>=2.31",
+    "maayanlab-bioinformatics",
+    "matplotlib-venn>=1.1.2",
 ]
 
 [tool.uv.sources]
-perturbseqr = { path = "../../perturbseqr-py", editable = true }
+perturbseqr = { path = "../perturbseqr-py", editable = true }
+maayanlab-bioinformatics = { git = "https://github.com/MaayanLab/maayanlab-bioinformatics.git" }
