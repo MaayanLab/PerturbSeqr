@@ -1,6 +1,6 @@
 # perturbseqr
 
-Python wrapper for the [Perturb-Seqr](https://perturbseqr.k8s.dev.maayanlab.cloud) dev server deployment (for now) GraphQL API. Returns results as `pandas.DataFrame`.
+Python wrapper for the [Perturb-Seqr](https://perturbseqr.maayanlab.cloud) GraphQL API. Returns results as `pandas.DataFrame`.
 
 ## Install
 
