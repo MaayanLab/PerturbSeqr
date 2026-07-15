@@ -9,7 +9,7 @@ import pandas as pd
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 
-PERTURBSEQR_URL = "https://perturbseqr.k8s.dev.maayanlab.cloud/graphql"
+PERTURBSEQR_URL = "https://perturbseqr.maayanlab.cloud/graphql"
 
 _transport = RequestsHTTPTransport(url=PERTURBSEQR_URL, timeout=60, retries=0)
 _client = Client(transport=_transport)
