@@ -67,7 +67,7 @@ function HomeContent() {
                 <InputForm
                   setInputSingle={setInputSingle}
                   selectedLibraries={selectedLibraries}
-                  initialDatasetId={datasetIds.length === 1 ? datasetIds[0] : undefined}
+                  initialGeneSetId={datasetIds.length === 1 ? datasetIds[0] : undefined}
                 />
               ) : (
                 <InputFormUpDown

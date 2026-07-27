@@ -74,7 +74,7 @@ services:
       context: .
       args:
         - NEXT_PUBLIC_MINIO_URL=https://s3.perturbseqr.k8s.maayanlab.cloud/data
-    image: johnkgardner/perturbseqr-app:0.2.48-dev
+    image: johnkgardner/perturbseqr-app:0.2.49-dev
     platform: linux/amd64
     restart: unless-stopped
     environment:

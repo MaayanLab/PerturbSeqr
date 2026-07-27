@@ -13,7 +13,7 @@ async function fetchAssociations(gene: string) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ gene_list: [gene], similarity: 'coexpression' }),
     cache: 'no-store',
-    signal: AbortSignal.timeout(10_000),
+    signal: AbortSignal.timeout(20_000),
   })
   if (!response.ok) throw new Error(`GeneShot returned ${response.status}`)
 
@@ -35,11 +35,15 @@ export async function GET(request: Request) {
   }
 
   try {
-    let queryGene = gene
-    let correlatedGenes = await fetchAssociations(queryGene)
-    if (correlatedGenes.length < GENE_COUNT - 1 && queryGene !== gene.toUpperCase()) {
-      queryGene = gene.toUpperCase()
+    const uppercaseGene = gene.toUpperCase()
+    // Perturb-Seqr uppercases symbols, while GeneShot preserves "orf" casing.
+    const candidates = [...new Set([uppercaseGene.replace(/ORF/g, 'orf'), gene])]
+    let queryGene = candidates[0]
+    let correlatedGenes: string[] = []
+    for (const candidate of candidates) {
+      queryGene = candidate
       correlatedGenes = await fetchAssociations(queryGene)
+      if (correlatedGenes.length >= GENE_COUNT - 1) break
     }
 
     if (correlatedGenes.length < GENE_COUNT - 1) {

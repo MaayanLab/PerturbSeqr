@@ -16,16 +16,19 @@ const allLibraryCount = Object.keys(libraryConfig.libraries).length
  * Input props:
  *   - setInputSingle: Function to toggle between single and up/down input modes
  *   - selectedLibraries: Array of selected library names for filtering (passed to enrich page)
- * Output: Renders gene input textarea, file upload, and submit button
+ *   - initialGeneSetId: Saved gene set to restore when returning from results; undefined for a new search
+ * Internal state:
+ *   - expansionGene: Single gene symbol entered for ARCHS4 expansion
+ * Output: Renders gene set input and ARCHS4 single-gene expansion forms
  */
-export default function InputForm({setInputSingle, selectedLibraries = [], initialDatasetId} : {setInputSingle:  React.Dispatch<React.SetStateAction<boolean>>, selectedLibraries?: string[], initialDatasetId?: string}) {
+export default function InputForm({setInputSingle, selectedLibraries = [], initialGeneSetId} : {setInputSingle:  React.Dispatch<React.SetStateAction<boolean>>, selectedLibraries?: string[], initialGeneSetId?: string}) {
   const router = useRouter()
   const [rawGenes, setRawGenes] = React.useState('')
 
   // Fetch initial gene set when returning from results page
   const { data: initialGeneSet } = useFetchUserGeneSetQuery({
-    skip: !initialDatasetId,
-    variables: { id: initialDatasetId || '' },
+    skip: !initialGeneSetId,
+    variables: { id: initialGeneSetId || '' },
   })
   const appliedInitial = React.useRef(false)
   React.useEffect(() => {
@@ -43,6 +46,10 @@ export default function InputForm({setInputSingle, selectedLibraries = [], initi
   var fileReader = React.useRef<FileReader | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [description, setDescription] = React.useState('User Gene Set')
+  const [expansionGene, setExpansionGene] = React.useState('')
+  const [expansionLoading, setExpansionLoading] = React.useState(false)
+  const [expansionError, setExpansionError] = React.useState<string | null>(null)
+  const [expandedGene, setExpandedGene] = React.useState<string | null>(null)
 
   const handleFileRead = React.useCallback(() => {
       const content = fileReader!.current!.result as string;
@@ -57,6 +64,31 @@ export default function InputForm({setInputSingle, selectedLibraries = [], initi
       
   
   }, [handleFileRead]);
+
+  const expandGene = async (gene: string) => {
+    const query = gene.trim()
+    if (!query || expansionLoading) return
+
+    setExpansionLoading(true)
+    setExpansionError(null)
+    setExpandedGene(null)
+    try {
+      const response = await fetch(`/archs4/correlated-genes?gene=${encodeURIComponent(query)}`)
+      const data = await response.json() as { queryGene?: string, genes?: string[], error?: string }
+      if (!response.ok || !Array.isArray(data.genes)) {
+        throw new Error(data.error || 'Could not expand this gene with ARCHS4.')
+      }
+
+      setRawGenes(data.genes.join('\n'))
+      setDescription(`ARCHS4 genes co-expressed with ${data.queryGene || query}`)
+      setExpandedGene(data.queryGene || query)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    } catch (error) {
+      setExpansionError(error instanceof Error ? error.message : 'Could not expand this gene with ARCHS4.')
+    } finally {
+      setExpansionLoading(false)
+    }
+  }
 
   return (
     <>
@@ -114,6 +146,26 @@ export default function InputForm({setInputSingle, selectedLibraries = [], initi
         <span className={classNames("loading", "w-6", { 'hidden': !loading })}></span>
         <div className={classNames("alert alert-error", { 'hidden': !error })}>{error?.message ?? null}</div>
         {genes.length > 3000 && <div className="alert alert-error">Gene set is too large. Please enter a gene set with less than 3000 genes.</div>}
+      </form>
+      <div className="divider my-3 text-xs font-semibold uppercase tracking-wide">or expand a single gene</div>
+      <h1 className="text-xl">Expand a single gene into a gene set</h1>
+      <form className="mt-2" onSubmit={(event) => { event.preventDefault(); void expandGene(expansionGene) }}>
+        <div className="join w-full">
+          <input
+            className="input input-bordered join-item min-w-0 flex-1"
+            value={expansionGene}
+            onChange={(event) => setExpansionGene(event.currentTarget.value)}
+            placeholder="e.g. STAT3"
+            aria-label="Single gene to expand"
+          />
+          <button className="btn btn-neutral join-item" type="submit" disabled={!expansionGene.trim() || expansionLoading}>
+            {expansionLoading ? <span className="loading loading-spinner loading-sm"></span> : 'Expand'}
+          </button>
+        </div>
+        <p className="mt-2 text-sm">Try an example <button className="font-semibold underline" type="button" onClick={() => setExpansionGene('STAT3')}>STAT3</button></p>
+        {expansionLoading && <p className="mt-2 text-sm" role="status">Finding genes co-expressed with <b>{expansionGene.trim()}</b> in ARCHS4...</p>}
+        {expandedGene && <p className="mt-2 text-sm" role="status"><b>{expandedGene} is a gene.</b><br />Expanded {expandedGene} with the ARCHS4 RNA-seq gene-gene co-expression matrix to create a 100-gene set.</p>}
+        {expansionError && <div className="alert alert-error mt-2 py-2 text-sm" role="alert">{expansionError}</div>}
       </form>
       <p className='font-semibold text-sm text-center my-2'>Or search for mimickers and reversers:</p>
       <button className='btn btn-outline text-xs p-2 m-2' onClick={() => setInputSingle(false)}>SWITCH TO UP/DOWN SETS INPUT</button>
