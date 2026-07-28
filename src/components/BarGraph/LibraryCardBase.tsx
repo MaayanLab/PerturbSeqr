@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { FiDownload } from 'react-icons/fi';
 import { BarGraph, type BarRow } from './BarGraph';
 import { isGenePerturbationLibrary } from '@/utils/metadataLookup';
 import clientDownloadBlob from '@/utils/clientDownloadBlob';
@@ -63,13 +62,37 @@ export function LibraryCardBase({
     setQueryString({ view: 'table', libraries: libraryName, page: '1' });
 
   const isGene = isGenePerturbationLibrary(libraryName);
-  const handleDownload = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-    const svg = cardRef.current?.querySelector<SVGSVGElement>('svg[data-bar-chart]');
+  const getChart = () => cardRef.current?.querySelector<SVGSVGElement>('svg[data-bar-chart]');
+  const filename = `${libraryName}-${leftLabel}-${rightLabel}`;
+
+  const downloadSvg = () => {
+    const svg = getChart();
     if (svg) clientDownloadBlob(
       new Blob([svg.outerHTML], { type: 'image/svg+xml' }),
-      `${libraryName}-${leftLabel}-${rightLabel}.svg`,
+      `${filename}.svg`,
     );
+  };
+
+  const downloadPng = async () => {
+    const svg = getChart();
+    if (!svg) return;
+
+    const url = URL.createObjectURL(new Blob([svg.outerHTML], { type: 'image/svg+xml' }));
+    const image = new window.Image();
+    image.src = url;
+    try {
+      await image.decode();
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = svg.viewBox.baseVal.width * 2;
+    canvas.height = svg.viewBox.baseVal.height * 2;
+    const context = canvas.getContext('2d');
+    if (!context) return;
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob((blob) => blob && clientDownloadBlob(blob, `${filename}.png`), 'image/png');
   };
 
   return (
@@ -89,15 +112,14 @@ export function LibraryCardBase({
             className="inline-block object-contain"
           />
           {!loading && !error && !noResults && (
-            <button
-              type="button"
-              className="btn btn-ghost btn-xs ml-auto text-base-content/60"
-              title="Download chart as SVG"
-              aria-label={`Download ${libraryName} chart as SVG`}
-              onClick={handleDownload}
-            >
-              <FiDownload aria-hidden="true" />
-            </button>
+            <span className="join ml-auto" onClick={(event) => event.stopPropagation()}>
+              <button type="button" className="btn btn-ghost btn-xs join-item" onClick={downloadSvg}>
+                SVG
+              </button>
+              <button type="button" className="btn btn-ghost btn-xs join-item" onClick={downloadPng}>
+                PNG
+              </button>
+            </span>
           )}
         </h3>
         <p className="text-xs text-base-content/50 mb-2 select-none [&_strong]:text-base-content">
