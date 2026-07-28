@@ -2,8 +2,10 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { FiDownload } from 'react-icons/fi';
 import { BarGraph, type BarRow } from './BarGraph';
 import { isGenePerturbationLibrary } from '@/utils/metadataLookup';
+import clientDownloadBlob from '@/utils/clientDownloadBlob';
 
 // Shared base for LibraryCardSingle and LibraryCardPaired.
 // Both share layout; they differ only in their queries.
@@ -30,6 +32,8 @@ export function LibraryCardBase({
   totalSignificant: number;
   setQueryString: (qs: Record<string, string | null>) => void;
 }) {
+  const cardRef = React.useRef<HTMLDivElement>(null);
+
   // Rank libraries by the geometric mean of the top 10 adjusted p-values,
   // pooled across mimicker and reverser sides. Equivalently, the mean of
   // -log10(adjPvalue) over the 10 pooled rows with the smallest adj_p.
@@ -59,9 +63,18 @@ export function LibraryCardBase({
     setQueryString({ view: 'table', libraries: libraryName, page: '1' });
 
   const isGene = isGenePerturbationLibrary(libraryName);
+  const handleDownload = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    const svg = cardRef.current?.querySelector<SVGSVGElement>('svg[data-bar-chart]');
+    if (svg) clientDownloadBlob(
+      new Blob([svg.outerHTML], { type: 'image/svg+xml' }),
+      `${libraryName}-${leftLabel}-${rightLabel}.svg`,
+    );
+  };
 
   return (
     <div
+      ref={cardRef}
       className="card bg-base-100 shadow-md border border-base-300 cursor-pointer hover:shadow-lg transition-shadow"
       style={{ order }}
       onClick={goToTable}
@@ -75,6 +88,17 @@ export function LibraryCardBase({
             width={28} height={28}
             className="inline-block object-contain"
           />
+          {!loading && !error && !noResults && (
+            <button
+              type="button"
+              className="btn btn-ghost btn-xs ml-auto text-base-content/60"
+              title="Download chart as SVG"
+              aria-label={`Download ${libraryName} chart as SVG`}
+              onClick={handleDownload}
+            >
+              <FiDownload aria-hidden="true" />
+            </button>
+          )}
         </h3>
         <p className="text-xs text-base-content/50 mb-2 select-none [&_strong]:text-base-content">
           {subtitle}

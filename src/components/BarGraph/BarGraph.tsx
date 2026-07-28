@@ -242,7 +242,15 @@ function BarGraphInner({
 
   return (
     <div ref={wrapperRef} style={{ position: 'relative' }}>
-      <svg width={width} height={svgHeight} xmlns="http://www.w3.org/2000/svg">
+      <svg
+        data-bar-chart
+        width={width}
+        height={svgHeight}
+        viewBox={`0 0 ${width} ${svgHeight}`}
+        fontFamily="sans-serif"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect width="100%" height="100%" fill="white" />
         {/* Column headers — one centered above each half */}
         {[
           { x: centerX / 2,                   label: opts.leftLabel  },
