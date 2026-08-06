@@ -41,6 +41,8 @@ query EnrichmentQuery($genes: [String]!, $filterTerm: String = "", $libraryNames
     ) {
       nodes {
         geneSetHash
+        libraryCount
+        supportingLibraries
         pvalue
         adjPvalue
         oddsRatio
@@ -127,6 +129,8 @@ query EnrichmentQuerySingle($genes: [String]!, $filterTerm: String = "", $librar
     ) {
       nodes {
         geneSetHash
+        libraryCount
+        supportingLibraries
         pvalue
         adjPvalue
         oddsRatio
@@ -294,6 +298,8 @@ query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTer
         adjPvalueReverse
         geneSetHashDown
         geneSetHashUp
+        libraryCount
+        supportingLibraries
         mimickerOverlap
         oddsRatioMimic
         geneSetHashUp
@@ -345,6 +351,8 @@ query PairEnrichmentQuerySingle($genesUp: [String]!, $genesDown: [String]!, $fil
         adjPvalueReverse
         geneSetHashDown
         geneSetHashUp
+        libraryCount
+        supportingLibraries
         mimickerOverlap
         oddsRatioMimic
         geneSetHashUp

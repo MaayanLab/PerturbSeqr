@@ -12,6 +12,7 @@ import {
   isGenePerturbationLibrary,
 } from '@/utils/metadataLookup';
 import { DatasetCell } from '@/components/DatasetCell';
+import LibraryCount from '@/components/LibraryCount';
 
 export type GeneSetModalT =
   | { type: 'UserGeneSet'; description: string; genes: string[] }
@@ -21,6 +22,8 @@ export type GeneSetModalT =
 
 type EnrichNode = {
   geneSetHash?: string | null;
+  libraryCount?: number | null;
+  supportingLibraries?: ReadonlyArray<string | null> | null;
   pvalue?: number | null;
   adjPvalue?: number | null;
   oddsRatio?: number | null;
@@ -102,9 +105,19 @@ export function EnrichmentTable({
           <th>Direction</th>
           <th className="relative group">
             <div className="absolute z-10 left-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
-              Number of signatures with this perturbation, per dataset
+              Number of signatures with this perturbation, in this gene set library
             </div>
             Signature<br></br>
+            <span className="inline-flex">
+              Count
+              <IoMdInformationCircleOutline className="ml-0.5" />
+            </span>
+          </th>
+          <th className="relative group">
+            <div className="absolute z-10 left-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
+              Number of gene set libraries with a significant result for this perturbation.
+            </div>
+            Library<br />
             <span className="inline-flex">
               Count
               <IoMdInformationCircleOutline className="ml-0.5" />
@@ -281,6 +294,12 @@ export function EnrichmentTable({
                 )}
               </td>
               <td>{sigCount}</td>
+              <td>
+                <LibraryCount
+                  count={enrichmentResult?.libraryCount}
+                  libraries={enrichmentResult?.supportingLibraries}
+                />
+              </td>
               <td className="max-w-[150px]">
                 {moa ? (
                   <div className="text-sm">
