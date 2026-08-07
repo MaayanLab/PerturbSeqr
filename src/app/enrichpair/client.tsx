@@ -28,6 +28,7 @@ import libraryConfig from "@/config/libraries.json";
 import { LibraryBarGraphGrid, LibraryCardPaired } from "@/components/BarGraph";
 import ShareButton from "@/components/shareButton";
 import { SortableHeader } from "@/components/SortableHeader";
+import LibraryCount from "@/components/LibraryCount";
 
 const allLibraryDisplayNames = Object.values(libraryConfig.libraries).map((l: any) => l.displayName as string);
 const drugLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'drug').map((l: any) => l.displayName as string);
@@ -1157,9 +1158,19 @@ function EnrichmentResults({
                 {/* <th>Direction</th> */}
                 <th className="relative group">
                   <div className="absolute z-10 left-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
-                    Number of signatures with this perturbation, per dataset
+                    Number of signatures with this perturbation, in this gene set library
                   </div>
                   Signature<br></br>
+                  <span className="inline-flex">
+                    Count
+                    <IoMdInformationCircleOutline className="ml-0.5" />
+                  </span>
+                </th>
+                <th className="relative group">
+                  <div className="absolute z-10 left-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
+                    Number of gene set libraries with a significant result for this perturbation.
+                  </div>
+                  Library<br />
                   <span className="inline-flex">
                     Count
                     <IoMdInformationCircleOutline className="ml-0.5" />
@@ -1341,6 +1352,12 @@ function EnrichmentResults({
                       <td className={`max-w-[70px] ${columnVisibility.timepoint ? "" : "hidden"}`}>{timepoint === 'N/A' ? <span className="text-gray-400">N/A</span> : <span className="truncate block" title={timepoint}>{timepoint}</span>}</td>
                       <td className={`max-w-[80px] ${columnVisibility.concentration ? "" : "hidden"}`}>{concentration === 'N/A' ? <span className="text-gray-400">N/A</span> : <span className="truncate block" title={concentration}>{concentration}</span>}</td>
                       <td>{count}</td>
+                      <td>
+                        <LibraryCount
+                          count={enrichmentResult?.libraryCount}
+                          libraries={enrichmentResult?.supportingLibraries}
+                        />
+                      </td>
                       <td className="max-w-[150px]">
                         {/* MOA with source attribution */}
                         {moa ? (

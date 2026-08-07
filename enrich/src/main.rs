@@ -9,7 +9,7 @@ use futures::StreamExt;
 use rocket::http::ContentType;
 use std::future;
 use std::io::Cursor;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use rocket::request::Request;
 use rocket::response::{self, Response, Responder, stream::TextStream};
 use rocket_db_pools::{Database, Connection};
@@ -204,6 +204,41 @@ fn corrected_directional_odds_ratios(a_up: usize, b_up: usize, a_down: usize, b_
     (up, down)
 }
 
+fn perturbation_key<'a>(perturbation: &'a str, cid: &'a str) -> Option<&'a str> {
+    (!perturbation.is_empty()).then_some(if cid.is_empty() { perturbation } else { cid })
+}
+
+fn libraries_by_perturbation(
+    bitmap: &Bitmap,
+    indices: impl Iterator<Item = usize>,
+) -> HashMap<String, HashSet<String>> {
+    let mut result: HashMap<String, HashSet<String>> = HashMap::new();
+    for index in indices {
+        let Some((hash, _)) = bitmap.values.get(index) else { continue };
+        let Some(library) = bitmap.gene_set_libraries.get(hash) else { continue };
+        for (_, _, _, _, _, perturbation, _, cid) in bitmap.terms.get(hash).into_iter().flatten() {
+            if let Some(key) = perturbation_key(perturbation, cid) {
+                result.entry(key.to_string()).or_default().insert(library.clone());
+            }
+        }
+    }
+    result
+}
+
+fn supporting_libraries(
+    bitmap: &Bitmap,
+    libraries: &HashMap<String, HashSet<String>>,
+    hash: &Uuid,
+) -> Vec<String> {
+    let mut result: Vec<_> = bitmap.terms.get(hash).into_iter().flatten()
+        .filter_map(|(_, _, _, _, _, perturbation, _, cid)| perturbation_key(perturbation, cid))
+        .filter_map(|key| libraries.get(key))
+        .max_by_key(|names| names.len())
+        .into_iter().flatten().cloned().collect();
+    result.sort_unstable();
+    result
+}
+
 #[derive(Eq, PartialEq, PartialOrd, Ord)]
 struct BackgroundQuery {
     background_id: Uuid,
@@ -255,6 +290,8 @@ struct PartialPairResult {
 #[derive(Serialize, Debug)]
 struct QueryResult {
     gene_set_hash: String,
+    library_count: usize,
+    supporting_libraries: Vec<String>,
     n_overlap: u32,
     odds_ratio: f64,
     pvalue: f64,
@@ -265,6 +302,8 @@ struct QueryResult {
 struct PairedQueryResult {
     gene_set_hash_up: String,
     gene_set_hash_down: String,      
+    library_count: usize,
+    supporting_libraries: Vec<String>,
     mimicker_overlap: u32, 
     reverser_overlap: u32, 
     odds_ratio_mimic: f64,
@@ -788,6 +827,8 @@ async fn query(
         bitmap.values.len() // no filter, count all gene sets
     };
 
+    let libraries = libraries_by_perturbation(&bitmap, results.iter().map(|result| result.index));
+
     // CID-based consensus grouping: use CID as group key when available, fall back to perturbation name
     // This ensures synonyms (same CID, different names) are grouped together
     let mut drug_significance_counts: HashMap<String, (usize, usize, usize, bool)> = HashMap::new();
@@ -1237,8 +1278,11 @@ async fn query(
                 }
             }
 
+            let supporting_libraries = supporting_libraries(&bitmap, &libraries, gene_set_hash);
             Some(QueryResult {
                 gene_set_hash: gene_set_hash.to_string(),
+                library_count: supporting_libraries.len(),
+                supporting_libraries,
                 n_overlap: result.n_overlap,
                 odds_ratio: result.odds_ratio,
                 pvalue: result.pvalue,
@@ -1566,6 +1610,8 @@ async fn query_pairs(
     } else {
         bitmap.signature_pairs.pairs.len()
     };
+
+    let libraries = libraries_by_perturbation(&bitmap, results.iter().map(|result| result.index_up));
 
     // CID-based consensus grouping for paired query
     let mut drug_significance_counts: HashMap<String, (usize, usize, usize, bool)> = HashMap::new();
@@ -2002,9 +2048,12 @@ async fn query_pairs(
                     }
                 }
             }
+            let supporting_libraries = supporting_libraries(&bitmap, &libraries, gene_set_hash);
             Some(PairedQueryResult {
                 gene_set_hash_up: bitmap.values[result.index_up].0.to_string(),
                 gene_set_hash_down: bitmap.values[result.index_down].0.to_string(),
+                library_count: supporting_libraries.len(),
+                supporting_libraries,
                 mimicker_overlap: result.mimicker_overlap,
                 reverser_overlap: result.reverser_overlap,
                 odds_ratio_mimic: result.odds_ratio_mimic,
