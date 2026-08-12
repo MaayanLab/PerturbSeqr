@@ -94,6 +94,7 @@ LIBRARIES = {
     "creeds-gene": ("gene", "creeds-gene"),
     "geo-gene": ("gene", "rummageo-gene"),
     "replogle": ("gene", "replogle-perturb-seq"),
+    "cm4ai": ("gene", "cm4ai"),
     # Drug perturbations
     "sciplex": ("drug", "sciplex"),
     "drugseqr": ("drug", "nibr-drug-seq"),
@@ -112,7 +113,8 @@ GENE_LIBS = [
     "perturbatlas-mouse",
     "creeds-gene",
     "geo-gene",
-    "replogle"
+    "replogle",
+    "cm4ai"
     ]
 DRUG_LIBS = [
     "sciplex",
@@ -132,7 +134,8 @@ DRUG_TITLES = dict(zip(DRUG_LIBS,
                         "RummaGEO Chem"]))
 GENE_TITLES = dict(zip(GENE_LIBS,
                        ["LINCS L1000 XPR","PerturbAtlas Human","PerturbAtlas Mouse",
-                        "CREEDS Gene","RummaGEO Gene","Replogle et al."]))
+                        "CREEDS Gene","RummaGEO Gene","Replogle et al.",
+                        "CM4AI KOLF2.1J Perturbation Atlas "]))
 
 
 # GMT Loading Functions
@@ -292,14 +295,14 @@ def add_moa(df:pd.DataFrame, drug_lookup):
         return pert
     df['pert_lower'] = df['term'].apply(pert_lower)
     df['moa'] = df['pert_lower'].apply(lambda x: drug_lookup(x, None))
-    df['moa'] = df['moa'].apply(lambda x: x['moa'] if pd.notna(x) else x)
+    df['moa'] = df['moa'].apply(lambda x: x['moa'] if pd.notna(x) else x) # extract from dictionary format
     df['moa'] = df['moa'].apply(lambda x: re.split(r'[|;]', x)[0] if pd.notna(x) else x)
     # fill in missing moas
     moa_from_cmap_metadata = pd.read_csv(f'{METADATA_DIR}/resolved_missing_moas.csv')
     moa_from_cmap_metadata['pert_lower'] = moa_from_cmap_metadata['perturbation'].apply(str.lower)
     moa_from_cmap_metadata = dict(zip(moa_from_cmap_metadata['pert_lower'], moa_from_cmap_metadata['moa']))
     def fill_moa(row):
-        if pd.isna(row['moa']):
+        if pd.isna(row['moa']) or row['moa']=='':
             return moa_from_cmap_metadata.get(row['pert_lower'], None)
         else:
             return row['moa']
@@ -450,6 +453,7 @@ def create_drug_scatterplot(scatter_df: pd.DataFrame, title: str = "UMAP"):
     sns.move_legend(ax, "upper left", bbox_to_anchor = (1,1), handletextpad=0.3, labelspacing=0.2, fontsize=LEGEND_FONT_SIZE)
 
     fig.savefig(f"{FIGURE_DIR}/{'_'.join(title.split(' '))}.png", dpi=FIG_DPI, bbox_inches='tight')
+    fig.savefig(f"{FIGURE_DIR}/{'_'.join(title.split(' '))}.svg", dpi=FIG_DPI, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -529,6 +533,7 @@ def create_gene_scatterplot(scatter_df: pd.DataFrame, top_terms_df: pd.DataFrame
     plt.legend(markerscale=3, shadow=False, frameon=False, loc='upper left', bbox_to_anchor = (1,1), ncol=legend_cols, fontsize=LEGEND_FONT_SIZE) 
 
     fig.savefig(f"{FIGURE_DIR}/{'_'.join(title.split(' '))}.png", dpi=FIG_DPI, bbox_inches='tight')
+    fig.savefig(f"{FIGURE_DIR}/{'_'.join(title.split(' '))}.svg", dpi=FIG_DPI, bbox_inches='tight')
     df[['go_id','wrapped_go','color_go_term']].drop_duplicates().to_csv(SCATTER_DIR / f'{title}_go_terms.csv', index=False)
     plt.close(fig)
 
@@ -596,6 +601,7 @@ def create_gene_pert_scatterplot(scatter_df: pd.DataFrame, title: str = "UMAP"):
     plt.legend(markerscale=3, shadow=False, frameon=False, loc='upper left', bbox_to_anchor = (1,1), fontsize=LEGEND_FONT_SIZE) 
 
     fig.savefig(f"{FIGURE_DIR}/{'_'.join(title.split(' '))}_gene_pert.png", dpi=FIG_DPI, bbox_inches='tight')
+    fig.savefig(f"{FIGURE_DIR}/{'_'.join(title.split(' '))}_gene_pert.svg", dpi=FIG_DPI, bbox_inches='tight')
     plt.close(fig)
 
 def create_scatterplot_cell_lines(scatter_df: pd.DataFrame, title: str = "UMAP"):
@@ -668,6 +674,7 @@ def create_scatterplot_cell_lines(scatter_df: pd.DataFrame, title: str = "UMAP")
     plt.legend(markerscale=3, shadow=False, frameon=False, loc='upper left', bbox_to_anchor = (1,1), fontsize=LEGEND_FONT_SIZE) 
 
     fig.savefig(f"{FIGURE_DIR}/{'_'.join(title.split(' '))}_cell_lines.png", dpi=FIG_DPI, bbox_inches='tight')
+    fig.savefig(f"{FIGURE_DIR}/{'_'.join(title.split(' '))}_cell_lines.svg", dpi=FIG_DPI, bbox_inches='tight')
     plt.close(fig)
 # Main Processing Functions
 
@@ -751,6 +758,7 @@ def process_library(
                     .reset_index()\
                         .rename(columns={'term':'cluster_go_term','count':'sig_count'})
     elif (library_name in DRUG_LIBS) and (not cell_line):
+        print("\tRetrieving MoAs...")
         lookup = drug_lookup()
         scatter_df = add_moa(scatter_df, lookup)
 
@@ -777,6 +785,7 @@ def process_library(
                 else:
                     create_scatterplot_cell_lines(scatter_df, title=f"{DRUG_TITLES[library_name]}")
             else:
+                print("\tConstructing UMAP plots...")
                 if library_name == 'ginkgo':
                     gdpx1_scatter = scatter_df[scatter_df['term'].str.contains('A549')]
                     gdpx2_scatter = scatter_df[~scatter_df['term'].str.contains('A549')]

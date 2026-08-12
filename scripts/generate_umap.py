@@ -73,6 +73,7 @@ LIBRARIES = {
     "creeds-gene": ("gene", "creeds-gene"),
     "geo-gene": ("gene", "rummageo-gene"),
     "replogle": ("gene", "replogle-perturb-seq"),
+    "cm4ai": ("gene", "cm4ai")
 }
 
 
