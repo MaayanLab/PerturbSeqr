@@ -528,7 +528,7 @@ const genePerturbationDatasets: Dataset[] = [
     gmtUrl: `${MINIO_BASE}/cm4ai.gmt.gz`,
     fullSignatures: [
       { url: 'https://figshare.com/s/ee85bb1880921326249b', label: 'Figshare' },
-      { url: `${MINIO_BASE}/cm4ai-cd-coefficients.h5ad`, label: 'CD Coefficients' },
+      { url: `${MINIO_BASE}/cm4ai-limma-voom-de.h5ad`, label: 'Limma-voom DE (logFC, P.Value, adj.P.Val)' },
     ],
     metadata: [
       { url: `${MINIO_BASE}/cm4ai-cell_line_metadata.parquet`, label: 'Cell Line' },
