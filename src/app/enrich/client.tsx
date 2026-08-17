@@ -283,7 +283,7 @@ function EnrichmentResults({
             <FaFilter className={`text-xs ${datasetFilter.length > 0 ? "" : "opacity-40"}`} />
           </button>
           {datasetDropdownOpen && (
-            <div className="absolute z-30 left-0 top-full mt-1 bg-base-100 border border-base-300 rounded shadow-lg p-2 min-w-[220px] max-h-[300px] overflow-y-auto">
+            <div className="absolute z-30 left-0 top-full mt-1 bg-base-100 border border-base-300 rounded shadow-lg p-2 min-w-[220px] max-h-[400px] overflow-y-auto">
               <div className="flex gap-1 mb-1">
                 <button
                   className="btn btn-xs"
