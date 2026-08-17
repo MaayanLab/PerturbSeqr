@@ -267,6 +267,20 @@ const termStructures: Record<string, TermStructure> = {
       { text: '10023', label: 'Study ID' },
     ],
   },
+  'cm4ai': {
+    example: 'A1BG::KOLF2.1J::hiPSCs::144H::::KD::CRISPRi up',
+    direction: 'up',
+    fields: [
+      { text: 'A1BG', label: 'Perturbation' },
+      { text: 'KOLF2.1J', label: 'Cell Line' },
+      { text: 'hiPSCs', label: 'Cell Type' },
+      { text: '144H', label: 'Timepoint' },
+      { text: '', label: 'Concentration' },
+      { text: 'KD', label: 'Pert. Type' },
+      { text: 'CRISPRi', label: 'Method' },
+    ],
+    extraFields: [],
+  },
   'creeds-gene': {
     example: 'Foxo1::::T reg::::::KO::::mus musculus::GSE40655.508 up',
     direction: 'up',
@@ -520,6 +534,7 @@ const genePerturbationDatasets: Dataset[] = [
       { url: `${MINIO_BASE}/cm4ai-cell_line_metadata.parquet`, label: 'Cell Line' },
       { url: `${MINIO_BASE}/cm4ai-gene_target_metadata.parquet`, label: 'Gene Targets' },
     ],
+    termKey: 'cm4ai',
   },
   {
     title: 'CREEDS Gene Perturbations',
