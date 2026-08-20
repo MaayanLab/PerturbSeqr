@@ -52,7 +52,7 @@ from goatools.anno.broad_gos import NS2GOS
 # Configuration
 
 # Base directory for GMT files
-BASE_DIR = Path(__file__).parent.parent / "db" / "data"
+BASE_DIR = Path(__file__).parent.parent / "data"
 DRUG_DIR = BASE_DIR / "drug_perturbation"
 GENE_DIR = BASE_DIR / "gene_perturbation"
 
@@ -78,6 +78,7 @@ LIBRARIES = {
     "creeds-gene": ("gene", "creeds-gene"),
     "geo-gene": ("gene", "rummageo-gene"),
     "replogle": ("gene", "replogle-perturb-seq"),
+    "cm4ai": ("gene", "cm4ai"),
 }
 
 

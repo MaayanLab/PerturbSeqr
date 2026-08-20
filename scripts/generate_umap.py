@@ -43,7 +43,7 @@ from bokeh.palettes import Category20
 # Configuration
 
 # Base directory for GMT files
-BASE_DIR = Path(__file__).parent.parent / "db" / "data"
+BASE_DIR = Path(__file__).parent.parent / "data"
 DRUG_DIR = BASE_DIR / "drug_perturbation"
 GENE_DIR = BASE_DIR / "gene_perturbation"
 
