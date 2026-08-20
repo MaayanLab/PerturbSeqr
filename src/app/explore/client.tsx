@@ -16,6 +16,7 @@ const DATASETS = {
     { id: 'tahoe-100m', name: 'Tahoe-100M', signatures: '105,404' },
   ],
   gene: [
+    { id: 'cm4ai', name: 'CM4AI', signatures: '23,360' },
     { id: 'creeds-gene', name: 'CREEDS Gene', signatures: '4,788' },
     { id: 'lincs-l1000-xpr', name: 'LINCS L1000 XPR', signatures: '65,672' },
     { id: 'perturbatlas-human', name: 'Perturb Atlas Human', signatures: '12,852' },

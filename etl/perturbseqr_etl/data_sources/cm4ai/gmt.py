@@ -17,6 +17,21 @@ FINAL = GENE_OUTPUT / "cm4ai.gmt.gz"
 
 PERTURBATION_TYPE = "KD"
 PERTURBATION_METHOD = "CRISPRi"
+MAX_GENE_SET_SIZE = 1000
+
+
+def validate_gene_set_sizes(path: Path) -> None:
+    oversized = [
+        (key.partition("\t")[0], len(genes))
+        for key, genes in load_gmt_dict(path).items()
+        if len(genes) > MAX_GENE_SET_SIZE
+    ]
+    if oversized:
+        term, size = max(oversized, key=lambda item: item[1])
+        raise ValueError(
+            f"{path.name}: {len(oversized)} gene sets exceed {MAX_GENE_SET_SIZE}; "
+            f"largest is {term!r} with {size} genes"
+        )
 
 
 def transform(term: str) -> str:
@@ -30,6 +45,8 @@ def gmt(no_cache: bool = False) -> Path:
     if missing := [p for p in (UPSTREAM_UP, UPSTREAM_DOWN) if not p.exists()]:
         raise NotImplementedError(
             f"CM4AI upstream GMTs missing (manual placement): {', '.join(p.name for p in missing)}")
+    for path in (UPSTREAM_UP, UPSTREAM_DOWN):
+        validate_gene_set_sizes(path)
     INTERMEDIATE.parent.mkdir(parents=True, exist_ok=True)
     n = 0
     with gzip.open(INTERMEDIATE, "wt") as f:              # LV terms carry the up/down direction inline
@@ -40,6 +57,7 @@ def gmt(no_cache: bool = False) -> Path:
                 n += 1
     print(f"  {INTERMEDIATE.name}: {n} terms")
     standardize_gmt(INTERMEDIATE, FINAL)
+    validate_gene_set_sizes(FINAL)
     return FINAL
 
 

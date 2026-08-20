@@ -267,6 +267,20 @@ const termStructures: Record<string, TermStructure> = {
       { text: '10023', label: 'Study ID' },
     ],
   },
+  'cm4ai': {
+    example: 'A1BG::KOLF2.1J::hiPSCs::144H::::KD::CRISPRi up',
+    direction: 'up',
+    fields: [
+      { text: 'A1BG', label: 'Perturbation' },
+      { text: 'KOLF2.1J', label: 'Cell Line' },
+      { text: 'hiPSCs', label: 'Cell Type' },
+      { text: '144H', label: 'Timepoint' },
+      { text: '', label: 'Concentration' },
+      { text: 'KD', label: 'Pert. Type' },
+      { text: 'CRISPRi', label: 'Method' },
+    ],
+    extraFields: [],
+  },
   'creeds-gene': {
     example: 'Foxo1::::T reg::::::KO::::mus musculus::GSE40655.508 up',
     direction: 'up',
@@ -325,6 +339,7 @@ type Dataset = {
   sourceLabel?: string
   sourceUrl2?: string
   sourceLabel2?: string
+  sourceLinks?: FullSignature[]
   gmtUrl?: string
   fullSignaturesUrl?: string
   fullSignatures?: FullSignature[]
@@ -511,15 +526,24 @@ const genePerturbationDatasets: Dataset[] = [
     publicationUrl: 'https://www.nature.com/articles/s41587-026-03199-w',
     sourceUrl: 'https://cm4ai.org',
     sourceLabel: 'CM4AI',
+    sourceLinks: [
+      { url: 'https://y-doctor.github.io/KOLF2.1J_Perturbation_Cell_Atlas/#home', label: 'KOLF2.1J Atlas' },
+      { url: 'https://figshare.com/s/ee85bb1880921326249b', label: 'AnnData (Figshare)' },
+      {
+        url: 'https://www.ncbi.nlm.nih.gov/bioproject/PRJNA1173491',
+        label: 'Raw FASTQs (SRA)',
+      },
+    ],
     gmtUrl: `${MINIO_BASE}/cm4ai.gmt.gz`,
     fullSignatures: [
-      { url: 'https://figshare.com/s/ee85bb1880921326249b', label: 'Figshare' },
-      { url: `${MINIO_BASE}/cm4ai-cd-coefficients.h5ad`, label: 'CD Coefficients' },
+      { url: `${MINIO_BASE}/cm4ai-limma-voom-de.h5ad`, label: 'Limma-voom DE (logFC, P.Value, adj.P.Val)' },
     ],
     metadata: [
       { url: `${MINIO_BASE}/cm4ai-cell_line_metadata.parquet`, label: 'Cell Line' },
       { url: `${MINIO_BASE}/cm4ai-gene_target_metadata.parquet`, label: 'Gene Targets' },
+      { url: `${MINIO_BASE}/cm4ai-signature_metadata.parquet`, label: 'Signatures' },
     ],
+    termKey: 'cm4ai',
   },
   {
     title: 'CREEDS Gene Perturbations',
@@ -733,6 +757,7 @@ const metadataDatasets: Dataset[] = [
 
 function DatasetCard({ dataset, showDownloads = true, liveCount, gmtSize }: { dataset: Dataset, showDownloads?: boolean, liveCount?: number, gmtSize?: string }) {
   const structure = dataset.termKey ? termStructures[dataset.termKey] : null
+  const hasSource = Boolean(dataset.sourceUrl || dataset.sourceUrl2 || dataset.sourceLinks?.length)
   const displayValue = dataset.libraryName
     ? (liveCount != null ? `${liveCount.toLocaleString()} signatures` : '…')
     : dataset.value
@@ -747,19 +772,17 @@ function DatasetCard({ dataset, showDownloads = true, liveCount, gmtSize }: { da
             <>
               Publication: <a href={dataset.publicationUrl} target="_blank" rel="noopener noreferrer" className="link link-neutral">[1]</a>
               {' '}<a href={dataset.publicationUrl2} target="_blank" rel="noopener noreferrer" className="link link-neutral">[2]</a>
-              {' · '}
+              {hasSource && ' · '}
             </>
           ) : (
             <>
               <a href={dataset.publicationUrl} target="_blank" rel="noopener noreferrer" className="link link-neutral">Publication</a>
-              {' · '}
+              {hasSource && ' · '}
             </>
           )
         ) : null}
-        {dataset.sourceUrl ? (
+        {dataset.sourceUrl && (
           <a href={dataset.sourceUrl} target="_blank" rel="noopener noreferrer" className="link link-neutral">{dataset.sourceLabel || 'Source'}</a>
-        ) : (
-          <span className="text-gray-400">Source</span>
         )}
         {dataset.sourceUrl2 && (
           <>
@@ -767,6 +790,12 @@ function DatasetCard({ dataset, showDownloads = true, liveCount, gmtSize }: { da
             <a href={dataset.sourceUrl2} target="_blank" rel="noopener noreferrer" className="link link-neutral">{dataset.sourceLabel2 || 'Source'}</a>
           </>
         )}
+        {dataset.sourceLinks?.map(link => (
+          <React.Fragment key={link.url}>
+            {' · '}
+            <a href={link.url} target="_blank" rel="noopener noreferrer" className="link link-neutral">{link.label}</a>
+          </React.Fragment>
+        ))}
         {showDownloads && (
           <>
             <br />
