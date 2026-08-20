@@ -27,7 +27,8 @@ async function fetchGmtSizes(): Promise<Record<string, string>> {
   const urls = Object.keys(libraries.libraries).map(slug => `${MINIO_BASE}/${slug}.gmt.gz`)
   const entries = await Promise.all(urls.map(async url => {
     try {
-      const res = await fetch(url, { method: 'HEAD' })
+      const res = await fetch(url, { method: 'HEAD', cache: 'no-store' })
+      if (!res.ok) throw new Error(`HEAD ${url}: ${res.status}`)
       return [url, formatBytes(Number(res.headers.get('content-length')))] as const
     } catch {
       return [url, ''] as const
