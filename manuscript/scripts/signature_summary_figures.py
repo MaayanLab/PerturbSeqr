@@ -25,12 +25,12 @@ warnings.filterwarnings("ignore")
 BASE_DIR = Path(__file__).parent.parent
 METADATA_DIR = BASE_DIR.parent / "public" / "metadata"
 FIG_DIR = BASE_DIR / "figures" / "summary"
-LOCAL_FIG_DIR = os.getenv('LOCAL_FIG_DIR')
+LOCAL_FIG_DIR = Path(os.getenv('LOCAL_FIG_DIR'))
 # Libraries
 DRUG_LIBS = ['LINCS L1000 CP', 'Tahoe-100M', 'RummaGEO Chem', 'NIBR DRUG-seq', 'Ginkgo Bioworks',
                 'Microarrays CMAP', 'SciPlex', 'CREEDS Chem', 'DeepCover MoA']
 GENE_LIBS = ['LINCS L1000 XPR', 'Perturb Atlas Human', 'Perturb Atlas Mouse', 'RummaGEO Gene',
-                'Replogle et al.', 'CREEDS Gene']
+                'Replogle et al.', 'CREEDS Gene', 'CM4AI']
 FIG_NUMBER = 'Fig1'
 FIG_NAMES = {'counts':'signature_summary',
              'features':'signature_features',
@@ -198,7 +198,7 @@ def perturbation_barplot(drug_signatures, gene_signatures, all_signatures, cid_l
     ax.tick_params(axis="both", labelsize=10)
     ax.set_ylabel(None)
     ax.set_xlabel(None)
-    plt.xlim(0, 14200)
+    plt.xlim(0, 21000)
     ax.set_xticklabels(labels=[f'{int(x):,}' for x in ax.get_xticks()]) 
     plt.grid(visible=False)
     plt.tight_layout()
@@ -215,7 +215,7 @@ def drug_pert_barplot(drug_signatures, colors):
     order = pivot_df.sum(axis=1).sort_values(ascending=False).index.values[:20]
     totals = pivot_df.sum(axis=1).loc[order]
     pivot_df = pivot_df.loc[order]
-
+    
     fig, ax = plt.subplots(figsize=(9, 6))
     for i, (idx, row) in enumerate(pivot_df.iterrows()):
         sorted_row = row.sort_values(ascending=False)
@@ -236,6 +236,10 @@ def drug_pert_barplot(drug_signatures, colors):
             fontweight='bold'
         )
     label_dict = drug_signatures[['resolved_pert', 'perturbation']].set_index('resolved_pert').to_dict()['perturbation']
+    label_dict = {
+        k:v.capitalize() if v[0].islower() else v
+        for k,v in label_dict.items()
+    }
     ax.set_xticklabels([label_dict.get(p, p) for p in pivot_df.index], rotation=45, ha='right')
     ax.set_ylabel('Signatures')
     ax.legend()
@@ -360,8 +364,9 @@ def main():
     
     # Plotting colors
     exclude = ['#7f7f7f', '#c7c7c7']
-    tab20_colors = [x for x in list(sns.color_palette('tab20').as_hex()) if x not in exclude][:all_signatures.library.nunique()]
-    COLORS = dict(zip(all_signatures.library.unique(), tab20_colors))
+    tab20_colors = [x for x in list(sns.color_palette('tab20').as_hex()) if x not in exclude]
+    COLORS = {lib: tab20_colors[i % len(tab20_colors)] for i, lib in enumerate(all_signatures.library.unique())}
+    # COLORS = dict(zip(all_signatures.library.unique(), tab20_colors))
     # Plotting aesthetics
     sns.set_theme(
     context='paper',
@@ -384,6 +389,7 @@ def main():
     symbol_map = pc_alias_map(organism='Mammalia/Homo_sapiens', cache_dir=Path('.') / 'cache')
 
     drug_metadata = pd.read_json(METADATA_DIR / "drug_lookup.json").T
+    drug_metadata = drug_metadata.rename(columns={'name':'resolved_name'})
     drug_metadata = drug_metadata.reset_index(names='name')
 
     cid_lookup = drug_metadata_lookup('name', 'cid', drug_metadata)
@@ -399,6 +405,7 @@ def main():
 
     drug_signatures['resolved_pert'] = drug_signatures['perturbation'].str.lower().map(drug_dict)
     drug_signatures['resolved_pert'] = drug_signatures['resolved_pert'].fillna(drug_signatures['perturbation'].str.lower())
+    drug_signatures['resolved_pert'] = drug_signatures.apply(lambda row: row['perturbation'].lower() if row['resolved_pert']=='' else row['resolved_pert'], axis=1)
 
     drug_pert_barplot(drug_signatures, colors=COLORS)
 
