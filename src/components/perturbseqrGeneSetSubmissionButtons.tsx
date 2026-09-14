@@ -24,7 +24,7 @@ function SubmitButton({ label, disabled, loading, onClick }: { label: string; di
   )
 }
 
-export function PerturbseqrSingleButton({ genes, description }: { genes?: Genes; description?: string | null }) {
+export function PerturbseqrSingleGeneSetSubmissionButton({ genes, description }: { genes?: Genes; description?: string | null }) {
   const { router, create, loading } = useSubmitGeneSet()
   const symbols = clean(genes)
   return (
@@ -40,7 +40,7 @@ export function PerturbseqrSingleButton({ genes, description }: { genes?: Genes;
   )
 }
 
-export function PerturbseqrPairedButton({ genesUp, genesDown, descriptionUp, descriptionDown }: {
+export function PerturbseqrPairedGeneSetSubmissionButton({ genesUp, genesDown, descriptionUp, descriptionDown }: {
   genesUp?: Genes; genesDown?: Genes; descriptionUp?: string | null; descriptionDown?: string | null
 }) {
   const { router, create, loading } = useSubmitGeneSet()

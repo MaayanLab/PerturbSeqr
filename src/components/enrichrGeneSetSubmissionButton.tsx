@@ -34,7 +34,7 @@ function enrich(options: any) {
     document.body.removeChild(form);
 }
 
-export default function EnrichrButton({ genes, description }: { genes?: (string | null)[] | undefined, description?: string | null }) {
+export default function EnrichrGeneSetSubmissionButton({ genes, description }: { genes?: (string | null)[] | undefined, description?: string | null }) {
     return (
         <button
             className="btn btn-sm btn-outline text-xs"
