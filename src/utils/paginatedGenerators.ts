@@ -57,13 +57,15 @@ export async function* paginatedNodeGenerator(genes: string[], term: string, fil
             cellLine: parsed.cellLine || 'N/A',
             timepoint: parsed.timepoint,
             direction: parsed.direction,
+            libraryCount: node.libraryCount ?? 0,
+            totalSignatureCount: fdaInfo?.totalCount ?? 0,
             geneSetSize: geneSet.nGeneIds,
             moa: geneSet.geneSetFdaCountsById.nodes[0]?.moa,
             nOverlap: node.nOverlap,
             oddsRatio: node.oddsRatio,
             pvalue: node.pvalue,
             adjPvalue: node.adjPvalue,
-            count: fdaInfo?.count || 1,
+            count: fdaInfo?.count ?? 0,
             approved: fdaInfo?.approved?.toString() || "",
             geneSetHash: node.geneSetHash,
           };
@@ -246,7 +248,9 @@ export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: 
           cellLine: parsed.cellLine || 'N/A',
           timepoint: parsed.timepoint,
           concentration: parsed.concentration || "N/A",
-          signatureCount: geneSet.geneSetFdaCountsById.nodes[0]?.count || 0,
+          libraryCount: node.libraryCount ?? 0,
+          signatureCount: fdaInfo?.count ?? 0,
+          totalSignatureCount: fdaInfo?.totalCount ?? 0,
           moa: geneSet.geneSetFdaCountsById.nodes[0]?.moa,
           fdaApproved: fdaInfo?.approved?.toString() || "",
           geneSetSizeUp: geneSetUp?.nGeneIds ?? '',
@@ -396,4 +400,3 @@ export async function* paginatedPairMoAsGenerator(
       if (offset >= totalCount) break;
     }
 }
-  

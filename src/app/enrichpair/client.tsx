@@ -1157,22 +1157,32 @@ function EnrichmentResults({
                 <th className={columnVisibility.concentration ? "" : "hidden"}>Concentration</th>
                 {/* <th>Direction</th> */}
                 <th className="relative group">
-                  <div className="absolute z-10 left-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
-                    Number of signatures with this perturbation, in this gene set library
+                  <div className="absolute z-10 left-0 top-10 mb-2 hidden w-72 whitespace-normal bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
+                    Number of gene set libraries with a significant result for this perturbation.
                   </div>
-                  Signature<br></br>
+                  Supporting<br />
                   <span className="inline-flex">
-                    Count
+                    Libraries
                     <IoMdInformationCircleOutline className="ml-0.5" />
                   </span>
                 </th>
                 <th className="relative group">
-                  <div className="absolute z-10 left-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
-                    Number of gene set libraries with a significant result for this perturbation.
+                  <div className="absolute z-10 left-0 top-10 mb-2 hidden w-80 whitespace-normal bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
+                    Number of signatures with this perturbation, in this gene set library
                   </div>
                   Library<br />
                   <span className="inline-flex">
-                    Count
+                    Signatures
+                    <IoMdInformationCircleOutline className="ml-0.5" />
+                  </span>
+                </th>
+                <th className="relative group">
+                  <div className="absolute z-10 left-0 top-10 mb-2 hidden w-80 whitespace-normal bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
+                    Total number of signatures for this perturbation across all gene set libraries.
+                  </div>
+                  Total<br />
+                  <span className="inline-flex">
+                    Signatures
                     <IoMdInformationCircleOutline className="ml-0.5" />
                   </span>
                 </th>
@@ -1351,13 +1361,14 @@ function EnrichmentResults({
                       </td>
                       <td className={`max-w-[70px] ${columnVisibility.timepoint ? "" : "hidden"}`}>{timepoint === 'N/A' ? <span className="text-gray-400">N/A</span> : <span className="truncate block" title={timepoint}>{timepoint}</span>}</td>
                       <td className={`max-w-[80px] ${columnVisibility.concentration ? "" : "hidden"}`}>{concentration === 'N/A' ? <span className="text-gray-400">N/A</span> : <span className="truncate block" title={concentration}>{concentration}</span>}</td>
-                      <td>{count}</td>
                       <td>
                         <LibraryCount
                           count={enrichmentResult?.libraryCount}
                           libraries={enrichmentResult?.supportingLibraries}
                         />
                       </td>
+                      <td>{count}</td>
+                      <td>{fdaData?.totalCount ?? 0}</td>
                       <td className="max-w-[150px]">
                         {/* MOA with source attribution */}
                         {moa ? (
