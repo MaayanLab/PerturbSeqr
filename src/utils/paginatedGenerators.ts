@@ -19,8 +19,10 @@ import {
 export async function* paginatedNodeGenerator(genes: string[], term: string, filterFda: boolean, filterKo: boolean, topN: number = DEFAULT_CONSENSUS_TOP_N_SIGNATURES, sort: string, maxTotal: number = MAX_DOWNLOAD_RESULT_COUNT, pvalueLe: number = DEFAULT_PVALUE_CUTOFF, libraryNames: string[] | null = null) {
     const pageSize = PAGINATION_FETCH_BATCH_SIZE;
     let offset = 0;
+    let emitted = 0;
 
-    while (true) {
+    while (emitted < maxTotal) {
+      const first = Math.min(pageSize, maxTotal - emitted);
       const { data, error } = await getClient().query<EnrichmentQuerySingleQuery>({
         query: EnrichmentQuerySingleDocument,
         variables: {
@@ -30,7 +32,7 @@ export async function* paginatedNodeGenerator(genes: string[], term: string, fil
           sortBy: sort,
           filterKo,
           offset,
-          first: pageSize,
+          first,
           topN,
           pvalueLe,
           libraryNames,
@@ -69,13 +71,12 @@ export async function* paginatedNodeGenerator(genes: string[], term: string, fil
             approved: fdaInfo?.approved?.toString() || "",
             geneSetHash: node.geneSetHash,
           };
+          if (++emitted >= maxTotal) return;
         }
       }
 
-      if (nodes.length < pageSize) break;
-      offset += pageSize;
-
-      if (offset >= maxTotal) break;
+      if (nodes.length < first) break;
+      offset += nodes.length;
     }
 }
   
@@ -208,8 +209,10 @@ export async function* paginatedMoAsGenerator(
 export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: string[], term: string, filterFda: boolean, filterKo: boolean, topN: number = DEFAULT_CONSENSUS_TOP_N_SIGNATURES, sort: string, maxTotal: number = MAX_DOWNLOAD_RESULT_COUNT, pvalueLe: number = DEFAULT_PVALUE_CUTOFF, libraryNames: string[] | null = null) {
     const pageSize = PAGINATION_FETCH_BATCH_SIZE;
     let offset = 0;
+    let emitted = 0;
 
-    while (true) {
+    while (emitted < maxTotal) {
+      const first = Math.min(pageSize, maxTotal - emitted);
       const { data, error } = await getClient().query<PairEnrichmentQuerySingleQuery>({
         query: PairEnrichmentQuerySingleDocument,
         variables: {
@@ -220,7 +223,7 @@ export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: 
           sortBy: sort,
           filterKo,
           offset,
-          first: pageSize,
+          first,
           topN,
           pvalueLe,
           libraryNames,
@@ -264,12 +267,11 @@ export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: 
           pvalueReverse: node.pvalueReverse,
           adjPvalueReverse: node.adjPvalueReverse,
         };
+        if (++emitted >= maxTotal) return;
       }
 
-      if (nodes.length < pageSize) break;
-      offset += pageSize;
-
-      if (offset >= maxTotal) break;
+      if (nodes.length < first) break;
+      offset += nodes.length;
     }
 }
 
