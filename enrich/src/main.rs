@@ -243,6 +243,9 @@ fn supporting_libraries(
 struct BackgroundQuery {
     background_id: Uuid,
     input_gene_set: DenseBitVec,
+    overlap_ge: u32,
+    pvalue_le_bits: u64,
+    adj_pvalue_le_bits: u64,
 }
 
 #[derive(Eq, PartialEq, PartialOrd, Ord)]
@@ -250,6 +253,9 @@ struct BackgroundQueryPair {
     background_id: Uuid,
     input_gene_set_up: DenseBitVec,
     input_gene_set_down: DenseBitVec,
+    overlap_ge: u32,
+    pvalue_le_bits: u64,
+    adj_pvalue_le_bits: u64,
 }
 
 // This structure stores a persistent many-reader single-writer hashmap containing cached indexes for a given background id
@@ -700,11 +706,13 @@ async fn query(
     // A 265-gene query has 198 genes in L1000's universe, 241 in Tahoe's, etc.
     println!("[{}] query: input_genes={}, libraries={}",
              background_id, input_gene_set.n, library_query_overlap_counts.len());
-    // Cache key: (background_id + query bitvec).
-    let background_query = Arc::new(BackgroundQuery { background_id, input_gene_set });
+    let background_query = Arc::new(BackgroundQuery {
+        background_id, input_gene_set, overlap_ge,
+        pvalue_le_bits: pvalue_le.to_bits(),
+        adj_pvalue_le_bits: adj_pvalue_le.to_bits(),
+    });
 
-    // Full unfiltered results are cached per query. On cache hit, clone and filter by request
-    // parameters (library, FDA, etc.). On cache miss, compute from scratch and cache for reuse.
+    // Threshold-filtered results are cached; library/display filters are applied below.
     let results = {
         let cached_results = state.cache.get(&background_query).await;
 
@@ -795,7 +803,7 @@ async fn query(
             results.sort_unstable_by(|a, b| a.pvalue.partial_cmp(&b.pvalue).unwrap_or(std::cmp::Ordering::Equal));
             let results = Arc::new(results);
 
-            // Cache full unfiltered results (library filtering applied post-cache)
+            // Cache threshold-filtered results across all libraries.
             state.cache.insert(background_query, results.clone(), CACHE_TTL_MS).await;
 
             let duration = start.elapsed();
@@ -1475,7 +1483,12 @@ async fn query_pairs(
 
     println!("[{}] Computing mimickers and reversers", background_id);
     let start = Instant::now();
-    let background_query = Arc::new(BackgroundQueryPair { background_id, input_gene_set_up, input_gene_set_down });
+    let background_query = Arc::new(BackgroundQueryPair {
+        background_id, input_gene_set_up, input_gene_set_down,
+        overlap_ge: overlap_ge.unwrap_or(DEFAULT_MIN_GENE_OVERLAP),
+        pvalue_le_bits: pvalue_le.unwrap_or(DEFAULT_PVALUE_CUTOFF).to_bits(),
+        adj_pvalue_le_bits: adj_pvalue_le.to_bits(),
+    });
     let mut results = {
         let cached_results = state.cachepair.get(&background_query).await;
         if let Some(results) = cached_results {
