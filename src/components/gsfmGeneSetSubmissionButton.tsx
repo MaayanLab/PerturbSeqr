@@ -21,10 +21,14 @@ export default function GsfmGeneSetSubmissionButton({ genes, description }: { ge
             type="button"
             onClick={async () => {
                 if (!genes?.length) return
+                const tab = window.open('about:blank', '_blank')
+                if (!tab) return alert('Allow pop-ups to open GSFM, then try again.')
+                tab.opener = null
                 try {
                     const link = await getGsfmLink(description || 'Perturb-Seqr gene set', genes)
-                    window.open(link, '_blank')
+                    if (!tab.closed) tab.location.replace(link)
                 } catch {
+                    tab.close()
                     alert('Could not submit the gene set to GSFM. Please try again.')
                 }
             }}
