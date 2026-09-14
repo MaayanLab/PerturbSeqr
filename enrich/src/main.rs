@@ -204,8 +204,8 @@ fn corrected_directional_odds_ratios(a_up: usize, b_up: usize, a_down: usize, b_
     (up, down)
 }
 
-fn perturbation_key<'a>(perturbation: &'a str, cid: &'a str) -> Option<&'a str> {
-    (!perturbation.is_empty()).then_some(if cid.is_empty() { perturbation } else { cid })
+fn perturbation_key(perturbation: &str, cid: &str) -> Option<String> {
+    (!perturbation.is_empty()).then(|| if cid.is_empty() { perturbation.to_lowercase() } else { cid.to_string() })
 }
 
 fn libraries_by_perturbation(
@@ -218,7 +218,7 @@ fn libraries_by_perturbation(
         let Some(library) = bitmap.gene_set_libraries.get(hash) else { continue };
         for (_, _, _, _, _, perturbation, _, cid) in bitmap.terms.get(hash).into_iter().flatten() {
             if let Some(key) = perturbation_key(perturbation, cid) {
-                result.entry(key.to_string()).or_default().insert(library.clone());
+                result.entry(key).or_default().insert(library.clone());
             }
         }
     }
@@ -232,7 +232,7 @@ fn supporting_libraries(
 ) -> Vec<String> {
     let mut result: Vec<_> = bitmap.terms.get(hash).into_iter().flatten()
         .filter_map(|(_, _, _, _, _, perturbation, _, cid)| perturbation_key(perturbation, cid))
-        .filter_map(|key| libraries.get(key))
+        .filter_map(|key| libraries.get(&key))
         .max_by_key(|names| names.len())
         .into_iter().flatten().cloned().collect();
     result.sort_unstable();
