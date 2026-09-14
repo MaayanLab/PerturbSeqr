@@ -7,6 +7,7 @@ import TermDownloadButton from '@/components/termDownloadButton';
 import { parseTerm, getCellDisplay, formatPerturbationWithType } from '@/utils/parseTerm';
 import { preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary } from '@/utils/metadataLookup';
 import { DatasetCell } from '@/components/DatasetCell';
+import SingleGenePerturbationResourceLinks from '@/components/SingleGenePerturbationResourceLinks';
 import Image from 'next/image';
 import { FaFilter } from 'react-icons/fa';
 import libraryConfig from '@/config/libraries.json';
@@ -345,17 +346,18 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
                     <td>
                     {el.term}
                   </td>
-                  <td className="max-w-[130px]">
-                    <div>
+                  <td className={el._isGenePert ? 'max-w-[240px]' : 'max-w-[130px]'}>
+                    <div className={el._isGenePert ? 'flex items-center gap-2' : undefined}>
                       <a
                         href={el._perturbationUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="link link-neutral hover:link-hover truncate block"
+                        className="link link-neutral hover:link-hover truncate block min-w-0"
                         title={el._perturbationDisplay}
                       >
                         {el._perturbationDisplay}
                       </a>
+                      {el._isGenePert && <SingleGenePerturbationResourceLinks perturbation={el._perturbation} />}
                       {!el._isGenePert && el._drugInfo?.cid && (
                         <div className="text-xs text-gray-500">
                           <span title="PubChem Compound ID">PCID:</span> {el._drugInfo.cid}

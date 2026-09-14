@@ -29,6 +29,7 @@ import { LibraryBarGraphGrid, LibraryCardPaired } from "@/components/BarGraph";
 import ShareButton from "@/components/shareButton";
 import { SortableHeader } from "@/components/SortableHeader";
 import LibraryCount from "@/components/LibraryCount";
+import SingleGenePerturbationResourceLinks from "@/components/SingleGenePerturbationResourceLinks";
 
 const allLibraryDisplayNames = Object.values(libraryConfig.libraries).map((l: any) => l.displayName as string);
 const drugLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'drug').map((l: any) => l.displayName as string);
@@ -1024,41 +1025,10 @@ function EnrichmentResults({
                               )}
                             </div>
                           ) : (
-                            <>
+                            <span className="inline-flex items-center gap-2">
                               {perturbation}
-                              <a
-                                className="underline cursor-pointer mx-2"
-                                href={`https://maayanlab.cloud/Harmonizome/gene/${perturbation?.replace(
-                                  " KO",
-                                  ""
-                                )}`}
-                                target="_blank"
-                              >
-                                <Image
-                                  className="inline-block rounded"
-                                  src="/images/harmonizome_logo_30x26.png"
-                                  width={20}
-                                  height={20}
-                                  alt="Harmonizome"
-                                />
-                              </a>
-                              <a
-                                className="underline cursor-pointer"
-                                href={`https://maayanlab.cloud/prismexp/g/${perturbation?.replace(
-                                  " KO",
-                                  ""
-                                )}`}
-                                target="_blank"
-                              >
-                                <Image
-                                  className="inline-block rounded"
-                                  src="/images/prismexp.png"
-                                  width={20}
-                                  height={20}
-                                  alt="PrismEXP"
-                                />
-                              </a>
-                            </>
+                              <SingleGenePerturbationResourceLinks perturbation={enrichmentResult?.drug} />
+                            </span>
                           )}
                         </td>
                         <td>
@@ -1306,18 +1276,19 @@ function EnrichmentResults({
                     <tr key={genesetIndex} className="text-left">
                       <td className={"hidden"}>{term}</td>
                       <DatasetCell dataset={dataset} term={term} />
-                      <td className="max-w-[130px]">
+                      <td className={isGenePert ? 'max-w-[240px]' : 'max-w-[130px]'}>
                         {/* Perturbation with appropriate link (PubChem for drugs, NCBI Gene for genes) */}
-                        <div>
+                        <div className={isGenePert ? 'flex items-center gap-2' : undefined}>
                           <a
                             href={perturbationUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="link link-neutral hover:link-hover truncate block"
+                            className="link link-neutral hover:link-hover truncate block min-w-0"
                             title={perturbationDisplay}
                           >
                             {perturbationDisplay}
                           </a>
+                          {isGenePert && <SingleGenePerturbationResourceLinks perturbation={perturbation} />}
                           {/* Show CID for drug perturbations */}
                           {!isGenePert && drugInfo?.cid && (
                             <div className="text-xs text-gray-500">

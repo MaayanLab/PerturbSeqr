@@ -13,6 +13,7 @@ import {
 } from '@/utils/metadataLookup';
 import { DatasetCell } from '@/components/DatasetCell';
 import LibraryCount from '@/components/LibraryCount';
+import SingleGenePerturbationResourceLinks from '@/components/SingleGenePerturbationResourceLinks';
 
 export type GeneSetModalT =
   | { type: 'UserGeneSet'; description: string; genes: string[] }
@@ -215,17 +216,18 @@ export function EnrichmentTable({
             <tr key={genesetIndex} className="text-left">
               <td className={'hidden'}>{term}</td>
               <DatasetCell dataset={dataset} term={term} />
-              <td className="max-w-[130px]">
-                <div>
+              <td className={isGenePert ? 'max-w-[240px]' : 'max-w-[130px]'}>
+                <div className={isGenePert ? 'flex items-center gap-2' : undefined}>
                   <a
                     href={perturbationUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="link link-neutral hover:link-hover truncate block"
+                    className="link link-neutral hover:link-hover truncate block min-w-0"
                     title={perturbationDisplay}
                   >
                     {perturbationDisplay}
                   </a>
+                  {isGenePert && <SingleGenePerturbationResourceLinks perturbation={perturbation} />}
                   {!isGenePert && drugInfo?.cid && (
                     <div className="text-xs text-gray-500">
                       <span title="PubChem Compound ID">PCID:</span> {drugInfo.cid}
