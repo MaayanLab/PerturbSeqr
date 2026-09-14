@@ -20,6 +20,11 @@ services:
     build:
       platforms:
         - linux/arm64
+  perturbseqr-mcp:
+    platform: linux/arm64
+    build:
+      platforms:
+        - linux/arm64
   minio-setup:
     platform: linux/arm64
     build:

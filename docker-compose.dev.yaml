@@ -94,6 +94,21 @@ services:
       perturbseqr-postgres:
         condition: service_healthy
 
+  perturbseqr-mcp:
+    build: mcp
+    image: johnkgardner/perturbseqr-mcp:0.2.51
+    platform: linux/amd64
+    restart: unless-stopped
+    environment:
+      - PERTURBSEQR_API_URL=http://perturbseqr-app:3000/graphql
+    ports:
+      - 5000:5000
+    x-kubernetes:
+      annotations:
+        maayanlab.cloud/ingress: https://perturbseqr.k8s.maayanlab.cloud/mcp
+    depends_on:
+      - perturbseqr-app
+
   minio-setup:
     build: minio
     image: johnkgardner/perturbseqr-minio-setup:0.2.45

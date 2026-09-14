@@ -55,6 +55,11 @@ COMPOSE_PROFILES=jobs docker compose run --rm ingest
 
 See [DEV_DEPLOY.md](DEV_DEPLOY.md) for the dev Kubernetes cluster deployment workflow.
 
+## MCP access
+
+See [mcp/README.md](mcp/README.md) for setup and supported tools,
+and [SKILL.md](SKILL.md) for the Perturb-Seqr agent skill.
+
 ## Citation
 Perturb-Seqr: Comprehensive Signature Search Engine Integrating Connectivity Maps from Multiple Sources
 John K. Gardner, Lily D. Taub, Daniel J. B. Clarke, Ido Diamant, Avi Ma'ayan

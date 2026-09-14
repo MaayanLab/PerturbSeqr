@@ -13,6 +13,7 @@ __pycache__
 /build
 /coverage
 /enrich
+/mcp
 /figures
 /node_modules
 /out/
