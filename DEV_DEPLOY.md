@@ -109,3 +109,4 @@ kubectl create -f k8s/ingest-incremental-job.yaml -n johnkgardner
 
 - App: https://perturbseqr.k8s.maayanlab.cloud
 - MinIO Console: https://console.s3.perturbseqr.k8s.maayanlab.cloud
+- MCP: https://perturbseqr.k8s.maayanlab.cloud/mcp
