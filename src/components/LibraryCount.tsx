@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 type Props = {
@@ -17,6 +17,17 @@ export default function LibraryCount({ count, libraries }: Props) {
   const names = libraries?.filter((name): name is string => !!name) ?? [];
   const triggerRef = useRef<HTMLSpanElement>(null);
   const [tooltipPosition, setTooltipPosition] = useState<TooltipPosition | null>(null);
+
+  useEffect(() => {
+    if (!tooltipPosition) return;
+    const hide = () => setTooltipPosition(null);
+    window.addEventListener('scroll', hide, true);
+    window.addEventListener('resize', hide);
+    return () => {
+      window.removeEventListener('scroll', hide, true);
+      window.removeEventListener('resize', hide);
+    };
+  }, [tooltipPosition]);
 
   const showTooltip = () => {
     const rect = triggerRef.current?.getBoundingClientRect();
