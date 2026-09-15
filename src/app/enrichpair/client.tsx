@@ -1278,7 +1278,7 @@ function EnrichmentResults({
                       <DatasetCell dataset={dataset} term={term} />
                       <td className={isGenePert ? 'max-w-[240px]' : 'max-w-[130px]'}>
                         {/* Perturbation with appropriate link (PubChem for drugs, NCBI Gene for genes) */}
-                        <div className={isGenePert ? 'flex items-center gap-2' : undefined}>
+                        <div className={isGenePert ? 'flex flex-wrap items-center gap-x-2 gap-y-1' : undefined}>
                           <a
                             href={perturbationUrl}
                             target="_blank"

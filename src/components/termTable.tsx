@@ -347,7 +347,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
                     {el.term}
                   </td>
                   <td className={el._isGenePert ? 'max-w-[240px]' : 'max-w-[130px]'}>
-                    <div className={el._isGenePert ? 'flex items-center gap-2' : undefined}>
+                    <div className={el._isGenePert ? 'flex flex-wrap items-center gap-x-2 gap-y-1' : undefined}>
                       <a
                         href={el._perturbationUrl}
                         target="_blank"

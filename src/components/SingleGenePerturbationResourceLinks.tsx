@@ -13,7 +13,7 @@ export default function SingleGenePerturbationResourceLinks({ perturbation }: { 
   if (!symbol || !/^[A-Z][A-Z0-9.-]*$/.test(symbol)) return null;
 
   return (
-    <span className="inline-flex shrink-0 items-center gap-1.5">
+    <span className="inline-flex min-w-max shrink-0 items-center gap-1.5">
       {resources.map(({ name, base, icon }) => (
         <a
           key={name}
