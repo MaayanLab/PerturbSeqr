@@ -16,7 +16,7 @@ pub fn create_bucket() -> Box<Bucket> {
 }
 
 fn index_key(id: &uuid::Uuid) -> String {
-    format!("enrich/index_{}.bin", id)
+    format!("enrich/index_v2_{}.bin", id)
 }
 
 pub async fn put_index(bucket: &Bucket, id: &uuid::Uuid, bytes: &[u8]) -> Result<(), String> {

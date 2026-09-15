@@ -16,7 +16,7 @@ export default ['single_gene_set_search', {
   currentBackground { enrich(genes:$genes, libraryNames:$libraryNames, filterTerm:$filterTerm,
     filterFda:$filterFda, first:$first, offset:$offset, sortby:$sortBy,
     overlapGe:$overlapGe, pvalueLe:$pvalueLe, adjPvalueLe:$adjPvalueLe) {
-    totalCount geneSetCount nodes { geneSetHash pvalue adjPvalue oddsRatio nOverlap libraryCount supportingLibraries
+    totalCount geneSetCount nodes { geneSetId geneSetHash pvalue adjPvalue oddsRatio nOverlap libraryCount supportingLibraries
       geneSets { nodes { ${geneSetFields} } } }
   } }
 }`, input)] as const;

@@ -146,6 +146,8 @@ export async function GET(request: Request) {
               "oddsRatioReverse",
               "pvalueReverse",
               "adjPvalueReverse",
+              "geneSetIdUp",
+              "geneSetIdDown",
             ],
             paginatedPairNodeGenerator(
               genesUp,

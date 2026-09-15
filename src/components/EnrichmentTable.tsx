@@ -22,6 +22,7 @@ export type GeneSetModalT =
   | undefined;
 
 type EnrichNode = {
+  geneSetId?: string | null;
   geneSetHash?: string | null;
   libraryCount?: number | null;
   supportingLibraries?: ReadonlyArray<string | null> | null;
@@ -182,7 +183,7 @@ export function EnrichmentTable({
             </td>
           </tr>
         ) : null}
-        {nodes?.flatMap((enrichmentResult, genesetIndex) => {
+        {nodes?.flatMap((enrichmentResult) => {
           const term = enrichmentResult?.geneSets?.nodes?.[0]?.term;
           const libraryName = enrichmentResult?.geneSets?.nodes?.[0]?.library?.name || '';
 
@@ -213,7 +214,7 @@ export function EnrichmentTable({
 
           if (!enrichmentResult?.geneSets) return null;
           return (
-            <tr key={genesetIndex} className="text-left">
+            <tr key={enrichmentResult.geneSetId} className="text-left">
               <td className={'hidden'}>{term}</td>
               <DatasetCell dataset={dataset} term={term} />
               <td className={isGenePert ? 'max-w-[240px]' : 'max-w-[130px]'}>
