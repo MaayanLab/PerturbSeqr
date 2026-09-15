@@ -51,6 +51,15 @@ export default async function About() {
           <br />
           <p className='mb-2 font-bold'>Please acknowledge Perturb-Seqr in your publications by citing the following reference: </p>
           <p className='font-bold'>John K. Gardner, Lily D. Taub, Daniel J. B. Clarke, Ido Diamant, Avi Ma&apos;ayan. Perturb-Seqr: Comprehensive Signature Search Engine Integrating Connectivity Maps from Multiple Sources. <a className="underline" href="https://perturbseqr.maayanlab.cloud/">https://perturbseqr.maayanlab.cloud/</a></p>
+          <p className="mt-4">
+            You can use Perturb-Seqr within AI Applications through the{' '}
+            <a className="underline font-semibold" href="https://github.com/MaayanLab/maayan-lab-tools-skills/blob/main/skills/Perturb-Seqr/SKILL.md" target="_blank" rel="noopener noreferrer">
+              Perturb-Seqr Agent Skill
+            </a>{' '}or{' '}
+            <a className="underline font-semibold" href="https://github.com/MaayanLab/PerturbSeqr/blob/release/0.2.51/mcp/README.md" target="_blank" rel="noopener noreferrer">
+              Perturb-Seqr MCP Server
+            </a>.
+          </p>
           <br/>
           <p>
             <strong>Drug/Chemical Perturbation Datasets:</strong>
