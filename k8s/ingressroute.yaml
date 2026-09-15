@@ -7,6 +7,11 @@ spec:
   entryPoints:
     - websecure
   routes:
+    - match: Host(`perturbseqr.k8s.maayanlab.cloud`) && PathPrefix(`/mcp`)
+      kind: Rule
+      services:
+        - name: perturbseqr-mcp
+          port: 5000
     - match: Host(`perturbseqr.k8s.maayanlab.cloud`)
       kind: Rule
       services:
