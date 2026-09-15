@@ -40,6 +40,7 @@ query EnrichmentQuery($genes: [String]!, $filterTerm: String = "", $libraryNames
       pvalueLe: $pvalueLe
     ) {
       nodes {
+        geneSetId
         geneSetHash
         libraryCount
         supportingLibraries
@@ -129,6 +130,7 @@ query EnrichmentQuerySingle($genes: [String]!, $filterTerm: String = "", $librar
       pvalueLe: $pvalueLe
     ) {
       nodes {
+        geneSetId
         geneSetHash
         libraryCount
         supportingLibraries
@@ -296,6 +298,8 @@ query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTer
         contributingSignatures
       }
       nodes {
+        geneSetIdUp
+        geneSetIdDown
         adjPvalueMimic
         adjPvalueReverse
         geneSetHashDown
@@ -350,6 +354,8 @@ query PairEnrichmentQuerySingle($genesUp: [String]!, $genesDown: [String]!, $fil
     ) {
       totalCount
       nodes {
+        geneSetIdUp
+        geneSetIdDown
         adjPvalueMimic
         adjPvalueReverse
         geneSetHashDown

@@ -125,6 +125,7 @@ export async function GET(request: Request) {
             "adjPvalue",
             "approved",
             "geneSetHash",
+            "geneSetId",
           ],
           paginatedNodeGenerator(
             genes,

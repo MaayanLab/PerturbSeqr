@@ -1235,10 +1235,10 @@ function EnrichmentResults({
                 </tr>
               ) : null}
               {enrichmentResults?.currentBackground?.pairedEnrich?.nodes?.flatMap(
-                (enrichmentResult, genesetIndex) => {
+                (enrichmentResult) => {
                   const term = enrichmentResult?.geneSet?.nodes[0]?.term;
-                  const geneSetUp =  enrichmentResult?.geneSet?.nodes.filter((x) => x.term.endsWith(" up"))[0]
-                  const geneSetDown =  enrichmentResult?.geneSet?.nodes.filter((x) => x.term.endsWith(" down"))[0]
+                  const geneSetUp = enrichmentResult?.geneSet?.nodes.find((x) => x.id === enrichmentResult.geneSetIdUp)
+                  const geneSetDown = enrichmentResult?.geneSet?.nodes.find((x) => x.id === enrichmentResult.geneSetIdDown)
                   const libraryName = geneSetUp?.library?.name || geneSetDown?.library?.name || '';
 
                   const parsed = term ? parseTerm(term) : parseTerm('');
@@ -1273,7 +1273,7 @@ function EnrichmentResults({
                   const dataset = libraryName || '';
 
                   return (
-                    <tr key={genesetIndex} className="text-left">
+                    <tr key={`${enrichmentResult.geneSetIdUp}:${enrichmentResult.geneSetIdDown}`} className="text-left">
                       <td className={"hidden"}>{term}</td>
                       <DatasetCell dataset={dataset} term={term} />
                       <td className={isGenePert ? 'max-w-[240px]' : 'max-w-[130px]'}>

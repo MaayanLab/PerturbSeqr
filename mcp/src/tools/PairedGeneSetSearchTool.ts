@@ -16,7 +16,7 @@ export default ['paired_gene_set_search', {
   currentBackground { pairedEnrich(genesUp:$genesUp, genesDown:$genesDown, libraryNames:$libraryNames,
     filterTerm:$filterTerm, filterFda:$filterFda, first:$first, offset:$offset, sortby:$sortBy,
     overlapGe:$overlapGe, pvalueLe:$pvalueLe, adjPvalueLe:$adjPvalueLe) {
-    totalCount geneSetCount nodes { geneSetHashUp geneSetHashDown
+    totalCount geneSetCount nodes { geneSetIdUp geneSetIdDown geneSetHashUp geneSetHashDown
       pvalueMimic adjPvalueMimic oddsRatioMimic mimickerOverlap
       pvalueReverse adjPvalueReverse oddsRatioReverse reverserOverlap libraryCount supportingLibraries
       geneSet { nodes { ${geneSetFields} } } }

@@ -52,6 +52,7 @@ export async function* paginatedNodeGenerator(genes: string[], term: string, fil
           const parsed = parseTerm(geneSet.term);
 
           yield {
+            geneSetId: node.geneSetId,
             dataset: geneSet.library?.name || '',
             drug: parsed.perturbation,
             perturbationId: '',
@@ -237,14 +238,16 @@ export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: 
 
       for (const node of nodes) {
         if (!node) continue;
-        const geneSetUp = node.geneSet.nodes.find((x: any) => x.term.includes(" up"));
-        const geneSetDown = node.geneSet.nodes.find((x: any) => x.term.includes(" down"));
+        const geneSetUp = node.geneSet.nodes.find((x) => x.id === node.geneSetIdUp);
+        const geneSetDown = node.geneSet.nodes.find((x) => x.id === node.geneSetIdDown);
         const geneSet = geneSetUp || geneSetDown;
         if (!geneSet) continue;
         const fdaInfo = geneSet.geneSetFdaCountsById.nodes[0];
         const parsed = parseTerm(geneSet.term);
 
         yield {
+          geneSetIdUp: node.geneSetIdUp,
+          geneSetIdDown: node.geneSetIdDown,
           dataset: geneSet.library?.name || '',
           perturbation: parsed.perturbation,
           perturbationId: '',

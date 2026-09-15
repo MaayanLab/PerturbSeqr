@@ -209,6 +209,7 @@ export type EnrichResult = {
   __typename?: 'EnrichResult';
   adjPvalue?: Maybe<Scalars['Float']['output']>;
   geneSetHash?: Maybe<Scalars['UUID']['output']>;
+  geneSetId?: Maybe<Scalars['UUID']['output']>;
   /** Reads and enables pagination through a set of `GeneSet`. */
   geneSets: GeneSetsConnection;
   libraryCount?: Maybe<Scalars['Int']['output']>;
@@ -651,6 +652,8 @@ export type PairedEnrichResult = {
   geneSet: GeneSetsConnection;
   geneSetHashDown?: Maybe<Scalars['UUID']['output']>;
   geneSetHashUp?: Maybe<Scalars['UUID']['output']>;
+  geneSetIdDown?: Maybe<Scalars['UUID']['output']>;
+  geneSetIdUp?: Maybe<Scalars['UUID']['output']>;
   libraryCount?: Maybe<Scalars['Int']['output']>;
   mimickerOverlap?: Maybe<Scalars['Int']['output']>;
   oddsRatioMimic?: Maybe<Scalars['Float']['output']>;
@@ -1124,7 +1127,7 @@ export type EnrichmentQueryQueryVariables = Exact<{
 }>;
 
 
-export type EnrichmentQueryQuery = { __typename?: 'Query', currentBackground?: { __typename?: 'Background', enrich?: { __typename?: 'PaginatedEnrichResult', totalCount?: number | null, consensusCount?: number | null, moasCount?: number | null, geneSetCount?: number | null, nodes?: Array<{ __typename?: 'EnrichResult', geneSetHash?: any | null, libraryCount?: number | null, supportingLibraries?: Array<string | null> | null, pvalue?: number | null, adjPvalue?: number | null, oddsRatio?: number | null, nOverlap?: number | null, geneSets: { __typename?: 'GeneSetsConnection', totalCount: number, nodes: Array<{ __typename?: 'GeneSet', id: any, term: string, description?: string | null, nGeneIds: number, library?: { __typename?: 'GeneSetLibrary', name: string } | null, geneSetFdaCountsById: { __typename?: 'GeneSetFdaCountsConnection', nodes: Array<{ __typename?: 'GeneSetFdaCount', approved?: boolean | null, count?: any | null, totalCount?: any | null, moa?: string | null }> } }> } } | null> | null, consensus?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null, libraries?: Array<string | null> | null, contributingSignatures?: any | null } | null> | null, moas?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null, libraries?: Array<string | null> | null, contributingSignatures?: any | null } | null> | null } | null } | null };
+export type EnrichmentQueryQuery = { __typename?: 'Query', currentBackground?: { __typename?: 'Background', enrich?: { __typename?: 'PaginatedEnrichResult', totalCount?: number | null, consensusCount?: number | null, moasCount?: number | null, geneSetCount?: number | null, nodes?: Array<{ __typename?: 'EnrichResult', geneSetId?: any | null, geneSetHash?: any | null, libraryCount?: number | null, supportingLibraries?: Array<string | null> | null, pvalue?: number | null, adjPvalue?: number | null, oddsRatio?: number | null, nOverlap?: number | null, geneSets: { __typename?: 'GeneSetsConnection', totalCount: number, nodes: Array<{ __typename?: 'GeneSet', id: any, term: string, description?: string | null, nGeneIds: number, library?: { __typename?: 'GeneSetLibrary', name: string } | null, geneSetFdaCountsById: { __typename?: 'GeneSetFdaCountsConnection', nodes: Array<{ __typename?: 'GeneSetFdaCount', approved?: boolean | null, count?: any | null, totalCount?: any | null, moa?: string | null }> } }> } } | null> | null, consensus?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null, libraries?: Array<string | null> | null, contributingSignatures?: any | null } | null> | null, moas?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null, libraries?: Array<string | null> | null, contributingSignatures?: any | null } | null> | null } | null } | null };
 
 export type EnrichmentQuerySingleQueryVariables = Exact<{
   genes: Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>;
@@ -1140,7 +1143,7 @@ export type EnrichmentQuerySingleQueryVariables = Exact<{
 }>;
 
 
-export type EnrichmentQuerySingleQuery = { __typename?: 'Query', currentBackground?: { __typename?: 'Background', enrich?: { __typename?: 'PaginatedEnrichResult', nodes?: Array<{ __typename?: 'EnrichResult', geneSetHash?: any | null, libraryCount?: number | null, supportingLibraries?: Array<string | null> | null, pvalue?: number | null, adjPvalue?: number | null, oddsRatio?: number | null, nOverlap?: number | null, geneSets: { __typename?: 'GeneSetsConnection', totalCount: number, nodes: Array<{ __typename?: 'GeneSet', id: any, term: string, description?: string | null, nGeneIds: number, library?: { __typename?: 'GeneSetLibrary', name: string } | null, geneSetFdaCountsById: { __typename?: 'GeneSetFdaCountsConnection', nodes: Array<{ __typename?: 'GeneSetFdaCount', approved?: boolean | null, count?: any | null, totalCount?: any | null, moa?: string | null }> } }> } } | null> | null } | null } | null };
+export type EnrichmentQuerySingleQuery = { __typename?: 'Query', currentBackground?: { __typename?: 'Background', enrich?: { __typename?: 'PaginatedEnrichResult', nodes?: Array<{ __typename?: 'EnrichResult', geneSetId?: any | null, geneSetHash?: any | null, libraryCount?: number | null, supportingLibraries?: Array<string | null> | null, pvalue?: number | null, adjPvalue?: number | null, oddsRatio?: number | null, nOverlap?: number | null, geneSets: { __typename?: 'GeneSetsConnection', totalCount: number, nodes: Array<{ __typename?: 'GeneSet', id: any, term: string, description?: string | null, nGeneIds: number, library?: { __typename?: 'GeneSetLibrary', name: string } | null, geneSetFdaCountsById: { __typename?: 'GeneSetFdaCountsConnection', nodes: Array<{ __typename?: 'GeneSetFdaCount', approved?: boolean | null, count?: any | null, totalCount?: any | null, moa?: string | null }> } }> } } | null> | null } | null } | null };
 
 export type EnrichmentQueryConsensusQueryVariables = Exact<{
   genes: Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>;
@@ -1189,7 +1192,7 @@ export type PairEnrichmentQueryQueryVariables = Exact<{
 }>;
 
 
-export type PairEnrichmentQueryQuery = { __typename?: 'Query', currentBackground?: { __typename?: 'Background', pairedEnrich?: { __typename?: 'PaginatedPairedEnrichResult', totalCount?: number | null, consensusCount?: number | null, moasCount?: number | null, geneSetCount?: number | null, consensus?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null, libraries?: Array<string | null> | null, contributingSignatures?: any | null } | null> | null, moas?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null, libraries?: Array<string | null> | null, contributingSignatures?: any | null } | null> | null, nodes?: Array<{ __typename?: 'PairedEnrichResult', adjPvalueMimic?: number | null, adjPvalueReverse?: number | null, geneSetHashDown?: any | null, geneSetHashUp?: any | null, libraryCount?: number | null, supportingLibraries?: Array<string | null> | null, mimickerOverlap?: number | null, oddsRatioMimic?: number | null, oddsRatioReverse?: number | null, pvalueMimic?: number | null, pvalueReverse?: number | null, reverserOverlap?: number | null, geneSet: { __typename?: 'GeneSetsConnection', nodes: Array<{ __typename?: 'GeneSet', description?: string | null, id: any, nGeneIds: number, term: string, library?: { __typename?: 'GeneSetLibrary', name: string } | null, geneSetFdaCountsById: { __typename?: 'GeneSetFdaCountsConnection', nodes: Array<{ __typename?: 'GeneSetFdaCount', count?: any | null, totalCount?: any | null, approved?: boolean | null, moa?: string | null }> } }> } } | null> | null } | null } | null };
+export type PairEnrichmentQueryQuery = { __typename?: 'Query', currentBackground?: { __typename?: 'Background', pairedEnrich?: { __typename?: 'PaginatedPairedEnrichResult', totalCount?: number | null, consensusCount?: number | null, moasCount?: number | null, geneSetCount?: number | null, consensus?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null, libraries?: Array<string | null> | null, contributingSignatures?: any | null } | null> | null, moas?: Array<{ __typename?: 'ConsensusResult', drug?: string | null, cid?: string | null, oddsRatio?: number | null, pvalue?: number | null, adjPvalue?: number | null, approved?: boolean | null, countSignificant?: number | null, countInsignificant?: number | null, countUpSignificant?: number | null, pvalueUp?: number | null, adjPvalueUp?: number | null, oddsRatioUp?: number | null, pvalueDown?: number | null, adjPvalueDown?: number | null, oddsRatioDown?: number | null, libraries?: Array<string | null> | null, contributingSignatures?: any | null } | null> | null, nodes?: Array<{ __typename?: 'PairedEnrichResult', geneSetIdUp?: any | null, geneSetIdDown?: any | null, adjPvalueMimic?: number | null, adjPvalueReverse?: number | null, geneSetHashDown?: any | null, geneSetHashUp?: any | null, libraryCount?: number | null, supportingLibraries?: Array<string | null> | null, mimickerOverlap?: number | null, oddsRatioMimic?: number | null, oddsRatioReverse?: number | null, pvalueMimic?: number | null, pvalueReverse?: number | null, reverserOverlap?: number | null, geneSet: { __typename?: 'GeneSetsConnection', nodes: Array<{ __typename?: 'GeneSet', description?: string | null, id: any, nGeneIds: number, term: string, library?: { __typename?: 'GeneSetLibrary', name: string } | null, geneSetFdaCountsById: { __typename?: 'GeneSetFdaCountsConnection', nodes: Array<{ __typename?: 'GeneSetFdaCount', count?: any | null, totalCount?: any | null, approved?: boolean | null, moa?: string | null }> } }> } } | null> | null } | null } | null };
 
 export type PairEnrichmentQuerySingleQueryVariables = Exact<{
   genesUp: Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>;
@@ -1206,7 +1209,7 @@ export type PairEnrichmentQuerySingleQueryVariables = Exact<{
 }>;
 
 
-export type PairEnrichmentQuerySingleQuery = { __typename?: 'Query', currentBackground?: { __typename?: 'Background', pairedEnrich?: { __typename?: 'PaginatedPairedEnrichResult', totalCount?: number | null, nodes?: Array<{ __typename?: 'PairedEnrichResult', adjPvalueMimic?: number | null, adjPvalueReverse?: number | null, geneSetHashDown?: any | null, geneSetHashUp?: any | null, libraryCount?: number | null, supportingLibraries?: Array<string | null> | null, mimickerOverlap?: number | null, oddsRatioMimic?: number | null, oddsRatioReverse?: number | null, pvalueMimic?: number | null, pvalueReverse?: number | null, reverserOverlap?: number | null, geneSet: { __typename?: 'GeneSetsConnection', nodes: Array<{ __typename?: 'GeneSet', description?: string | null, id: any, nGeneIds: number, term: string, library?: { __typename?: 'GeneSetLibrary', name: string } | null, geneSetFdaCountsById: { __typename?: 'GeneSetFdaCountsConnection', nodes: Array<{ __typename?: 'GeneSetFdaCount', count?: any | null, totalCount?: any | null, approved?: boolean | null, moa?: string | null }> } }> } } | null> | null } | null } | null };
+export type PairEnrichmentQuerySingleQuery = { __typename?: 'Query', currentBackground?: { __typename?: 'Background', pairedEnrich?: { __typename?: 'PaginatedPairedEnrichResult', totalCount?: number | null, nodes?: Array<{ __typename?: 'PairedEnrichResult', geneSetIdUp?: any | null, geneSetIdDown?: any | null, adjPvalueMimic?: number | null, adjPvalueReverse?: number | null, geneSetHashDown?: any | null, geneSetHashUp?: any | null, libraryCount?: number | null, supportingLibraries?: Array<string | null> | null, mimickerOverlap?: number | null, oddsRatioMimic?: number | null, oddsRatioReverse?: number | null, pvalueMimic?: number | null, pvalueReverse?: number | null, reverserOverlap?: number | null, geneSet: { __typename?: 'GeneSetsConnection', nodes: Array<{ __typename?: 'GeneSet', description?: string | null, id: any, nGeneIds: number, term: string, library?: { __typename?: 'GeneSetLibrary', name: string } | null, geneSetFdaCountsById: { __typename?: 'GeneSetFdaCountsConnection', nodes: Array<{ __typename?: 'GeneSetFdaCount', count?: any | null, totalCount?: any | null, approved?: boolean | null, moa?: string | null }> } }> } } | null> | null } | null } | null };
 
 export type PairEnrichmentQueryConsensusQueryVariables = Exact<{
   genesUp: Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>;
@@ -1414,6 +1417,7 @@ export const EnrichmentQueryDocument = gql`
       pvalueLe: $pvalueLe
     ) {
       nodes {
+        geneSetId
         geneSetHash
         libraryCount
         supportingLibraries
@@ -1541,6 +1545,7 @@ export const EnrichmentQuerySingleDocument = gql`
       pvalueLe: $pvalueLe
     ) {
       nodes {
+        geneSetId
         geneSetHash
         libraryCount
         supportingLibraries
@@ -1821,6 +1826,8 @@ export const PairEnrichmentQueryDocument = gql`
         contributingSignatures
       }
       nodes {
+        geneSetIdUp
+        geneSetIdDown
         adjPvalueMimic
         adjPvalueReverse
         geneSetHashDown
@@ -1914,6 +1921,8 @@ export const PairEnrichmentQuerySingleDocument = gql`
     ) {
       totalCount
       nodes {
+        geneSetIdUp
+        geneSetIdDown
         adjPvalueMimic
         adjPvalueReverse
         geneSetHashDown
