@@ -11,7 +11,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: ingest
-        image: johnkgardner/perturbseqr-ingest:0.2.47
+        image: johnkgardner/perturbseqr-ingest:0.2.51
         env:
         - name: POSTGRES_PASSWORD
           valueFrom: { secretKeyRef: { name: perturbseqr-env, key: POSTGRES_PASSWORD } }

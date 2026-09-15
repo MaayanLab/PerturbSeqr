@@ -149,7 +149,7 @@ services:
     build:
       context: .
       dockerfile: ingest/Dockerfile
-    image: johnkgardner/perturbseqr-ingest:0.2.47
+    image: johnkgardner/perturbseqr-ingest:0.2.51
     pull_policy: if_not_present
     platform: linux/amd64
     restart: "no"
