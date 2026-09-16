@@ -98,21 +98,23 @@ export function LibraryCardBase({
   return (
     <div
       ref={cardRef}
-      className="card bg-base-100 shadow-md border border-base-300 cursor-pointer hover:shadow-lg transition-shadow"
+      className="card min-w-0 bg-base-100 shadow-md border border-base-300 cursor-pointer hover:shadow-lg transition-shadow"
       style={{ order }}
       onClick={goToTable}
     >
       <div className="card-body p-3">
-        <h3 className="text-base font-semibold select-none text-slate-700 flex items-center gap-1.5">
-          {libraryName}
-          <Image
-            src={isGene ? '/images/gene_icon_l2s2.png' : '/images/drug_vector_art.png'}
-            alt={isGene ? 'gene perturbation' : 'drug perturbation'}
-            width={28} height={28}
-            className="inline-block object-contain"
-          />
+        <h3 className="text-base font-semibold select-none text-slate-700 flex flex-wrap items-center gap-1.5">
+          <span className="inline-flex min-w-0 items-center gap-1.5">
+            <span>{libraryName}</span>
+            <Image
+              src={isGene ? '/images/gene_icon_l2s2.png' : '/images/drug_vector_art.png'}
+              alt={isGene ? 'gene perturbation' : 'drug perturbation'}
+              width={28} height={28}
+              className="inline-block shrink-0 object-contain"
+            />
+          </span>
           {!loading && !error && !noResults && (
-            <span className="join ml-auto" onClick={(event) => event.stopPropagation()}>
+            <span className="join ml-auto shrink-0" onClick={(event) => event.stopPropagation()}>
               <button type="button" className="btn btn-ghost btn-xs join-item" onClick={downloadSvg}>
                 SVG
               </button>
