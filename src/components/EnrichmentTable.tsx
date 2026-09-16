@@ -84,7 +84,7 @@ export function EnrichmentTable({
   }, [nodes]);
 
   return (
-    <table className="table table-sm">
+    <table className="table table-sm [&_th]:px-2 [&_td]:px-2">
       <thead>
         <tr className="text-left align-text-bottom overflow-visible">
           <th className={'hidden'}>Term</th>
@@ -199,6 +199,7 @@ export function EnrichmentTable({
           // Display string with perturbation type appended for gene libraries (e.g. "PRSS36 KO").
           // `perturbation` stays raw — it feeds the NCBI/PubChem URL and drug lookups below.
           const perturbationDisplay = formatPerturbationWithType(perturbation, parsed.perturbationType, isGenePert);
+          const typeSuffix = isGenePert && !perturbation.includes('|') ? perturbationDisplay.slice(perturbation.length) : '';
 
           const fdaData = enrichmentResult?.geneSets?.nodes?.[0]?.geneSetFdaCountsById?.nodes?.[0];
           const sigCount = fdaData?.count ?? 0;
@@ -217,16 +218,17 @@ export function EnrichmentTable({
             <tr key={enrichmentResult.geneSetId} className="text-left">
               <td className={'hidden'}>{term}</td>
               <DatasetCell dataset={dataset} term={term} />
-              <td className={isGenePert ? 'max-w-[240px]' : 'max-w-[130px]'}>
-                <div className={isGenePert ? 'flex flex-wrap items-center gap-x-2 gap-y-1' : undefined}>
+              <td className={isGenePert ? 'w-[17.5rem] min-w-[16.25rem] max-w-[17.5rem]' : 'max-w-[130px]'}>
+                <div className={isGenePert ? 'flex items-center gap-2' : undefined}>
                   <a
                     href={perturbationUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="link link-neutral hover:link-hover truncate block min-w-0"
+                    className="link link-neutral hover:link-hover flex min-w-0"
                     title={perturbationDisplay}
                   >
-                    {perturbationDisplay}
+                    <span className="truncate">{typeSuffix ? perturbation : perturbationDisplay}</span>
+                    <span className="shrink-0 whitespace-pre">{typeSuffix}</span>
                   </a>
                   {isGenePert && <SingleGenePerturbationResourceLinks perturbation={perturbation} />}
                   {!isGenePert && drugInfo?.cid && (

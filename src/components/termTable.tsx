@@ -323,7 +323,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
           </div>
         </div>
         <div className='overflow-x-auto'>
-        <table className="table table-sm">
+        <table className="table table-sm [&_th]:px-2 [&_td]:px-2">
           <thead>
             <tr>
               <th>Dataset</th>
@@ -340,22 +340,24 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
           <tbody>
             {dataFiltered?.slice((page-1) * pageSize, page * pageSize).map(el => {
               if (!el) return null
+              const typeSuffix = el._isGenePert && !el._perturbation.includes('|') ? el._perturbationDisplay.slice(el._perturbation.length) : '';
               return (
                   <tr key={el?.term}>
                     <DatasetCell dataset={el._dataset} term={el.term} className="font-medium max-w-[120px]" />
                     <td>
                     {el.term}
                   </td>
-                  <td className={el._isGenePert ? 'max-w-[240px]' : 'max-w-[130px]'}>
-                    <div className={el._isGenePert ? 'flex flex-wrap items-center gap-x-2 gap-y-1' : undefined}>
+                  <td className={el._isGenePert ? 'w-[17.5rem] min-w-[16.25rem] max-w-[17.5rem]' : 'max-w-[130px]'}>
+                    <div className={el._isGenePert ? 'flex items-center gap-2' : undefined}>
                       <a
                         href={el._perturbationUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="link link-neutral hover:link-hover truncate block min-w-0"
+                        className="link link-neutral hover:link-hover flex min-w-0"
                         title={el._perturbationDisplay}
                       >
-                        {el._perturbationDisplay}
+                        <span className="truncate">{typeSuffix ? el._perturbation : el._perturbationDisplay}</span>
+                        <span className="shrink-0 whitespace-pre">{typeSuffix}</span>
                       </a>
                       {el._isGenePert && <SingleGenePerturbationResourceLinks perturbation={el._perturbation} />}
                       {!el._isGenePert && el._drugInfo?.cid && (
