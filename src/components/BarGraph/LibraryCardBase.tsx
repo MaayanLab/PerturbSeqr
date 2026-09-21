@@ -4,6 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import { BarGraph, type BarRow } from './BarGraph';
 import { isGenePerturbationLibrary } from '@/utils/metadataLookup';
+import clientDownloadBlob from '@/utils/clientDownloadBlob';
 
 // Shared base for LibraryCardSingle and LibraryCardPaired.
 // Both share layout; they differ only in their queries.
@@ -30,6 +31,8 @@ export function LibraryCardBase({
   totalSignificant: number;
   setQueryString: (qs: Record<string, string | null>) => void;
 }) {
+  const cardRef = React.useRef<HTMLDivElement>(null);
+
   // Rank libraries by the geometric mean of the top 10 adjusted p-values,
   // pooled across mimicker and reverser sides. Equivalently, the mean of
   // -log10(adjPvalue) over the 10 pooled rows with the smallest adj_p.
@@ -59,22 +62,67 @@ export function LibraryCardBase({
     setQueryString({ view: 'table', libraries: libraryName, page: '1' });
 
   const isGene = isGenePerturbationLibrary(libraryName);
+  const getChart = () => cardRef.current?.querySelector<SVGSVGElement>('svg[data-bar-chart]');
+  const filename = `${libraryName}-${leftLabel}-${rightLabel}`;
+
+  const downloadSvg = () => {
+    const svg = getChart();
+    if (svg) clientDownloadBlob(
+      new Blob([svg.outerHTML], { type: 'image/svg+xml' }),
+      `${filename}.svg`,
+    );
+  };
+
+  const downloadPng = async () => {
+    const svg = getChart();
+    if (!svg) return;
+
+    const url = URL.createObjectURL(new Blob([svg.outerHTML], { type: 'image/svg+xml' }));
+    const image = new window.Image();
+    image.src = url;
+    try {
+      await image.decode();
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = svg.viewBox.baseVal.width * 2;
+    canvas.height = svg.viewBox.baseVal.height * 2;
+    const context = canvas.getContext('2d');
+    if (!context) return;
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob((blob) => blob && clientDownloadBlob(blob, `${filename}.png`), 'image/png');
+  };
 
   return (
     <div
-      className="card bg-base-100 shadow-md border border-base-300 cursor-pointer hover:shadow-lg transition-shadow"
+      ref={cardRef}
+      className="card min-w-0 bg-base-100 shadow-md border border-base-300 cursor-pointer hover:shadow-lg transition-shadow"
       style={{ order }}
       onClick={goToTable}
     >
       <div className="card-body p-3">
-        <h3 className="text-base font-semibold select-none text-slate-700 flex items-center gap-1.5">
-          {libraryName}
-          <Image
-            src={isGene ? '/images/gene_icon_l2s2.png' : '/images/drug_vector_art.png'}
-            alt={isGene ? 'gene perturbation' : 'drug perturbation'}
-            width={28} height={28}
-            className="inline-block object-contain"
-          />
+        <h3 className="text-base font-semibold select-none text-slate-700 flex flex-wrap items-center gap-1.5">
+          <span className="inline-flex min-w-0 items-center gap-1.5">
+            <span>{libraryName}</span>
+            <Image
+              src={isGene ? '/images/gene_icon_l2s2.png' : '/images/drug_vector_art.png'}
+              alt={isGene ? 'gene perturbation' : 'drug perturbation'}
+              width={28} height={28}
+              className="inline-block shrink-0 object-contain"
+            />
+          </span>
+          {!loading && !error && !noResults && (
+            <span className="join ml-auto shrink-0" onClick={(event) => event.stopPropagation()}>
+              <button type="button" className="btn btn-ghost btn-xs join-item" onClick={downloadSvg}>
+                SVG
+              </button>
+              <button type="button" className="btn btn-ghost btn-xs join-item" onClick={downloadPng}>
+                PNG
+              </button>
+            </span>
+          )}
         </h3>
         <p className="text-xs text-base-content/50 mb-2 select-none [&_strong]:text-base-content">
           {subtitle}

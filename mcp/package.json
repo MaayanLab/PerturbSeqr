@@ -1,0 +1,25 @@
+{
+  "name": "perturbseqr-mcp",
+  "version": "0.2.51",
+  "private": true,
+  "description": "MCP tools for the Perturb-Seqr API",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": { "node": ">=22" }
+}

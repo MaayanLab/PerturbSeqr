@@ -9,7 +9,7 @@ use futures::StreamExt;
 use rocket::http::ContentType;
 use std::future;
 use std::io::Cursor;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use rocket::request::Request;
 use rocket::response::{self, Response, Responder, stream::TextStream};
 use rocket_db_pools::{Database, Connection};
@@ -66,10 +66,13 @@ struct Bitmap {
     // Reverse lookup: bit position index → gene symbol string (decoding: index → symbol, used for GMT export)
     columns_str: Vec<String>,
 
-    // Gene sets: (gene_set_hash, sparse bit vector of gene positions)
+    // One entry per stored signature: (gene_set_id, sparse bit vector of gene positions)
     values: Vec<(Uuid, SparseBitVec)>,
 
-    // Gene set metadata: gene_set_hash -> vec of (gene_set_id, term, description, fda_approved, count, pert, moa, cid)
+    // Content hashes remain available separately from signature identity.
+    gene_set_hashes: HashMap<Uuid, Uuid>,
+
+    // Signature metadata: gene_set_id -> singleton vec of (gene_set_id, term, description, fda_approved, count, pert, moa, cid)
     terms: HashMap<Uuid, Vec<(Uuid, String, String, bool, i32, String, String, String)>>,
 
     // Paired signatures: (up_index, down_index) into `values` for mimicker/reverser search
@@ -79,7 +82,7 @@ struct Bitmap {
     moa_counts: HashMap<String, i32>,
 
     // Per-library state for library-specific Fisher's exact test backgrounds
-    gene_set_libraries: HashMap<Uuid, String>,             // gene_set_hash -> library_name
+    gene_set_libraries: HashMap<Uuid, String>,             // gene_set_id -> library_name
     library_backgrounds: HashMap<String, DenseBitVec>,     // library_name -> dense bit vector of all genes in that library
     #[serde(default)]
     library_background_counts: HashMap<String, u32>,            // library_name -> |B_lib| (pre-computed library-specific background size)
@@ -104,6 +107,7 @@ impl Bitmap {
             columns: HashMap::new(),
             columns_str: Vec::new(),
             values: Vec::new(),
+            gene_set_hashes: HashMap::new(),
             terms: HashMap::new(),
             signature_pairs: SignaturePairs { pairs: Vec::new() },
             moa_counts: HashMap::new(),
@@ -204,10 +208,47 @@ fn corrected_directional_odds_ratios(a_up: usize, b_up: usize, a_down: usize, b_
     (up, down)
 }
 
+fn perturbation_key(perturbation: &str, cid: &str) -> Option<String> {
+    (!perturbation.is_empty()).then(|| if cid.is_empty() { perturbation.to_lowercase() } else { cid.to_string() })
+}
+
+fn libraries_by_perturbation(
+    bitmap: &Bitmap,
+    indices: impl Iterator<Item = usize>,
+) -> HashMap<String, HashSet<String>> {
+    let mut result: HashMap<String, HashSet<String>> = HashMap::new();
+    for index in indices {
+        let Some((id, _)) = bitmap.values.get(index) else { continue };
+        let Some(library) = bitmap.gene_set_libraries.get(id) else { continue };
+        for (_, _, _, _, _, perturbation, _, cid) in bitmap.terms.get(id).into_iter().flatten() {
+            if let Some(key) = perturbation_key(perturbation, cid) {
+                result.entry(key).or_default().insert(library.clone());
+            }
+        }
+    }
+    result
+}
+
+fn supporting_libraries(
+    bitmap: &Bitmap,
+    libraries: &HashMap<String, HashSet<String>>,
+    id: &Uuid,
+) -> Vec<String> {
+    let mut result: Vec<_> = bitmap.terms.get(id).and_then(|terms| terms.first())
+        .and_then(|(_, _, _, _, _, perturbation, _, cid)| perturbation_key(perturbation, cid))
+        .and_then(|key| libraries.get(&key))
+        .into_iter().flatten().cloned().collect();
+    result.sort_unstable();
+    result
+}
+
 #[derive(Eq, PartialEq, PartialOrd, Ord)]
 struct BackgroundQuery {
     background_id: Uuid,
     input_gene_set: DenseBitVec,
+    overlap_ge: u32,
+    pvalue_le_bits: u64,
+    adj_pvalue_le_bits: u64,
 }
 
 #[derive(Eq, PartialEq, PartialOrd, Ord)]
@@ -215,6 +256,9 @@ struct BackgroundQueryPair {
     background_id: Uuid,
     input_gene_set_up: DenseBitVec,
     input_gene_set_down: DenseBitVec,
+    overlap_ge: u32,
+    pvalue_le_bits: u64,
+    adj_pvalue_le_bits: u64,
 }
 
 // This structure stores a persistent many-reader single-writer hashmap containing cached indexes for a given background id
@@ -254,7 +298,10 @@ struct PartialPairResult {
 
 #[derive(Serialize, Debug)]
 struct QueryResult {
+    gene_set_id: String,
     gene_set_hash: String,
+    library_count: usize,
+    supporting_libraries: Vec<String>,
     n_overlap: u32,
     odds_ratio: f64,
     pvalue: f64,
@@ -263,8 +310,12 @@ struct QueryResult {
 
 #[derive(Serialize, Debug)]
 struct PairedQueryResult {
+    gene_set_id_up: String,
+    gene_set_id_down: String,
     gene_set_hash_up: String,
     gene_set_hash_down: String,      
+    library_count: usize,
+    supporting_libraries: Vec<String>,
     mimicker_overlap: u32, 
     reverser_overlap: u32, 
     odds_ratio_mimic: f64,
@@ -450,17 +501,15 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
                 let cid: String = row.try_get("cid").unwrap_or("").to_string();
                 let library_name: String = row.try_get("library_name").unwrap_or("".to_string());
                 if let Ok(gene_set_hash) = gene_set_hash {
-                    if !bitmap.terms.contains_key(&gene_set_hash) {
-                        let gene_ids: sqlx::types::Json<HashMap<String, sqlx::types::JsonValue>> = row.try_get("gene_ids").unwrap();
-                        let gene_ids = gene_ids.keys().map(|gene_id| Uuid::parse_str(gene_id).unwrap()).collect::<Vec<Uuid>>();
-                        let bitset = SparseBitVec::new(&bitmap.columns, &gene_ids);
-                        bitmap.values.push((gene_set_hash, bitset));
-                        // Store library for this gene set hash
-                        if !library_name.is_empty() {
-                            bitmap.gene_set_libraries.insert(gene_set_hash, library_name.clone());
-                        }
+                    let gene_ids: sqlx::types::Json<HashMap<String, sqlx::types::JsonValue>> = row.try_get("gene_ids").unwrap();
+                    let gene_ids = gene_ids.keys().map(|gene_id| Uuid::parse_str(gene_id).unwrap()).collect::<Vec<Uuid>>();
+                    let bitset = SparseBitVec::new(&bitmap.columns, &gene_ids);
+                    bitmap.values.push((gene_set_id, bitset));
+                    bitmap.gene_set_hashes.insert(gene_set_id, gene_set_hash);
+                    if !library_name.is_empty() {
+                        bitmap.gene_set_libraries.insert(gene_set_id, library_name.clone());
                     }
-                    bitmap.terms.entry(gene_set_hash).or_default().push((gene_set_id, term, description, fda_approved, count, pert, moa, cid));
+                    bitmap.terms.insert(gene_set_id, vec![(gene_set_id, term, description, fda_approved, count, pert, moa, cid)]);
                 }
                 future::ready(())
             })
@@ -472,8 +521,8 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
         let mut library_gene_sets: HashMap<String, Vec<usize>> = HashMap::new();
 
         // Group gene set indices by library
-        for (idx, (gene_set_hash, _)) in bitmap.values.iter().enumerate() {
-            if let Some(lib_name) = bitmap.gene_set_libraries.get(gene_set_hash) {
+        for (idx, (gene_set_id, _)) in bitmap.values.iter().enumerate() {
+            if let Some(lib_name) = bitmap.gene_set_libraries.get(gene_set_id) {
                 library_gene_sets.entry(lib_name.clone()).or_default().push(idx);
             }
         }
@@ -564,8 +613,8 @@ async fn get_gmt(
     ensure_index(&mut db, &state, background_id).await.map_err(|e| Custom(Status::InternalServerError, e.to_string()))?;
     let bitmap = state.bitmaps.get_read(&background_id).await.ok_or(Custom(Status::InternalServerError, String::from("Can't find background")))?;
     Ok(TextStream! {
-        for (gene_set_hash, gene_set) in bitmap.values.iter() {
-            if let Some(terms) = bitmap.terms.get(gene_set_hash) {
+        for (gene_set_id, gene_set) in bitmap.values.iter() {
+            if let Some(terms) = bitmap.terms.get(gene_set_id) {
                 for (_row_id, term, description, _fda_approved, _count, _pert, _moa, _cid) in terms.iter() {
                     let mut line = String::new();
                     line.push_str(term);
@@ -661,11 +710,13 @@ async fn query(
     // A 265-gene query has 198 genes in L1000's universe, 241 in Tahoe's, etc.
     println!("[{}] query: input_genes={}, libraries={}",
              background_id, input_gene_set.n, library_query_overlap_counts.len());
-    // Cache key: (background_id + query bitvec).
-    let background_query = Arc::new(BackgroundQuery { background_id, input_gene_set });
+    let background_query = Arc::new(BackgroundQuery {
+        background_id, input_gene_set, overlap_ge,
+        pvalue_le_bits: pvalue_le.to_bits(),
+        adj_pvalue_le_bits: adj_pvalue_le.to_bits(),
+    });
 
-    // Full unfiltered results are cached per query. On cache hit, clone and filter by request
-    // parameters (library, FDA, etc.). On cache miss, compute from scratch and cache for reuse.
+    // Threshold-filtered results are cached; library/display filters are applied below.
     let results = {
         let cached_results = state.cache.get(&background_query).await;
 
@@ -677,7 +728,7 @@ async fn query(
             // Closure: compute Fisher's exact test for one gene set against the user's query.
             // Returns None if the gene set doesn't pass overlap or p-value thresholds.
             let compute_result = |index: usize| -> Option<PartialQueryResult> {
-                // Look up this gene set's hash and sparse bitvector from the index
+                // Look up this signature's ID and sparse bitvector from the index
                 let (gene_set_uuid, gene_set) = &bitmap.values[index];
                 // Find which library this gene set belongs to (e.g. "LINCS L1000 CP")
                 let lib_name = bitmap.gene_set_libraries.get(gene_set_uuid)?;
@@ -753,10 +804,11 @@ async fn query(
             let post_adj_count = results.len();
             println!("[{}] filter stats: {} passed pvalue, {} passed adj_pvalue", background_id, pre_adj_count, post_adj_count);
             // Sort by raw p-value (most significant first)
-            results.sort_unstable_by(|a, b| a.pvalue.partial_cmp(&b.pvalue).unwrap_or(std::cmp::Ordering::Equal));
+            results.sort_unstable_by(|a, b| a.pvalue.partial_cmp(&b.pvalue).unwrap_or(std::cmp::Ordering::Equal)
+                .then_with(|| bitmap.values[a.index].0.cmp(&bitmap.values[b.index].0)));
             let results = Arc::new(results);
 
-            // Cache full unfiltered results (library filtering applied post-cache)
+            // Cache threshold-filtered results across all libraries.
             state.cache.insert(background_query, results.clone(), CACHE_TTL_MS).await;
 
             let duration = start.elapsed();
@@ -788,6 +840,8 @@ async fn query(
         bitmap.values.len() // no filter, count all gene sets
     };
 
+    let libraries = libraries_by_perturbation(&bitmap, results.iter().map(|result| result.index));
+
     // CID-based consensus grouping: use CID as group key when available, fall back to perturbation name
     // This ensures synonyms (same CID, different names) are grouped together
     let mut drug_significance_counts: HashMap<String, (usize, usize, usize, bool)> = HashMap::new();
@@ -801,9 +855,9 @@ async fn query(
     let mut moa_contributing_sigs: HashMap<String, Vec<ContributingSignature>> = HashMap::new();
 
     for result in (*results).iter().take(top_n) {
-        if let Some((gene_set_hash, _gene_set)) = bitmap.values.get(result.index) {
-            let current_lib = bitmap.gene_set_libraries.get(gene_set_hash).cloned().unwrap_or_default();
-            if let Some(terms) = bitmap.terms.get(gene_set_hash) {
+        if let Some((gene_set_id, _gene_set)) = bitmap.values.get(result.index) {
+            let current_lib = bitmap.gene_set_libraries.get(gene_set_id).cloned().unwrap_or_default();
+            if let Some(terms) = bitmap.terms.get(gene_set_id) {
                 // Iterate over the terms for the current gene set
                 for (_gene_set_id, gene_set_term, _description, fda_approved, count, pert, moa, cid) in terms {
                     // Ensure `pert` is not empty before proceeding
@@ -1199,11 +1253,11 @@ async fn query(
     let mut results: Vec<_> = results
         .iter()
         .filter_map(|result| {
-            let (gene_set_hash, _gene_set) = bitmap.values.get(result.index)?;
+            let (gene_set_id, _gene_set) = bitmap.values.get(result.index)?;
             if let Some(filter_term) = &filter_term {
                 let (filter_term_clean, is_up, is_down) = parse_filter_term(filter_term);
                 let filter_terms: Vec<String> = filter_term_clean.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
-                if let Some(terms) = bitmap.terms.get(gene_set_hash) {
+                if let Some(terms) = bitmap.terms.get(gene_set_id) {
                     if is_up && !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)|  gene_set_term.to_lowercase().contains(" up")) {
                         return None
                     }
@@ -1220,7 +1274,7 @@ async fn query(
             }
             if let Some(filter_fda) = filter_fda {
                 if filter_fda {
-                    if let Some(terms) = bitmap.terms.get(gene_set_hash) {
+                    if let Some(terms) = bitmap.terms.get(gene_set_id) {
                         if terms.iter().any(|(_gene_set_id, _gene_set_term, _gene_set_description, fda_approved, _count, _pert, _moa, _cid)| !*fda_approved) {
                             return None
                         }
@@ -1229,7 +1283,7 @@ async fn query(
             }
             if let Some(filter_ko) = filter_ko {
                 if filter_ko {
-                    if let Some(terms) = bitmap.terms.get(gene_set_hash) {
+                    if let Some(terms) = bitmap.terms.get(gene_set_id) {
                         if terms.iter().any(|(_gene_set_id, _gene_set_term, _gene_set_description, _fda_approved, _count, pert, _moa, _cid)| !pert.contains(" ") ) {
                             return None
                         }
@@ -1237,8 +1291,12 @@ async fn query(
                 }
             }
 
+            let supporting_libraries = supporting_libraries(&bitmap, &libraries, gene_set_id);
             Some(QueryResult {
-                gene_set_hash: gene_set_hash.to_string(),
+                gene_set_id: gene_set_id.to_string(),
+                gene_set_hash: bitmap.gene_set_hashes.get(gene_set_id)?.to_string(),
+                library_count: supporting_libraries.len(),
+                supporting_libraries,
                 n_overlap: result.n_overlap,
                 odds_ratio: result.odds_ratio,
                 pvalue: result.pvalue,
@@ -1252,17 +1310,20 @@ async fn query(
             "adj_pvalue" => {
                 consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
                 moa_consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
-                results.sort_unstable_by(|a, b| a.adj_pvalue.partial_cmp(&b.adj_pvalue).unwrap_or(std::cmp::Ordering::Equal));
+                results.sort_unstable_by(|a, b| a.adj_pvalue.partial_cmp(&b.adj_pvalue).unwrap_or(std::cmp::Ordering::Equal)
+                    .then_with(|| a.gene_set_id.cmp(&b.gene_set_id)));
             },
             "pvalue" => {
                 consensus_results.sort_unstable_by(|a, b| a.pvalue_up.partial_cmp(&b.pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
                 moa_consensus_results.sort_unstable_by(|a, b| a.pvalue_up.partial_cmp(&b.pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
-                results.sort_unstable_by(|a, b| a.pvalue.partial_cmp(&b.pvalue).unwrap_or(std::cmp::Ordering::Equal));
+                results.sort_unstable_by(|a, b| a.pvalue.partial_cmp(&b.pvalue).unwrap_or(std::cmp::Ordering::Equal)
+                    .then_with(|| a.gene_set_id.cmp(&b.gene_set_id)));
             },
             "odds_ratio" => {
                 consensus_results.sort_unstable_by(|a, b| b.odds_ratio.partial_cmp(&a.odds_ratio).unwrap_or(std::cmp::Ordering::Equal));
                 moa_consensus_results.sort_unstable_by(|a, b| b.odds_ratio.partial_cmp(&a.odds_ratio).unwrap_or(std::cmp::Ordering::Equal));
-                results.sort_unstable_by(|a, b| b.odds_ratio.partial_cmp(&a.odds_ratio).unwrap_or(std::cmp::Ordering::Equal));
+                results.sort_unstable_by(|a, b| b.odds_ratio.partial_cmp(&a.odds_ratio).unwrap_or(std::cmp::Ordering::Equal)
+                    .then_with(|| a.gene_set_id.cmp(&b.gene_set_id)));
             },
             "odds_ratio_up" => {
                 consensus_results.sort_unstable_by(|a, b| b.odds_ratio_up.partial_cmp(&a.odds_ratio_up).unwrap_or(std::cmp::Ordering::Equal));
@@ -1279,7 +1340,8 @@ async fn query(
             "adj_pvalue_up" => {
                 consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
                 moa_consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
-                results.sort_unstable_by(|a, b| a.adj_pvalue.partial_cmp(&b.adj_pvalue).unwrap_or(std::cmp::Ordering::Equal));
+                results.sort_unstable_by(|a, b| a.adj_pvalue.partial_cmp(&b.adj_pvalue).unwrap_or(std::cmp::Ordering::Equal)
+                    .then_with(|| a.gene_set_id.cmp(&b.gene_set_id)));
             },
             "pvalue_down" => {
                 consensus_results.sort_unstable_by(|a, b| a.pvalue_down.partial_cmp(&b.pvalue_down).unwrap_or(std::cmp::Ordering::Equal));
@@ -1288,34 +1350,24 @@ async fn query(
             "adj_pvalue_down" => {
                 consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_down.partial_cmp(&b.adj_pvalue_down).unwrap_or(std::cmp::Ordering::Equal));
                 moa_consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_down.partial_cmp(&b.adj_pvalue_down).unwrap_or(std::cmp::Ordering::Equal));
-                results.sort_unstable_by(|a, b| a.adj_pvalue.partial_cmp(&b.adj_pvalue).unwrap_or(std::cmp::Ordering::Equal));
+                results.sort_unstable_by(|a, b| a.adj_pvalue.partial_cmp(&b.adj_pvalue).unwrap_or(std::cmp::Ordering::Equal)
+                    .then_with(|| a.gene_set_id.cmp(&b.gene_set_id)));
             },
             "overlap" => {
-                results.sort_unstable_by(|a, b| b.n_overlap.partial_cmp(&a.n_overlap).unwrap_or(std::cmp::Ordering::Equal));
+                results.sort_unstable_by(|a, b| b.n_overlap.cmp(&a.n_overlap)
+                    .then_with(|| a.gene_set_id.cmp(&b.gene_set_id)));
             },
             _ => println!("Invalid sortby parameter. Defaulting to pvalue."),
         }
     }
     
     let range_total = results.len();
-    let (range_start, range_end) = match (offset.unwrap_or(0), limit) {
-        (0, None) => (0, range_total),
-        (offset, None) => {
-            if offset < results.len() {
-                results.drain(..offset);
-            };
-            (offset, range_total)
-        },
-        (offset, Some(limit)) => {
-            if offset < results.len() {
-                results.drain(..offset);
-                if limit < results.len() {
-                    results.drain(limit..);
-                }
-            };
-            (offset, offset + results.len())
-        },
-    };
+    let range_start = offset.unwrap_or(0).min(range_total);
+    results.drain(..range_start);
+    if let Some(limit) = limit {
+        results.truncate(limit);
+    }
+    let range_end = range_start + results.len();
 
     let (_consensus_range_start, _consensus_range_end) = match (offset.unwrap_or(0), limit) {
         (0, None) => (0, consensus_results.len()),
@@ -1431,7 +1483,12 @@ async fn query_pairs(
 
     println!("[{}] Computing mimickers and reversers", background_id);
     let start = Instant::now();
-    let background_query = Arc::new(BackgroundQueryPair { background_id, input_gene_set_up, input_gene_set_down });
+    let background_query = Arc::new(BackgroundQueryPair {
+        background_id, input_gene_set_up, input_gene_set_down,
+        overlap_ge: overlap_ge.unwrap_or(DEFAULT_MIN_GENE_OVERLAP),
+        pvalue_le_bits: pvalue_le.unwrap_or(DEFAULT_PVALUE_CUTOFF).to_bits(),
+        adj_pvalue_le_bits: adj_pvalue_le.to_bits(),
+    });
     let mut results = {
         let cached_results = state.cachepair.get(&background_query).await;
         if let Some(results) = cached_results {
@@ -1439,10 +1496,10 @@ async fn query_pairs(
         } else {
             let all_results: Vec<_> = bitmap.signature_pairs.pairs.par_iter().enumerate()
             .filter_map(|(index, (up_idx, down_idx))| {
-                let (up_hash, gene_set_up) = &bitmap.values[*up_idx];
-                let (_down_hash, gene_set_down) = &bitmap.values[*down_idx];
+                let (up_id, gene_set_up) = &bitmap.values[*up_idx];
+                let (_down_id, gene_set_down) = &bitmap.values[*down_idx];
 
-                let lib_name = bitmap.gene_set_libraries.get(up_hash)?;
+                let lib_name = bitmap.gene_set_libraries.get(up_id)?;
                 let n_background = *bitmap.library_background_counts.get(lib_name)?;
                 let n_user_gene_id = *library_query_overlap_counts_up.get(lib_name)? + *library_query_overlap_counts_down.get(lib_name)?;
 
@@ -1528,7 +1585,8 @@ async fn query_pairs(
                 // Append this library's surviving results into the combined output
                 results.extend(lib_results);
             }
-            results.sort_unstable_by(|a, b| a.pvalue_mimic.partial_cmp(&b.pvalue_mimic).unwrap_or(std::cmp::Ordering::Equal));
+            results.sort_unstable_by(|a, b| a.pvalue_mimic.partial_cmp(&b.pvalue_mimic).unwrap_or(std::cmp::Ordering::Equal)
+                .then_with(|| bitmap.values[a.index_up].0.cmp(&bitmap.values[b.index_up].0)));
 
             let results = Arc::new(results);
             state.cachepair.insert(background_query, results.clone(), CACHE_TTL_MS).await;
@@ -1567,6 +1625,8 @@ async fn query_pairs(
         bitmap.signature_pairs.pairs.len()
     };
 
+    let libraries = libraries_by_perturbation(&bitmap, results.iter().map(|result| result.index_up));
+
     // CID-based consensus grouping for paired query
     let mut drug_significance_counts: HashMap<String, (usize, usize, usize, bool)> = HashMap::new();
     let mut drug_counts: HashMap<String, (usize, bool)> = HashMap::new();
@@ -1579,9 +1639,9 @@ async fn query_pairs(
     let mut moa_contributing_sigs: HashMap<String, Vec<ContributingSignature>> = HashMap::new();
 
     for result in (*results).iter().take(top_n) {
-        if let Some((gene_set_hash, _gene_set)) = bitmap.values.get(result.index_up) {
-            let current_lib = bitmap.gene_set_libraries.get(gene_set_hash).cloned().unwrap_or_default();
-            if let Some(terms) = bitmap.terms.get(gene_set_hash) {
+        if let Some((gene_set_id, _gene_set)) = bitmap.values.get(result.index_up) {
+            let current_lib = bitmap.gene_set_libraries.get(gene_set_id).cloned().unwrap_or_default();
+            if let Some(terms) = bitmap.terms.get(gene_set_id) {
                 // Iterate over the terms for the current gene set
                 for (_gene_set_id, gene_set_term, _description, fda_approved, count, pert, moa, cid) in terms {
                     // Ensure `pert` is not empty before proceeding
@@ -1964,11 +2024,11 @@ async fn query_pairs(
     let mut results: Vec<_> = results
         .iter()
         .filter_map(|result| {
-            let (gene_set_hash, _gene_set) = bitmap.values.get(result.index_up)?;
+            let (gene_set_id, _gene_set) = bitmap.values.get(result.index_up)?;
             if let Some(filter_term) = &filter_term {
                 let (filter_term_clean, is_up, is_down) = parse_filter_term(filter_term);
                 let filter_terms: Vec<String> = filter_term_clean.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
-                if let Some(terms) = bitmap.terms.get(gene_set_hash) {
+                if let Some(terms) = bitmap.terms.get(gene_set_id) {
                     if !filter_terms.is_empty() && !terms.iter().any(|(_gene_set_id, gene_set_term, _gene_set_description, _fda_approved, _count, _pert, _moa, _cid)| {
                         let term_lower = gene_set_term.to_lowercase();
                         filter_terms.iter().any(|ft| term_lower.contains(ft))
@@ -1986,7 +2046,7 @@ async fn query_pairs(
             }
             if let Some(filter_fda) = filter_fda {
                 if filter_fda {
-                    if let Some(terms) = bitmap.terms.get(gene_set_hash) {
+                    if let Some(terms) = bitmap.terms.get(gene_set_id) {
                         if terms.iter().any(|(_gene_set_id, _gene_set_term, _gene_set_description, fda_approved, _count, _pert, _moa, _cid)| !*fda_approved) {
                             return None
                         }
@@ -1995,16 +2055,21 @@ async fn query_pairs(
             }
             if let Some(filter_ko) = filter_ko {
                 if filter_ko {
-                    if let Some(terms) = bitmap.terms.get(gene_set_hash) {
+                    if let Some(terms) = bitmap.terms.get(gene_set_id) {
                         if terms.iter().any(|(_gene_set_id, _gene_set_term, _gene_set_description, _fda_approved, _count, pert, _moa, _cid)| !pert.contains(" ") ) {
                             return None
                         }
                     }
                 }
             }
+            let supporting_libraries = supporting_libraries(&bitmap, &libraries, gene_set_id);
             Some(PairedQueryResult {
-                gene_set_hash_up: bitmap.values[result.index_up].0.to_string(),
-                gene_set_hash_down: bitmap.values[result.index_down].0.to_string(),
+                gene_set_id_up: bitmap.values[result.index_up].0.to_string(),
+                gene_set_id_down: bitmap.values[result.index_down].0.to_string(),
+                gene_set_hash_up: bitmap.gene_set_hashes.get(&bitmap.values[result.index_up].0)?.to_string(),
+                gene_set_hash_down: bitmap.gene_set_hashes.get(&bitmap.values[result.index_down].0)?.to_string(),
+                library_count: supporting_libraries.len(),
+                supporting_libraries,
                 mimicker_overlap: result.mimicker_overlap,
                 reverser_overlap: result.reverser_overlap,
                 odds_ratio_mimic: result.odds_ratio_mimic,
@@ -2037,52 +2102,62 @@ async fn query_pairs(
                 moa_consensus_results.sort_unstable_by(|a, b| b.odds_ratio_down.partial_cmp(&a.odds_ratio_down).unwrap_or(std::cmp::Ordering::Equal));
             },
             "pvalue_up" => {
-                results.sort_unstable_by(|a, b| a.pvalue_mimic.partial_cmp(&b.pvalue_mimic).unwrap());
+                results.sort_unstable_by(|a, b| a.pvalue_mimic.partial_cmp(&b.pvalue_mimic).unwrap_or(std::cmp::Ordering::Equal)
+                    .then_with(|| a.gene_set_id_up.cmp(&b.gene_set_id_up)));
                 consensus_results.sort_unstable_by(|a, b| a.pvalue_up.partial_cmp(&b.pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
                 moa_consensus_results.sort_unstable_by(|a, b| a.pvalue_up.partial_cmp(&b.pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
             },
             "adj_pvalue_up" => {
-                results.sort_unstable_by(|a, b| a.adj_pvalue_mimic.partial_cmp(&b.adj_pvalue_mimic).unwrap());
+                results.sort_unstable_by(|a, b| a.adj_pvalue_mimic.partial_cmp(&b.adj_pvalue_mimic).unwrap_or(std::cmp::Ordering::Equal)
+                    .then_with(|| a.gene_set_id_up.cmp(&b.gene_set_id_up)));
                 consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
                 moa_consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
             },
             "pvalue_down" => {
-                results.sort_unstable_by(|a, b| a.pvalue_reverse.partial_cmp(&b.pvalue_reverse).unwrap());
+                results.sort_unstable_by(|a, b| a.pvalue_reverse.partial_cmp(&b.pvalue_reverse).unwrap_or(std::cmp::Ordering::Equal)
+                    .then_with(|| a.gene_set_id_up.cmp(&b.gene_set_id_up)));
                 consensus_results.sort_unstable_by(|a, b| a.pvalue_down.partial_cmp(&b.pvalue_down).unwrap_or(std::cmp::Ordering::Equal));
                 moa_consensus_results.sort_unstable_by(|a, b| a.pvalue_down.partial_cmp(&b.pvalue_down).unwrap_or(std::cmp::Ordering::Equal));
             },
             "adj_pvalue_down" => {
-                results.sort_unstable_by(|a, b| a.adj_pvalue_reverse.partial_cmp(&b.adj_pvalue_reverse).unwrap());
+                results.sort_unstable_by(|a, b| a.adj_pvalue_reverse.partial_cmp(&b.adj_pvalue_reverse).unwrap_or(std::cmp::Ordering::Equal)
+                    .then_with(|| a.gene_set_id_up.cmp(&b.gene_set_id_up)));
                 consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_down.partial_cmp(&b.adj_pvalue_down).unwrap_or(std::cmp::Ordering::Equal));
                 moa_consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_down.partial_cmp(&b.adj_pvalue_down).unwrap_or(std::cmp::Ordering::Equal));
             },
             "pvalue_mimic" => {
-                results.sort_unstable_by(|a, b| a.pvalue_mimic.partial_cmp(&b.pvalue_mimic).unwrap());
+                results.sort_unstable_by(|a, b| a.pvalue_mimic.partial_cmp(&b.pvalue_mimic).unwrap_or(std::cmp::Ordering::Equal)
+                    .then_with(|| a.gene_set_id_up.cmp(&b.gene_set_id_up)));
                 consensus_results.sort_unstable_by(|a, b| a.pvalue_up.partial_cmp(&b.pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
                 moa_consensus_results.sort_unstable_by(|a, b| a.pvalue_up.partial_cmp(&b.pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
             },
             "adj_pvalue_mimic" => {
-                results.sort_unstable_by(|a, b| a.adj_pvalue_mimic.partial_cmp(&b.adj_pvalue_mimic).unwrap());
+                results.sort_unstable_by(|a, b| a.adj_pvalue_mimic.partial_cmp(&b.adj_pvalue_mimic).unwrap_or(std::cmp::Ordering::Equal)
+                    .then_with(|| a.gene_set_id_up.cmp(&b.gene_set_id_up)));
                 consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
                 moa_consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_up.partial_cmp(&b.adj_pvalue_up).unwrap_or(std::cmp::Ordering::Equal));
             },
             "pvalue_reverse" => {
-                results.sort_unstable_by(|a, b| a.pvalue_reverse.partial_cmp(&b.pvalue_reverse).unwrap());
+                results.sort_unstable_by(|a, b| a.pvalue_reverse.partial_cmp(&b.pvalue_reverse).unwrap_or(std::cmp::Ordering::Equal)
+                    .then_with(|| a.gene_set_id_up.cmp(&b.gene_set_id_up)));
                 consensus_results.sort_unstable_by(|a, b| a.pvalue_down.partial_cmp(&b.pvalue_down).unwrap_or(std::cmp::Ordering::Equal));
                 moa_consensus_results.sort_unstable_by(|a, b| a.pvalue_down.partial_cmp(&b.pvalue_down).unwrap_or(std::cmp::Ordering::Equal));
             },
             "adj_pvalue_reverse" => {
-                results.sort_unstable_by(|a, b| a.adj_pvalue_reverse.partial_cmp(&b.adj_pvalue_reverse).unwrap());
+                results.sort_unstable_by(|a, b| a.adj_pvalue_reverse.partial_cmp(&b.adj_pvalue_reverse).unwrap_or(std::cmp::Ordering::Equal)
+                    .then_with(|| a.gene_set_id_up.cmp(&b.gene_set_id_up)));
                 consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_down.partial_cmp(&b.adj_pvalue_down).unwrap_or(std::cmp::Ordering::Equal));
                 moa_consensus_results.sort_unstable_by(|a, b| a.adj_pvalue_down.partial_cmp(&b.adj_pvalue_down).unwrap_or(std::cmp::Ordering::Equal));
             },
             "odds_ratio_mimic" => {
-                results.sort_unstable_by(|a, b| b.odds_ratio_mimic.partial_cmp(&a.odds_ratio_mimic).unwrap());
+                results.sort_unstable_by(|a, b| b.odds_ratio_mimic.partial_cmp(&a.odds_ratio_mimic).unwrap_or(std::cmp::Ordering::Equal)
+                    .then_with(|| a.gene_set_id_up.cmp(&b.gene_set_id_up)));
                 consensus_results.sort_unstable_by(|a, b| b.odds_ratio_up.partial_cmp(&a.odds_ratio_up).unwrap_or(std::cmp::Ordering::Equal));
                 moa_consensus_results.sort_unstable_by(|a, b| b.odds_ratio_up.partial_cmp(&a.odds_ratio_up).unwrap_or(std::cmp::Ordering::Equal));
             },
             "odds_ratio_reverse" => {
-                results.sort_unstable_by(|a, b| b.odds_ratio_reverse.partial_cmp(&a.odds_ratio_reverse).unwrap());
+                results.sort_unstable_by(|a, b| b.odds_ratio_reverse.partial_cmp(&a.odds_ratio_reverse).unwrap_or(std::cmp::Ordering::Equal)
+                    .then_with(|| a.gene_set_id_up.cmp(&b.gene_set_id_up)));
                 consensus_results.sort_unstable_by(|a, b| b.odds_ratio_down.partial_cmp(&a.odds_ratio_down).unwrap_or(std::cmp::Ordering::Equal));
                 moa_consensus_results.sort_unstable_by(|a, b| b.odds_ratio_down.partial_cmp(&a.odds_ratio_down).unwrap_or(std::cmp::Ordering::Equal));
             },
@@ -2091,24 +2166,12 @@ async fn query_pairs(
     }
     
     let range_total = results.len();
-    let (range_start, range_end) = match (offset.unwrap_or(0), limit) {
-        (0, None) => (0, range_total),
-        (offset, None) => {
-            if offset < results.len() {
-                results.drain(..offset);
-            };
-            (offset, range_total)
-        },
-        (offset, Some(limit)) => {
-            if offset < results.len() {
-                results.drain(..offset);
-                if limit < results.len() {
-                    results.drain(limit..);
-                }
-            };
-            (offset, offset + results.len())
-        },
-    };
+    let range_start = offset.unwrap_or(0).min(range_total);
+    results.drain(..range_start);
+    if let Some(limit) = limit {
+        results.truncate(limit);
+    }
+    let range_end = range_start + results.len();
 
     let (_consensus_range_start, _consensus_range_end) = match (offset.unwrap_or(0), limit) {
         (0, None) => (0, consensus_results.len()),

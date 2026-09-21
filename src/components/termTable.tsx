@@ -7,6 +7,7 @@ import TermDownloadButton from '@/components/termDownloadButton';
 import { parseTerm, getCellDisplay, formatPerturbationWithType } from '@/utils/parseTerm';
 import { preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary } from '@/utils/metadataLookup';
 import { DatasetCell } from '@/components/DatasetCell';
+import SingleGenePerturbationResourceLinks from '@/components/SingleGenePerturbationResourceLinks';
 import Image from 'next/image';
 import { FaFilter } from 'react-icons/fa';
 import libraryConfig from '@/config/libraries.json';
@@ -322,7 +323,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
           </div>
         </div>
         <div className='overflow-x-auto'>
-        <table className="table table-sm">
+        <table className="table table-sm [&_th]:px-2 [&_td]:px-2">
           <thead>
             <tr>
               <th>Dataset</th>
@@ -339,23 +340,26 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
           <tbody>
             {dataFiltered?.slice((page-1) * pageSize, page * pageSize).map(el => {
               if (!el) return null
+              const typeSuffix = el._isGenePert && !el._perturbation.includes('|') ? el._perturbationDisplay.slice(el._perturbation.length) : '';
               return (
                   <tr key={el?.term}>
                     <DatasetCell dataset={el._dataset} term={el.term} className="font-medium max-w-[120px]" />
                     <td>
                     {el.term}
                   </td>
-                  <td className="max-w-[130px]">
-                    <div>
+                  <td className={el._isGenePert ? 'w-[17.5rem] min-w-[16.25rem] max-w-[17.5rem]' : 'max-w-[130px]'}>
+                    <div className={el._isGenePert ? 'flex items-center gap-2' : undefined}>
                       <a
                         href={el._perturbationUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="link link-neutral hover:link-hover truncate block"
+                        className="link link-neutral hover:link-hover flex min-w-0"
                         title={el._perturbationDisplay}
                       >
-                        {el._perturbationDisplay}
+                        <span className="truncate">{typeSuffix ? el._perturbation : el._perturbationDisplay}</span>
+                        <span className="shrink-0 whitespace-pre">{typeSuffix}</span>
                       </a>
+                      {el._isGenePert && <SingleGenePerturbationResourceLinks perturbation={el._perturbation} />}
                       {!el._isGenePert && el._drugInfo?.cid && (
                         <div className="text-xs text-gray-500">
                           <span title="PubChem Compound ID">PCID:</span> {el._drugInfo.cid}

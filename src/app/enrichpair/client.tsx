@@ -28,6 +28,8 @@ import libraryConfig from "@/config/libraries.json";
 import { LibraryBarGraphGrid, LibraryCardPaired } from "@/components/BarGraph";
 import ShareButton from "@/components/shareButton";
 import { SortableHeader } from "@/components/SortableHeader";
+import LibraryCount from "@/components/LibraryCount";
+import SingleGenePerturbationResourceLinks from "@/components/SingleGenePerturbationResourceLinks";
 
 const allLibraryDisplayNames = Object.values(libraryConfig.libraries).map((l: any) => l.displayName as string);
 const drugLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'drug').map((l: any) => l.displayName as string);
@@ -1023,41 +1025,10 @@ function EnrichmentResults({
                               )}
                             </div>
                           ) : (
-                            <>
+                            <span className="inline-flex items-center gap-2">
                               {perturbation}
-                              <a
-                                className="underline cursor-pointer mx-2"
-                                href={`https://maayanlab.cloud/Harmonizome/gene/${perturbation?.replace(
-                                  " KO",
-                                  ""
-                                )}`}
-                                target="_blank"
-                              >
-                                <Image
-                                  className="inline-block rounded"
-                                  src="/images/harmonizome_logo_30x26.png"
-                                  width={20}
-                                  height={20}
-                                  alt="Harmonizome"
-                                />
-                              </a>
-                              <a
-                                className="underline cursor-pointer"
-                                href={`https://maayanlab.cloud/prismexp/g/${perturbation?.replace(
-                                  " KO",
-                                  ""
-                                )}`}
-                                target="_blank"
-                              >
-                                <Image
-                                  className="inline-block rounded"
-                                  src="/images/prismexp.png"
-                                  width={20}
-                                  height={20}
-                                  alt="PrismEXP"
-                                />
-                              </a>
-                            </>
+                              <SingleGenePerturbationResourceLinks perturbation={enrichmentResult?.drug} />
+                            </span>
                           )}
                         </td>
                         <td>
@@ -1133,7 +1104,7 @@ function EnrichmentResults({
             </table>
           </>
         ) : (
-          <table className="table table-sm">
+          <table className="table table-sm [&_th]:px-2 [&_td]:px-2">
             <thead>
               <tr className="text-left align-text-bottom overflow-visible">
                 <th className={"hidden"}>Term</th>
@@ -1156,12 +1127,32 @@ function EnrichmentResults({
                 <th className={columnVisibility.concentration ? "" : "hidden"}>Concentration</th>
                 {/* <th>Direction</th> */}
                 <th className="relative group">
-                  <div className="absolute z-10 left-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
-                    Number of signatures with this perturbation, per dataset
+                  <div className="absolute z-10 left-0 top-10 mb-2 hidden w-72 whitespace-normal bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
+                    Number of gene set libraries with a significant result for this perturbation.
                   </div>
-                  Signature<br></br>
+                  Supporting<br />
                   <span className="inline-flex">
-                    Count
+                    Libraries
+                    <IoMdInformationCircleOutline className="ml-0.5" />
+                  </span>
+                </th>
+                <th className="relative group">
+                  <div className="absolute z-10 left-0 top-10 mb-2 hidden w-80 whitespace-normal bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
+                    Number of signatures with this perturbation, in this gene set library
+                  </div>
+                  Library<br />
+                  <span className="inline-flex">
+                    Signatures
+                    <IoMdInformationCircleOutline className="ml-0.5" />
+                  </span>
+                </th>
+                <th className="relative group">
+                  <div className="absolute z-10 left-0 top-10 mb-2 hidden w-80 whitespace-normal bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
+                    Total number of signatures for this perturbation across all gene set libraries.
+                  </div>
+                  Total<br />
+                  <span className="inline-flex">
+                    Signatures
                     <IoMdInformationCircleOutline className="ml-0.5" />
                   </span>
                 </th>
@@ -1244,10 +1235,10 @@ function EnrichmentResults({
                 </tr>
               ) : null}
               {enrichmentResults?.currentBackground?.pairedEnrich?.nodes?.flatMap(
-                (enrichmentResult, genesetIndex) => {
+                (enrichmentResult) => {
                   const term = enrichmentResult?.geneSet?.nodes[0]?.term;
-                  const geneSetUp =  enrichmentResult?.geneSet?.nodes.filter((x) => x.term.endsWith(" up"))[0]
-                  const geneSetDown =  enrichmentResult?.geneSet?.nodes.filter((x) => x.term.endsWith(" down"))[0]
+                  const geneSetUp = enrichmentResult?.geneSet?.nodes.find((x) => x.id === enrichmentResult.geneSetIdUp)
+                  const geneSetDown = enrichmentResult?.geneSet?.nodes.find((x) => x.id === enrichmentResult.geneSetIdDown)
                   const libraryName = geneSetUp?.library?.name || geneSetDown?.library?.name || '';
 
                   const parsed = term ? parseTerm(term) : parseTerm('');
@@ -1262,6 +1253,7 @@ function EnrichmentResults({
                   // Display string with perturbation type appended for gene libraries (e.g. "PRSS36 KO");
                   // `perturbation` stays raw for the NCBI/PubChem URL and drug lookups.
                   const perturbationDisplay = formatPerturbationWithType(perturbation, parsed.perturbationType, isGenePert);
+                  const typeSuffix = isGenePert && !perturbation.includes('|') ? perturbationDisplay.slice(perturbation.length) : '';
 
                   // Get FDA data from database
                   const fdaData = enrichmentResult?.geneSet?.nodes[0].geneSetFdaCountsById?.nodes[0];
@@ -1282,21 +1274,23 @@ function EnrichmentResults({
                   const dataset = libraryName || '';
 
                   return (
-                    <tr key={genesetIndex} className="text-left">
+                    <tr key={`${enrichmentResult.geneSetIdUp}:${enrichmentResult.geneSetIdDown}`} className="text-left">
                       <td className={"hidden"}>{term}</td>
                       <DatasetCell dataset={dataset} term={term} />
-                      <td className="max-w-[130px]">
+                      <td className={isGenePert ? 'w-[17.5rem] min-w-[16.25rem] max-w-[17.5rem]' : 'max-w-[130px]'}>
                         {/* Perturbation with appropriate link (PubChem for drugs, NCBI Gene for genes) */}
-                        <div>
+                        <div className={isGenePert ? 'flex items-center gap-2' : undefined}>
                           <a
                             href={perturbationUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="link link-neutral hover:link-hover truncate block"
+                            className="link link-neutral hover:link-hover flex min-w-0"
                             title={perturbationDisplay}
                           >
-                            {perturbationDisplay}
+                            <span className="truncate">{typeSuffix ? perturbation : perturbationDisplay}</span>
+                            <span className="shrink-0 whitespace-pre">{typeSuffix}</span>
                           </a>
+                          {isGenePert && <SingleGenePerturbationResourceLinks perturbation={perturbation} />}
                           {/* Show CID for drug perturbations */}
                           {!isGenePert && drugInfo?.cid && (
                             <div className="text-xs text-gray-500">
@@ -1340,7 +1334,14 @@ function EnrichmentResults({
                       </td>
                       <td className={`max-w-[70px] ${columnVisibility.timepoint ? "" : "hidden"}`}>{timepoint === 'N/A' ? <span className="text-gray-400">N/A</span> : <span className="truncate block" title={timepoint}>{timepoint}</span>}</td>
                       <td className={`max-w-[80px] ${columnVisibility.concentration ? "" : "hidden"}`}>{concentration === 'N/A' ? <span className="text-gray-400">N/A</span> : <span className="truncate block" title={concentration}>{concentration}</span>}</td>
+                      <td>
+                        <LibraryCount
+                          count={enrichmentResult?.libraryCount}
+                          libraries={enrichmentResult?.supportingLibraries}
+                        />
+                      </td>
                       <td>{count}</td>
+                      <td>{fdaData?.totalCount ?? 0}</td>
                       <td className="max-w-[150px]">
                         {/* MOA with source attribution */}
                         {moa ? (

@@ -30,13 +30,17 @@ export function LibraryBarGraphGrid({
   const geneLibs = activeLibraries.filter((lib) =>  isGenePerturbationLibrary(lib));
   const parentCols =
     drugLibs.length > 0 && geneLibs.length > 0 ? 'md:grid-cols-2' : 'md:grid-cols-1';
-  // Fixed `grid-auto-rows` so every row is the same height in both the drug
-  // and gene subgrids. Without this, the two subgrids can drift out of
-  // alignment when one side has many "no enriched terms" cards next to tall
-  // bar charts on the other side.
-  const sideClass = 'grid grid-cols-1 lg:grid-cols-2 items-start gap-3 content-start [grid-auto-rows:460px]';
+  const rowCount = Math.max(drugLibs.length, geneLibs.length);
+  // Shared content-sized rows keep both categories aligned when headings wrap.
+  const sideClass = 'grid min-w-0 grid-cols-1 lg:grid-cols-2 items-stretch gap-3 content-start [grid-auto-rows:minmax(460px,auto)] md:row-span-full md:[grid-template-rows:subgrid]';
   return (
-    <div className={`grid grid-cols-1 ${parentCols} gap-3 mt-1`}>
+    <div
+      className={`grid grid-cols-1 ${parentCols} gap-3 mt-1 md:[grid-template-rows:repeat(var(--library-rows),minmax(460px,auto))] lg:[grid-template-rows:repeat(var(--library-wide-rows),minmax(460px,auto))]`}
+      style={{
+        '--library-rows': rowCount,
+        '--library-wide-rows': Math.ceil(rowCount / 2),
+      } as React.CSSProperties}
+    >
       {drugLibs.length > 0 && (
         <div className={sideClass}>
           {drugLibs.map((lib) => <React.Fragment key={lib}>{renderCard(lib)}</React.Fragment>)}

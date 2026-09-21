@@ -44,6 +44,16 @@ export default async function About() {
           <p>
           This site is programmatically accessible via a <Link href="/graphiql" className="underline cursor-pointer" target="_blank">GraphQL API</Link>.
           </p>
+          <p className="mt-4">
+            You can use Perturb-Seqr within AI Applications through the{' '}
+            <a className="underline" href="https://github.com/MaayanLab/maayan-lab-tools-skills/blob/main/skills/Perturb-Seqr/SKILL.md" target="_blank" rel="noopener noreferrer">
+              Perturb-Seqr Agent Skill
+            </a>{' '}and{' '}
+            Perturb-Seqr MCP Server (<span className="underline select-all">perturbseqr.maayanlab.cloud/mcp</span>,{' '}
+            <a className="underline" href="https://github.com/MaayanLab/PerturbSeqr/blob/release/0.2.51/mcp/README.md" target="_blank" rel="noopener noreferrer">
+              GitHub Link
+            </a>).
+          </p>
           <br />
           <p>
           Perturb-Seqr was developed by <a className='underline cursor' href="https://labs.icahn.mssm.edu/maayanlab/">the Ma&apos;ayan Lab.</a>

@@ -12,6 +12,8 @@ import {
   isGenePerturbationLibrary,
 } from '@/utils/metadataLookup';
 import { DatasetCell } from '@/components/DatasetCell';
+import LibraryCount from '@/components/LibraryCount';
+import SingleGenePerturbationResourceLinks from '@/components/SingleGenePerturbationResourceLinks';
 
 export type GeneSetModalT =
   | { type: 'UserGeneSet'; description: string; genes: string[] }
@@ -20,7 +22,10 @@ export type GeneSetModalT =
   | undefined;
 
 type EnrichNode = {
+  geneSetId?: string | null;
   geneSetHash?: string | null;
+  libraryCount?: number | null;
+  supportingLibraries?: ReadonlyArray<string | null> | null;
   pvalue?: number | null;
   adjPvalue?: number | null;
   oddsRatio?: number | null;
@@ -36,6 +41,7 @@ type EnrichNode = {
         nodes: ReadonlyArray<{
           approved?: boolean | null;
           count?: number | null;
+          totalCount?: number | null;
           moa?: string | null;
         } | null>;
       } | null;
@@ -78,7 +84,7 @@ export function EnrichmentTable({
   }, [nodes]);
 
   return (
-    <table className="table table-sm">
+    <table className="table table-sm [&_th]:px-2 [&_td]:px-2">
       <thead>
         <tr className="text-left align-text-bottom overflow-visible">
           <th className={'hidden'}>Term</th>
@@ -101,12 +107,32 @@ export function EnrichmentTable({
           <th className={columnVisibility.concentration ? '' : 'hidden'}>Concentration</th>
           <th>Direction</th>
           <th className="relative group">
-            <div className="absolute z-10 left-0 top-10 mb-2 hidden w-max bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
-              Number of signatures with this perturbation, per dataset
+            <div className="absolute z-10 left-0 top-10 mb-2 hidden w-72 whitespace-normal bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
+              Number of gene set libraries with a significant result for this perturbation.
             </div>
-            Signature<br></br>
+            Supporting<br />
             <span className="inline-flex">
-              Count
+              Libraries
+              <IoMdInformationCircleOutline className="ml-0.5" />
+            </span>
+          </th>
+          <th className="relative group">
+            <div className="absolute z-10 left-0 top-10 mb-2 hidden w-80 whitespace-normal bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
+              Number of signatures with this perturbation, in this gene set library
+            </div>
+            Library<br />
+            <span className="inline-flex">
+              Signatures
+              <IoMdInformationCircleOutline className="ml-0.5" />
+            </span>
+          </th>
+          <th className="relative group">
+            <div className="absolute z-10 left-0 top-10 mb-2 hidden w-80 whitespace-normal bg-gray-700 text-white text-xs rounded p-1 group-hover:block">
+              Total number of signatures for this perturbation across all gene set libraries.
+            </div>
+            Total<br />
+            <span className="inline-flex">
+              Signatures
               <IoMdInformationCircleOutline className="ml-0.5" />
             </span>
           </th>
@@ -157,7 +183,7 @@ export function EnrichmentTable({
             </td>
           </tr>
         ) : null}
-        {nodes?.flatMap((enrichmentResult, genesetIndex) => {
+        {nodes?.flatMap((enrichmentResult) => {
           const term = enrichmentResult?.geneSets?.nodes?.[0]?.term;
           const libraryName = enrichmentResult?.geneSets?.nodes?.[0]?.library?.name || '';
 
@@ -173,6 +199,7 @@ export function EnrichmentTable({
           // Display string with perturbation type appended for gene libraries (e.g. "PRSS36 KO").
           // `perturbation` stays raw — it feeds the NCBI/PubChem URL and drug lookups below.
           const perturbationDisplay = formatPerturbationWithType(perturbation, parsed.perturbationType, isGenePert);
+          const typeSuffix = isGenePert && !perturbation.includes('|') ? perturbationDisplay.slice(perturbation.length) : '';
 
           const fdaData = enrichmentResult?.geneSets?.nodes?.[0]?.geneSetFdaCountsById?.nodes?.[0];
           const sigCount = fdaData?.count ?? 0;
@@ -188,20 +215,22 @@ export function EnrichmentTable({
 
           if (!enrichmentResult?.geneSets) return null;
           return (
-            <tr key={genesetIndex} className="text-left">
+            <tr key={enrichmentResult.geneSetId} className="text-left">
               <td className={'hidden'}>{term}</td>
               <DatasetCell dataset={dataset} term={term} />
-              <td className="max-w-[130px]">
-                <div>
+              <td className={isGenePert ? 'w-[17.5rem] min-w-[16.25rem] max-w-[17.5rem]' : 'max-w-[130px]'}>
+                <div className={isGenePert ? 'flex items-center gap-2' : undefined}>
                   <a
                     href={perturbationUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="link link-neutral hover:link-hover truncate block"
+                    className="link link-neutral hover:link-hover flex min-w-0"
                     title={perturbationDisplay}
                   >
-                    {perturbationDisplay}
+                    <span className="truncate">{typeSuffix ? perturbation : perturbationDisplay}</span>
+                    <span className="shrink-0 whitespace-pre">{typeSuffix}</span>
                   </a>
+                  {isGenePert && <SingleGenePerturbationResourceLinks perturbation={perturbation} />}
                   {!isGenePert && drugInfo?.cid && (
                     <div className="text-xs text-gray-500">
                       <span title="PubChem Compound ID">PCID:</span> {drugInfo.cid}
@@ -280,7 +309,14 @@ export function EnrichmentTable({
                   />
                 )}
               </td>
+              <td>
+                <LibraryCount
+                  count={enrichmentResult?.libraryCount}
+                  libraries={enrichmentResult?.supportingLibraries}
+                />
+              </td>
               <td>{sigCount}</td>
+              <td>{fdaData?.totalCount ?? 0}</td>
               <td className="max-w-[150px]">
                 {moa ? (
                   <div className="text-sm">

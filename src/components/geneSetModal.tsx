@@ -2,10 +2,11 @@ import React from "react";
 import classNames from "classnames";
 import blobTsv from "@/utils/blobTsv";
 import clientDownloadBlob from "@/utils/clientDownloadBlob";
-import EnrichrButton from "./enrichrButton";
-import RummageneButton from "./rummageneButton";
-import RummageoButton from "./rummageoButton";
-import { PerturbseqrSingleButton, PerturbseqrPairedButton } from "./perturbseqrButtons";
+import EnrichrGeneSetSubmissionButton from "./enrichrGeneSetSubmissionButton";
+import RummageneGeneSetSubmissionButton from "./rummageneGeneSetSubmissionButton";
+import RummageoGeneSetSubmissionButton from "./rummageoGeneSetSubmissionButton";
+import GsfmGeneSetSubmissionButton from "./gsfmGeneSetSubmissionButton";
+import { PerturbseqrSingleGeneSetSubmissionButton, PerturbseqrPairedGeneSetSubmissionButton } from "./perturbseqrGeneSetSubmissionButtons";
 
 type GeneNode = {
   gene?: string | null;
@@ -154,10 +155,11 @@ function SingleBody({ geneset, genes, term }: { geneset?: GeneList; genes: strin
             }
           />
           <CopyButton label="Copy Symbols to Clipboard" getText={() => genes.join("\n")} />
-          <EnrichrButton genes={genes} description={term}></EnrichrButton>
-          <RummageoButton genes={genes} description={term}></RummageoButton>
-          <RummageneButton genes={genes} description={term}></RummageneButton>
-          <PerturbseqrSingleButton genes={genes} description={term} />
+          <EnrichrGeneSetSubmissionButton genes={genes} description={term} />
+          <RummageneGeneSetSubmissionButton genes={genes} description={term} />
+          <RummageoGeneSetSubmissionButton genes={genes} description={term} />
+          <GsfmGeneSetSubmissionButton genes={genes} description={term} />
+          <PerturbseqrSingleGeneSetSubmissionButton genes={genes} description={term} />
         </div>
       </div>
     </div>
@@ -192,7 +194,7 @@ function PairedBody({ upSet, downSet, upGenes, downGenes, baseTerm }: {
         />
         <CopyButton label="Copy Up Symbols" getText={() => upGenes.join("\n")} />
         <CopyButton label="Copy Down Symbols" getText={() => downGenes.join("\n")} />
-        <PerturbseqrPairedButton
+        <PerturbseqrPairedGeneSetSubmissionButton
           genesUp={upGenes}
           genesDown={downGenes}
           descriptionUp={baseTerm ? `${baseTerm} up` : undefined}

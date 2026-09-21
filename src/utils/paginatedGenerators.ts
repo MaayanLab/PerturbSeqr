@@ -19,8 +19,10 @@ import {
 export async function* paginatedNodeGenerator(genes: string[], term: string, filterFda: boolean, filterKo: boolean, topN: number = DEFAULT_CONSENSUS_TOP_N_SIGNATURES, sort: string, maxTotal: number = MAX_DOWNLOAD_RESULT_COUNT, pvalueLe: number = DEFAULT_PVALUE_CUTOFF, libraryNames: string[] | null = null) {
     const pageSize = PAGINATION_FETCH_BATCH_SIZE;
     let offset = 0;
+    let emitted = 0;
 
-    while (true) {
+    while (emitted < maxTotal) {
+      const first = Math.min(pageSize, maxTotal - emitted);
       const { data, error } = await getClient().query<EnrichmentQuerySingleQuery>({
         query: EnrichmentQuerySingleDocument,
         variables: {
@@ -30,7 +32,7 @@ export async function* paginatedNodeGenerator(genes: string[], term: string, fil
           sortBy: sort,
           filterKo,
           offset,
-          first: pageSize,
+          first,
           topN,
           pvalueLe,
           libraryNames,
@@ -50,6 +52,7 @@ export async function* paginatedNodeGenerator(genes: string[], term: string, fil
           const parsed = parseTerm(geneSet.term);
 
           yield {
+            geneSetId: node.geneSetId,
             dataset: geneSet.library?.name || '',
             drug: parsed.perturbation,
             perturbationId: '',
@@ -57,23 +60,24 @@ export async function* paginatedNodeGenerator(genes: string[], term: string, fil
             cellLine: parsed.cellLine || 'N/A',
             timepoint: parsed.timepoint,
             direction: parsed.direction,
+            libraryCount: node.libraryCount ?? 0,
+            totalSignatureCount: fdaInfo?.totalCount ?? 0,
             geneSetSize: geneSet.nGeneIds,
             moa: geneSet.geneSetFdaCountsById.nodes[0]?.moa,
             nOverlap: node.nOverlap,
             oddsRatio: node.oddsRatio,
             pvalue: node.pvalue,
             adjPvalue: node.adjPvalue,
-            count: fdaInfo?.count || 1,
+            count: fdaInfo?.count ?? 0,
             approved: fdaInfo?.approved?.toString() || "",
             geneSetHash: node.geneSetHash,
           };
+          if (++emitted >= maxTotal) return;
         }
       }
 
-      if (nodes.length < pageSize) break;
-      offset += pageSize;
-
-      if (offset >= maxTotal) break;
+      if (nodes.length < first) break;
+      offset += nodes.length;
     }
 }
   
@@ -206,8 +210,10 @@ export async function* paginatedMoAsGenerator(
 export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: string[], term: string, filterFda: boolean, filterKo: boolean, topN: number = DEFAULT_CONSENSUS_TOP_N_SIGNATURES, sort: string, maxTotal: number = MAX_DOWNLOAD_RESULT_COUNT, pvalueLe: number = DEFAULT_PVALUE_CUTOFF, libraryNames: string[] | null = null) {
     const pageSize = PAGINATION_FETCH_BATCH_SIZE;
     let offset = 0;
+    let emitted = 0;
 
-    while (true) {
+    while (emitted < maxTotal) {
+      const first = Math.min(pageSize, maxTotal - emitted);
       const { data, error } = await getClient().query<PairEnrichmentQuerySingleQuery>({
         query: PairEnrichmentQuerySingleDocument,
         variables: {
@@ -218,7 +224,7 @@ export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: 
           sortBy: sort,
           filterKo,
           offset,
-          first: pageSize,
+          first,
           topN,
           pvalueLe,
           libraryNames,
@@ -232,21 +238,25 @@ export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: 
 
       for (const node of nodes) {
         if (!node) continue;
-        const geneSetUp = node.geneSet.nodes.find((x: any) => x.term.includes(" up"));
-        const geneSetDown = node.geneSet.nodes.find((x: any) => x.term.includes(" down"));
+        const geneSetUp = node.geneSet.nodes.find((x) => x.id === node.geneSetIdUp);
+        const geneSetDown = node.geneSet.nodes.find((x) => x.id === node.geneSetIdDown);
         const geneSet = geneSetUp || geneSetDown;
         if (!geneSet) continue;
         const fdaInfo = geneSet.geneSetFdaCountsById.nodes[0];
         const parsed = parseTerm(geneSet.term);
 
         yield {
+          geneSetIdUp: node.geneSetIdUp,
+          geneSetIdDown: node.geneSetIdDown,
           dataset: geneSet.library?.name || '',
           perturbation: parsed.perturbation,
           perturbationId: '',
           cellLine: parsed.cellLine || 'N/A',
           timepoint: parsed.timepoint,
           concentration: parsed.concentration || "N/A",
-          signatureCount: geneSet.geneSetFdaCountsById.nodes[0]?.count || 0,
+          libraryCount: node.libraryCount ?? 0,
+          signatureCount: fdaInfo?.count ?? 0,
+          totalSignatureCount: fdaInfo?.totalCount ?? 0,
           moa: geneSet.geneSetFdaCountsById.nodes[0]?.moa,
           fdaApproved: fdaInfo?.approved?.toString() || "",
           geneSetSizeUp: geneSetUp?.nGeneIds ?? '',
@@ -260,12 +270,11 @@ export async function* paginatedPairNodeGenerator(genesUp: string[], genesDown: 
           pvalueReverse: node.pvalueReverse,
           adjPvalueReverse: node.adjPvalueReverse,
         };
+        if (++emitted >= maxTotal) return;
       }
 
-      if (nodes.length < pageSize) break;
-      offset += pageSize;
-
-      if (offset >= maxTotal) break;
+      if (nodes.length < first) break;
+      offset += nodes.length;
     }
 }
 
@@ -396,4 +405,3 @@ export async function* paginatedPairMoAsGenerator(
       if (offset >= totalCount) break;
     }
 }
-  

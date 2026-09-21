@@ -40,7 +40,10 @@ query EnrichmentQuery($genes: [String]!, $filterTerm: String = "", $libraryNames
       pvalueLe: $pvalueLe
     ) {
       nodes {
+        geneSetId
         geneSetHash
+        libraryCount
+        supportingLibraries
         pvalue
         adjPvalue
         oddsRatio
@@ -58,6 +61,7 @@ query EnrichmentQuery($genes: [String]!, $filterTerm: String = "", $libraryNames
               nodes {
                 approved
                 count
+                totalCount
                 moa
               }
             }
@@ -126,7 +130,10 @@ query EnrichmentQuerySingle($genes: [String]!, $filterTerm: String = "", $librar
       pvalueLe: $pvalueLe
     ) {
       nodes {
+        geneSetId
         geneSetHash
+        libraryCount
+        supportingLibraries
         pvalue
         adjPvalue
         oddsRatio
@@ -144,6 +151,7 @@ query EnrichmentQuerySingle($genes: [String]!, $filterTerm: String = "", $librar
               nodes {
                 approved
                 count
+                totalCount
                 moa
               }
             }
@@ -290,10 +298,14 @@ query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTer
         contributingSignatures
       }
       nodes {
+        geneSetIdUp
+        geneSetIdDown
         adjPvalueMimic
         adjPvalueReverse
         geneSetHashDown
         geneSetHashUp
+        libraryCount
+        supportingLibraries
         mimickerOverlap
         oddsRatioMimic
         geneSetHashUp
@@ -313,6 +325,7 @@ query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTer
             geneSetFdaCountsById {
               nodes {
                 count
+                totalCount
                 approved
                 moa
               }
@@ -341,10 +354,14 @@ query PairEnrichmentQuerySingle($genesUp: [String]!, $genesDown: [String]!, $fil
     ) {
       totalCount
       nodes {
+        geneSetIdUp
+        geneSetIdDown
         adjPvalueMimic
         adjPvalueReverse
         geneSetHashDown
         geneSetHashUp
+        libraryCount
+        supportingLibraries
         mimickerOverlap
         oddsRatioMimic
         geneSetHashUp
@@ -364,6 +381,7 @@ query PairEnrichmentQuerySingle($genesUp: [String]!, $genesDown: [String]!, $fil
             geneSetFdaCountsById {
               nodes {
                 count
+                totalCount
                 approved
                 moa
               }

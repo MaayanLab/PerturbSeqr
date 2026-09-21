@@ -131,7 +131,9 @@ export async function GET(request: Request) {
               "cellLine",
               "timepoint",
               "concentration",
+              "libraryCount",
               "signatureCount",
+              "totalSignatureCount",
               "moa",
               "fdaApproved",
               "geneSetSizeUp",
@@ -144,6 +146,8 @@ export async function GET(request: Request) {
               "oddsRatioReverse",
               "pvalueReverse",
               "adjPvalueReverse",
+              "geneSetIdUp",
+              "geneSetIdDown",
             ],
             paginatedPairNodeGenerator(
               genesUp,

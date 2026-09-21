@@ -41,7 +41,7 @@ async function getRummageoLink(genesetName: string, genes: string[]) {
     }
 }
 
-export default function RummageoButton({ genes, description }: { genes?: string[] | undefined, description?: string | null }) {
+export default function RummageoGeneSetSubmissionButton({ genes, description }: { genes?: string[] | undefined, description?: string | null }) {
     return (
         <button
             className="btn btn-sm btn-outline text-xs"
