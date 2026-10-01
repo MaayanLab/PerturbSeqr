@@ -13,6 +13,6 @@ export async function generateMetadata(props: { searchParams?: { q?: string } },
   }
 }
 
-export default function TermSearchPage(props: { searchParams?: { q?: string, page?: string } }) {
-  return <TermSearchClientPage {...props} />
+export default function TermSearchPage() {
+  return <TermSearchClientPage />
 }

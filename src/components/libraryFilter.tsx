@@ -19,14 +19,16 @@ const GENE_PERTURBATION_LIBRARIES = libraries.filter(l => l.category === 'gene')
 export default function LibraryFilter({
   selectedLibraries,
   onSelectionChange,
-  compact = false
+  compact = false,
+  category,
 }: {
   selectedLibraries: string[]
   onSelectionChange: (libraries: string[]) => void
   compact?: boolean
+  category?: 'drug' | 'gene'
 }) {
-  const drugLibraries = DRUG_PERTURBATION_LIBRARIES
-  const geneLibraries = GENE_PERTURBATION_LIBRARIES
+  const drugLibraries = category === 'gene' ? [] : DRUG_PERTURBATION_LIBRARIES
+  const geneLibraries = category === 'drug' ? [] : GENE_PERTURBATION_LIBRARIES
 
   const { data: libraryData } = useAllLibrariesQuery()
   const signatureCounts = React.useMemo(() => {

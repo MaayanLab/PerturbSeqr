@@ -11,6 +11,8 @@ import SingleGenePerturbationResourceLinks from '@/components/SingleGenePerturba
 import Image from 'next/image';
 import { FaFilter } from 'react-icons/fa';
 import libraryConfig from '@/config/libraries.json';
+import type { SignaturePair, SignatureSummary } from '@/utils/signaturePairs';
+import { PerturbseqrPairedGeneSetSubmissionButton } from '@/components/perturbseqrGeneSetSubmissionButtons';
 
 const pageSize = 10
 const drugLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'drug').map((l: any) => l.displayName as string)
@@ -109,7 +111,8 @@ function FilterDropdown({ label, allValues, filterValues, queryKey, setQs, hasSe
   )
 }
 
-export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" | undefined; term?: string | null | undefined; id?: any; nGeneIds?: number | null | undefined; library?: { name?: string | null } | null }[] }) {
+export default function TermTable({ terms, pairs, enrichmentParams }: { terms: SignatureSummary[]; pairs?: SignaturePair[]; enrichmentParams?: Record<string, string> }) {
+  const paired = !!pairs
   const [queryString, setQueryString] = useQsState({ page: '1', search: '', dataset: '', cellLine: '', moa: '', timepoint: '', concentration: '', direction: '' })
   const { page, searchTerm, tableSearch } = React.useMemo(() => ({ page: queryString.page ? +queryString.page : 1, searchTerm: queryString.q ?? '', tableSearch: queryString.search || '' }), [queryString])
 
@@ -130,9 +133,13 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
     preloadDrugLookup().then(() => setDrugLookupLoaded(true))
   }, [terms])
 
+  const tableTerms = React.useMemo(() => pairs
+    ? pairs.map(pair => ({ ...pair.up, term: pair.term, _pair: pair }))
+    : terms.map(term => ({ ...term, _pair: undefined })), [terms, pairs])
+
   // Precompute parsed data for all terms (avoids re-parsing in table body)
   const parsedTerms = React.useMemo(() => {
-    return terms.map(el => {
+    return tableTerms.map(el => {
       const term = el.term || ''
       const libraryName = el.library?.name || ''
       const parsed = parseTerm(term)
@@ -163,7 +170,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
         _perturbationLinkTitle: getPerturbationLinkTitle(libraryName),
       }
     })
-  }, [terms, drugLookupLoaded])
+  }, [tableTerms, drugLookupLoaded])
 
   // Extract unique sorted values for each filter dimension
   const allDatasets = React.useMemo(() => Array.from(new Set(parsedTerms.map(t => t._dataset))).sort((a, b) => a.localeCompare(b)), [parsedTerms])
@@ -181,13 +188,14 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
       if (moaFilter.length > 0) { if (moaFilter.includes('__none__')) return false; if (!moaFilter.includes(el._moa)) return false }
       if (timepointFilter.length > 0) { if (timepointFilter.includes('__none__')) return false; if (!timepointFilter.includes(el._timepoint)) return false }
       if (concentrationFilter.length > 0) { if (concentrationFilter.includes('__none__')) return false; if (!concentrationFilter.includes(el._concentration)) return false }
-      if (dirFilter === 'up' && el._dirDisplay !== 'Up') return false
-      if (dirFilter === 'down' && el._dirDisplay !== 'Down') return false
+      if (!paired && dirFilter === 'up' && el._dirDisplay !== 'Up') return false
+      if (!paired && dirFilter === 'down' && el._dirDisplay !== 'Down') return false
       return true
     }),
-  [parsedTerms, tableSearch, datasetFilter, cellLineFilter, moaFilter, timepointFilter, concentrationFilter, dirFilter])
+  [parsedTerms, tableSearch, datasetFilter, cellLineFilter, moaFilter, timepointFilter, concentrationFilter, dirFilter, paired])
 
   const genesQuery = useGeneSetGenesByIdQuery({
+    skip: paired,
     variables: { id: geneSetId }
   })
 
@@ -200,21 +208,22 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
     return ''
   }, [currTerm])
   const pairQuery = useGeneSetDetailsByTermQuery({
-    skip: !showModal || !pairedTerm,
+    skip: paired || !showModal || !pairedTerm,
     variables: { term: pairedTerm },
   })
   const viewedGenes = genesQuery?.data?.geneSet?.genes.nodes
   const pairGenes = pairQuery?.data?.geneSetByTerm?.genes.nodes
 
-  const anyFilterActive = datasetFilter.length > 0 || cellLineFilter.length > 0 || moaFilter.length > 0 || timepointFilter.length > 0 || concentrationFilter.length > 0 || !!dirFilter
+  const anyFilterActive = datasetFilter.length > 0 || cellLineFilter.length > 0 || moaFilter.length > 0 || timepointFilter.length > 0 || concentrationFilter.length > 0 || (!paired && !!dirFilter)
 
   return (
     <>
-      <GeneSetModal tabbed geneset={viewedGenes} geneset2={pairGenes ?? []} term={currTerm} dataset={currDataset} showModal={showModal} setShowModal={setShowModal}></GeneSetModal>
+      {!paired && <GeneSetModal tabbed geneset={viewedGenes} geneset2={pairGenes ?? []} term={currTerm} dataset={currDataset} showModal={showModal} setShowModal={setShowModal}></GeneSetModal>}
       {/* Filter bar — above the table, matching enrich page layout */}
       <div className="flex flex-col gap-2 mx-5">
         <div className="flex flex-row flex-wrap items-center gap-2">
           <FilterDropdown label="Dataset" allValues={allDatasets} filterValues={datasetFilter} queryKey="dataset" setQs={setQueryString} />
+          {!paired && <>
           <div
             id="ptype-select"
             className="join place-content-start place-items-center"
@@ -279,6 +288,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
               DOWN
             </div>
           </div>
+          </>}
           <FilterDropdown label="Cell Line" allValues={allCellLines} filterValues={cellLineFilter} queryKey="cellLine" setQs={setQueryString} />
           <FilterDropdown label="MOA" allValues={allMoas} filterValues={moaFilter} queryKey="moa" setQs={setQueryString} />
           <FilterDropdown label="Timepoint" allValues={allTimepoints} filterValues={timepointFilter} queryKey="timepoint" setQs={setQueryString} />
@@ -317,9 +327,9 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
                 }}
               >&#x232B;</button>
             </div>
-            <div className="tooltip" data-tip="Download results">
+            {!paired && <div className="tooltip" data-tip="Download results">
               <TermDownloadButton dataFiltered={dataFiltered} filterTerm={searchTerm || ""} />
-            </div>
+            </div>}
           </div>
         </div>
         <div className='overflow-x-auto'>
@@ -333,18 +343,27 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
               <th>Cell Line</th>
               <th>Timepoint</th>
               <th>Concentration</th>
-              <th>Direction</th>
-              <th>Gene Set Size</th>
+              {paired ? <>
+                <th>Up Genes</th>
+                <th>Down Genes</th>
+                <th>Submit</th>
+              </> : <>
+                <th>Direction</th>
+                <th>Gene Set Size</th>
+              </>}
             </tr>
           </thead>
           <tbody>
+            {paired && dataFiltered.length === 0 && (
+              <tr><td colSpan={10} className="text-center py-6">No signature pairs match these filters.</td></tr>
+            )}
             {dataFiltered?.slice((page-1) * pageSize, page * pageSize).map(el => {
               if (!el) return null
               const typeSuffix = el._isGenePert && !el._perturbation.includes('|') ? el._perturbationDisplay.slice(el._perturbation.length) : '';
               return (
-                  <tr key={el?.term}>
+                  <tr key={el.id}>
                     <DatasetCell dataset={el._dataset} term={el.term} className="font-medium max-w-[120px]" />
-                    <td>
+                    <td className={paired ? 'max-w-[260px] [overflow-wrap:anywhere]' : undefined}>
                     {el.term}
                   </td>
                   <td className={el._isGenePert ? 'w-[17.5rem] min-w-[16.25rem] max-w-[17.5rem]' : 'max-w-[130px]'}>
@@ -414,6 +433,19 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
                   <td className="max-w-[80px]">
                     {el._concentration === 'N/A' ? <span className="text-gray-400">N/A</span> : <span className="truncate block" title={el._concentration}>{el._concentration}</span>}
                   </td>
+                  {paired && el._pair ? <>
+                    <td>{el._pair.up.nGeneIds}</td>
+                    <td>{el._pair.down.nGeneIds}</td>
+                    <td>
+                      <PerturbseqrPairedGeneSetSubmissionButton
+                        referencePair={{ upId: el._pair.up.id, downId: el._pair.down.id }}
+                        descriptionUp={`${el._pair.term} up`}
+                        descriptionDown={`${el._pair.term} down`}
+                        enrichmentParams={enrichmentParams}
+                        label="Submit"
+                      />
+                    </td>
+                  </> : <>
                   <td>
                     {el._direction === "up" ? (
                       <Image
@@ -454,6 +486,7 @@ export default function TermTable({ terms }: { terms: { __typename?: "GeneSet" |
                     ><p>View Gene Set ({el?.nGeneIds})</p>
                     </button>
                   </td>
+                  </>}
                 </tr>
               )
             })}
