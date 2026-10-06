@@ -82,7 +82,7 @@ function TermSearchResults({ query, libraries, workflow }: { query: string; libr
     ...(workflow.targetType ? { q: `::${workflow.targetType}::` } : {}),
   } : undefined
   return (
-    <div className="w-full flex flex-col gap-2 my-2">
+    <div className="self-stretch min-w-0 -mx-8 md:-mx-24 flex flex-col gap-2 my-2">
       <ul className="menu menu-horizontal gap-3 text-base justify-center py-0"><ShareButton /></ul>
       <h2 className="text-lg font-bold">{workflow
         ? <>Perturb-Seqr found {count.toLocaleString()} complete up/down signature pairs for &quot;{query}&quot; in {workflow.source} perturbation libraries.</>
@@ -101,9 +101,10 @@ export default function TermSearch({ title, description, workflows }: {
   description: React.ReactNode
   workflows?: Record<string, TermSearchWorkflow>
 }) {
-  const [queryString, setQueryString] = useQsState({ q: '', mode: '', libraries: '' })
+  const defaultMode = Object.keys(workflows ?? {})[0] ?? ''
+  const [queryString, setQueryString] = useQsState({ q: '', mode: defaultMode, libraries: '' })
   const query = queryString.q?.trim() ?? ''
-  const queryMode = workflows && Object.hasOwn(workflows, queryString.mode ?? '') ? queryString.mode! : ''
+  const queryMode = workflows && Object.hasOwn(workflows, queryString.mode ?? '') ? queryString.mode! : defaultMode
   const queryWorkflow = workflows?.[queryMode]
   const [mode, setMode] = React.useState(queryMode)
   const workflow = workflows?.[mode]
@@ -127,7 +128,7 @@ export default function TermSearch({ title, description, workflows }: {
   function selectWorkflow(value: string) {
     const next = workflows?.[value]
     if (!next) return
-    if (value === queryMode) {
+    if (query && value === queryMode) {
       setRawTerm(query)
       setSelectedLibraries(queryLibraries)
     } else if (workflow?.source !== next.source) {

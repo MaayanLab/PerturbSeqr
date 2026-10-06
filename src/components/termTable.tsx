@@ -300,7 +300,7 @@ export default function TermTable({ terms, pairs, enrichmentParams }: { terms: S
           </p>
         )}
       </div>
-      <div className='border m-5 mt-1'>
+      <div className='border min-w-0 m-5 mt-1'>
       <div className='flex flex-row flex-wrap place-content-end items-center pt-3 pr-3 gap-2'>
           <div className='join flex flex-row items-center'>
             <span className="label-text text-base">Search:&nbsp;</span>
@@ -346,7 +346,7 @@ export default function TermTable({ terms, pairs, enrichmentParams }: { terms: S
               {paired ? <>
                 <th>Up Genes</th>
                 <th>Down Genes</th>
-                <th>Submit</th>
+                <th className="sticky right-0 z-10 min-w-[110px] bg-gray-100 dark:bg-gray-900">Submit</th>
               </> : <>
                 <th>Direction</th>
                 <th>Gene Set Size</th>
@@ -363,7 +363,7 @@ export default function TermTable({ terms, pairs, enrichmentParams }: { terms: S
               return (
                   <tr key={el.id}>
                     <DatasetCell dataset={el._dataset} term={el.term} className="font-medium max-w-[120px]" />
-                    <td className={paired ? 'max-w-[260px] [overflow-wrap:anywhere]' : undefined}>
+                    <td className={paired ? 'min-w-[240px] max-w-[260px] [overflow-wrap:anywhere]' : undefined}>
                     {el.term}
                   </td>
                   <td className={el._isGenePert ? 'w-[17.5rem] min-w-[16.25rem] max-w-[17.5rem]' : 'max-w-[130px]'}>
@@ -436,7 +436,7 @@ export default function TermTable({ terms, pairs, enrichmentParams }: { terms: S
                   {paired && el._pair ? <>
                     <td>{el._pair.up.nGeneIds}</td>
                     <td>{el._pair.down.nGeneIds}</td>
-                    <td>
+                    <td className="sticky right-0 z-10 min-w-[110px] bg-gray-100 dark:bg-gray-900">
                       <PerturbseqrPairedGeneSetSubmissionButton
                         referencePair={{ upId: el._pair.up.id, downId: el._pair.down.id }}
                         descriptionUp={`${el._pair.term} up`}
