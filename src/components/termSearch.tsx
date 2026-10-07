@@ -88,6 +88,9 @@ function TermSearchResults({ query, libraries, workflow }: { query: string; libr
         ? <>Perturb-Seqr found {count.toLocaleString()} complete up/down signature pairs for &quot;{query}&quot; in {workflow.source} perturbation libraries.</>
         : <>After rummaging through <Stats show_gene_sets />. Perturb-Seqr <Image className="inline-block rounded dark:invert" src="/images/perturbseqr-logo.png" width={50} height={50} alt="Perturb-Seqr" /> found your search term in {count.toLocaleString()} gene sets.</>}
       </h2>
+      {workflow && count > 0 && <p className="text-lg text-blue-900 dark:text-blue-300">
+        Select one of the matching signatures and press <strong>Submit</strong> to find <strong>matching {workflow.target === 'drug' ? 'drugs' : 'targets'}</strong>.
+      </p>}
       {count > 0 ? <TermTable terms={result} pairs={pairs} enrichmentParams={enrichmentParams} /> : (
         <p className="text-center py-8">{workflow ? 'No complete up/down signature pairs found. Try another perturbation name.' : 'No matching gene sets found. Try another search term.'}</p>
       )}
