@@ -77,7 +77,7 @@ services:
     build:
       context: .
       args:
-        - NEXT_PUBLIC_MINIO_URL=${PUBLIC_S3_URL}
+        - NEXT_PUBLIC_MINIO_URL=${PUBLIC_S3_URL:-https://perturbseqr.s3.amazonaws.com}
     image: johnkgardner/perturbseqr-app:0.2.51
     pull_policy: if_not_present
     platform: linux/amd64
@@ -87,7 +87,7 @@ services:
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres
       - NODE_ENV=production
       - ENRICH_URL=http://perturbseqr-enrich:8000
-      - NEXT_PUBLIC_MINIO_URL=${PUBLIC_S3_URL}
+      - NEXT_PUBLIC_MINIO_URL=${PUBLIC_S3_URL:-https://perturbseqr.s3.amazonaws.com}
       - MINIO_ENDPOINT=perturbseqr-minio:9000
       - NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
     ports:
