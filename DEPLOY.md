@@ -8,10 +8,12 @@ cp .env.example .env
 #   - POSTGRES_PASSWORD: secure value
 #   - MINIO_ROOT_PASSWORD: secure value
 #   - S3_URL: http://minio:<MINIO_ROOT_PASSWORD>@perturbseqr-minio:9000/data
-#   - PUBLIC_S3_URL: https://s3.perturbseqr.maayanlab.cloud/data
+#   - PUBLIC_S3_URL: https://perturbseqr.s3.amazonaws.com
 
 kube-compose up
 ```
+
+Production downloads use the AWS S3 bucket root, with no `/data` suffix. Rebuild the app image when changing `PUBLIC_S3_URL`, since the download URL is embedded at build time.
 
 ## MinIO + Ingest
 
