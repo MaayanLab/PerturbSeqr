@@ -56,6 +56,13 @@ export function parseTerm(term: string): ParsedTerm {
   }
 }
 
+/** Search perturbation names and canonical compound IDs, excluding experimental metadata. */
+export function matchesPerturbation(parsed: ParsedTerm, query: string): boolean {
+  const names = [parsed.perturbation, ...parsed.extras.filter(value => /^(BRD-[AK]\d|NSN:)/i.test(value))]
+  const needle = query.toLowerCase()
+  return names.some(name => name.toLowerCase().includes(needle))
+}
+
 /**
  * Get the display value for cell line. Does NOT fall back to cellType,
  * as cellType often contains long tissue/condition descriptions (e.g. from CREEDS/GEO)

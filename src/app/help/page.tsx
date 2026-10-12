@@ -27,6 +27,7 @@ export default function UserManual() {
               <li><Link href="#metadata-search" className="underline cursor-pointer" shallow>Term Search</Link></li>
               <li><Link href="#download-page" className="underline cursor-pointer" shallow>Download Page</Link></li>
               <li><Link href="#api" className="underline cursor-pointer" shallow>API</Link></li>
+              <li><Link href="#mcp-and-skills" className="underline cursor-pointer" shallow>Using Perturb-Seqr with AI Applications (SKILL.md and MCP)</Link></li>
             </ol>
           </div>
           <h2 className="title text-xl font-medium mb-3" id="getting-started">
@@ -760,6 +761,137 @@ df = ps.term_search("STAT3")`}</code>
               </code>
             </pre>
           </div>
+          <br />
+          <hr className="my-10" />
+          <h2 className="title text-xl font-medium mb-3" id="mcp-and-skills">
+            Using Perturb-Seqr with AI Applications (SKILL.md and MCP)
+          </h2>
+          <p>
+            You can take advantage of Perturb-Seqr&apos;s efficient signature search
+            and harmonized corpus within AI Applications through the{' '}
+            <a className="underline" href="https://github.com/MaayanLab/maayan-lab-tools-skills/blob/main/skills/Perturb-Seqr/SKILL.md" target="_blank" rel="noopener noreferrer">
+              Perturb-Seqr Agent Skill
+            </a>{' '}and Perturb-Seqr MCP Server (<span className="underline select-all">perturbseqr.maayanlab.cloud/mcp</span>,{' '}
+            <a className="underline" href="https://github.com/MaayanLab/PerturbSeqr/blob/main/mcp/README.md" target="_blank" rel="noopener noreferrer">
+              GitHub Link
+            </a>).
+          </p>
+          <h3 className="text-lg font-semibold mb-2 mt-6" id="skills">SKILL.md</h3>
+          <p>
+            The Perturb-Seqr{' '}
+            <a className="underline" href="https://github.com/MaayanLab/maayan-lab-tools-skills/blob/main/skills/Perturb-Seqr/SKILL.md" target="_blank" rel="noopener noreferrer">SKILL.md</a>{' '}
+            file is available on the Ma&apos;ayan Lab&apos;s collection of SKILLs on{' '}
+            <a className="underline" href="https://github.com/MaayanLab/maayan-lab-tools-skills" target="_blank" rel="noopener noreferrer">Github</a>.
+          </p>
+          <p className="mt-4">
+            Skills are human- and LLM-readable files that provide instructions on
+            how to use tools like Perturb-Seqr. These skills are compatible with
+            any AI agent that supports the open Agent Skills standard, including
+            Claude Code, Codex, and more.
+          </p>
+          <p className="mt-4">
+            The Perturb-Seqr SKILL guides agents
+            through single gene set and paired up/down enrichment using the
+            GraphQL API, with Python examples for retrieving overlapping genes
+            and mapping input genes, and with guidance on starting the interpretation
+            of the results.
+          </p>
+          <figure className="my-4">
+            <Image
+              src="/images/claude-skill-menu.png"
+              width={830}
+              height={920}
+              alt="Claude's Skills menu showing perturb-seqr and Manage skills"
+              className="border rounded-lg mx-auto w-full max-w-lg h-auto"
+              sizes="(max-width: 768px) 100vw, 512px"
+              quality={90}
+            />
+            <figcaption className="text-center text-xs italic text-base-content/60 mt-2">
+              Adding the Perturb-Seqr SKILL.md to claude.ai
+            </figcaption>
+          </figure>
+          <figure className="my-4">
+            <Image
+              src="/images/claude-skill-single-gene-set-search.png"
+              width={1314}
+              height={1802}
+              alt="A perturb-seqr skill prompt with an attached gene set and Claude's single gene set search results"
+              className="border rounded-lg mx-auto w-full max-w-3xl h-auto"
+              sizes="(max-width: 768px) 100vw, 768px"
+              quality={90}
+            />
+            <figcaption className="text-center text-xs italic text-base-content/60 mt-2">
+              Performing Single Gene Set Search with Perturb-Seqr&apos;s SKILL.md
+            </figcaption>
+          </figure>
+          <p className="mt-4">
+            For more information on SKILL.md files, see{' '}
+            <a className="underline" href="https://skills.md/docs" target="_blank" rel="noopener noreferrer">SKILL.md Documentation</a>,{' '}
+            <a className="underline" href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview" target="_blank" rel="noopener noreferrer">Claude Agent Skills Documentation</a>, and{' '}
+            <a className="underline" href="https://developers.openai.com/api/docs/guides/tools-skills" target="_blank" rel="noopener noreferrer">OpenAI Tool Skills Documentation</a>.
+          </p>
+          <h3 className="text-lg font-semibold mb-2 mt-6" id="mcp">MCP</h3>
+          <p>
+            The Perturb-Seqr MCP server can be accessed at{' '}
+            <span className="underline select-all">https://perturbseqr.maayanlab.cloud/mcp</span>.
+          </p>
+          <p className="mt-4">
+            Manual MCP setup may be optional if your AI client can use Perturb-Seqr&apos;s{' '}
+            <a className="underline" href="/llms.txt">llms.txt</a>{' '}
+            to discover its skill and configure the MCP server automatically.
+          </p>
+          <figure className="my-4">
+            <Image
+              src="/images/claude-mcp-connector-setup.png"
+              width={1543}
+              height={1091}
+              alt="Claude's Add custom connector menu and the Perturb-Seqr MCP server connection form"
+              className="border rounded-lg mx-auto w-full max-w-3xl h-auto"
+              sizes="(max-width: 768px) 100vw, 768px"
+              quality={90}
+            />
+            <figcaption className="text-center text-xs italic text-base-content/60 mt-2">
+              Adding Perturb-Seqr&apos;s MCP server as a Connector at claude.ai
+            </figcaption>
+          </figure>
+          <p>
+            Perturb-Seqr&apos;s MCP server provides the following tools, which AI
+            applications can discover and call to access Perturb-Seqr programmatically
+            in response to a user&apos;s natural-language prompts:
+          </p>
+          <ul className="list-disc ml-6 my-4 [&_code]:rounded [&_code]:bg-base-200 [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-sm">
+            <li><code>single_gene_set_search</code>: Find significant signatures given an input gene set.</li>
+            <li><code>paired_gene_set_search</code>: Find signatures that mimic or reverse input up- and down-regulated gene sets.</li>
+            <li><code>term_search</code>: Find reference signatures by terms such as a drug, gene, or cell line.</li>
+            <li><code>get_gene_set_genes</code>: Retrieve genes and annotations for a reference signature using its ID.</li>
+            <li><code>get_overlap</code>: Retrieve genes shared by an input gene set and a reference signature.</li>
+            <li><code>list_datasets</code>: List available gene set libraries and their signature counts.</li>
+          </ul>
+          <figure className="my-4">
+            <Image
+              src="/images/claude-mcp-usage.png"
+              width={1238}
+              height={1324}
+              alt="Claude calling the Perturb-Seqr list_datasets MCP tool and displaying libraries from an earlier development snapshot"
+              className="border rounded-lg mx-auto w-full max-w-3xl h-auto"
+              sizes="(max-width: 768px) 100vw, 768px"
+              quality={90}
+            />
+            <figcaption className="text-center text-xs italic text-base-content/60 mt-2">
+              Using Perturb-Seqr&apos;s MCP with claude.ai
+            </figcaption>
+          </figure>
+          <p className="mt-4">
+            Developers can consult the{' '}
+            <a className="underline" href="https://github.com/MaayanLab/PerturbSeqr/tree/main/mcp" target="_blank" rel="noopener noreferrer">Perturb-Seqr MCP GitHub directory</a>{' '}
+            for tool implementations and instructions for running the server locally.
+          </p>
+          <p className="mt-4">
+            For more information on MCP, see{' '}
+            <a className="underline" href="https://platform.claude.com/docs/en/agents-and-tools/mcp-connector" target="_blank" rel="noopener noreferrer">Claude MCP Connector Documentation</a>,{' '}
+            <a className="underline" href="https://developers.openai.com/api/docs/guides/tools-connectors-mcp" target="_blank" rel="noopener noreferrer">OpenAI Connectors and MCP Documentation</a>, and{' '}
+            <a className="underline" href="https://modelcontextprotocol.io/docs/2026-07-28/getting-started/intro" target="_blank" rel="noopener noreferrer">Model Context Protocol Documentation</a>.
+          </p>
           <br />
           <p className="">
             Perturb-Seqr is actively being developed by{" "}
