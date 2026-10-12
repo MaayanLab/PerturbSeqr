@@ -4,7 +4,7 @@ ADD package.json .
 ADD package-lock.json .
 RUN npm i
 ADD . .
-ARG NEXT_PUBLIC_MINIO_URL=https://s3.perturbseqr.maayanlab.cloud/data
+ARG NEXT_PUBLIC_MINIO_URL=https://perturbseqr.s3.amazonaws.com
 ENV NEXT_PUBLIC_MINIO_URL=${NEXT_PUBLIC_MINIO_URL}
 RUN npx next build && rm -f .env
 

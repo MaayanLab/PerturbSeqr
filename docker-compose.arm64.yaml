@@ -5,6 +5,8 @@ services:
       platforms:
         - linux/arm64
   perturbseqr-minio:
+    # The Docker Hub mirror is amd64-only; use the locally cached ARM64 image.
+    image: quay.io/minio/minio
     platform: linux/arm64
   perturbseqr-enrich:
     platform: linux/arm64
