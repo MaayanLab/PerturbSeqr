@@ -16,8 +16,8 @@ const workflows: Record<string, TermSearchWorkflow> = {
   },
   'drug-gene': {
     label: 'Likely targets of a drug',
-    description: 'Find likely drug targets by matching gene expression signatures of drugs and gene knockouts.',
-    source: 'drug', target: 'gene', targetType: 'KO',
+    description: 'Find likely drug targets by matching gene expression signatures of drugs and gene perturbations.',
+    source: 'drug', target: 'gene',
   },
 }
 

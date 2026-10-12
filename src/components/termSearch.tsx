@@ -22,7 +22,6 @@ export type TermSearchWorkflow = {
   source: 'drug' | 'gene'
   target: 'drug' | 'gene'
   sourceType?: string
-  targetType?: string
 }
 const libraries = Object.values(libraryConfig.libraries)
 const libraryNames = {
@@ -78,8 +77,6 @@ function TermSearchResults({ query, libraries, workflow }: { query: string; libr
   const count = pairs?.length ?? result.length
   const enrichmentParams = workflow ? {
     view: 'table', dir: 'up', sort: 'pvalue_mimic', libraries: libraryNames[workflow.target].join(','),
-    // Canonical type boundaries exclude OE, KD, unknown, and mixed-type signatures.
-    ...(workflow.targetType ? { q: `::${workflow.targetType}::` } : {}),
   } : undefined
   return (
     <div className="self-stretch min-w-0 -mx-8 md:-mx-24 flex flex-col gap-2 my-2">
