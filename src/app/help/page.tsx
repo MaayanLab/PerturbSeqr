@@ -835,6 +835,11 @@ df = ps.term_search("STAT3")`}</code>
             The Perturb-Seqr MCP server can be accessed at{' '}
             <span className="underline select-all">https://perturbseqr.maayanlab.cloud/mcp</span>.
           </p>
+          <p className="mt-4">
+            Manual MCP setup may be optional if your AI client can use Perturb-Seqr&apos;s{' '}
+            <a className="underline" href="/llms.txt">llms.txt</a>{' '}
+            to discover its skill and configure the MCP server automatically.
+          </p>
           <figure className="my-4">
             <Image
               src="/images/claude-mcp-connector-setup.png"
