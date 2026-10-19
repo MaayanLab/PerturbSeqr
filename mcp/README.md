@@ -2,6 +2,8 @@
 
 MCP tools wrapping the core Perturb-Seqr GraphQL API.
 
+For instructions on using Perturb-Seqr's MCP server with AI applications, see the [User Manual](https://perturbseqr.maayanlab.cloud/help#mcp).
+
 ## Quick Start
 
 ```bash

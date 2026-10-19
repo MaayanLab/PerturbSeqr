@@ -101,7 +101,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" style={{ minWidth: "580px" }}>
-      <head>{jsonld}</head>
+      <head>
+        {jsonld}
+        <link rel="describedby" href="/llms.txt" type="text/markdown" title="Perturb-Seqr AI discovery" />
+        <link rel="help" href="https://raw.githubusercontent.com/MaayanLab/maayan-lab-tools-skills/main/skills/Perturb-Seqr/SKILL.md" type="text/markdown" title="Perturb-Seqr Agent Skill" />
+      </head>
       <ApolloWrapper>
         <RuntimeConfig>
           <body className="min-h-screen flex flex-col bg-gray-100 dark:bg-gray-900 dark:text-white">

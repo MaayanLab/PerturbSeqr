@@ -549,6 +549,17 @@ query GeneSetGenesById($id: UUID!) {
   }
 }
 
+query GeneSetSymbolsPage($id: UUID!, $first: Int = 1000, $offset: Int = 0) {
+  geneSet(id: $id) {
+    genes(first: $first, offset: $offset) {
+      totalCount
+      nodes {
+        symbol
+      }
+    }
+  }
+}
+
 # GeneSetDetailsById (previously ViewGeneSet2)
 # Lookup: by UUID
 # Input: id (UUID) - the unique identifier of the gene set

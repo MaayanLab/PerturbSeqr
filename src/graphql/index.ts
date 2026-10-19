@@ -1285,6 +1285,15 @@ export type GeneSetGenesByIdQueryVariables = Exact<{
 
 export type GeneSetGenesByIdQuery = { __typename?: 'Query', geneSet?: { __typename?: 'GeneSet', genes: { __typename?: 'GenesConnection', nodes: Array<{ __typename?: 'Gene', symbol: string, ncbiGeneId?: number | null, description?: string | null, summary?: string | null }> } } | null };
 
+export type GeneSetSymbolsPageQueryVariables = Exact<{
+  id: Scalars['UUID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GeneSetSymbolsPageQuery = { __typename?: 'Query', geneSet?: { __typename?: 'GeneSet', genes: { __typename?: 'GenesConnection', totalCount: number, nodes: Array<{ __typename?: 'Gene', symbol: string }> } } | null };
+
 export type GeneSetDetailsByIdQueryVariables = Exact<{
   id: Scalars['UUID']['input'];
 }>;
@@ -2368,6 +2377,48 @@ export function useGeneSetGenesByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookO
 export type GeneSetGenesByIdQueryHookResult = ReturnType<typeof useGeneSetGenesByIdQuery>;
 export type GeneSetGenesByIdLazyQueryHookResult = ReturnType<typeof useGeneSetGenesByIdLazyQuery>;
 export type GeneSetGenesByIdQueryResult = Apollo.QueryResult<GeneSetGenesByIdQuery, GeneSetGenesByIdQueryVariables>;
+export const GeneSetSymbolsPageDocument = gql`
+    query GeneSetSymbolsPage($id: UUID!, $first: Int = 1000, $offset: Int = 0) {
+  geneSet(id: $id) {
+    genes(first: $first, offset: $offset) {
+      totalCount
+      nodes {
+        symbol
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useGeneSetSymbolsPageQuery__
+ *
+ * To run a query within a React component, call `useGeneSetSymbolsPageQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGeneSetSymbolsPageQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGeneSetSymbolsPageQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      offset: // value for 'offset'
+ *   },
+ * });
+ */
+export function useGeneSetSymbolsPageQuery(baseOptions: Apollo.QueryHookOptions<GeneSetSymbolsPageQuery, GeneSetSymbolsPageQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GeneSetSymbolsPageQuery, GeneSetSymbolsPageQueryVariables>(GeneSetSymbolsPageDocument, options);
+      }
+export function useGeneSetSymbolsPageLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GeneSetSymbolsPageQuery, GeneSetSymbolsPageQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GeneSetSymbolsPageQuery, GeneSetSymbolsPageQueryVariables>(GeneSetSymbolsPageDocument, options);
+        }
+export type GeneSetSymbolsPageQueryHookResult = ReturnType<typeof useGeneSetSymbolsPageQuery>;
+export type GeneSetSymbolsPageLazyQueryHookResult = ReturnType<typeof useGeneSetSymbolsPageLazyQuery>;
+export type GeneSetSymbolsPageQueryResult = Apollo.QueryResult<GeneSetSymbolsPageQuery, GeneSetSymbolsPageQueryVariables>;
 export const GeneSetDetailsByIdDocument = gql`
     query GeneSetDetailsById($id: UUID!) {
   geneSet(id: $id) {

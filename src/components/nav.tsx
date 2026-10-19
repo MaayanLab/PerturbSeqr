@@ -20,6 +20,11 @@ export default function Nav() {
           shallow>Term Search</Link></li>
       <li>
         <Link
+          href="/matcher"
+          className={classNames({ 'active': pathname === '/matcher' })}
+          shallow>Matcher</Link></li>
+      <li>
+        <Link
           href="/explore"
           className={classNames({ 'active': pathname === '/explore' })}
           shallow>Visualization</Link></li>
