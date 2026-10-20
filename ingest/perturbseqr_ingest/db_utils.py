@@ -7,6 +7,7 @@ import re
 import json
 import tempfile
 from pathlib import Path
+from urllib.parse import urlsplit
 
 # Optional: only needed by scripts that connect to the database (not build_drug_lookup.py)
 try:
@@ -16,9 +17,11 @@ except ImportError:
     psycopg2 = None
 
 try:
-    from minio import Minio
+    from minio import Minio as S3Client
+    from minio.credentials.providers import EnvAWSProvider
 except ImportError:
-    Minio = None
+    S3Client = None
+    EnvAWSProvider = None
 
 try:
     from dotenv import load_dotenv
@@ -142,9 +145,9 @@ MINIO_FILE_MAPPING = {
 }
 
 
-def get_minio_client() -> "Minio":
+def get_minio_client() -> "S3Client":
     """Create MinIO client from environment variables."""
-    if Minio is None:
+    if S3Client is None:
         raise ImportError("minio package not installed. Install with: uv pip install minio")
 
     endpoint = os.environ.get("MINIO_ENDPOINT", "localhost:9000")
@@ -155,12 +158,35 @@ def get_minio_client() -> "Minio":
     if not secret_key:
         raise ValueError("MINIO_ROOT_PASSWORD environment variable is required")
 
-    return Minio(endpoint, access_key=access_key, secret_key=secret_key, secure=secure)
+    return S3Client(endpoint, access_key=access_key, secret_key=secret_key, secure=secure)
 
 
-def discover_minio_gmt_files(bucket: str = "data") -> list[tuple[str, str]]:
-    """Discover all GMT files in MinIO bucket. Returns [(object_name, library), ...]."""
-    client = get_minio_client()
+def get_s3_bucket() -> str:
+    """Use the configured S3 bucket, or the legacy MinIO bucket."""
+    return os.environ["INGEST_S3_BUCKET"] if os.environ.get("INGEST_S3_ENDPOINT") else "data"
+
+
+def get_s3_client() -> "S3Client":
+    """Create an S3 client without changing unconfigured local/dev MinIO behavior."""
+    endpoint = os.environ.get("INGEST_S3_ENDPOINT")
+    if not endpoint:
+        return get_minio_client()
+    if S3Client is None:
+        raise ImportError("minio package not installed. Install with: uv pip install minio")
+
+    url = urlsplit(endpoint)
+    if url.scheme not in ("http", "https") or not url.netloc or url.path not in ("", "/"):
+        raise ValueError("INGEST_S3_ENDPOINT must be an HTTP(S) service URL without a bucket path")
+    credentials = EnvAWSProvider()
+    credentials.retrieve()
+    region = os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION") or "us-east-1"
+    return S3Client(url.netloc, credentials=credentials, secure=url.scheme == "https", region=region)
+
+
+def discover_s3_gmt_files(bucket: str | None = None) -> list[tuple[str, str]]:
+    """Discover supported GMT objects. Returns [(object_name, library), ...]."""
+    bucket = get_s3_bucket() if bucket is None else bucket
+    client = get_s3_client()
 
     files = []
     for obj in client.list_objects(bucket):
@@ -171,9 +197,10 @@ def discover_minio_gmt_files(bucket: str = "data") -> list[tuple[str, str]]:
     return sorted(files, key=lambda x: x[0])
 
 
-def download_minio_gmt_file(object_name: str, bucket: str = "data") -> Path:
-    """Download a GMT file from MinIO to a temp directory. Returns the local path."""
-    client = get_minio_client()
+def download_s3_gmt_file(object_name: str, bucket: str | None = None) -> Path:
+    """Download a GMT object to a temporary file and return its local path."""
+    bucket = get_s3_bucket() if bucket is None else bucket
+    client = get_s3_client()
 
     # Create temp file with same extension
     suffix = "".join(Path(object_name).suffixes)  # e.g., ".gmt.gz"
@@ -183,3 +210,13 @@ def download_minio_gmt_file(object_name: str, bucket: str = "data") -> Path:
 
     client.fget_object(bucket, object_name, str(temp_path))
     return temp_path
+
+
+def discover_minio_gmt_files(bucket: str | None = None) -> list[tuple[str, str]]:
+    """Compatibility alias for callers using the previous MinIO-specific name."""
+    return discover_s3_gmt_files(bucket)
+
+
+def download_minio_gmt_file(object_name: str, bucket: str | None = None) -> Path:
+    """Compatibility alias for callers using the previous MinIO-specific name."""
+    return download_s3_gmt_file(object_name, bucket)
