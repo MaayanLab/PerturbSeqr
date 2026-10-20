@@ -158,9 +158,53 @@ def get_minio_client() -> "Minio":
     return Minio(endpoint, access_key=access_key, secret_key=secret_key, secure=secure)
 
 
-def discover_minio_gmt_files(bucket: str = "data") -> list[tuple[str, str]]:
-    """Discover all GMT files in MinIO bucket. Returns [(object_name, library), ...]."""
-    client = get_minio_client()
+def _uses_ingest_s3_config() -> bool:
+    return any(os.environ.get(name) for name in (
+        "INGEST_S3_ENDPOINT", "INGEST_S3_BUCKET", "INGEST_S3_SECURE",
+    ))
+
+
+def get_s3_bucket() -> str:
+    """Use an explicit bucket for configured S3 sources, or the legacy MinIO bucket."""
+    if not _uses_ingest_s3_config():
+        return "data"
+    bucket = os.environ.get("INGEST_S3_BUCKET")
+    if not bucket:
+        raise ValueError("INGEST_S3_BUCKET is required when configuring an ingest S3 source")
+    return bucket
+
+
+def get_s3_client() -> "Minio":
+    """Create an S3 client without changing unconfigured local/dev MinIO behavior."""
+    if not _uses_ingest_s3_config():
+        return get_minio_client()
+    if Minio is None:
+        raise ImportError("minio package not installed. Install with: uv pip install minio")
+
+    required = ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY")
+    missing = [name for name in required if not os.environ.get(name)]
+    if missing:
+        raise ValueError(f"Configured ingest S3 source requires: {', '.join(missing)}")
+
+    secure = os.environ.get("INGEST_S3_SECURE", "true").lower()
+    if secure not in ("true", "false"):
+        raise ValueError("INGEST_S3_SECURE must be true or false")
+    region = os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION") or "us-east-1"
+    endpoint = os.environ.get("INGEST_S3_ENDPOINT") or f"s3.{region}.amazonaws.com"
+    return Minio(
+        endpoint,
+        access_key=os.environ["AWS_ACCESS_KEY_ID"],
+        secret_key=os.environ["AWS_SECRET_ACCESS_KEY"],
+        session_token=os.environ.get("AWS_SESSION_TOKEN") or None,
+        secure=secure == "true",
+        region=region,
+    )
+
+
+def discover_s3_gmt_files(bucket: str | None = None) -> list[tuple[str, str]]:
+    """Discover supported GMT objects. Returns [(object_name, library), ...]."""
+    bucket = get_s3_bucket() if bucket is None else bucket
+    client = get_s3_client()
 
     files = []
     for obj in client.list_objects(bucket):
@@ -171,9 +215,10 @@ def discover_minio_gmt_files(bucket: str = "data") -> list[tuple[str, str]]:
     return sorted(files, key=lambda x: x[0])
 
 
-def download_minio_gmt_file(object_name: str, bucket: str = "data") -> Path:
-    """Download a GMT file from MinIO to a temp directory. Returns the local path."""
-    client = get_minio_client()
+def download_s3_gmt_file(object_name: str, bucket: str | None = None) -> Path:
+    """Download a GMT object to a temporary file and return its local path."""
+    bucket = get_s3_bucket() if bucket is None else bucket
+    client = get_s3_client()
 
     # Create temp file with same extension
     suffix = "".join(Path(object_name).suffixes)  # e.g., ".gmt.gz"
@@ -183,3 +228,13 @@ def download_minio_gmt_file(object_name: str, bucket: str = "data") -> Path:
 
     client.fget_object(bucket, object_name, str(temp_path))
     return temp_path
+
+
+def discover_minio_gmt_files(bucket: str | None = None) -> list[tuple[str, str]]:
+    """Compatibility alias for callers using the previous MinIO-specific name."""
+    return discover_s3_gmt_files(bucket)
+
+
+def download_minio_gmt_file(object_name: str, bucket: str | None = None) -> Path:
+    """Compatibility alias for callers using the previous MinIO-specific name."""
+    return download_s3_gmt_file(object_name, bucket)

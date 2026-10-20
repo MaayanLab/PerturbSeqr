@@ -5,11 +5,19 @@ Each GMT file contains unified up/down terms (terms already have " up"/" down" s
 
 Usage:
   uv run db/ingest.py --batch              # Ingest all GMT files from data directories
-  uv run db/ingest.py --batch --minio      # Ingest all GMT files from MinIO
+  uv run db/ingest.py --batch --s3         # Ingest GMT files from configured S3 storage
   uv run db/ingest.py --batch --dry-run    # Preview without ingesting
   uv run db/ingest.py -i FILE -l LIB       # Single file mode
 
-Environment variables for MinIO mode:
+Environment variables for an explicitly configured S3 source:
+  INGEST_S3_BUCKET: bucket containing the GMT files (required)
+  INGEST_S3_ENDPOINT: host[:port] (default: regional AWS S3 endpoint)
+  INGEST_S3_SECURE: Use HTTPS (default: true)
+  AWS_REGION / AWS_DEFAULT_REGION: signing region (default: us-east-1)
+  AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY: credentials (required)
+  AWS_SESSION_TOKEN: optional temporary-credential token
+
+Without INGEST_S3_* settings, retain the existing MinIO configuration:
   MINIO_ENDPOINT: MinIO server endpoint (default: localhost:9000)
   MINIO_ROOT_USER: MinIO access key (default: minio)
   MINIO_ROOT_PASSWORD: MinIO secret key (required)
@@ -27,7 +35,7 @@ import polars as pl
 from tqdm import tqdm
 from .gmt_parser import read_gmt
 from .perturbation_parser import extract_perturbation
-from .db_utils import get_conn, get_cid, get_or_create_library, query, discover_gmt_files, discover_minio_gmt_files, download_minio_gmt_file
+from .db_utils import get_conn, get_cid, get_or_create_library, query, discover_gmt_files, get_s3_bucket, discover_s3_gmt_files, download_s3_gmt_file
 
 # Helper lambdas
 extract_fallback_id = lambda term, lib: term.rsplit(" ", 1)[0].split("::")[5] if lib == "nibr-drug-seq" and len(term.rsplit(" ", 1)[0].split("::")) > 5 else None
@@ -165,27 +173,28 @@ def ingest_gmt(conn, gmt_path: Path, library_name: str):
 def main():
     parser = argparse.ArgumentParser(description='Ingest GMT files into PerturbSeek')
     parser.add_argument('--batch', action='store_true', help='Ingest all GMT files from data directories')
-    parser.add_argument('--minio', action='store_true', help='Use MinIO instead of local files (requires --batch)')
+    parser.add_argument('--s3', '--minio', dest='s3', action='store_true', help='Use S3 storage instead of local files (requires --batch; --minio is a compatibility alias)')
     parser.add_argument('--dry-run', action='store_true', help='Preview what would be ingested')
     parser.add_argument('-i', '--input', type=Path, help='GMT file to ingest')
     parser.add_argument('-l', '--library', type=str, help='Library/dataset name')
     args = parser.parse_args()
 
-    use_minio = args.minio
+    use_s3 = args.s3
 
     if args.batch:
         if args.input or args.library:
             parser.error('--batch cannot be used with -i or -l')
 
-        if use_minio:
-            print("Discovering GMT files from MinIO...")
-            minio_files = discover_minio_gmt_files()
-            if not minio_files:
-                return print("No GMT files found in MinIO bucket 'data'")
-            print(f"Found {len(minio_files)} GMT files in MinIO:\n")
-            for obj_name, lib in minio_files:
+        if use_s3:
+            bucket = get_s3_bucket()
+            print(f"Discovering GMT files from S3 bucket '{bucket}'...")
+            s3_files = discover_s3_gmt_files(bucket)
+            if not s3_files:
+                return print(f"No GMT files found in S3 bucket '{bucket}'")
+            print(f"Found {len(s3_files)} GMT files in S3 bucket '{bucket}':\n")
+            for obj_name, lib in s3_files:
                 print(f"  {obj_name:<50} -> library={lib}")
-            files = minio_files  # [(object_name, library), ...]
+            files = s3_files  # [(object_name, library), ...]
         else:
             files = discover_gmt_files()
             if not files:
@@ -194,8 +203,8 @@ def main():
             for f, lib in files:
                 print(f"  {f.name:<50} -> library={lib}")
     else:
-        if args.minio:
-            parser.error('--minio requires --batch')
+        if use_s3:
+            parser.error('--s3/--minio requires --batch')
         if not all([args.input, args.library]):
             parser.error('-i and -l are required when not using --batch')
         files = [(args.input, args.library)]
@@ -206,10 +215,10 @@ def main():
     conn = get_conn()
     try:
         for i, (file_ref, library) in enumerate(files, 1):
-            if use_minio:
+            if use_s3:
                 object_name = file_ref
-                print(f"\n[{i}/{len(files)}] Downloading {object_name} from MinIO...")
-                filepath = download_minio_gmt_file(object_name)
+                print(f"\n[{i}/{len(files)}] Downloading {object_name} from S3 bucket '{bucket}'...")
+                filepath = download_s3_gmt_file(object_name, bucket)
                 print(f"  Downloaded to {filepath}")
             else:
                 filepath = file_ref
@@ -219,8 +228,8 @@ def main():
             try:
                 ingest_gmt(conn, filepath, library)
             finally:
-                # Clean up temp file if downloaded from MinIO
-                if use_minio:
+                # Clean up temp file if downloaded from S3
+                if use_s3:
                     filepath.unlink(missing_ok=True)
 
         conn.commit()
