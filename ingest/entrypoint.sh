@@ -14,9 +14,9 @@ echo ""
 ulimit -n 65536 2>/dev/null || echo "Note: Could not increase file limit (not critical)"
 echo ""
 
-# Step 1: Ingest data from MinIO to Postgres (GMT files must already be uploaded)
-echo "=== Step 1: Ingesting gene sets from MinIO ==="
-python -m perturbseqr_ingest.ingest --batch --minio
+# Step 1: Ingest data from S3 storage to Postgres (GMT files must already be uploaded)
+echo "=== Step 1: Ingesting gene sets from S3 storage ==="
+python -m perturbseqr_ingest.ingest --batch --s3
 echo ""
 
 # Step 2: Ingest FDA counts

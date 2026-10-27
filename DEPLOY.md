@@ -6,49 +6,71 @@
 cp .env.example .env
 # edit .env:
 #   - POSTGRES_PASSWORD: secure value
-#   - MINIO_ROOT_PASSWORD: secure value
+#   - MINIO_ROOT_PASSWORD: optional secure value for legacy MinIO service
 #   - S3_URL: http://minio:<MINIO_ROOT_PASSWORD>@perturbseqr-minio:9000/data
 #   - PUBLIC_S3_URL: https://perturbseqr.s3.amazonaws.com
+#   - INGEST_S3_ENDPOINT: https://s3.us-east-1.amazonaws.com
+#   - INGEST_S3_BUCKET: perturbseqr
+#   - ENRICH_S3_ENDPOINT: https://s3.us-east-1.amazonaws.com
+#   - ENRICH_S3_BUCKET: perturbseqr
+#   - ENRICH_S3_PREFIX: enrich/production/
+#   - AWS_REGION: us-east-1
+#   - AWS_ACCESS_KEY_ID: supplied privately
+#   - AWS_SECRET_ACCESS_KEY: supplied privately
+#   - AWS_SESSION_TOKEN: only when using temporary AWS credentials
 
 kube-compose up
 ```
 
 Production downloads use the AWS S3 bucket root, with no `/data` suffix. Rebuild the app image when changing `PUBLIC_S3_URL`, since the download URL is embedded at build time.
 
-## MinIO + Ingest
+## Storage and ingest
 
-Create a secret holding env values and then set up the MinIO bucket, upload GMT and files for download, run ingest.
+Production GMTs, metadata parquets, full-signature downloads, and enrichment indexes use the AWS bucket `perturbseqr`, in `us-east-1`. Upload data changes there before running ingest.
 
-```bash
-# Create secret from .env
-kubectl create secret generic perturbseqr-env --from-env-file=.env -n perturbseqr
-
-# Create data bucket and apply public-read policy (denies public access to enrich/*)
-kubectl create -f k8s/minio-setup-job.yaml -n perturbseqr
-```
+### Container configuration
 
 ```bash
-# Add rclone config for both prod (dest) and dev (source) MinIO:
-#[perturbseqr]
-#type = s3
-#provider = Minio
-#access_key_id = minio
-#secret_access_key = prod MINIO_ROOT_PASSWORD from .env
-#endpoint = https://s3.perturbseqr.maayanlab.cloud
-#
-#[perturbseqr-dev]
-#type = s3
-#provider = Minio
-#access_key_id = minio
-#secret_access_key = dev MINIO_ROOT_PASSWORD
-#endpoint = https://s3.perturbseqr.k8s.maayanlab.cloud
-
-# Sync GMTs, metadata parquets, and full-signature files from dev MinIO to prod MinIO.
-# Everything is flat at data/ root. enrich/ is excluded since the ingest rebuilds it.
-rclone copy --progress perturbseqr-dev:data/ perturbseqr:data/ --exclude "enrich/**"
+# Create or update the ingest Job secret from .env
+kubectl create secret generic perturbseqr-env --from-env-file=.env -n perturbseqr --dry-run=client -o yaml | kubectl apply -f -
 ```
 
-`drug_lookup.json` ships inside the app image (served by Next from `public/metadata/`), so it does not need a MinIO upload.
+### Configure rclone for production AWS S3
+
+Add this remote to your local rclone configuration:
+
+```ini
+[perturbseqr]
+type = s3
+provider = AWS
+env_auth = true
+region = us-east-1
+```
+
+Export `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` (plus `AWS_SESSION_TOKEN` for temporary credentials); rclone does not load `.env`.
+
+Files are stored at the bucket root. For example, `cm4ai.gmt.gz` is public at `https://perturbseqr.s3.amazonaws.com/cm4ai.gmt.gz`.
+
+### Upload updates before ingest
+
+```bash
+# GMTs
+rclone copy --progress data/drug_perturbation/ perturbseqr:perturbseqr/
+rclone copy --progress data/gene_perturbation/ perturbseqr:perturbseqr/
+
+# Full-signature downloads
+rclone copy --progress data/full-signatures/ perturbseqr:perturbseqr/
+
+# Metadata parquets; omit other metadata-source inputs
+rclone copy --progress data/metadata/ perturbseqr:perturbseqr/ --include "*_metadata.parquet"
+
+# Inspect uploaded object names
+rclone lsf perturbseqr:perturbseqr/ --max-depth 1
+```
+
+Ingest reads the supported GMT objects from the bucket root.
+
+### Run ingest
 
 ```bash
 # Run ingest
@@ -62,7 +84,7 @@ kubectl logs -f job/<job-name> -n perturbseqr
 kube-compose restart perturbseqr-app
 ```
 
-## Updating
+## Updating the app
 
 ```bash
 kube-compose version perturbseqr-app patch
@@ -72,7 +94,7 @@ kube-compose diff
 kube-compose up
 ```
 
-Or bump tags in `docker-compose.yaml`, rebuild, and run `kube-compose up`.
+Or bump tags in `docker-compose.yaml`, build and push the images, and run `kube-compose up`.
 
 ## Clean re-ingest (preserves user_gene_set)
 
@@ -82,7 +104,7 @@ kubectl create -f k8s/ingest-clean-job.yaml -n perturbseqr
 
 ## Full rebuild
 
-`-v` deletes the postgres and minio PVCs requiring new MinIO uploads and a DB rebuild.
+Deletes the PostgreSQL PVCs.
 
 ```bash
 kube-compose down -v
@@ -90,17 +112,14 @@ kubectl delete secret perturbseqr-env -n perturbseqr
 kube-compose up
 
 kubectl create secret generic perturbseqr-env --from-env-file=.env -n perturbseqr
-kubectl create -f k8s/minio-setup-job.yaml -n perturbseqr
 
-# Re-sync data from dev MinIO (see MinIO + Ingest above)
-rclone copy --progress perturbseqr-dev:data/ perturbseqr:data/ --exclude "enrich/**"
-
-# Fresh ingest
+# Fresh ingest from AWS, once the updated ingest image/environment are configured
 kubectl create -f k8s/ingest-incremental-job.yaml -n perturbseqr
 ```
 
 ## URLs
 
 - App: https://perturbseqr.maayanlab.cloud
-- MinIO Console: https://console.s3.perturbseqr.maayanlab.cloud
+- AWS downloads: https://perturbseqr.s3.amazonaws.com/
+- Legacy MinIO Console (until retired): https://console.s3.perturbseqr.maayanlab.cloud
 - MCP: https://perturbseqr.maayanlab.cloud/mcp

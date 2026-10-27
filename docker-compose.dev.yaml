@@ -48,7 +48,7 @@ services:
 
   perturbseqr-enrich:
     build: enrich
-    image: johnkgardner/perturbseqr-enrich:0.2.51
+    image: johnkgardner/perturbseqr-enrich:0.2.54
     platform: linux/amd64
     restart: unless-stopped
     deploy:
@@ -141,7 +141,7 @@ services:
     build:
       context: .
       dockerfile: ingest/Dockerfile
-    image: johnkgardner/perturbseqr-ingest:0.2.51
+    image: johnkgardner/perturbseqr-ingest:0.2.54
     platform: linux/amd64
     restart: "no"
     x-kubernetes:

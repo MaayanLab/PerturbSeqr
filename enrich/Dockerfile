@@ -5,6 +5,7 @@ ENV RUST_MIN_STACK=16777216
 RUN cargo install --path .
 
 FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /usr/src/enrich/Rocket.toml .
 COPY --from=builder /usr/local/cargo/bin/enrich /usr/local/bin/enrich
 CMD ["enrich"]

@@ -4,7 +4,7 @@ version = "0.0.0"
 description = "PerturbSeqr data ingest runtime: load GMTs and metadata into Postgres."
 requires-python = ">=3.11"
 dependencies = [
-    "minio",
+    "boto3",
     "psycopg2-binary",
     "polars",
     "tqdm",

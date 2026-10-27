@@ -4,7 +4,7 @@
 # This script runs:
 #   1. Database migrations (dbmate)
 #   2. Library wipe (only if INGEST_CLEAN=true; preserves user_gene_set and background)
-#   3. Gene set ingest from MinIO
+#   3. Gene set ingest from S3 storage
 #   4. FDA counts ingest
 #   5. Materialized view refresh
 #   6. Background creation + enrich trigger
@@ -12,7 +12,7 @@
 #
 # Prerequisites:
 #   - PostgreSQL running and healthy
-#   - MinIO running with GMT files uploaded
+#   - S3 storage configured with GMT files uploaded (AWS or dev MinIO)
 #   - Enrich service running (for index rebuild)
 #
 # Usage:
@@ -47,9 +47,9 @@ if [ "${INGEST_CLEAN:-false}" = "true" ]; then
   echo ""
 fi
 
-# Step 3: Ingest data from MinIO to Postgres
-echo "=== Step 3: Ingesting gene sets from MinIO ==="
-python -m perturbseqr_ingest.ingest --batch --minio
+# Step 3: Ingest data from S3 storage to Postgres
+echo "=== Step 3: Ingesting gene sets from S3 storage ==="
+python -m perturbseqr_ingest.ingest --batch --s3
 echo ""
 
 # Step 4: Ingest FDA counts
