@@ -10,24 +10,22 @@ A comprehensive perturbation-signature search engine integrating connectivity ma
 
 ## Local Quick Start
 
-Runs the full stack (postgres, MinIO, enrich, app) via docker compose.
+Runs the stack via Docker Compose, using AWS S3 for ingest, downloads, and enrichment indexes. The dev cluster retains MinIO; see [DEV_DEPLOY.md](DEV_DEPLOY.md).
 
 ```bash
 cp .env.example .env
-# Build all images including the one-off job containers (minio-setup, ingest)
-COMPOSE_PROFILES=jobs docker compose build
+# Edit .env: supply AWS credentials and set ENRICH_S3_PREFIX to a unique
+# enrich/local-<identifier>/ prefix for this database (never enrich/production/).
+docker compose build perturbseqr-enrich ingest
 docker compose up -d
-# Create the MinIO bucket and apply the access policy
-COMPOSE_PROFILES=jobs docker compose run --rm minio-setup
-# Upload .gmt.gz files via the MinIO console at http://localhost:9001
-#   login: minio / password from .env
-# Then ingest the gene sets into Postgres
+# Read GMTs already stored at the root of the AWS perturbseqr bucket
 COMPOSE_PROFILES=jobs docker compose run --rm ingest
 ```
 
 - App: http://localhost:3000
-- MinIO console: http://localhost:9001
 - GraphiQL: http://localhost:3000/graphiql
+
+Compose still starts the legacy MinIO service during cutover, but configured ingest and enrichment use AWS. No MinIO bucket setup is needed for AWS. Local resets do not delete AWS objects; the enrichment service manages the index cache under your local prefix.
 
 ## Frontend Development
 
@@ -35,19 +33,19 @@ Run only the backend services in docker; run the Next.js app with hot reload:
 
 ```bash
 cp .env.example .env
+# Supply AWS credentials and a unique local ENRICH_S3_PREFIX as above
+docker compose build perturbseqr-enrich
 docker compose up -d perturbseqr-postgres perturbseqr-minio perturbseqr-enrich
 npm install && npm run dev
 ```
 
 ## Reset
 
-Wipe local postgres + MinIO volumes and rebuild from scratch:
+Wipe local PostgreSQL and legacy MinIO volumes and rebuild from the existing AWS GMTs. This leaves AWS objects intact:
 
 ```bash
 docker compose down -v
 docker compose up -d
-COMPOSE_PROFILES=jobs docker compose run --rm minio-setup
-# Re-upload GMT files via MinIO console
 COMPOSE_PROFILES=jobs docker compose run --rm ingest
 ```
 

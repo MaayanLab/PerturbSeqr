@@ -17,11 +17,11 @@ except ImportError:
     psycopg2 = None
 
 try:
-    from minio import Minio as S3Client
-    from minio.credentials.providers import EnvAWSProvider
+    import boto3
+    from botocore.config import Config
 except ImportError:
-    S3Client = None
-    EnvAWSProvider = None
+    boto3 = None
+    Config = None
 
 try:
     from dotenv import load_dotenv
@@ -100,11 +100,11 @@ def get_or_create_library(conn, library_name: str) -> str:
 def parse_gmt_filename(filepath: Path) -> str | None:
     """Parse GMT filename to extract library name.
 
-    Checks MINIO_FILE_MAPPING first (handles standardized filenames),
+    Checks GMT_FILE_MAPPING first (handles standardized filenames),
     then falls back to stripping .gmt.gz extension.
     """
-    if filepath.name in MINIO_FILE_MAPPING:
-        return MINIO_FILE_MAPPING[filepath.name]
+    if filepath.name in GMT_FILE_MAPPING:
+        return GMT_FILE_MAPPING[filepath.name]
 
     # Fallback: strip .gmt.gz or .gmt extension
     name = filepath.name
@@ -121,9 +121,8 @@ def discover_gmt_files(dirs: list[Path] = None) -> list[tuple[Path, str]]:
             for f in sorted(d.glob('*.gmt*')) if (parsed := parse_gmt_filename(f))]
 
 
-# MinIO file mapping: MinIO object name -> library_name
-# This maps the standardized MinIO names back to library names used in the database
-MINIO_FILE_MAPPING = {
+# Standardized GMT filename -> library name used in the database.
+GMT_FILE_MAPPING = {
     # Drug Perturbation
     "lincs-l1000-cp.gmt.gz": "lincs-l1000-cp",
     "tahoe-100m.gmt.gz": "tahoe-100m",
@@ -145,10 +144,10 @@ MINIO_FILE_MAPPING = {
 }
 
 
-def get_minio_client() -> "S3Client":
-    """Create MinIO client from environment variables."""
-    if S3Client is None:
-        raise ImportError("minio package not installed. Install with: uv pip install minio")
+def get_minio_client():
+    """Create an S3 client using the legacy MinIO environment variables."""
+    if boto3 is None:
+        raise ImportError("boto3 package not installed. Install with: uv pip install boto3")
 
     endpoint = os.environ.get("MINIO_ENDPOINT", "localhost:9000")
     access_key = os.environ.get("MINIO_ROOT_USER", "minio")
@@ -158,7 +157,14 @@ def get_minio_client() -> "S3Client":
     if not secret_key:
         raise ValueError("MINIO_ROOT_PASSWORD environment variable is required")
 
-    return S3Client(endpoint, access_key=access_key, secret_key=secret_key, secure=secure)
+    return boto3.client(
+        "s3",
+        endpoint_url=f"{'https' if secure else 'http'}://{endpoint}",
+        region_name="us-east-1",
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+        config=Config(s3={"addressing_style": "path"}),
+    )
 
 
 def get_s3_bucket() -> str:
@@ -166,21 +172,19 @@ def get_s3_bucket() -> str:
     return os.environ["INGEST_S3_BUCKET"] if os.environ.get("INGEST_S3_ENDPOINT") else "data"
 
 
-def get_s3_client() -> "S3Client":
+def get_s3_client():
     """Create an S3 client without changing unconfigured local/dev MinIO behavior."""
     endpoint = os.environ.get("INGEST_S3_ENDPOINT")
     if not endpoint:
         return get_minio_client()
-    if S3Client is None:
-        raise ImportError("minio package not installed. Install with: uv pip install minio")
+    if boto3 is None:
+        raise ImportError("boto3 package not installed. Install with: uv pip install boto3")
 
     url = urlsplit(endpoint)
     if url.scheme not in ("http", "https") or not url.netloc or url.path not in ("", "/"):
         raise ValueError("INGEST_S3_ENDPOINT must be an HTTP(S) service URL without a bucket path")
-    credentials = EnvAWSProvider()
-    credentials.retrieve()
     region = os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION") or "us-east-1"
-    return S3Client(url.netloc, credentials=credentials, secure=url.scheme == "https", region=region)
+    return boto3.client("s3", endpoint_url=endpoint, region_name=region)
 
 
 def discover_s3_gmt_files(bucket: str | None = None) -> list[tuple[str, str]]:
@@ -189,10 +193,11 @@ def discover_s3_gmt_files(bucket: str | None = None) -> list[tuple[str, str]]:
     client = get_s3_client()
 
     files = []
-    for obj in client.list_objects(bucket):
-        if obj.object_name in MINIO_FILE_MAPPING:
-            library = MINIO_FILE_MAPPING[obj.object_name]
-            files.append((obj.object_name, library))
+    for page in client.get_paginator("list_objects_v2").paginate(Bucket=bucket, Delimiter="/"):
+        for obj in page.get("Contents", []):
+            if obj["Key"] in GMT_FILE_MAPPING:
+                library = GMT_FILE_MAPPING[obj["Key"]]
+                files.append((obj["Key"], library))
 
     return sorted(files, key=lambda x: x[0])
 
@@ -208,7 +213,7 @@ def download_s3_gmt_file(object_name: str, bucket: str | None = None) -> Path:
     temp_path = Path(temp_file.name)
     temp_file.close()
 
-    client.fget_object(bucket, object_name, str(temp_path))
+    client.download_file(bucket, object_name, str(temp_path))
     return temp_path
 
 

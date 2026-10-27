@@ -51,7 +51,7 @@ services:
 
   perturbseqr-enrich:
     build: enrich
-    image: johnkgardner/perturbseqr-enrich:0.2.51
+    image: johnkgardner/perturbseqr-enrich:0.2.54
     pull_policy: if_not_present
     platform: linux/amd64
     restart: unless-stopped
@@ -65,12 +65,18 @@ services:
       - MINIO_ROOT_USER=minio
       - MINIO_ROOT_PASSWORD
       - MINIO_SECURE=false
+      - ENRICH_S3_ENDPOINT
+      - ENRICH_S3_BUCKET
+      - ENRICH_S3_PREFIX
+      - AWS_REGION
+      - AWS_DEFAULT_REGION
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SESSION_TOKEN
     ports:
       - 8000:8000
     depends_on:
       perturbseqr-postgres:
-        condition: service_healthy
-      perturbseqr-minio:
         condition: service_healthy
 
   perturbseqr-app:
@@ -149,7 +155,7 @@ services:
     build:
       context: .
       dockerfile: ingest/Dockerfile
-    image: johnkgardner/perturbseqr-ingest:0.2.51
+    image: johnkgardner/perturbseqr-ingest:0.2.54
     pull_policy: if_not_present
     platform: linux/amd64
     restart: "no"
@@ -161,12 +167,17 @@ services:
       - MINIO_ROOT_USER=minio
       - MINIO_ROOT_PASSWORD
       - MINIO_SECURE=false
+      - INGEST_S3_ENDPOINT
+      - INGEST_S3_BUCKET
+      - AWS_REGION
+      - AWS_DEFAULT_REGION
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SESSION_TOKEN
       - ENRICH_URL=http://perturbseqr-enrich:8000
       - INGEST_CLEAN
     depends_on:
       perturbseqr-postgres:
-        condition: service_healthy
-      perturbseqr-minio:
         condition: service_healthy
     entrypoint: ["/app/ingest-entrypoint.sh"]
     profiles: [jobs]
