@@ -19,36 +19,6 @@ services:
       timeout: 5s
       retries: 5
 
-  perturbseqr-minio:
-    image: johnkgardner/perturbseqr-minio:RELEASE.2025-09-07T16-13-09Z
-    pull_policy: if_not_present
-    platform: linux/amd64
-    restart: unless-stopped
-    command: server /data --console-address ":9001"
-    environment:
-      - MINIO_ROOT_USER=minio
-      - MINIO_ROOT_PASSWORD
-    ports:
-      - target: 9000
-        published: 9000
-        x-kubernetes:
-          annotations:
-            maayanlab.cloud/ingress: https://s3.perturbseqr.maayanlab.cloud
-            nginx.ingress.kubernetes.io/proxy-body-size: '0'
-      - target: 9001
-        published: 9001
-        x-kubernetes:
-          annotations:
-            maayanlab.cloud/ingress: https://console.s3.perturbseqr.maayanlab.cloud
-            nginx.ingress.kubernetes.io/proxy-body-size: '0'
-    volumes:
-      - minio-data:/data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   perturbseqr-enrich:
     build: enrich
     image: johnkgardner/perturbseqr-enrich:0.2.54
@@ -61,10 +31,6 @@ services:
           memory: 5Gb
     environment:
       - ROCKET_DATABASES={postgres={url="postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres"}}
-      - MINIO_ENDPOINT=perturbseqr-minio:9000
-      - MINIO_ROOT_USER=minio
-      - MINIO_ROOT_PASSWORD
-      - MINIO_SECURE=false
       - ENRICH_S3_ENDPOINT
       - ENRICH_S3_BUCKET
       - ENRICH_S3_PREFIX
@@ -94,7 +60,6 @@ services:
       - NODE_ENV=production
       - ENRICH_URL=http://perturbseqr-enrich:8000
       - NEXT_PUBLIC_MINIO_URL=${PUBLIC_S3_URL:-https://perturbseqr.s3.amazonaws.com}
-      - MINIO_ENDPOINT=perturbseqr-minio:9000
       - NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
     ports:
       - target: 3000
@@ -122,22 +87,6 @@ services:
     depends_on:
       - perturbseqr-app
 
-  minio-setup:
-    build: minio
-    image: johnkgardner/perturbseqr-minio-setup:0.2.45
-    pull_policy: if_not_present
-    platform: linux/amd64
-    restart: "no"
-    x-kubernetes:
-      exclude: true   # k8s uses k8s/minio-setup-job.yaml instead
-    environment:
-      - S3_URL=${S3_URL}
-      - PUBLIC_S3_URL=${PUBLIC_S3_URL}
-    depends_on:
-      perturbseqr-minio:
-        condition: service_healthy
-    profiles: [jobs]
-
   dbmate:
     image: ghcr.io/amacneil/dbmate
     restart: "no"
@@ -163,10 +112,6 @@ services:
       exclude: true   # k8s uses k8s/ingest-{clean,incremental}-job.yaml instead
     environment:
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres?sslmode=disable
-      - MINIO_ENDPOINT=perturbseqr-minio:9000
-      - MINIO_ROOT_USER=minio
-      - MINIO_ROOT_PASSWORD
-      - MINIO_SECURE=false
       - INGEST_S3_ENDPOINT
       - INGEST_S3_BUCKET
       - AWS_REGION
@@ -184,10 +129,6 @@ services:
 
 volumes:
   perturbseqr-data:
-    x-kubernetes:
-      size: 50Gi
-      class: gp2
-  minio-data:
     x-kubernetes:
       size: 50Gi
       class: gp2

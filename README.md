@@ -25,8 +25,6 @@ COMPOSE_PROFILES=jobs docker compose run --rm ingest
 - App: http://localhost:3000
 - GraphiQL: http://localhost:3000/graphiql
 
-Compose still starts the legacy MinIO service during cutover, but configured ingest and enrichment use AWS. No MinIO bucket setup is needed for AWS. Local resets do not delete AWS objects; the enrichment service manages the index cache under your local prefix.
-
 ## Frontend Development
 
 Run only the backend services in docker; run the Next.js app with hot reload:
@@ -35,13 +33,13 @@ Run only the backend services in docker; run the Next.js app with hot reload:
 cp .env.example .env
 # Supply AWS credentials and a unique local ENRICH_S3_PREFIX as above
 docker compose build perturbseqr-enrich
-docker compose up -d perturbseqr-postgres perturbseqr-minio perturbseqr-enrich
+docker compose up -d perturbseqr-postgres perturbseqr-enrich
 npm install && npm run dev
 ```
 
 ## Reset
 
-Wipe local PostgreSQL and legacy MinIO volumes and rebuild from the existing AWS GMTs. This leaves AWS objects intact:
+Wipe local PostgreSQL volumes and rebuild from the existing AWS GMTs. This leaves AWS objects intact:
 
 ```bash
 docker compose down -v

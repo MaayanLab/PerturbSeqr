@@ -6,8 +6,6 @@
 cp .env.example .env
 # edit .env:
 #   - POSTGRES_PASSWORD: secure value
-#   - MINIO_ROOT_PASSWORD: optional secure value for legacy MinIO service
-#   - S3_URL: http://minio:<MINIO_ROOT_PASSWORD>@perturbseqr-minio:9000/data
 #   - PUBLIC_S3_URL: https://perturbseqr.s3.amazonaws.com
 #   - INGEST_S3_ENDPOINT: https://s3.us-east-1.amazonaws.com
 #   - INGEST_S3_BUCKET: perturbseqr
@@ -121,5 +119,4 @@ kubectl create -f k8s/ingest-incremental-job.yaml -n perturbseqr
 
 - App: https://perturbseqr.maayanlab.cloud
 - AWS downloads: https://perturbseqr.s3.amazonaws.com/
-- Legacy MinIO Console (until retired): https://console.s3.perturbseqr.maayanlab.cloud
 - MCP: https://perturbseqr.maayanlab.cloud/mcp
