@@ -35,9 +35,9 @@ services:
       - ENRICH_S3_BUCKET
       - ENRICH_S3_PREFIX
       - AWS_REGION
-      - AWS_DEFAULT_REGION
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
+      # Temporary AWS credentials only. Leave unset otherwise.
       - AWS_SESSION_TOKEN
     ports:
       - 8000:8000
@@ -115,9 +115,9 @@ services:
       - INGEST_S3_ENDPOINT
       - INGEST_S3_BUCKET
       - AWS_REGION
-      - AWS_DEFAULT_REGION
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
+      # Temporary AWS credentials only. Leave unset otherwise.
       - AWS_SESSION_TOKEN
       - ENRICH_URL=http://perturbseqr-enrich:8000
       - INGEST_CLEAN

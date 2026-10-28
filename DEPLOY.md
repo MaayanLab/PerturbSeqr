@@ -12,10 +12,10 @@ cp .env.example .env
 #   - ENRICH_S3_ENDPOINT: https://s3.us-east-1.amazonaws.com
 #   - ENRICH_S3_BUCKET: perturbseqr
 #   - ENRICH_S3_PREFIX: enrich/production/
-#   - AWS_REGION: us-east-1
+#   - AWS_REGION: (default: us-east-1)
 #   - AWS_ACCESS_KEY_ID: supplied privately
 #   - AWS_SECRET_ACCESS_KEY: supplied privately
-#   - AWS_SESSION_TOKEN: only when using temporary AWS credentials
+#   - AWS_SESSION_TOKEN: temporary credentials only. Leave unset otherwise.
 
 kube-compose up
 ```

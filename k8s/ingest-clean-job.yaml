@@ -28,12 +28,11 @@ spec:
           valueFrom: { secretKeyRef: { name: perturbseqr-env, key: INGEST_S3_BUCKET, optional: true } }
         - name: AWS_REGION
           valueFrom: { secretKeyRef: { name: perturbseqr-env, key: AWS_REGION, optional: true } }
-        - name: AWS_DEFAULT_REGION
-          valueFrom: { secretKeyRef: { name: perturbseqr-env, key: AWS_DEFAULT_REGION, optional: true } }
         - name: AWS_ACCESS_KEY_ID
           valueFrom: { secretKeyRef: { name: perturbseqr-env, key: AWS_ACCESS_KEY_ID, optional: true } }
         - name: AWS_SECRET_ACCESS_KEY
           valueFrom: { secretKeyRef: { name: perturbseqr-env, key: AWS_SECRET_ACCESS_KEY, optional: true } }
+        # Temporary AWS credentials only. Leave unset otherwise.
         - name: AWS_SESSION_TOKEN
           valueFrom: { secretKeyRef: { name: perturbseqr-env, key: AWS_SESSION_TOKEN, optional: true } }
         - { name: ENRICH_URL,      value: http://perturbseqr-enrich:8000 }

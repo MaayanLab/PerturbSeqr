@@ -21,8 +21,7 @@ pub fn create_bucket() -> Box<Bucket> {
     assert!(!bucket.is_empty(), "ENRICH_S3_BUCKET must not be empty");
     let region = Region::Custom {
         region: if configured_s3 {
-            env::var("AWS_REGION").or_else(|_| env::var("AWS_DEFAULT_REGION"))
-                .unwrap_or_else(|_| "us-east-1".into())
+            env::var("AWS_REGION").unwrap_or_else(|_| "us-east-1".into())
         } else {
             "us-east-1".into()
         },

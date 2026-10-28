@@ -12,9 +12,9 @@ Usage:
 Environment variables for an explicitly configured S3 source:
   INGEST_S3_ENDPOINT: service URL, e.g. https://s3.us-east-1.amazonaws.com or http://rustfs:9000
   INGEST_S3_BUCKET: bucket containing the GMT files, e.g. perturbseqr or data
-  AWS_REGION / AWS_DEFAULT_REGION: signing region (default: us-east-1)
+  AWS_REGION: (default: us-east-1)
   AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY: S3 credentials for the selected service (required)
-  AWS_SESSION_TOKEN: optional temporary-credential token
+  AWS_SESSION_TOKEN: temporary credentials only. Leave unset otherwise.
 
 Without INGEST_S3_ENDPOINT, retain the existing MinIO configuration:
   MINIO_ENDPOINT: MinIO server endpoint (default: localhost:9000)

@@ -183,7 +183,7 @@ def get_s3_client():
     url = urlsplit(endpoint)
     if url.scheme not in ("http", "https") or not url.netloc or url.path not in ("", "/"):
         raise ValueError("INGEST_S3_ENDPOINT must be an HTTP(S) service URL without a bucket path")
-    region = os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION") or "us-east-1"
+    region = os.environ.get("AWS_REGION") or "us-east-1"
     return boto3.client("s3", endpoint_url=endpoint, region_name=region)
 
 
