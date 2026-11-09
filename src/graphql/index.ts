@@ -279,6 +279,54 @@ export enum FdaCountsOrderBy {
   PrimaryKeyDesc = 'PRIMARY_KEY_DESC'
 }
 
+export type FileDownload = Node & {
+  __typename?: 'FileDownload';
+  count: Scalars['BigInt']['output'];
+  key: Scalars['String']['output'];
+  /** A globally unique identifier. Can be used in various places throughout the system to identify this single value. */
+  nodeId: Scalars['ID']['output'];
+};
+
+/**
+ * A condition to be used against `FileDownload` object types. All fields are
+ * tested for equality and combined with a logical ‘and.’
+ */
+export type FileDownloadCondition = {
+  /** Checks for equality with the object’s `key` field. */
+  key?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** A connection to a list of `FileDownload` values. */
+export type FileDownloadsConnection = {
+  __typename?: 'FileDownloadsConnection';
+  /** A list of edges which contains the `FileDownload` and cursor to aid in pagination. */
+  edges: Array<FileDownloadsEdge>;
+  /** A list of `FileDownload` objects. */
+  nodes: Array<FileDownload>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** The count of *all* `FileDownload` you could get from the connection. */
+  totalCount: Scalars['Int']['output'];
+};
+
+/** A `FileDownload` edge in the connection. */
+export type FileDownloadsEdge = {
+  __typename?: 'FileDownloadsEdge';
+  /** A cursor for use in pagination. */
+  cursor?: Maybe<Scalars['Cursor']['output']>;
+  /** The `FileDownload` at the end of the edge. */
+  node: FileDownload;
+};
+
+/** Methods to use when ordering `FileDownload`. */
+export enum FileDownloadsOrderBy {
+  KeyAsc = 'KEY_ASC',
+  KeyDesc = 'KEY_DESC',
+  Natural = 'NATURAL',
+  PrimaryKeyAsc = 'PRIMARY_KEY_ASC',
+  PrimaryKeyDesc = 'PRIMARY_KEY_DESC'
+}
+
 export type Gene = Node & {
   __typename?: 'Gene';
   description?: Maybe<Scalars['String']['output']>;
@@ -591,16 +639,54 @@ export enum GenesOrderBy {
   SynonymsDesc = 'SYNONYMS_DESC'
 }
 
+/** All input for the `incrementFileDownload` mutation. */
+export type IncrementFileDownloadInput = {
+  /**
+   * An arbitrary string value with no semantic meaning. Will be included in the
+   * payload verbatim. May be used to track mutations by the client.
+   */
+  clientMutationId?: InputMaybe<Scalars['String']['input']>;
+  key?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** The output of our `incrementFileDownload` mutation. */
+export type IncrementFileDownloadPayload = {
+  __typename?: 'IncrementFileDownloadPayload';
+  /**
+   * The exact same `clientMutationId` that was provided in the mutation input,
+   * unchanged and unused. May be used by a client to track mutations.
+   */
+  clientMutationId?: Maybe<Scalars['String']['output']>;
+  fileDownload?: Maybe<FileDownload>;
+  /** An edge for our `FileDownload`. May be used by Relay 1. */
+  fileDownloadEdge?: Maybe<FileDownloadsEdge>;
+  /** Our root query field type. Allows us to run any query from our mutation payload. */
+  query?: Maybe<Query>;
+};
+
+
+/** The output of our `incrementFileDownload` mutation. */
+export type IncrementFileDownloadPayloadFileDownloadEdgeArgs = {
+  orderBy?: InputMaybe<Array<FileDownloadsOrderBy>>;
+};
+
 /** The root mutation type which contains root level fields which mutate data. */
 export type Mutation = {
   __typename?: 'Mutation';
   addUserGeneSet?: Maybe<AddUserGeneSetPayload>;
+  incrementFileDownload?: Maybe<IncrementFileDownloadPayload>;
 };
 
 
 /** The root mutation type which contains root level fields which mutate data. */
 export type MutationAddUserGeneSetArgs = {
   input: AddUserGeneSetInput;
+};
+
+
+/** The root mutation type which contains root level fields which mutate data. */
+export type MutationIncrementFileDownloadArgs = {
+  input: IncrementFileDownloadInput;
 };
 
 /** An object with a globally unique `ID`. */
@@ -692,6 +778,11 @@ export type Query = Node & {
   fdaCountByNodeId?: Maybe<FdaCount>;
   /** Reads and enables pagination through a set of `FdaCount`. */
   fdaCounts?: Maybe<FdaCountsConnection>;
+  fileDownload?: Maybe<FileDownload>;
+  /** Reads a single `FileDownload` using its globally unique `ID`. */
+  fileDownloadByNodeId?: Maybe<FileDownload>;
+  /** Reads and enables pagination through a set of `FileDownload`. */
+  fileDownloads?: Maybe<FileDownloadsConnection>;
   gene?: Maybe<Gene>;
   /** Reads a single `Gene` using its globally unique `ID`. */
   geneByNodeId?: Maybe<Gene>;
@@ -790,6 +881,30 @@ export type QueryFdaCountsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Array<FdaCountsOrderBy>>;
+};
+
+
+/** The root query type which gives access points into the data universe. */
+export type QueryFileDownloadArgs = {
+  key: Scalars['String']['input'];
+};
+
+
+/** The root query type which gives access points into the data universe. */
+export type QueryFileDownloadByNodeIdArgs = {
+  nodeId: Scalars['ID']['input'];
+};
+
+
+/** The root query type which gives access points into the data universe. */
+export type QueryFileDownloadsArgs = {
+  after?: InputMaybe<Scalars['Cursor']['input']>;
+  before?: InputMaybe<Scalars['Cursor']['input']>;
+  condition?: InputMaybe<FileDownloadCondition>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<Array<FileDownloadsOrderBy>>;
 };
 
 
@@ -1106,6 +1221,11 @@ export type StatsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type StatsQuery = { __typename?: 'Query', userGeneSets?: { __typename?: 'UserGeneSetsConnection', totalCount: number } | null, geneSets?: { __typename?: 'GeneSetsConnection', totalCount: number } | null };
 
+export type FileDownloadsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type FileDownloadsQuery = { __typename?: 'Query', fileDownloads?: { __typename?: 'FileDownloadsConnection', nodes: Array<{ __typename?: 'FileDownload', key: string, count: any }> } | null };
+
 export type FetchUserGeneSetQueryVariables = Exact<{
   id: Scalars['UUID']['input'];
 }>;
@@ -1278,6 +1398,13 @@ export type AddUserGeneSetMutationVariables = Exact<{
 
 export type AddUserGeneSetMutation = { __typename?: 'Mutation', addUserGeneSet?: { __typename?: 'AddUserGeneSetPayload', userGeneSet?: { __typename?: 'UserGeneSet', id: any } | null } | null };
 
+export type IncrementFileDownloadMutationVariables = Exact<{
+  key: Scalars['String']['input'];
+}>;
+
+
+export type IncrementFileDownloadMutation = { __typename?: 'Mutation', incrementFileDownload?: { __typename?: 'IncrementFileDownloadPayload', fileDownload?: { __typename?: 'FileDownload', key: string, count: any } | null } | null };
+
 export type GeneSetGenesByIdQueryVariables = Exact<{
   id: Scalars['UUID']['input'];
 }>;
@@ -1374,6 +1501,43 @@ export function useStatsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Stat
 export type StatsQueryHookResult = ReturnType<typeof useStatsQuery>;
 export type StatsLazyQueryHookResult = ReturnType<typeof useStatsLazyQuery>;
 export type StatsQueryResult = Apollo.QueryResult<StatsQuery, StatsQueryVariables>;
+export const FileDownloadsDocument = gql`
+    query FileDownloads {
+  fileDownloads {
+    nodes {
+      key
+      count
+    }
+  }
+}
+    `;
+
+/**
+ * __useFileDownloadsQuery__
+ *
+ * To run a query within a React component, call `useFileDownloadsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFileDownloadsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFileDownloadsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useFileDownloadsQuery(baseOptions?: Apollo.QueryHookOptions<FileDownloadsQuery, FileDownloadsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FileDownloadsQuery, FileDownloadsQueryVariables>(FileDownloadsDocument, options);
+      }
+export function useFileDownloadsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FileDownloadsQuery, FileDownloadsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FileDownloadsQuery, FileDownloadsQueryVariables>(FileDownloadsDocument, options);
+        }
+export type FileDownloadsQueryHookResult = ReturnType<typeof useFileDownloadsQuery>;
+export type FileDownloadsLazyQueryHookResult = ReturnType<typeof useFileDownloadsLazyQuery>;
+export type FileDownloadsQueryResult = Apollo.QueryResult<FileDownloadsQuery, FileDownloadsQueryVariables>;
 export const FetchUserGeneSetDocument = gql`
     query FetchUserGeneSet($id: UUID!) {
   userGeneSet(id: $id) {
@@ -2335,6 +2499,42 @@ export function useAddUserGeneSetMutation(baseOptions?: Apollo.MutationHookOptio
 export type AddUserGeneSetMutationHookResult = ReturnType<typeof useAddUserGeneSetMutation>;
 export type AddUserGeneSetMutationResult = Apollo.MutationResult<AddUserGeneSetMutation>;
 export type AddUserGeneSetMutationOptions = Apollo.BaseMutationOptions<AddUserGeneSetMutation, AddUserGeneSetMutationVariables>;
+export const IncrementFileDownloadDocument = gql`
+    mutation IncrementFileDownload($key: String!) {
+  incrementFileDownload(input: {key: $key}) {
+    fileDownload {
+      key
+      count
+    }
+  }
+}
+    `;
+export type IncrementFileDownloadMutationFn = Apollo.MutationFunction<IncrementFileDownloadMutation, IncrementFileDownloadMutationVariables>;
+
+/**
+ * __useIncrementFileDownloadMutation__
+ *
+ * To run a mutation, you first call `useIncrementFileDownloadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useIncrementFileDownloadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [incrementFileDownloadMutation, { data, loading, error }] = useIncrementFileDownloadMutation({
+ *   variables: {
+ *      key: // value for 'key'
+ *   },
+ * });
+ */
+export function useIncrementFileDownloadMutation(baseOptions?: Apollo.MutationHookOptions<IncrementFileDownloadMutation, IncrementFileDownloadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<IncrementFileDownloadMutation, IncrementFileDownloadMutationVariables>(IncrementFileDownloadDocument, options);
+      }
+export type IncrementFileDownloadMutationHookResult = ReturnType<typeof useIncrementFileDownloadMutation>;
+export type IncrementFileDownloadMutationResult = Apollo.MutationResult<IncrementFileDownloadMutation>;
+export type IncrementFileDownloadMutationOptions = Apollo.BaseMutationOptions<IncrementFileDownloadMutation, IncrementFileDownloadMutationVariables>;
 export const GeneSetGenesByIdDocument = gql`
     query GeneSetGenesById($id: UUID!) {
   geneSet(id: $id) {

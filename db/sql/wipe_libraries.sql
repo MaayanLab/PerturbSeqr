@@ -1,11 +1,11 @@
--- Truncate library GMT data while preserving user_gene_set and background.
+-- Truncate library GMT data while preserving user_gene_set, file_download and background.
 -- Run by ingest-entrypoint.sh between migrations and ingest when INGEST_CLEAN=true.
 
 BEGIN;
 
--- app_public: gene, gene_set_library, gene_set, background, user_gene_set, release, fda_counts
+-- app_public: gene, gene_set_library, gene_set, background, user_gene_set, file_download, release, fda_counts
 -- Truncated (library GMT data): gene, gene_set_library, gene_set, fda_counts, release
--- Preserved: user_gene_set (sets analyzed counter), background.
+-- Preserved: user_gene_set (sets analyzed counter), file_download (download counters), background.
 -- Possibly stale background is preserved because update_background.py will find the old UUID and delete its enrich index from S3.
 TRUNCATE TABLE
   app_public.gene_set,

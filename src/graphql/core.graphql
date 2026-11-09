@@ -7,6 +7,15 @@ query Stats {
   }
 }
 
+query FileDownloads {
+  fileDownloads {
+    nodes {
+      key
+      count
+    }
+  }
+}
+
 query FetchUserGeneSet($id: UUID!) {
   userGeneSet(id: $id) {
     genes
@@ -527,6 +536,15 @@ mutation AddUserGeneSet($genes: [String], $description: String = "") {
   addUserGeneSet(input: {genes: $genes, description: $description}) {
     userGeneSet {
       id
+    }
+  }
+}
+
+mutation IncrementFileDownload($key: String!) {
+  incrementFileDownload(input: {key: $key}) {
+    fileDownload {
+      key
+      count
     }
   }
 }

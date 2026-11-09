@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { useAllLibrariesQuery } from '@/graphql'
+import { useAllLibrariesQuery, useFileDownloadsQuery, useIncrementFileDownloadMutation } from '@/graphql'
 
 // MinIO base URL for GMT downloads
 const MINIO_BASE = process.env.NEXT_PUBLIC_MINIO_URL
@@ -755,6 +755,34 @@ const metadataDatasets: Dataset[] = [
 
 // --- Components ---
 
+// Download counts keyed by S3 object key, plus a callback to record a click.
+const DownloadCountContext = React.createContext<{
+  counts: Record<string, number>
+  record: (key: string) => void
+}>({ counts: {}, record: () => {} })
+
+// S3 object key for files hosted in our bucket; external URLs aren't counted.
+function downloadKey(url: string): string | undefined {
+  return url.startsWith(`${MINIO_BASE}/`) ? url.slice(MINIO_BASE!.length + 1) : undefined
+}
+
+function formatDownloads(n: number): string {
+  return `${Intl.NumberFormat("en-US", {}).format(n)} download${n === 1 ? '' : 's'}`
+}
+
+function DownloadLink({ url, label, size }: { url: string, label: string, size?: string }) {
+  const { counts, record } = React.useContext(DownloadCountContext)
+  const key = downloadKey(url)
+  const count = key ? counts[key] : undefined
+  const details = [size && `${size} compressed`, count && formatDownloads(count)].filter(Boolean).join(' · ')
+  return (
+    <>
+      <a href={url} download className="link link-neutral" onClick={() => key && record(key)}>{label}</a>
+      {details && <span className="text-gray-400">{` (${details})`}</span>}
+    </>
+  )
+}
+
 function DatasetCard({ dataset, showDownloads = true, liveCount, gmtSize }: { dataset: Dataset, showDownloads?: boolean, liveCount?: number, gmtSize?: string }) {
   const structure = dataset.termKey ? termStructures[dataset.termKey] : null
   const hasSource = Boolean(dataset.sourceUrl || dataset.sourceUrl2 || dataset.sourceLinks?.length)
@@ -800,18 +828,17 @@ function DatasetCard({ dataset, showDownloads = true, liveCount, gmtSize }: { da
           <>
             <br />
             {dataset.gmtUrl ? (
-              <a href={dataset.gmtUrl} download className="link link-neutral">Gene Matrix Transposed</a>
+              <DownloadLink url={dataset.gmtUrl} label="Gene Matrix Transposed" size={gmtSize} />
             ) : (
               <span className="text-gray-400">Gene Matrix Transposed</span>
             )}
-            {gmtSize && <span className="text-gray-400">{` (${gmtSize} compressed)`}</span>}
             <br />
             {dataset.fullSignatures ? (
               <>
                 {'Full Signatures: '}
                 {dataset.fullSignatures.map((sig, i) => (
                   <span key={sig.label}>
-                    <a href={sig.url} download className="link link-neutral">{sig.label}</a>
+                    <DownloadLink url={sig.url} label={sig.label} />
                     {i < dataset.fullSignatures!.length - 1 && ', '}
                   </span>
                 ))}
@@ -827,7 +854,7 @@ function DatasetCard({ dataset, showDownloads = true, liveCount, gmtSize }: { da
                 {'Metadata: '}
                 {dataset.metadata.map((m, i) => (
                   <span key={m.label}>
-                    <a href={m.url} download className="link link-neutral">{m.label}</a>
+                    <DownloadLink url={m.url} label={m.label} />
                     {i < dataset.metadata!.length - 1 && ', '}
                   </span>
                 ))}
@@ -863,7 +890,27 @@ export default function DownloadClientPage({ gmtSizes }: { gmtSizes: Record<stri
     data?.geneSetLibraries?.nodes.map(n => [n.name, n.geneSetsByLibraryId.totalCount]) ?? []
   )
 
+  // Polled like the "sets analyzed" Stats counter; clicks merge in the returned count immediately.
+  const { data: downloadData } = useFileDownloadsQuery({ pollInterval: 60000 })
+  const [incrementFileDownload] = useIncrementFileDownloadMutation()
+  const [clicked, setClicked] = React.useState<Record<string, number>>({})
+  const downloadCounts: Record<string, number> = {}
+  for (const n of downloadData?.fileDownloads?.nodes ?? []) downloadCounts[n.key] = Number(n.count)
+  for (const [key, n] of Object.entries(clicked)) downloadCounts[key] = Math.max(downloadCounts[key] ?? 0, n)
+  const downloadContext = {
+    counts: downloadCounts,
+    record: (key: string) => {
+      incrementFileDownload({ variables: { key } })
+        .then(({ data }) => {
+          const updated = data?.incrementFileDownload?.fileDownload
+          if (updated) setClicked(prev => ({ ...prev, [updated.key]: Number(updated.count) }))
+        })
+        .catch(() => {})
+    },
+  }
+
   return (
+    <DownloadCountContext.Provider value={downloadContext}>
     <div className="prose max-w-none">
       <p className="text-sm font-bold mb-4">
         GMT downloads contain both up- and down-regulated gene sets in a single compressed .gmt.gz file
@@ -894,5 +941,6 @@ export default function DownloadClientPage({ gmtSizes }: { gmtSizes: Record<stri
         Developed in <a className='link link-neutral' href="https://labs.icahn.mssm.edu/maayanlab/">the Ma&apos;ayan Lab</a>
       </p>
     </div>
+    </DownloadCountContext.Provider>
   )
 }
