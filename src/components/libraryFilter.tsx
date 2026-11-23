@@ -24,10 +24,9 @@ export default function LibraryFilter({
   compact?: boolean
   category?: 'drug' | 'gene'
 }) {
-  const { drugNames, geneNames, libraries } = useLibraryCatalog()
+  const { drugNames, geneNames, libraries, filterLabels } = useLibraryCatalog()
   const drugLibraries = category === 'gene' ? [] : drugNames
   const geneLibraries = category === 'drug' ? [] : geneNames
-  const labels = new Map(libraries.map(library => [library.name, library.manifest.presentation?.filterLabel ?? library.name]))
 
   const { data: libraryData } = useAllLibrariesQuery()
   const signatureCounts = React.useMemo(() => {
@@ -84,7 +83,7 @@ export default function LibraryFilter({
    */
   const renderLibraryCheckbox = (libraryName: string) => {
     const count = signatureCounts[libraryName]
-    const label = labels.get(libraryName) ?? libraryName
+    const label = filterLabels.get(libraryName) ?? libraryName
     return (
       <label key={libraryName} className="flex min-w-0 items-center gap-2 cursor-pointer" title={label}>
         <input

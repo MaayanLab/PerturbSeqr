@@ -58,7 +58,7 @@ export default function DatasetIcons({
             <Image src={logoInfo.src} alt={name} width={size} height={size} className={`object-contain max-w-full max-h-full ${configured?.logo?.invertInDarkMode === false ? '' : 'dark:invert'}`} unoptimized />
           )}
         </div>
-        <span className="mt-1 block max-w-full truncate text-center text-xs leading-tight">{label}</span>
+        <span className="mt-1 block max-w-full truncate text-center text-xs normal-case leading-tight">{label}</span>
       </button>
     )
   }

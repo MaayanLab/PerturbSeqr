@@ -1,0 +1,48 @@
+{
+  "sourceArchive": {
+    "filename": "drive-download-20261123T193207Z-1-002.zip",
+    "sha256": "f1e48e17af824ba3438bfa04ff9f26d3f20c3e5a9dd4922fecc9d90e1bb2537f"
+  },
+  "files": {
+    "ginkgo-reframe-short-drugs.gmt": { "bytes": 12442573, "sha256": "1ee457c3c933a8c6f3495bdf2fd26510632f5a7f7c9a69706ab9bfe7f6b90f7c" },
+    "calculate_dge.py": { "bytes": 8380, "sha256": "a222c2889ac3216103da2a6822f68aed729574b53efcb11142890fe4bbe9c014" },
+    "case_controls.pkl": { "bytes": 1764635, "sha256": "faf237c6aa6ff3684cbeadcbc932a5527ca672b1bfd306cba3a45169344159a8" },
+    "compound_meta.csv": { "bytes": 1506438, "sha256": "b5f8155ab2acb23749930800aa5b380bc1b3f5c06f60c5893d0c2a724c817e55" },
+    "create_gmt.ipynb": { "bytes": 249606, "sha256": "c617b775392a3d647f914b05d3972a6a65f2bce9af5c24225101c378706d74af" },
+    "reFRAME.ipynb": { "bytes": 10617, "sha256": "c4620e2d70d20c6270f5ccbf85ac01ce0e9bfe6a22a62c7a35e475c42b49fd0f" },
+    "compound_label_map.csv": { "bytes": 1427181, "sha256": "c2ede07c0c6a9447111167e0099a23d4f47fe83bf2d8827e2b9ba71f01981bba" },
+    "signature_provenance.csv": { "bytes": 1768984, "sha256": "7a358b72a52c4e7765b3b6cceb938a2d6a24a13e7046e8fb03ecfb045e029ce6" }
+  },
+  "contrasts": {
+    "conditions": 12377,
+    "cellLines": { "THP-1": 12377 },
+    "timepoints": { "24h": 12377 },
+    "concentrations": { "10000.0": 12377 },
+    "caseSizes": { "2": 11581, "4": 746, "6": 38, "8": 11, "10": 1 },
+    "controlSizes": { "16": 11626, "32": 707, "48": 36, "64": 7, "80": 1 },
+    "caseControlOverlaps": 0
+  },
+  "compoundMetadata": { "rows": 12448, "uniqueCids": 12378, "mappedLabels": 11642, "ambiguousSurvivingLabels": {} },
+  "fullSignaturesArchive": {
+    "filename": "deseq2.h5ad-001.zip",
+    "bytes": 2394608903,
+    "sha256": "0b3be1a88484ae16ab5cfbeefe583ff0ea81da24f043f13cb01860914b0e9b8c"
+  },
+  "fullSignatures": {
+    "archiveMember": "deseq2.h5ad",
+    "bytes": 5693310288,
+    "sha256": "4c9d51eed3e60ea8132224dcf2460df675a29dd32194c50b9d7cb039c2ea7636",
+    "shape": [12377, 19161],
+    "dtype": "float64",
+    "X": "DESeq2 adjusted p-value (padj)",
+    "layers": { "logFC": "log2FoldChange", "pValue": "unadjusted pvalue" },
+    "gmtMatches": true,
+    "regeneratedGeneSets": 22800,
+    "emptyDirectionalResults": 1942,
+    "overwrittenNameDirectionKeys": 12,
+    "allNanConditions": 0,
+    "missingTerms": [],
+    "extraTerms": [],
+    "membershipConflictCount": 0
+  }
+}

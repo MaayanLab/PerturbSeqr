@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1, "slug": "ginkgo-reframe", "displayName": "Ginkgo reFRAME", "category": "drug", "resource": { "key": "ginkgo" }, "version": "deseq2-v1",
+  "description": "DESeq2 drug perturbation signatures in human THP-1 cells (24 h, 10 µM).",
+  "license": { "id": "CC-BY-4.0", "url": "https://creativecommons.org/licenses/by/4.0/", "attribution": "Ginkgo Datapoints / Virtual Cell Pharmacology Initiative; ReFRAME collection from Calibr-Skaggs at Scripps Research." },
+  "input": {
+    "gmt": "s3://perturbseqr/ginkgo-reframe.gmt.gz",
+    "sha256": "ed239d4bb0d543febba7a0ead558a63f63c35b982e724794cb63ef0011e774a7",
+    "organism": "human",
+    "geneIdentifiers": "symbol",
+    "compoundLabels": "names-and-pubchem-cids",
+    "compoundAnnotations": {
+      "s3": "s3://perturbseqr/ginkgo-reframe-drug_metadata.parquet",
+      "sha256": "c7996c8e55710adf12252c6ddf9083907008ee2c1f57d6c070443f49239e30d0"
+    }
+  },
+  "sources": [
+    { "label": "Ginkgo reFRAME release", "url": "https://datapoints.ginkgo.bio/updates/vcpi-releases-drug-seq-profiles-for-the-reframe-library" },
+    { "label": "Original expression counts (registered access)", "url": "https://thevirtualcell.com/" }
+  ],
+  "presentation": { "logo": { "src": "/images/ginkgo-logo.png" } },
+  "distribution": { "gmt": "public", "metadata": "public" },
+  "artifacts": [
+    { "kind": "gmt", "s3": "s3://perturbseqr/ginkgo-reframe.gmt.gz", "format": "gmt.gz", "bytes": 5369062 },
+    { "kind": "full_signatures", "label": "DESeq2 full statistics (AnnData, zipped)", "s3": "s3://perturbseqr/ginkgo-reframe-deseq2.h5ad.zip", "bytes": 2394608903 },
+    { "kind": "cell_line_metadata", "label": "Cell Line", "s3": "s3://perturbseqr/ginkgo-reframe-cell_line_metadata.parquet", "bytes": 1779 },
+    { "kind": "drug_metadata", "label": "Drug", "s3": "s3://perturbseqr/ginkgo-reframe-drug_metadata.parquet", "bytes": 1210152 },
+    { "kind": "signature_metadata", "label": "Signatures", "s3": "s3://perturbseqr/ginkgo-reframe-signature_metadata.parquet", "bytes": 965865 }
+  ]
+}

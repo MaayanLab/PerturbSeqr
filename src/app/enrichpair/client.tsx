@@ -85,7 +85,7 @@ function EnrichmentResults({
   datasetDown: string;
   libraryNames: string[] | null;
 }) {
-  const { names: allLibraryDisplayNames, drugNames: drugLibraryNames, geneNames: geneLibraryNames } = useLibraryCatalog()
+  const { names: allLibraryDisplayNames, drugNames: drugLibraryNames, geneNames: geneLibraryNames, filterLabels } = useLibraryCatalog()
 
   
   const genesUp = React.useMemo(
@@ -332,10 +332,10 @@ function EnrichmentResults({
                 >None</button>
               </div>
               {allLibraryDisplayNames.map((lib) => (
-                <label key={lib} className="flex items-center gap-1 cursor-pointer py-0.5 text-xs">
+                <label key={lib} className="flex min-w-0 items-center gap-1 cursor-pointer py-0.5 text-xs" title={filterLabels.get(lib) ?? lib}>
                   <input
                     type="checkbox"
-                    className="checkbox checkbox-xs"
+                    className="checkbox checkbox-xs shrink-0"
                     checked={datasetFilter.length === 0 ? true : datasetFilter.includes(lib)}
                     onChange={(e) => {
                       let next: string[];
@@ -355,7 +355,7 @@ function EnrichmentResults({
                       }
                     }}
                   />
-                  {lib}
+                  <span className="truncate">{filterLabels.get(lib) ?? lib}</span>
                 </label>
               ))}
             </div>

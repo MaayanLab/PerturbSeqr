@@ -12,8 +12,11 @@ export default function useLibraryCatalog() {
     return catalog
   }, { fallbackData: emptyCatalog, refreshInterval: 60000 })
   const libraries = data?.libraries ?? emptyCatalog.libraries
+  const filterLabels = React.useMemo(() => new Map(libraries.map(library => [
+    library.name, library.manifest.presentation?.filterLabel ?? library.name,
+  ])), [libraries])
   return {
-    catalog: data, libraries, error,
+    catalog: data, libraries, filterLabels, error,
     names: libraries.map(l => l.name),
     drugNames: libraries.filter(l => l.category === 'drug').map(l => l.name),
     geneNames: libraries.filter(l => l.category === 'gene').map(l => l.name),
