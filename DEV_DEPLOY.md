@@ -1,5 +1,22 @@
 # Dev Server Deployment
 
+## Manifest catalog rollout
+
+The dev app uses the flat public library assets in `s3://perturbseqr/`. Enrichment
+continues to store index backups in the existing MinIO container and volume.
+
+For the first upgrade, build the **App** (environment `dev`), **Enrich**, and
+**Ingest** images using the individual GitHub Actions workflows on the same commit.
+Use the same release-candidate tag for all three (this rollout uses `0.2.55-rc.1`);
+the app workflow appends `-dev`. The setup job uses `perturbseqr-ingest:0.2.55-rc.1`.
+
+1. Back up the dev database and run the [Kubernetes setup job](libraries/README.md#kubernetes)
+   in `johnkgardner` with `LIBRARY_RELEASE` empty to migrate and register the existing catalog.
+2. Review `kube-compose -f docker-compose.dev.yaml diff`, then apply the app and enrichment
+   upgrade. Verify the existing catalog and a search at <https://perturbseqr.k8s.maayanlab.cloud/>.
+3. Run the same setup job with `LIBRARY_RELEASE=ginkgo-reframe`. Verify that reFRAME
+   appears in search and on Downloads after publication.
+
 > Select the cluster with `sshkube use -s ssh.k8s.maayanlab.cloud` (sshkube >= 0.4 manages multiple clusters).
 
 kube-compose and kubectl require an active sshkube session. Run `eval "$(sshkube init -s ssh.k8s.maayanlab.cloud)"` before the other commands.

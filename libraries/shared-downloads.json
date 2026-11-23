@@ -1,0 +1,13 @@
+[
+  { "title": "PerturbSeqr Drug Metadata", "description": "Collated drug annotations (PubChem CID, MoA, target, FDA)", "artifact": { "kind": "drug_metadata", "label": "Download", "s3": "s3://perturbseqr/perturbseqr-drug_metadata.parquet", "bytes": 1036648 } },
+  { "title": "PerturbSeqr Cell Line Metadata", "description": "Collated cell-line annotations (Cellosaurus, DepMap, Organ)", "artifact": { "kind": "cell_line_metadata", "label": "Download", "s3": "s3://perturbseqr/perturbseqr-cell_line_metadata.parquet", "bytes": 72559 } },
+  { "title": "PerturbSeqr Gene Target Metadata", "description": "Collated gene target annotations", "artifact": { "kind": "gene_target_metadata", "label": "Download", "s3": "s3://perturbseqr/perturbseqr-gene_target_metadata.parquet", "bytes": 1603431 } },
+  { "title": "Drug Repurposing Hub", "description": "Broad Institute drug annotations", "artifact": { "kind": "drug_metadata", "label": "Link", "url": "https://repo-hub.broadinstitute.org/repurposing#download-data" } },
+  { "title": "LINCS Metadata", "description": "L1000 experiment annotations", "artifact": { "kind": "signature_metadata", "label": "Link", "url": "https://maayanlab.cloud/sigcom-lincs/#/Download" } },
+  { "title": "Tahoe 100M Metadata", "description": "Tahoe drug annotations", "artifact": { "kind": "drug_metadata", "label": "Link", "url": "https://huggingface.co/datasets/tahoebio/Tahoe-100M#drug-metadata" } },
+  { "title": "Novartis DRUG-seq Metadata", "description": "DRUG-seq drug annotations", "artifact": { "kind": "drug_metadata", "label": "Link", "url": "https://drugseqr.maayanlab.cloud/download" } },
+  { "title": "RummaGEO Metadata", "description": "RummaGEO experiment annotations", "artifact": { "kind": "signature_metadata", "label": "Link", "url": "https://rummageo.com" } },
+  { "title": "PerturbAtlas Metadata", "description": "PerturbAtlas study and sample annotations", "artifact": { "kind": "sample_metadata", "label": "Link", "url": "https://drive.google.com/drive/folders/1KPKn_4zCsNRhEmBiQjuSY67vR5kautiA" } },
+  { "title": "CREEDS Gene Metadata", "description": "CREEDS gene perturbation annotations", "artifact": { "kind": "signature_metadata", "label": "Link", "url": "https://maayanlab.cloud/CREEDS/download/single_gene_perturbations-v1.0.json" } },
+  { "title": "CREEDS Chem Metadata", "description": "CREEDS chemical perturbation annotations", "artifact": { "kind": "drug_metadata", "label": "Link", "url": "https://maayanlab.cloud/CREEDS/download/single_drug_perturbations-v1.0.json" } }
+]

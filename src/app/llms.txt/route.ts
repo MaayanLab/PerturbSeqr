@@ -1,3 +1,5 @@
+import { citation } from '@/constants/citation'
+
 export const dynamic = 'force-dynamic'
 
 export function GET() {
@@ -43,8 +45,17 @@ Reload or restart the client if newly configured tools do not appear. If MCP is 
 ## Optional
 
 - [About Perturb-Seqr](${site}/about): Resource description, datasets, authors, and citation.
-- [Perturb-Seqr preprint](https://www.biorxiv.org/content/10.64898/2026.10.06.757137v1): Comprehensive Signature Search Engine Integrating Connectivity Maps from Multiple Sources.
 - [Source code](https://github.com/MaayanLab/PerturbSeqr): Application, database, ingest pipeline, enrichment backend, and MCP implementation.
+
+## Citation
+
+[${citation.title}](${citation.url})
+
+${citation.authors.map(author => `${author}¹`).join(', ')}
+
+¹${citation.affiliation}
+
+${citation.venue}. doi:${citation.doi}
 `
   return new Response(body, {
     headers: {

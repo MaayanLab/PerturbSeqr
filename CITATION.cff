@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use Perturb-Seqr, please cite the preprint below."
+title: "Perturb-Seqr: Comprehensive Signature Search Engine Integrating Connectivity Maps from Multiple Sources"
+authors: &authors
+  - given-names: Lily D.
+    family-names: Taub
+    affiliation: &affiliation Department of Pharmacological Sciences, Mount Sinai Center for Bioinformatics, Icahn School of Medicine at Mount Sinai, New York, New York; CFDE Data Resource Center
+  - given-names: John K.
+    family-names: Gardner
+    affiliation: *affiliation
+  - given-names: Ido
+    family-names: Diamant
+    affiliation: *affiliation
+  - given-names: Daniel J. B.
+    family-names: Clarke
+    affiliation: *affiliation
+  - given-names: Avi
+    family-names: Ma'ayan
+    affiliation: *affiliation
+repository-code: https://github.com/MaayanLab/PerturbSeqr
+url: https://perturbseqr.maayanlab.cloud/
+preferred-citation:
+  type: article
+  title: "Perturb-Seqr: Comprehensive Signature Search Engine Integrating Connectivity Maps from Multiple Sources"
+  authors: *authors
+  journal: bioRxiv
+  year: 2026
+  doi: 10.64898/2026.10.06.757137

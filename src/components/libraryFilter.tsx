@@ -1,11 +1,8 @@
 'use client'
 import React from 'react'
-import libraryConfig from '@/config/libraries.json'
+import useLibraryCatalog from '@/utils/useLibraryCatalog'
 import { useAllLibrariesQuery } from '@/graphql'
 
-const libraries = Object.values(libraryConfig.libraries) as { displayName: string; category: string }[]
-const DRUG_PERTURBATION_LIBRARIES = libraries.filter(l => l.category === 'drug').map(l => l.displayName).sort()
-const GENE_PERTURBATION_LIBRARIES = libraries.filter(l => l.category === 'gene').map(l => l.displayName).sort()
 
 /**
  * LibraryFilter component - Displays toggles to filter search by dataset/library
@@ -27,8 +24,10 @@ export default function LibraryFilter({
   compact?: boolean
   category?: 'drug' | 'gene'
 }) {
-  const drugLibraries = category === 'gene' ? [] : DRUG_PERTURBATION_LIBRARIES
-  const geneLibraries = category === 'drug' ? [] : GENE_PERTURBATION_LIBRARIES
+  const { drugNames, geneNames, libraries } = useLibraryCatalog()
+  const drugLibraries = category === 'gene' ? [] : drugNames
+  const geneLibraries = category === 'drug' ? [] : geneNames
+  const labels = new Map(libraries.map(library => [library.name, library.manifest.presentation?.filterLabel ?? library.name]))
 
   const { data: libraryData } = useAllLibrariesQuery()
   const signatureCounts = React.useMemo(() => {
@@ -36,8 +35,14 @@ export default function LibraryFilter({
     libraryData?.geneSetLibraries?.nodes.forEach(node => {
       counts[node.name] = node.geneSetsByLibraryId.totalCount
     })
+    libraries.forEach(library => {
+      // Legacy revisions can gain signatures after the migration snapshot.
+      if (library.counts.geneSets != null && (!library.manifest.legacy || counts[library.name] == null)) {
+        counts[library.name] = library.counts.geneSets
+      }
+    })
     return counts
-  }, [libraryData])
+  }, [libraryData, libraries])
 
   /**
    * Handle toggle change for a single library
@@ -78,18 +83,19 @@ export default function LibraryFilter({
    * Render a library checkbox
    */
   const renderLibraryCheckbox = (libraryName: string) => {
-    const count = libraryData ? (signatureCounts[libraryName] ?? 0) : undefined
+    const count = signatureCounts[libraryName]
+    const label = labels.get(libraryName) ?? libraryName
     return (
-      <label key={libraryName} className="flex items-center gap-2 cursor-pointer">
+      <label key={libraryName} className="flex min-w-0 items-center gap-2 cursor-pointer" title={label}>
         <input
           type="checkbox"
-          className="checkbox checkbox-sm"
+          className="checkbox checkbox-sm shrink-0"
           checked={selectedLibraries.includes(libraryName)}
           onChange={() => handleToggle(libraryName)}
         />
-        <span className="text-sm">
-          {libraryName}
-          {count != null && <span className="text-xs text-base-content/50 ml-1">({count.toLocaleString()} signatures)</span>}
+        <span className="flex min-w-0 items-baseline text-sm">
+          <span className="truncate">{label}</span>
+          {count != null && <span className="ml-1 shrink-0 whitespace-nowrap text-xs text-base-content/50">({count.toLocaleString()} signatures)</span>}
         </span>
       </label>
     )

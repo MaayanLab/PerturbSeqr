@@ -4,7 +4,12 @@ Perturb-Seqr's web-based tools and services are free for academic, non-profit us
 Citation
 Within any publication that uses any methods or results inspired by Perturb-Seqr, please cite:
 
-John K. Gardner, Lily D. Taub, Daniel J. B. Clarke, Ido Diamant, Avi Ma'ayan. Perturb-Seqr: Comprehensive Signature Search Engine Integrating Connectivity Maps from Multiple Sources. https://perturbseqr.maayanlab.cloud/
+Perturb-Seqr: Comprehensive Signature Search Engine Integrating Connectivity Maps from Multiple Sources
+Lily D. Taub¹, John K. Gardner¹, Ido Diamant¹, Daniel J. B. Clarke¹, Avi Ma'ayan¹
+
+¹Department of Pharmacological Sciences, Mount Sinai Center for Bioinformatics, Icahn School of Medicine at Mount Sinai, New York, New York; CFDE Data Resource Center
+
+bioRxiv (2026). https://doi.org/10.64898/2026.10.06.757137
 
 Disclaimer
 PERTURB-SEQR IS NOT TO BE USED FOR TREATING OR DIAGNOSING HUMAN SUBJECTS.

@@ -5,10 +5,8 @@ import parseGenes from '@/utils/parseGenes'
 import { useAddUserGeneSetMutation, useFetchUserGeneSetQuery } from '@/graphql'
 import classNames from 'classnames'
 import { useRouter } from 'next/navigation'
-import libraryConfig from '@/config/libraries.json'
-
-// Get total library count to check if all are selected
-const allLibraryCount = Object.keys(libraryConfig.libraries).length
+import useLibraryCatalog from '@/utils/useLibraryCatalog'
+import { libraryFilterParam } from '@/utils/libraryCatalog'
 
 
 /**
@@ -23,6 +21,7 @@ const allLibraryCount = Object.keys(libraryConfig.libraries).length
  */
 export default function InputForm({setInputSingle, selectedLibraries = [], initialGeneSetId} : {setInputSingle:  React.Dispatch<React.SetStateAction<boolean>>, selectedLibraries?: string[], initialGeneSetId?: string}) {
   const router = useRouter()
+  const { names: allLibraries } = useLibraryCatalog()
   const [rawGenes, setRawGenes] = React.useState('')
 
   // Fetch initial gene set when returning from results page
@@ -118,9 +117,8 @@ export default function InputForm({setInputSingle, selectedLibraries = [], initi
             // Build URL with dataset ID and optional library filter
             const params = new URLSearchParams({ dataset: id })
             // Pass selected libraries only if NOT all are selected (all selected = no filter)
-            if (selectedLibraries.length > 0 && selectedLibraries.length < allLibraryCount) {
-              params.set('libraries', selectedLibraries.join(','))
-            }
+            const filter = libraryFilterParam(selectedLibraries, allLibraries)
+            if (filter) params.set('libraries', filter)
             router.push(`/enrich?${params.toString()}`)
           }
         }}

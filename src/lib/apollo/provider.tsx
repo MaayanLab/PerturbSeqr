@@ -10,7 +10,7 @@ import {
 
 function makeClient() {
   const httpLink = new HttpLink({
-    uri: `${typeof window === 'undefined' ? 'http://localhost:3000' : ''}/graphql`,
+    uri: `${typeof window === 'undefined' ? (process.env.INTERNAL_APP_URL || 'http://localhost:3000') : ''}/graphql`,
   });
 
   return new NextSSRApolloClient({

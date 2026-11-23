@@ -20,11 +20,17 @@ cp .env.example .env
 kube-compose up
 ```
 
-Production downloads use the AWS S3 bucket root, with no `/data` suffix. Rebuild the app image when changing `PUBLIC_S3_URL`, since the download URL is embedded at build time.
+Library download URLs are registered from the library manifests. The existing production objects are under the AWS S3 bucket root, with no `/data` suffix.
 
 ## Storage and ingest
 
 Production GMTs, metadata parquets, full-signature downloads, and enrichment indexes use the AWS bucket `perturbseqr`, in `us-east-1`. Upload data changes there before running ingest.
+
+For the first manifest-catalog upgrade and for new library releases, use the
+[library setup job](libraries/README.md#run-the-library-setup-job). The catalog-only
+run prepares the existing database before the app and enrichment services are upgraded.
+Subsequent releases use one job with a release slug and the ingest image that
+contains its manifest.
 
 ### Container configuration
 
@@ -47,7 +53,13 @@ region = us-east-1
 
 Export `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` (plus `AWS_SESSION_TOKEN` for temporary credentials); rclone does not load `.env`.
 
-Files are stored at the bucket root. For example, `cm4ai.gmt.gz` is public at `https://perturbseqr.s3.amazonaws.com/cm4ai.gmt.gz`.
+The bucket root is the flat downloads directory for every library. For example,
+`cm4ai-limma-voom-de.h5ad`, `lincs-l1000-cp.gmt.gz`, and `ginkgo-reframe.gmt.gz`
+are all root-level object keys, with manifest references such as
+`s3://perturbseqr/ginkgo-reframe.gmt.gz`. Store only the ingest GMTs and files
+served on Downloads there. Keep enrichment backups under `enrich/` and retain
+manifests, provenance, and build reports outside S3. See the
+[release layout](libraries/README.md#upload-first) for naming conventions.
 
 ### Upload updates before ingest
 

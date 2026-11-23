@@ -421,4 +421,11 @@ def parse_perturbation_term(term):
 - Pandas library: https://pandas.pydata.org/docs/user_guide/index.html#user-guide
 
 ## Citations
-John K. Gardner, Lily D. Taub, Daniel J. B. Clarke, Ido Diamant, Avi Ma'ayan. Perturb-Seqr: Comprehensive Signature Search Engine Integrating Connectivity Maps from Multiple Sources. https://perturbseqr.maayanlab.cloud/
+
+**Perturb-Seqr: Comprehensive Signature Search Engine Integrating Connectivity Maps from Multiple Sources**
+
+Lily D. Taub<sup>1</sup>, John K. Gardner<sup>1</sup>, Ido Diamant<sup>1</sup>, Daniel J. B. Clarke<sup>1</sup>, Avi Ma'ayan<sup>1</sup>
+
+<sup>1</sup>Department of Pharmacological Sciences, Mount Sinai Center for Bioinformatics, Icahn School of Medicine at Mount Sinai, New York, New York; CFDE Data Resource Center
+
+bioRxiv (2026). [doi:10.64898/2026.10.06.757137](https://doi.org/10.64898/2026.10.06.757137)

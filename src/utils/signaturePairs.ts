@@ -2,6 +2,8 @@ import { parseTerm } from './parseTerm'
 
 export type SignatureSummary = {
   id?: string | null
+  cid?: string | null
+  libraryId?: string | null
   term?: string | null
   nGeneIds?: number | null
   library?: { name?: string | null } | null

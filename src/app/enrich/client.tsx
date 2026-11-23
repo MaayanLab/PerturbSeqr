@@ -21,17 +21,15 @@ import type { ContributingSignature } from "@/components/signaturesModal";
 import { FaFilter, FaSortUp } from "react-icons/fa6";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { parseTerm, getCellDisplay } from "@/utils/parseTerm";
-import { preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary, getDatasetUrl } from "@/utils/metadataLookup";
+import { preloadDrugLookup, getSignatureCompound } from "@/utils/metadataLookup";
+import { findCatalogLibrary } from '@/utils/libraryCatalog';
 import { useRouter } from "next/navigation";
-import libraryConfig from "@/config/libraries.json";
+import useLibraryCatalog from '@/utils/useLibraryCatalog';
 import { LibraryBarGraphGrid, LibraryCardSingle } from "@/components/BarGraph";
 import ShareButton from "@/components/shareButton";
 import { EnrichmentTable } from "@/components/EnrichmentTable";
 import SingleGenePerturbationResourceLinks from "@/components/SingleGenePerturbationResourceLinks";
 
-const allLibraryDisplayNames = Object.values(libraryConfig.libraries).map((l: any) => l.displayName as string);
-const drugLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'drug').map((l: any) => l.displayName as string);
-const geneLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'gene').map((l: any) => l.displayName as string);
 
 import { DEFAULT_CONSENSUS_TOP_N_SIGNATURES, DEFAULT_PVALUE_CUTOFF, RESULTS_PER_PAGE } from '@/constants/enrichment';
 
@@ -75,6 +73,7 @@ function EnrichmentResults({
   setModalGeneSet: React.Dispatch<React.SetStateAction<GeneSetModalT>>;
   libraryNames: string[] | null;
 }) {
+  const { names: allLibraryDisplayNames, drugNames: drugLibraryNames, geneNames: geneLibraryNames } = useLibraryCatalog()
   const genes = React.useMemo(
     () =>
       ensureArray(userGeneSet?.userGeneSet?.genes)
@@ -140,7 +139,7 @@ function EnrichmentResults({
     if (datasetFilter.includes("__none__")) return [];
     if (datasetFilter.length > 0) return datasetFilter;
     return libraryNames ?? allLibraryDisplayNames;
-  }, [datasetFilter, libraryNames]);
+  }, [datasetFilter, libraryNames, allLibraryDisplayNames]);
   // Query enrichment results
   const { data: enrichmentResults, error } = useEnrichmentQueryQuery({
     skip: genes.length === 0,
@@ -958,21 +957,21 @@ function EnrichmentResults({
                     const isGeneKO = libs.length > 0 && libs.every(lib => geneLibraryNames.includes(lib));
                     if (isGeneKO && !moas)
                       perturbation = perturbation + " KO";
-                    // Use direct PubChem link if CID available, otherwise search
-                    const pubchemUrl = cid
-                      ? `https://pubchem.ncbi.nlm.nih.gov/compound/${cid}`
-                      : `https://pubchem.ncbi.nlm.nih.gov/#query=${perturbation}`;
+                    const compound = !isGeneKO && !moas ? getSignatureCompound({
+                      label: perturbation || '', cid,
+                      libraryId: libs.length === 1 ? findCatalogLibrary(libs[0])?.id : undefined,
+                    }, drugLookupLoaded) : null;
                     return (
                       <tr key={genesetIndex}>
                         <td>
                           {moas ? <span style={{textTransform: 'capitalize'}}>{perturbation}</span> : !isGeneKO ? (
                             <div>
-                              {perturbation}
+                              {compound?.name || perturbation}
                               <a
                                 className="underline cursor-pointer mx-2"
-                                href={pubchemUrl}
+                                href={compound?.url}
                                 target="_blank"
-                                title={cid ? `PubChem CID: ${cid}` : 'Search PubChem'}
+                                title={compound?.cid ? `PubChem CID: ${compound.cid}` : 'Search PubChem'}
                               >
                                 <Image
                                   className="inline-block rounded"
@@ -982,9 +981,9 @@ function EnrichmentResults({
                                   alt="PubChem"
                                 />
                               </a>
-                              {cid && (
+                              {compound?.cid && (
                                 <div className="text-xs text-gray-500">
-                                  <span title="PubChem Compound ID">PCID:</span> {cid}
+                                  <span title="PubChem Compound ID">PCID:</span> {compound.cid}
                                 </div>
                               )}
                             </div>

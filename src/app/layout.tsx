@@ -9,7 +9,7 @@ import Footer from "@/components/footer";
 export const metadata: Metadata = {
   title: "Perturb-Seqr",
   description:
-    "Search through gene sets created from 12 Connectivity Mapping resources, organized into 16 gene set libraries: 9 drug perturbation and 7 gene perturbation followed by expression.",
+    "Search Connectivity Mapping gene set libraries for drug and gene perturbations followed by expression.",
   keywords: [
     "big data",
     "bioinformatics",
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Perturb-Seqr",
     description:
-      "Search through gene sets created from 12 Connectivity Mapping resources, organized into 16 gene set libraries: 9 drug perturbation and 7 gene perturbation followed by expression.",
+      "Search Connectivity Mapping gene set libraries for drug and gene perturbations followed by expression.",
     url: "https://perturbseqr.maayanlab.cloud",
     siteName: "Ma'ayan Lab",
     images: [

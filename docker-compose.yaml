@@ -58,6 +58,13 @@ services:
       - PUBLIC_URL=https://perturbseqr.maayanlab.cloud
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres
       - NODE_ENV=production
+      - LIBRARY_S3_BUCKET
+      - LIBRARY_S3_PUBLIC_ENDPOINT
+      - INGEST_S3_ENDPOINT
+      - AWS_REGION
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SESSION_TOKEN
       - ENRICH_URL=http://perturbseqr-enrich:8000
       - NEXT_PUBLIC_MINIO_URL=${PUBLIC_S3_URL:-https://perturbseqr.s3.amazonaws.com}
       - NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
@@ -121,10 +128,29 @@ services:
       - AWS_SESSION_TOKEN
       - ENRICH_URL=http://perturbseqr-enrich:8000
       - INGEST_CLEAN
+      - LIBRARY_S3_BUCKET
     depends_on:
       perturbseqr-postgres:
         condition: service_healthy
     entrypoint: ["/app/ingest-entrypoint.sh"]
+    profiles: [jobs]
+
+  library-setup:
+    build:
+      context: .
+      dockerfile: ingest/Dockerfile
+    image: ${LIBRARY_SETUP_IMAGE:-perturbseqr-ingest:library-setup-local}
+    platform: linux/amd64
+    restart: "no"
+    x-kubernetes:
+      exclude: true   # k8s uses k8s/library-setup-job.yaml instead
+    environment:
+      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@perturbseqr-postgres/postgres?sslmode=disable
+      - ENRICH_URL=http://perturbseqr-enrich:8000
+    depends_on:
+      perturbseqr-postgres:
+        condition: service_healthy
+    entrypoint: ["python", "-u", "-m", "perturbseqr_ingest.library_setup"]
     profiles: [jobs]
 
 volumes:

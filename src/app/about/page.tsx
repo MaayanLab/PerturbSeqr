@@ -2,6 +2,8 @@ import React from 'react'
 import Image from 'next/image'
 import Link from "next/link"
 import { Metadata, ResolvingMetadata } from 'next'
+import PaperCitation from '@/components/PaperCitation'
+import { citation } from '@/constants/citation'
 
 export async function generateMetadata(props: {}, parent: ResolvingMetadata): Promise<Metadata> {
   const parentMetadata = await parent
@@ -26,13 +28,7 @@ export default async function About() {
       </div>
       <div className="flex">
         <div className="flex-col">
-          <h3 className="text-lg font-semibold mt-4">Perturb-Seqr: Comprehensive Signature Search Engine Integrating Connectivity Maps from Multiple Sources</h3>
-          <p className="text-sm mt-1">
-            Lily D. Taub<sup>1</sup>, John K. Gardner<sup>1</sup>, Ido Diamant<sup>1</sup>, Daniel J. B. Clarke<sup>1</sup>, Avi Ma&apos;ayan<sup>1</sup>
-          </p>
-          <p className="text-xs text-gray-500 mt-1">
-            <sup>1</sup>Department of Pharmacological Sciences, Mount Sinai Center for Bioinformatics, Icahn School of Medicine at Mount Sinai, New York, New York; CFDE Data Resource Center
-          </p>
+          <div id="citation"><PaperCitation /></div>
           <h4 className="text-lg font-semibold mt-4">Abstract</h4>
           <p className="mt-1">
             High-throughput transcriptomics can be used to develop Connectivity Mapping resources for identifying potential reversers and mimickers of disease signatures for drug and target discovery. Recently, several new Connectivity Mapping datasets have emerged, but no efforts were made so far to evaluate and integrate them. Motivated by this opportunity, we have developed Perturb-Seqr, a comprehensive Connectivity Mapping search engine that integrates nine small molecule transcriptomics Connectivity Maps and seven single gene perturbation followed by expression Connectivity Maps. Specifically, Perturb-Seqr contains processed data from LINCS (L1000), Tahoe-100M, Novartis Institute for Biomedical Research (DRUG-seq), the original CMap (cDNA microarrays), Ginkgo Bioworks (DRUG-seq), SciPlex (scRNA-seq), DeepCover MoA (PISA proteomics), Perturb Atlas (RNA-seq), Replogle et al. (Perturb-seq), CREEDS (cDNA microarrays), CM4AI (Perturb-seq), and RummaGEO (RNA-seq). To serve these Connectivity Maps in one unifying search engine, we converted the expression signatures from these resources into 450,271 gene sets of up- and down-regulated genes measuring the effects of 9,856 unique drug and 17,643 unique gene perturbations, targeting 917 cell lines and cell types. We demonstrate how Perturb-Seqr, and the gene sets it serves, can be used to identify targets for drugs and drugs for targets, uncover new pathways, and identify potential side effects for preclinical compounds. Overall, Perturb-Seqr is a comprehensive up-to-date Connectivity Mapping search engine and database, enabling the discovery of new drugs and targets. Perturb-Seqr is accessible from: https://perturbseqr.maayanlab.cloud/.
@@ -59,8 +55,7 @@ export default async function About() {
           Perturb-Seqr was developed by <a className='underline cursor' href="https://labs.icahn.mssm.edu/maayanlab/">the Ma&apos;ayan Lab.</a>
           </p>
           <br />
-          <p className='mb-2 font-bold'>Please acknowledge Perturb-Seqr in your publications by citing the following reference: </p>
-          <p className='font-bold'>Lily D. Taub, John K. Gardner, Ido Diamant, Daniel J. B. Clarke, Avi Ma&apos;ayan. Perturb-Seqr: Comprehensive Signature Search Engine Integrating Connectivity Maps from Multiple Sources. bioRxiv (2026). <a className="underline" href="https://www.biorxiv.org/content/10.64898/2026.10.06.757137v1">doi:10.64898/2026.10.06.757137</a></p>
+          <p className='mb-2 font-bold'>Please acknowledge Perturb-Seqr in your publications by citing <a className="underline" href="#citation">the preprint</a> (<a className="underline" href={citation.url}>doi:{citation.doi}</a>).</p>
           <br/>
           <p>
             <strong>Drug/Chemical Perturbation Datasets:</strong>
