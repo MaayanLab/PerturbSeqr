@@ -43,3 +43,20 @@ uv run --project etl --with h5py python libraries/ginkgo-reframe/prepare_sources
 uv run --project etl perturbseqr-library build \
   --manifest libraries/ginkgo-reframe/source-manifest.json --offline
 ```
+
+## UMAP visualization
+
+The Visualization page uses the canonical public GMT listed in the release
+manifest. Each dot represents one directional signature, including unpaired
+signatures. The shared generator uses TF-IDF gene-set vectors, a 30-neighbor
+graph, Leiden clustering, and UMAP with a minimum distance of 0.1.
+
+Download `ginkgo-reframe.gmt.gz` from the release and verify its checksum
+against `manifest.json`. Then run from the repository root:
+
+```bash
+uv run --python 3.13 --script scripts/generate_umap.py --library ginkgo-reframe \
+  --gmt /path/to/ginkgo-reframe.gmt.gz --title 'Ginkgo reFRAME UMAP'
+```
+
+The app serves `public/umap/figures/ginkgo-reframe_UMAP.html`.
