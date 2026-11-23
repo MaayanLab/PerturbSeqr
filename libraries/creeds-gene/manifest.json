@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1, "registration": "existing", "slug": "creeds-gene", "displayName": "CREEDS Gene", "category": "gene", "resource": { "key": "creeds" }, "version": "legacy",
+  "description": "CREEDS + Harmonizome GEO microarray",
+  "license": null,
+  "input": { "gmt": "s3://perturbseqr/creeds-gene.gmt.gz", "organism": "human", "geneIdentifiers": "symbol" },
+  "sources": [{ "label": "CREEDS", "url": "https://maayanlab.cloud/CREEDS/" }, { "label": "Harmonizome", "url": "https://maayanlab.cloud/Harmonizome/dataset/GEO+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations" }],
+  "publications": [{ "url": "https://pubmed.ncbi.nlm.nih.gov/27667448/" }],
+  "presentation": { "downloadTitle": "CREEDS Gene Perturbations", "logo": { "src": "/images/creeds-logo.png" }, "termExample": { "term": "Foxo1::::T reg::::::KO::::mus musculus::GSE40655.508 up", "extraFields": ["Organism", "GEO ID"] } },
+  "artifacts": [
+    { "kind": "gmt", "s3": "s3://perturbseqr/creeds-gene.gmt.gz", "format": "gmt.gz", "bytes": 3537533 },
+    { "kind": "full_signatures", "label": "Fold Changes (JSON)", "s3": "s3://perturbseqr/creeds-gene-full.json", "bytes": 58276121 },
+    { "kind": "gene_target_metadata", "label": "Gene Targets", "s3": "s3://perturbseqr/creeds-gene-gene_target_metadata.parquet", "bytes": 103059 }
+  ]
+}

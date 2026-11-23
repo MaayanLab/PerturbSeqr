@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1, "registration": "existing", "slug": "nibr-drug-seq", "displayName": "NIBR DRUG-seq", "category": "drug", "resource": { "key": "nibr" }, "version": "legacy",
+  "description": "Novartis DRUG-seq U2OS MoABox signatures.",
+  "license": null,
+  "input": { "gmt": "s3://perturbseqr/nibr-drug-seq.gmt.gz", "organism": "human", "geneIdentifiers": "symbol" },
+  "sources": [{ "label": "Harmonizome", "url": "https://maayanlab.cloud/Harmonizome/dataset/NIBR+DRUG-seq+U2OS+MoA+Box+Gene+Expression+Profiles" }],
+  "publications": [{ "url": "https://pubmed.ncbi.nlm.nih.gov/35508359/" }],
+  "presentation": { "downloadTitle": "Novartis/DRUG-seq U2OS MoABox Dataset", "downloadSummary": "", "shortLabel": "NIBR DR-seq", "logo": { "src": "/images/nibr-logo.png", "width": 100 }, "relatedLinks": [{ "label": "DRUGseqr", "url": "https://drugseqr.maayanlab.cloud/download" }], "termExample": { "term": "Diphenidol::U2OS::::24h::0.01uM::AF-80-QK39 up", "extraFields": ["NSN Code"] } },
+  "artifacts": [
+    { "kind": "gmt", "s3": "s3://perturbseqr/nibr-drug-seq.gmt.gz", "format": "gmt.gz", "bytes": 5896768 },
+    { "kind": "full_signatures", "label": "Full DE (RData)", "url": "https://zenodo.org/records/14291445" },
+    { "kind": "full_signatures", "label": "DE Summary (Parquet)", "s3": "s3://perturbseqr/nibr-drug-seq-de.parquet", "bytes": 2374086344 },
+    { "kind": "cell_line_metadata", "label": "Cell Line", "s3": "s3://perturbseqr/nibr-drug-seq-cell_line_metadata.parquet", "bytes": 4405 },
+    { "kind": "drug_metadata", "label": "Drug", "s3": "s3://perturbseqr/nibr-drug-seq-drug_metadata.parquet", "bytes": 642017 }
+  ]
+}

@@ -5,6 +5,7 @@ description = "PerturbSeqr data ingest runtime: load GMTs and metadata into Post
 requires-python = ">=3.11"
 dependencies = [
     "boto3",
+    "jsonschema>=4",
     "psycopg2-binary",
     "polars",
     "tqdm",
@@ -17,5 +18,11 @@ dependencies = [
 requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
+[project.scripts]
+perturbseqr-library = "perturbseqr_ingest.library_manager:main"
+
 [tool.setuptools]
 packages = ["perturbseqr_ingest"]
+
+[tool.setuptools.package-data]
+perturbseqr_ingest = ["*.schema.json"]

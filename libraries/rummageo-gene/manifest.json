@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1, "registration": "existing", "slug": "rummageo-gene", "displayName": "RummaGEO Gene", "category": "gene", "resource": { "key": "rummageo" }, "version": "legacy",
+  "description": "Gene perturbation signatures mined from GEO RNA-seq.",
+  "license": null,
+  "input": { "gmt": "s3://perturbseqr/rummageo-gene.gmt.gz", "organism": "human", "geneIdentifiers": "symbol" },
+  "sources": [{ "label": "Harmonizome", "url": "https://maayanlab.cloud/Harmonizome/dataset/RummaGEO+Gene+Perturbation+Signatures" }],
+  "publications": [{ "url": "https://pubmed.ncbi.nlm.nih.gov/39569206/" }],
+  "presentation": { "downloadTitle": "RummaGEO Gene Perturbations", "downloadSummary": "", "logo": { "src": "/images/rummageo-logo.png", "width": 60 }, "relatedLinks": [{ "label": "RummaGEO", "url": "https://rummageo.com" }], "termExample": { "term": "atrx::::::::::::::mouse::GSE100464,GSE100465::0::3 up", "extraFields": ["Organism", "GEO ID", "Group 1", "Group 2"], "caption": "When the GEO ID has two accessions, they are a SubSeries and its parent SuperSeries in ascending accession-number order." } },
+  "artifacts": [
+    { "kind": "gmt", "s3": "s3://perturbseqr/rummageo-gene.gmt.gz", "format": "gmt.gz", "bytes": 12652811 },
+    { "kind": "full_signatures", "label": "Discretized Matrix", "s3": "s3://perturbseqr/rummageo-gene-full.txt.gz", "bytes": 6352813 },
+    { "kind": "full_signatures", "label": "Human Limma-Voom logFC", "s3": "s3://perturbseqr/rummageo-human-de-aligned.txt.gz", "bytes": 1074456404 },
+    { "kind": "full_signatures", "label": "Mouse Limma-Voom logFC", "s3": "s3://perturbseqr/rummageo-mouse-de-aligned.txt.gz", "bytes": 1024249445 },
+    { "kind": "full_signatures", "label": "Human DE h5ad (logFC + t + adj.P.Val)", "s3": "s3://perturbseqr/rummageo-human-de-aligned.h5ad", "bytes": 8684625112 },
+    { "kind": "full_signatures", "label": "Mouse DE h5ad (logFC + t + adj.P.Val)", "s3": "s3://perturbseqr/rummageo-mouse-de-aligned.h5ad", "bytes": 8253939904 },
+    { "kind": "gene_target_metadata", "label": "Gene Targets", "s3": "s3://perturbseqr/rummageo-gene-gene_target_metadata.parquet", "bytes": 106253 }
+  ]
+}

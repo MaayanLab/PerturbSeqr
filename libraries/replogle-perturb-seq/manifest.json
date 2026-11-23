@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1, "registration": "existing", "slug": "replogle-perturb-seq", "displayName": "Replogle et al.", "category": "gene", "resource": { "key": "replogle" }, "version": "legacy",
+  "description": "K562 genome-wide, K562 essential, RPE1 essential",
+  "license": null,
+  "input": { "gmt": "s3://perturbseqr/replogle-perturb-seq.gmt.gz", "organism": "human", "geneIdentifiers": "symbol" },
+  "sources": [{ "label": "Harmonizome", "url": "https://maayanlab.cloud/Harmonizome/dataset/Replogle+et+al.,+Cell,+2022+K562+Genome-wide+Perturb-seq+Gene+Perturbation+Signatures" }, { "label": "Upstream resource", "url": "https://maayanlab.cloud/Harmonizome/resource/Replogle+et+al.%2C+Cell%2C+2022" }],
+  "publications": [{ "url": "https://pubmed.ncbi.nlm.nih.gov/35688146/" }],
+  "presentation": { "downloadTitle": "Replogle et al. Perturb-seq", "logo": { "src": "/images/replogle-logo.svg", "width": 200 }, "termExample": { "term": "ZC3H18::K562::::day6::::KD::CRISPRi::P1P2::essential::10023 up", "extraFields": ["Guide", "Screen", "Study ID"] } },
+  "artifacts": [
+    { "kind": "gmt", "s3": "s3://perturbseqr/replogle-perturb-seq.gmt.gz", "format": "gmt.gz", "bytes": 1720235 },
+    { "kind": "full_signatures", "label": "K562 Genome-wide CD Coefficients", "s3": "s3://perturbseqr/replogle-k562-genomewide-full.txt.gz", "bytes": 265909548 },
+    { "kind": "full_signatures", "label": "K562 Essential CD Coefficients", "s3": "s3://perturbseqr/replogle-k562-essential-full.txt.gz", "bytes": 76812633 },
+    { "kind": "full_signatures", "label": "RPE1 Essential CD Coefficients", "s3": "s3://perturbseqr/replogle-rpe1-essential-full.txt.gz", "bytes": 70151083 },
+    { "kind": "cell_line_metadata", "label": "Cell Line", "s3": "s3://perturbseqr/replogle-perturb-seq-cell_line_metadata.parquet", "bytes": 4440 },
+    { "kind": "gene_target_metadata", "label": "Gene Targets", "s3": "s3://perturbseqr/replogle-perturb-seq-gene_target_metadata.parquet", "bytes": 290287 }
+  ]
+}

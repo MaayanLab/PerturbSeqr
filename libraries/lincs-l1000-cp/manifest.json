@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1, "registration": "existing", "slug": "lincs-l1000-cp", "displayName": "LINCS L1000 CP", "category": "drug", "resource": { "key": "lincs" }, "version": "legacy",
+  "description": "Pruned, top 250 by CD coefficient",
+  "license": null,
+  "input": { "gmt": "s3://perturbseqr/lincs-l1000-cp.gmt.gz", "organism": "human", "geneIdentifiers": "symbol" },
+  "publications": [{ "url": "https://pubmed.ncbi.nlm.nih.gov/35524556/" }],
+  "presentation": { "downloadTitle": "L1000-CP (Chemical Perturbations)", "shortLabel": "L1000 CP", "logo": { "src": "/images/cmap-logo.svg" }, "relatedLinks": [{ "label": "L2S2", "url": "https://l2s2.maayanlab.cloud/download" }, { "label": "SigCom LINCS", "url": "https://maayanlab.cloud/sigcom-lincs/#/Download" }], "termExample": { "term": "bortezomib::HT29::::24H::20uM::REP.B007::C23 up", "extraFields": ["Batch ID", "Well"] } },
+  "artifacts": [
+    { "kind": "gmt", "s3": "s3://perturbseqr/lincs-l1000-cp.gmt.gz", "format": "gmt.gz", "bytes": 104082627 },
+    { "kind": "full_signatures", "label": "Full CD Coefficients", "url": "https://lincs-dcic.s3.amazonaws.com/LINCS-sigs-2021/gctx/cd-coefficient/cp_coeff_mat.gctx" },
+    { "kind": "full_signatures", "label": "Pruned CD Coefficients", "s3": "s3://perturbseqr/l1000-cp-pruned-cd-coefficients.h5ad", "bytes": 3651315250 },
+    { "kind": "cell_line_metadata", "label": "Cell Line", "s3": "s3://perturbseqr/lincs-l1000-cp-cell_line_metadata.parquet", "bytes": 10730 },
+    { "kind": "drug_metadata", "label": "Drug", "s3": "s3://perturbseqr/lincs-l1000-cp-drug_metadata.parquet", "bytes": 812854 }
+  ]
+}

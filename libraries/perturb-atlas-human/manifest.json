@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1, "registration": "existing", "slug": "perturb-atlas-human", "displayName": "Perturb Atlas Human", "category": "gene", "resource": { "key": "perturb-atlas" }, "version": "legacy",
+  "description": "Human gene perturbation signatures, reprocessed from Harmonizome.",
+  "license": null,
+  "input": { "gmt": "s3://perturbseqr/perturb-atlas-human.gmt.gz", "organism": "human", "geneIdentifiers": "symbol" },
+  "sources": [{ "label": "Harmonizome", "url": "https://maayanlab.cloud/Harmonizome/dataset/PerturbAtlas+Signatures+of+Differentially+Expressed+Genes+for+Gene+Perturbations" }],
+  "publications": [{ "url": "https://pubmed.ncbi.nlm.nih.gov/39351872/" }],
+  "presentation": { "downloadTitle": "PerturbAtlas Human Gene Perturbations", "downloadSummary": "", "shortLabel": "PA Human", "logo": { "src": "/images/perturbatlas-logo.png" }, "termExample": { "term": "CPSF6::::K562::::::KD::::SRP013565::10000 up", "extraFields": ["SRA ID", "Atlas ID"] } },
+  "artifacts": [
+    { "kind": "gmt", "s3": "s3://perturbseqr/perturb-atlas-human.gmt.gz", "format": "gmt.gz", "bytes": 2556456 },
+    { "kind": "full_signatures", "label": "CD Coefficients", "s3": "s3://perturbseqr/perturb-atlas-human-full.txt.gz", "bytes": 10549934 },
+    { "kind": "cell_line_metadata", "label": "Cell Line", "s3": "s3://perturbseqr/perturb-atlas-human-cell_line_metadata.parquet", "bytes": 30191 },
+    { "kind": "gene_target_metadata", "label": "Gene Targets", "s3": "s3://perturbseqr/perturb-atlas-human-gene_target_metadata.parquet", "bytes": 219120 }
+  ]
+}

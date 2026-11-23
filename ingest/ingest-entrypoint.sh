@@ -37,7 +37,7 @@ echo ""
 
 # Step 1: Run dbmate migrations
 echo "=== Step 1: Running database migrations ==="
-dbmate --migrations-dir /app/migrations up || echo "Migrations already applied or no new migrations"
+dbmate --migrations-dir /app/migrations --no-dump-schema up
 echo ""
 
 # Step 2: Wipe library tables if INGEST_CLEAN=true

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1, "registration": "existing", "slug": "deepcover-moa", "displayName": "DeepCover MoA", "category": "drug", "resource": { "key": "deepcover" }, "version": "legacy",
+  "description": "Proteome-wide atlas of drug mechanism of action.",
+  "license": null,
+  "input": { "gmt": "s3://perturbseqr/deepcover-moa.gmt.gz", "organism": "human", "geneIdentifiers": "symbol" },
+  "sources": [{ "label": "Harmonizome", "url": "https://maayanlab.cloud/Harmonizome/dataset/DeepCoverMOA+Drug+Mechanisms+of+Action" }],
+  "publications": [{ "url": "https://pubmed.ncbi.nlm.nih.gov/36593396/" }],
+  "presentation": { "downloadTitle": "DeepCoverMOA", "downloadSummary": "", "shortLabel": "DeepCover", "logo": { "src": "/images/deepcovermoa-logo.png" }, "termExample": { "term": "(4-Chlorobenzyl)pyridine::HCT116::::24h::10uM up" } },
+  "artifacts": [
+    { "kind": "gmt", "s3": "s3://perturbseqr/deepcover-moa.gmt.gz", "format": "gmt.gz", "bytes": 448725 },
+    { "kind": "full_signatures", "label": "CD Coefficients", "s3": "s3://perturbseqr/deepcover-moa-full.txt.gz", "bytes": 650034 },
+    { "kind": "cell_line_metadata", "label": "Cell Line", "s3": "s3://perturbseqr/deepcover-moa-cell_line_metadata.parquet", "bytes": 4445 },
+    { "kind": "drug_metadata", "label": "Drug", "s3": "s3://perturbseqr/deepcover-moa-drug_metadata.parquet", "bytes": 76936 }
+  ]
+}
