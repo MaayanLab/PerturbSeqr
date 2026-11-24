@@ -10,7 +10,10 @@ import Stats from '@/components/stats'
 import ShareButton from '@/components/shareButton'
 import LibraryFilter from '@/components/libraryFilter'
 import DatasetIcons from '@/components/datasetIcons'
-import libraryConfig from '@/config/libraries.json'
+import useLibraryCatalog from '@/utils/useLibraryCatalog'
+import { libraryFilterParam } from '@/utils/libraryCatalog'
+import { preloadDrugLookup, getSignatureCompound } from '@/utils/metadataLookup'
+import { matchesCompoundQuery, pubChemCid } from '@/utils/drugAnnotations'
 import useQsState from '@/utils/useQsState'
 import { matchesPerturbation, parseTerm } from '@/utils/parseTerm'
 import { pairSignatures, type SignatureSummary } from '@/utils/signaturePairs'
@@ -23,39 +26,40 @@ export type TermSearchWorkflow = {
   target: 'drug' | 'gene'
   sourceType?: string
 }
-const libraries = Object.values(libraryConfig.libraries)
-const libraryNames = {
-  all: libraries.map(library => library.displayName),
-  drug: libraries.filter(library => library.category === 'drug').map(library => library.displayName),
-  gene: libraries.filter(library => library.category === 'gene').map(library => library.displayName),
-}
 const examples = { all: ['Dexamethasone', 'STAT3', 'HCC515'], drug: ['Dexamethasone', 'Doxorubicin', 'Metformin'], gene: ['TP53', 'STAT3', 'EGFR'] }
 const resetFilters = { page: '1', search: '', dataset: '', cellLine: '', moa: '', timepoint: '', concentration: '', direction: '' }
 
-function selectedSources(source: TermSearchWorkflow['source'] | undefined, selection: string | null) {
-  const available = libraryNames[source ?? 'all']
+function selectedSources(available: string[], selection: string | null) {
   return selection ? available.filter(name => selection.split(',').includes(name)) : available
 }
 
 function TermSearchResults({ query, libraries, workflow }: { query: string; libraries: string[]; workflow?: TermSearchWorkflow }) {
+  const { drugNames, geneNames } = useLibraryCatalog()
+  const libraryNames = { drug: drugNames, gene: geneNames }
   const client = useApolloClient()
   const [result, setResult] = React.useState<SignatureSummary[] | 'loading' | 'error'>('loading')
   const [retry, setRetry] = React.useState(0)
   React.useEffect(() => {
     let cancelled = false
     setResult('loading')
+    const requestedCid = workflow?.source === 'drug' ? pubChemCid(query) : null
     // Load every page before pairing or displaying counts; opposite arms can span pages.
     fetchAllNodes(async offset => {
       const { data } = await client.query<TermSearchQuery>({
         query: TermSearchDocument,
-        variables: { terms: [query], libraryNames: libraries, first: 10000, offset },
+        variables: { terms: [requestedCid ?? query], libraryNames: libraries, first: 10000, offset },
         fetchPolicy: 'no-cache',
       })
       return data.geneSetTermSearch
-    }, () => !cancelled).then(matches => {
+    }, () => !cancelled).then(async matches => {
+      if (workflow?.source === 'drug') await preloadDrugLookup()
       if (!cancelled) setResult(workflow ? matches.filter(signature => {
         const parsed = parseTerm(signature.term)
-        return matchesPerturbation(parsed, query) && (!workflow.sourceType || parsed.perturbationType === workflow.sourceType)
+        const compound = workflow.source === 'drug' ? getSignatureCompound({
+          label: parsed.perturbation, cid: signature.cid, libraryId: signature.libraryId, legacyLabel: parsed.extras[0],
+        }) : null
+        const match = (!requestedCid && matchesPerturbation(parsed, query)) || (compound && matchesCompoundQuery(compound, query))
+        return match && (!workflow.sourceType || parsed.perturbationType === workflow.sourceType)
       }) : matches)
     }).catch(() => { if (!cancelled) setResult('error') })
     return () => { cancelled = true }
@@ -76,7 +80,7 @@ function TermSearchResults({ query, libraries, workflow }: { query: string; libr
   )
   const count = pairs?.length ?? result.length
   const enrichmentParams = workflow ? {
-    view: 'table', dir: 'up', sort: 'pvalue_mimic', libraries: libraryNames[workflow.target].join(','),
+    view: 'table', dir: 'up', sort: 'pvalue_mimic', libraries: libraryNames[workflow.target].join(',') || '__none__',
   } : undefined
   return (
     <div className="self-stretch min-w-0 -mx-8 md:-mx-24 flex flex-col gap-2 my-2">
@@ -101,6 +105,12 @@ export default function TermSearch({ title, description, workflows }: {
   description: React.ReactNode
   workflows?: Record<string, TermSearchWorkflow>
 }) {
+  const { libraries: catalogLibraries } = useLibraryCatalog()
+  const libraryNames = React.useMemo(() => ({
+    all: catalogLibraries.map(library => library.name),
+    drug: catalogLibraries.filter(library => library.category === 'drug').map(library => library.name),
+    gene: catalogLibraries.filter(library => library.category === 'gene').map(library => library.name),
+  }), [catalogLibraries])
   const defaultMode = Object.keys(workflows ?? {})[0] ?? ''
   const [queryString, setQueryString] = useQsState({ q: '', mode: defaultMode, libraries: '' })
   const query = queryString.q?.trim() ?? ''
@@ -110,15 +120,16 @@ export default function TermSearch({ title, description, workflows }: {
   const workflow = workflows?.[mode]
   const available = libraryNames[workflow?.source ?? 'all']
   const [rawTerm, setRawTerm] = React.useState(query)
-  const queryLibraries = React.useMemo(() => selectedSources(queryWorkflow?.source, queryString.libraries), [queryWorkflow, queryString.libraries])
-  const [selectedLibraries, setSelectedLibraries] = React.useState(queryLibraries)
+  const queryLibraries = React.useMemo(() => selectedSources(libraryNames[queryWorkflow?.source ?? 'all'], queryString.libraries), [libraryNames, queryWorkflow, queryString.libraries])
+  const [selection, setSelection] = React.useState<string[] | null>(() => queryString.libraries ? queryString.libraries.split(',') : null)
+  const selectedLibraries = React.useMemo(() => selection === null ? available : available.filter(name => selection.includes(name)), [available, selection])
   React.useEffect(() => { setRawTerm(query); setMode(queryMode) }, [query, queryMode])
-  React.useEffect(() => { setSelectedLibraries(queryLibraries) }, [queryLibraries])
+  React.useEffect(() => { setSelection(queryString.libraries ? queryString.libraries.split(',') : null) }, [queryString.libraries, queryMode])
   const ready = !workflows || !!workflow
   const hasQuery = !!query && ready && mode === queryMode
 
   function selectionValue(selection: string[]) {
-    return selection.length === available.length ? '' : selection.join(',') || '__none__'
+    return libraryFilterParam(selection, available)
   }
   function search(term: string) {
     if (ready && term.trim() && selectedLibraries.length) {
@@ -130,16 +141,16 @@ export default function TermSearch({ title, description, workflows }: {
     if (!next) return
     if (query && value === queryMode) {
       setRawTerm(query)
-      setSelectedLibraries(queryLibraries)
+      setSelection(queryString.libraries ? queryLibraries : null)
     } else if (workflow?.source !== next.source) {
       setRawTerm('')
-      setSelectedLibraries(libraryNames[next.source])
+      setSelection(null)
     }
     setMode(value)
   }
   function selectLibraries(selection: string[]) {
     const selected = available.filter(name => selection.includes(name))
-    setSelectedLibraries(selected)
+    setSelection(selected.length === available.length ? null : selected)
     if (hasQuery) setQueryString({ ...resetFilters, libraries: selectionValue(selected) })
   }
   const datasetFilter = ready && (

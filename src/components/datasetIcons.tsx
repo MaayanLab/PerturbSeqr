@@ -1,69 +1,7 @@
 'use client'
 import React from 'react'
 import Image from 'next/image'
-import libraryConfig from '@/config/libraries.json'
-
-// Map dataset keys to their logo files
-const logoMap: Record<string, { src: string; darkSrc?: string; type: 'image' | 'svg' }> = {
-  'Tahoe-100M': { src: '/images/tahoe-logo-new.png', type: 'image' },
-  'LINCS L1000 CP': { src: '/images/cmap-logo.svg', type: 'svg' },
-  'LINCS L1000 XPR': { src: '/images/cmap-logo.svg', type: 'svg' },
-  'Microarrays CMAP': { src: '/images/broad-logo.png', type: 'image' },
-  'NIBR DRUG-seq': { src: '/images/nibr-logo.png', type: 'image' },
-  'SciPlex': { src: '/images/sciplex-logo.svg', darkSrc: '/images/sciplex-logo-dark.svg', type: 'svg' },
-  'DeepCover MoA': { src: '/images/deepcovermoa-logo.png', type: 'image' },
-  'CREEDS Chem': { src: '/images/creeds-logo.png', type: 'image' },
-  'CREEDS Gene': { src: '/images/creeds-logo.png', type: 'image' },
-  'RummaGEO Chem': { src: '/images/rummageo-logo.png', type: 'image' },
-  'RummaGEO Gene': { src: '/images/rummageo-logo.png', type: 'image' },
-  'Ginkgo Bioworks': { src: '/images/ginkgo-logo.png', type: 'image' },
-  'Perturb Atlas Human': { src: '/images/perturbatlas-logo.png', type: 'image' },
-  'Perturb Atlas Mouse': { src: '/images/perturbatlas-logo.png', type: 'image' },
-  'Replogle et al.': { src: '/images/replogle-logo.svg', type: 'svg' },
-  'CM4AI': { src: '/images/cm4ai-logo.png', darkSrc: '/images/cm4ai-logo-dark.png', type: 'image' },
-}
-
-// Short display labels for buttons
-const shortLabels: Record<string, string> = {
-  'LINCS L1000 CP': 'L1000 CP',
-  'LINCS L1000 XPR': 'L1000 XPR',
-  'Microarrays CMAP': 'CMAP Arrays',
-  'NIBR DRUG-seq': 'NIBR DR-seq',
-  'DeepCover MoA': 'DeepCover',
-  'Ginkgo Bioworks': 'Ginkgo DR-seq',
-  'Perturb Atlas Human': 'PA Human',
-  'Perturb Atlas Mouse': 'PA Mouse',
-  'Replogle et al.': 'Replogle et al.',
-}
-
-// Custom logo sizes per library (matches original groupSubtitle sizing)
-const customSizes: Record<string, number> = {
-  'RummaGEO Chem': 60,
-  'RummaGEO Gene': 60,
-  'Microarrays CMAP': 100,
-  'SciPlex': 75,
-  'NIBR DRUG-seq': 100,
-  'Replogle et al.': 200,
-}
-const defaultSize = 80
-
-// Build per-library entries from config. Drug libraries first (alphabetical
-// within), then gene libraries (alphabetical within). Same category color
-// theme (cyan / fuchsia) carries over from the button styling, so the
-// grouping is visually obvious in the grid.
-const allLibraries = Object.values(libraryConfig.libraries).map((l: any) => ({
-  name: l.displayName as string,
-  category: l.category as 'drug' | 'gene',
-})).sort((a, b) => {
-  if (a.category !== b.category) return a.category === 'drug' ? -1 : 1;
-  return a.name.localeCompare(b.name);
-})
-
-// Export counts for use in subtitle
-export const resourceCount = new Set(allLibraries.map(l => logoMap[l.name]?.src).filter(Boolean)).size
-export const libraryCount = allLibraries.length
-export const drugLibraryCount = allLibraries.filter(l => l.category === 'drug').length
-export const geneLibraryCount = allLibraries.filter(l => l.category === 'gene').length
+import useLibraryCatalog from '@/utils/useLibraryCatalog'
 
 export default function DatasetIcons({
   selectedLibraries = [],
@@ -72,6 +10,8 @@ export default function DatasetIcons({
   selectedLibraries?: string[]
   onSelectionChange?: (libraries: string[]) => void
 }) {
+  const { libraries } = useLibraryCatalog()
+  const allLibraries = [...libraries].sort((a, b) => a.category === b.category ? a.name.localeCompare(b.name) : a.category === 'drug' ? -1 : 1)
   const handleToggle = (name: string) => {
     if (selectedLibraries.includes(name)) {
       onSelectionChange(selectedLibraries.filter(lib => lib !== name))
@@ -94,30 +34,31 @@ export default function DatasetIcons({
     }
   }
 
-  const renderButton = ({ name, category }: { name: string; category: 'drug' | 'gene' }) => {
-    const logoInfo = logoMap[name]
-    if (!logoInfo) return null
-    const size = customSizes[name] || defaultSize
-    const label = shortLabels[name] || name
+  const renderButton = (library: typeof libraries[number]) => {
+    const { name, category } = library
+    const configured = library.manifest.presentation
+    const logoInfo = configured?.logo
+    const size = logoInfo?.width ?? 80
+    const label = configured?.shortLabel || name
     return (
       <button
         key={name}
         type="button"
         onClick={() => handleToggle(name)}
         className={`btn btn-ghost p-2 h-auto min-h-0 w-32 flex flex-col items-center justify-center transition-all rounded-lg mx-1 ${getButtonStyle(name, category)}`}
-        title={name}
+        title={label}
       >
         <div className="w-24 h-24 relative flex items-center justify-center">
-          {logoInfo.darkSrc ? (
+          {!logoInfo ? <span className="text-2xl font-semibold" aria-hidden="true">{name.split(/\s+/).map(word => word[0]).slice(0, 3).join('')}</span> : logoInfo.darkSrc ? (
             <>
               <Image src={logoInfo.src} alt={name} width={size} height={size} className="object-contain max-w-full max-h-full dark:hidden" />
               <Image src={logoInfo.darkSrc} alt={name} width={size} height={size} className="object-contain max-w-full max-h-full hidden dark:block" />
             </>
           ) : (
-            <Image src={logoInfo.src} alt={name} width={size} height={size} className={`object-contain max-w-full max-h-full ${name === 'SciPlex' ? '' : 'dark:invert'}`} unoptimized={logoInfo.type === 'svg'} />
+            <Image src={logoInfo.src} alt={name} width={size} height={size} className={`object-contain max-w-full max-h-full ${configured?.logo?.invertInDarkMode === false ? '' : 'dark:invert'}`} unoptimized />
           )}
         </div>
-        <span className="text-xs mt-1 leading-tight text-center whitespace-nowrap">{label}</span>
+        <span className="mt-1 block max-w-full truncate text-center text-xs normal-case leading-tight">{label}</span>
       </button>
     )
   }

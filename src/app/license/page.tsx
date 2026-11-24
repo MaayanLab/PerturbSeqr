@@ -1,5 +1,6 @@
 import React from 'react'
 import { Metadata, ResolvingMetadata } from 'next'
+import PaperCitation from '@/components/PaperCitation'
 
 export async function generateMetadata(props: {}, parent: ResolvingMetadata): Promise<Metadata> {
   const parentMetadata = await parent
@@ -21,9 +22,7 @@ export default async function License() {
       <p className="mt-1">
         Within any publication that uses any methods or results inspired by Perturb-Seqr, please cite:
       </p>
-      <p className="mt-1 font-bold">
-        Lily D. Taub, John K. Gardner, Ido Diamant, Daniel J. B. Clarke, Avi Ma&apos;ayan. Perturb-Seqr: Comprehensive Signature Search Engine Integrating Connectivity Maps from Multiple Sources. bioRxiv (2026). <a className="underline" href="https://www.biorxiv.org/content/10.64898/2026.10.06.757137v1">doi:10.64898/2026.10.06.757137</a>
-      </p>
+      <PaperCitation />
       <h3 className="text-lg font-semibold mt-4">Disclaimer</h3>
       <p className="mt-1 font-bold">
         PERTURB-SEQR IS NOT TO BE USED FOR TREATING OR DIAGNOSING HUMAN SUBJECTS.

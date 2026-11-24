@@ -68,6 +68,11 @@ ARCHITECTURE.md
 scripts/deploy_to_dev.sh
 notes/
 notebooks/
+# Local assistant state, skills, and exported conversations
+/.claude/
+session*.md
+L2S2_PAIRED_ENRICHMENT_CONTEXT.md
+MCP_IMPLEMENTATION_NOTES.md
 startup_log*.txt
 startup_log*.md
 .python-version
@@ -84,6 +89,8 @@ public/umap/enrich/
 manuscript/figures/umap
 
 # Data files
+data/library-builds/
+data/upstream/
 *.tsv
 *.rpt
 *.feather

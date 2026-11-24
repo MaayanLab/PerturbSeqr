@@ -3,6 +3,8 @@ __pycache__
 .env
 .env*.local
 .git
+.claude/
+notes/
 .pnp.js
 .venv
 .vercel

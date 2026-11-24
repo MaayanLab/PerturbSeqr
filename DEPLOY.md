@@ -1,122 +1,62 @@
-# Prod Server Deployment
+# Production deployment
 
-## Setup
+Run from the repo root on `main`, with the production Kubernetes context and `.env`
+([example](.env.example)). Keep the existing Compose project name and AWS S3 index
+settings. Library setup jobs use the existing `perturbseqr-env` secret.
 
-```bash
-cp .env.example .env
-# edit .env:
-#   - POSTGRES_PASSWORD: secure value
-#   - PUBLIC_S3_URL: https://perturbseqr.s3.amazonaws.com
-#   - INGEST_S3_ENDPOINT: https://s3.us-east-1.amazonaws.com
-#   - INGEST_S3_BUCKET: perturbseqr
-#   - ENRICH_S3_ENDPOINT: https://s3.us-east-1.amazonaws.com
-#   - ENRICH_S3_BUCKET: perturbseqr
-#   - ENRICH_S3_PREFIX: enrich/production/
-#   - AWS_REGION: (default: us-east-1)
-#   - AWS_ACCESS_KEY_ID: supplied privately
-#   - AWS_SECRET_ACCESS_KEY: supplied privately
-#   - AWS_SESSION_TOKEN: temporary credentials only. Leave unset otherwise.
+## Update services
 
-kube-compose up
-```
+1. Build the app and enrichment images with the tag pinned in `docker-compose.yaml`:
 
-Production downloads use the AWS S3 bucket root, with no `/data` suffix. Rebuild the app image when changing `PUBLIC_S3_URL`, since the download URL is embedded at build time.
+   ```bash
+   TAG='<image-tag>'
+   gh workflow run build-app.yml --ref main -f tag="$TAG" -f environment=prod
+   gh workflow run build-enrich.yml --ref main -f tag="$TAG"
+   ```
 
-## Storage and ingest
+2. **First catalog upgrade only:** Run the catalog job after its ingest image is
+   published. Wait for it to succeed before deploying the services.
 
-Production GMTs, metadata parquets, full-signature downloads, and enrichment indexes use the AWS bucket `perturbseqr`, in `us-east-1`. Upload data changes there before running ingest.
+   ```bash
+   kubectl -n perturbseqr create -f k8s/perturbseqr-0.2.55-catalog.yaml
+   ```
 
-### Container configuration
+3. Once the service builds pass, check the diff, then deploy:
 
-```bash
-# Create or update the ingest Job secret from .env
-kubectl create secret generic perturbseqr-env --from-env-file=.env -n perturbseqr --dry-run=client -o yaml | kubectl apply -f -
-```
+   ```bash
+   kube-compose -f docker-compose.yaml diff
+   kube-compose -f docker-compose.yaml up
+   ```
 
-### Configure rclone for production AWS S3
+4. Wait for the rollout and run an enrichment search against an existing library.
 
-Add this remote to your local rclone configuration:
+## Publish a library
 
-```ini
-[perturbseqr]
-type = s3
-provider = AWS
-env_auth = true
-region = us-east-1
-```
+The [library's S3 files and manifest](libraries/README.md) must be ready, and the
+catalog must already be initialized.
 
-Export `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` (plus `AWS_SESSION_TOKEN` for temporary credentials); rclone does not load `.env`.
+If the release ships a ready-to-run Job and its ingest image is published, run
+`kubectl -n perturbseqr create -f "$JOB_FILE"` with `JOB_FILE` set to the release's
+Job YAML, then follow its logs (step 3).
 
-Files are stored at the bucket root. For example, `cm4ai.gmt.gz` is public at `https://perturbseqr.s3.amazonaws.com/cm4ai.gmt.gz`.
+1. Build the ingest image from `main` with the bundled manifest:
 
-### Upload updates before ingest
+   ```bash
+   TAG='<image-tag>'
+   SLUG='<library-slug>'
+   gh workflow run build-ingest.yml --ref main -f tag="$TAG"
+   ```
 
-```bash
-# GMTs
-rclone copy --progress data/drug_perturbation/ perturbseqr:perturbseqr/
-rclone copy --progress data/gene_perturbation/ perturbseqr:perturbseqr/
+2. Once the build passes, run the setup job:
 
-# Full-signature downloads
-rclone copy --progress data/full-signatures/ perturbseqr:perturbseqr/
+   ```bash
+   LIBRARY_SETUP_IMAGE="johnkgardner/perturbseqr-ingest:$TAG" LIBRARY_RELEASE="$SLUG" \
+     envsubst '${LIBRARY_SETUP_IMAGE} ${LIBRARY_RELEASE}' < k8s/library-setup-job.yaml |
+     kubectl -n perturbseqr create -f -
+   ```
 
-# Metadata parquets; omit other metadata-source inputs
-rclone copy --progress data/metadata/ perturbseqr:perturbseqr/ --include "*_metadata.parquet"
+3. Follow the job logs. Once it succeeds, verify the library in the [production app](https://perturbseqr.maayanlab.cloud/):
 
-# Inspect uploaded object names
-rclone lsf perturbseqr:perturbseqr/ --max-depth 1
-```
-
-Ingest reads the supported GMT objects from the bucket root.
-
-### Run ingest
-
-```bash
-# Run ingest
-kubectl create -f k8s/ingest-incremental-job.yaml -n perturbseqr
-
-# Logs
-kubectl get jobs -n perturbseqr
-kubectl logs -f job/<job-name> -n perturbseqr
-
-# Restart app so PostGraphile picks up the new schema
-kube-compose restart perturbseqr-app
-```
-
-## Updating the app
-
-```bash
-kube-compose version perturbseqr-app patch
-docker compose build perturbseqr-app
-docker compose push perturbseqr-app
-kube-compose diff
-kube-compose up
-```
-
-Or bump tags in `docker-compose.yaml`, build and push the images, and run `kube-compose up`.
-
-## Clean re-ingest (preserves user_gene_set)
-
-```bash
-kubectl create -f k8s/ingest-clean-job.yaml -n perturbseqr
-```
-
-## Full rebuild
-
-Deletes the PostgreSQL PVCs.
-
-```bash
-kube-compose down -v
-kubectl delete secret perturbseqr-env -n perturbseqr
-kube-compose up
-
-kubectl create secret generic perturbseqr-env --from-env-file=.env -n perturbseqr
-
-# Fresh ingest from AWS, once the updated ingest image/environment are configured
-kubectl create -f k8s/ingest-incremental-job.yaml -n perturbseqr
-```
-
-## URLs
-
-- App: https://perturbseqr.maayanlab.cloud
-- AWS downloads: https://perturbseqr.s3.amazonaws.com/
-- MCP: https://perturbseqr.maayanlab.cloud/mcp
+   ```bash
+   kubectl -n perturbseqr logs -f 'job/<job-name>'
+   ```

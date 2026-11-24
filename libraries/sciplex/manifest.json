@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1, "registration": "existing", "slug": "sciplex", "displayName": "SciPlex", "category": "drug", "resource": { "key": "sciplex" }, "version": "legacy",
+  "description": "Sci-Plex drug perturbation signatures.",
+  "license": null,
+  "input": { "gmt": "s3://perturbseqr/sciplex.gmt.gz", "organism": "human", "geneIdentifiers": "symbol" },
+  "sources": [{ "label": "Harmonizome", "url": "https://maayanlab.cloud/Harmonizome/dataset/Sci-Plex+Drug+Perturbation+Signatures" }],
+  "publications": [{ "url": "https://pubmed.ncbi.nlm.nih.gov/31806696/" }],
+  "presentation": { "downloadTitle": "Sci-Plex Drug Perturbations", "downloadSummary": "", "logo": { "src": "/images/sciplex-logo.svg", "darkSrc": "/images/sciplex-logo-dark.svg", "width": 75 }, "termExample": { "term": "2-Methoxyestradiol::A549::::24h::100nM up" } },
+  "artifacts": [
+    { "kind": "gmt", "s3": "s3://perturbseqr/sciplex.gmt.gz", "format": "gmt.gz", "bytes": 4801553 },
+    { "kind": "full_signatures", "label": "CD Coefficients", "s3": "s3://perturbseqr/sciplex-full.txt.gz", "bytes": 320225756 },
+    { "kind": "cell_line_metadata", "label": "Cell Line", "s3": "s3://perturbseqr/sciplex-cell_line_metadata.parquet", "bytes": 4532 },
+    { "kind": "drug_metadata", "label": "Drug", "s3": "s3://perturbseqr/sciplex-drug_metadata.parquet", "bytes": 25554 }
+  ]
+}

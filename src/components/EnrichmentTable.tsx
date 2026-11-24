@@ -7,8 +7,8 @@ import { IoMdInformationCircleOutline } from 'react-icons/io';
 import { SortableHeader } from '@/components/SortableHeader';
 import { parseTerm, getCellDisplay, formatPerturbationWithType } from '@/utils/parseTerm';
 import {
-  getDrugInfo,
-  getPerturbationUrl,
+  getSignatureCompound,
+  getGenePerturbationUrl,
   isGenePerturbationLibrary,
 } from '@/utils/metadataLookup';
 import { DatasetCell } from '@/components/DatasetCell';
@@ -33,6 +33,8 @@ type EnrichNode = {
   geneSets?: {
     nodes: ReadonlyArray<{
       id?: any;
+      cid?: string | null;
+      libraryId?: string | null;
       term?: string | null;
       description?: string | null;
       nGeneIds?: number | null;
@@ -184,8 +186,9 @@ export function EnrichmentTable({
           </tr>
         ) : null}
         {nodes?.flatMap((enrichmentResult) => {
-          const term = enrichmentResult?.geneSets?.nodes?.[0]?.term;
-          const libraryName = enrichmentResult?.geneSets?.nodes?.[0]?.library?.name || '';
+          const signature = enrichmentResult?.geneSets?.nodes?.[0];
+          const term = signature?.term;
+          const libraryName = signature?.library?.name || '';
 
           const parsed = term ? parseTerm(term) : parseTerm('');
           const dataset = libraryName;
@@ -196,21 +199,18 @@ export function EnrichmentTable({
           const concentration = parsed.concentration || 'N/A';
 
           const isGenePert = isGenePerturbationLibrary(libraryName);
-          // Display string with perturbation type appended for gene libraries (e.g. "PRSS36 KO").
-          // `perturbation` stays raw — it feeds the NCBI/PubChem URL and drug lookups below.
-          const perturbationDisplay = formatPerturbationWithType(perturbation, parsed.perturbationType, isGenePert);
+          const drugInfo = isGenePert ? null : getSignatureCompound({
+            label: perturbation, cid: signature?.cid, libraryId: signature?.libraryId, legacyLabel: parsed.extras[0],
+          }, drugLookupLoaded);
+          const perturbationDisplay = drugInfo?.name ?? formatPerturbationWithType(perturbation, parsed.perturbationType, true);
           const typeSuffix = isGenePert && !perturbation.includes('|') ? perturbationDisplay.slice(perturbation.length) : '';
 
-          const fdaData = enrichmentResult?.geneSets?.nodes?.[0]?.geneSetFdaCountsById?.nodes?.[0];
+          const fdaData = signature?.geneSetFdaCountsById?.nodes?.[0];
           const sigCount = fdaData?.count ?? 0;
           const dbMoa = fdaData?.moa || '';
           const approved = fdaData?.approved || false;
 
-          const drugInfo =
-            !isGenePert && drugLookupLoaded
-              ? getDrugInfo(perturbation) || getDrugInfo(parsed.extras[0] || '')
-              : null;
-          const perturbationUrl = getPerturbationUrl(perturbation, libraryName);
+          const perturbationUrl = drugInfo?.url ?? getGenePerturbationUrl(perturbation);
           const moa = isGenePert ? '' : dbMoa || drugInfo?.moa || '';
 
           if (!enrichmentResult?.geneSets) return null;

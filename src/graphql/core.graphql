@@ -51,6 +51,8 @@ query EnrichmentQuery($genes: [String]!, $filterTerm: String = "", $libraryNames
         geneSets {
           nodes {
             id
+            cid
+            libraryId
             term
             description
             nGeneIds
@@ -317,6 +319,8 @@ query PairEnrichmentQuery($genesUp: [String]!, $genesDown: [String]!, $filterTer
           nodes {
             description
             id
+            cid
+            libraryId
             nGeneIds
             term
             library {
@@ -513,6 +517,8 @@ query TermSearch($terms: [String]!, $libraryNames: [String], $offset: Int = 0, $
   geneSetTermSearch(terms: $terms, libraryNames: $libraryNames, offset: $offset, first: $first) {
     nodes {
       id
+      cid
+      libraryId
       term
       nGeneIds
       library {

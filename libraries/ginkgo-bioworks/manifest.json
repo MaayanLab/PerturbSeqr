@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1, "registration": "existing", "slug": "ginkgo-bioworks", "displayName": "Ginkgo Bioworks", "category": "drug", "resource": { "key": "ginkgo" }, "version": "legacy",
+  "description": "DRUG-seq signatures from GDPx1 (A549 cells) and GDPx2 (four primary human cell types). Data used under license.",
+  "license": { "id": "CC BY with restrictions", "url": "https://huggingface.co/datasets/ginkgo-datapoints/GDPx1/blob/main/LICENSE.md" },
+  "input": { "gmt": "ginkgo-bioworks.gmt.gz", "organism": "human", "geneIdentifiers": "symbol" },
+  "sources": [{ "label": "Dataset access", "url": "https://datapoints.ginkgo.bio/dataset-access" }, { "label": "GDPx1", "url": "https://huggingface.co/datasets/ginkgo-datapoints/GDPx1" }, { "label": "GDPx2", "url": "https://huggingface.co/datasets/ginkgo-datapoints/GDPx2" }],
+  "presentation": { "downloadTitle": "Ginkgo Bioworks (GDPx1 + GDPx2)", "shortLabel": "GDPx1 + GDPx2", "filterLabel": "Ginkgo GDPx1 + GDPx2", "logo": { "src": "/images/ginkgo-logo.png" }, "termExample": { "term": "SC_514::A549::::24h::1uM up" } },
+  "distribution": { "gmt": "restricted", "metadata": "restricted" },
+  "artifacts": [{ "kind": "gmt", "status": "restricted" }, { "kind": "full_signatures", "label": "Full signatures", "status": "restricted" }]
+}

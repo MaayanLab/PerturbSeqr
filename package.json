@@ -8,6 +8,7 @@
     "start:graphql": "ts-node src/cli/graphql.ts",
     "start": "next start",
     "lint": "next lint",
+    "test:libraries": "node -r ts-node/register -r tsconfig-paths/register --test scripts/library-catalog.test.cjs",
     "generate": "graphql-codegen --config graphql.config.yml",
     "version": "ts-node src/cli/version-compose.ts && docker-compose build perturbseqr-app",
     "postversion": "docker-compose push perturbseqr-app"
@@ -15,6 +16,8 @@
   "dependencies": {
     "@apollo/client": "^3.8.0-rc.2",
     "@apollo/experimental-nextjs-app-support": "^0.8.0",
+    "@aws-sdk/client-s3": "^3.1175.0",
+    "@aws-sdk/s3-request-presigner": "^3.1175.0",
     "@graphile-contrib/pg-simplify-inflector": "^6.1.0",
     "@types/node": "20.4.6",
     "@types/react": "18.2.18",
@@ -35,6 +38,7 @@
     "eslint-config-next": "13.4.12",
     "graphql": "^15.8.0",
     "next": "^13.5.6",
+    "pg": "^8.23.1",
     "postcss": "^8.4.35",
     "postgraphile": "^4.13.0",
     "react": "18.2.0",
@@ -54,6 +58,7 @@
     "@parcel/watcher": "^2.2.0",
     "@types/d3-interpolate": "^3.0.4",
     "@types/d3-scale": "^4.0.8",
+    "@types/pg": "^8.23.1",
     "@types/uuid": "^9.0.2",
     "concurrently": "^8.2.0",
     "daisyui": "^3.5.1",

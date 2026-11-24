@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1, "registration": "existing", "slug": "tahoe-100m", "displayName": "Tahoe-100M", "category": "drug", "resource": { "key": "tahoe" }, "version": "legacy",
+  "description": "Pseudobulk DESeq2, padj ≤ 0.05, top 100 by log2FC, per-concentration",
+  "license": null,
+  "input": { "gmt": "s3://perturbseqr/tahoe-100m.gmt.gz", "organism": "human", "geneIdentifiers": "symbol" },
+  "sources": [{ "label": "Hugging Face", "url": "https://huggingface.co/datasets/tahoebio/Tahoe-100M" }],
+  "publications": [{ "url": "https://www.biorxiv.org/content/10.1101/2025.02.20.639398v3" }],
+  "presentation": { "downloadTitle": "Tahoe 100M", "downloadSummaryLink": { "label": "Pseudobulk DESeq2", "url": "https://huggingface.co/datasets/tahoebio/Tahoe-100M/viewer/pseudobulk_differential_expression" }, "logo": { "src": "/images/tahoe-logo-new.png" }, "termExample": { "term": "(R)-Verapamil (hydrochloride)::A-172::CNS/Brain::24h::0.05uM up" } },
+  "artifacts": [
+    { "kind": "gmt", "s3": "s3://perturbseqr/tahoe-100m.gmt.gz", "format": "gmt.gz", "bytes": 28046210 },
+    { "kind": "full_signatures", "label": "DESeq2 log2FC", "url": "https://huggingface.co/datasets/tahoebio/Tahoe-100M/viewer/pseudobulk_differential_expression" },
+    { "kind": "cell_line_metadata", "label": "Cell Line", "s3": "s3://perturbseqr/tahoe-100m-cell_line_metadata.parquet", "bytes": 8722 },
+    { "kind": "drug_metadata", "label": "Drug", "s3": "s3://perturbseqr/tahoe-100m-drug_metadata.parquet", "bytes": 63484 }
+  ]
+}

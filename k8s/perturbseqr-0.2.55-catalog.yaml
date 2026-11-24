@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: library-setup-
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 43200
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: library-setup
+        image: johnkgardner/perturbseqr-ingest:0.2.55
+        command: ["python", "-u", "-m", "perturbseqr_ingest.library_setup"]
+        env:
+        - name: LIBRARY_RELEASE
+          value: ""
+        - name: POSTGRES_PASSWORD
+          valueFrom: { secretKeyRef: { name: perturbseqr-env, key: POSTGRES_PASSWORD } }
+        - name: DATABASE_URL
+          value: postgres://postgres:$(POSTGRES_PASSWORD)@perturbseqr-postgres/postgres?sslmode=disable
+        - name: ENRICH_URL
+          value: http://perturbseqr-enrich:8000

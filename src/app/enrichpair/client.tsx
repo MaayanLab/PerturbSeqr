@@ -21,19 +21,17 @@ import type { ContributingSignature } from "@/components/signaturesModal";
 import { FaFilter, FaSortUp } from "react-icons/fa6";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { parseTerm, getCellDisplay, formatPerturbationWithType } from "@/utils/parseTerm";
-import { preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary } from "@/utils/metadataLookup";
+import { preloadDrugLookup, getSignatureCompound, getGenePerturbationUrl, isGenePerturbationLibrary } from "@/utils/metadataLookup";
+import { findCatalogLibrary } from '@/utils/libraryCatalog';
 import { DatasetCell } from "@/components/DatasetCell";
 import { useRouter } from "next/navigation";
-import libraryConfig from "@/config/libraries.json";
+import useLibraryCatalog from '@/utils/useLibraryCatalog';
 import { LibraryBarGraphGrid, LibraryCardPaired } from "@/components/BarGraph";
 import ShareButton from "@/components/shareButton";
 import { SortableHeader } from "@/components/SortableHeader";
 import LibraryCount from "@/components/LibraryCount";
 import SingleGenePerturbationResourceLinks from "@/components/SingleGenePerturbationResourceLinks";
 
-const allLibraryDisplayNames = Object.values(libraryConfig.libraries).map((l: any) => l.displayName as string);
-const drugLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'drug').map((l: any) => l.displayName as string);
-const geneLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'gene').map((l: any) => l.displayName as string);
 
 import { DEFAULT_CONSENSUS_TOP_N_SIGNATURES, DEFAULT_PVALUE_CUTOFF, RESULTS_PER_PAGE } from '@/constants/enrichment';
 
@@ -87,6 +85,7 @@ function EnrichmentResults({
   datasetDown: string;
   libraryNames: string[] | null;
 }) {
+  const { names: allLibraryDisplayNames, drugNames: drugLibraryNames, geneNames: geneLibraryNames, filterLabels } = useLibraryCatalog()
 
   
   const genesUp = React.useMemo(
@@ -163,7 +162,7 @@ function EnrichmentResults({
     if (datasetFilter.includes("__none__")) return [];
     if (datasetFilter.length > 0) return datasetFilter;
     return libraryNames ?? allLibraryDisplayNames;
-  }, [datasetFilter, libraryNames]);
+  }, [datasetFilter, libraryNames, allLibraryDisplayNames]);
   // Query enrichment results
   const { data: enrichmentResults, error } = usePairEnrichmentQueryQuery({
     skip: genesUp.length === 0 || genesDown.length === 0,
@@ -333,10 +332,10 @@ function EnrichmentResults({
                 >None</button>
               </div>
               {allLibraryDisplayNames.map((lib) => (
-                <label key={lib} className="flex items-center gap-1 cursor-pointer py-0.5 text-xs">
+                <label key={lib} className="flex min-w-0 items-center gap-1 cursor-pointer py-0.5 text-xs" title={filterLabels.get(lib) ?? lib}>
                   <input
                     type="checkbox"
-                    className="checkbox checkbox-xs"
+                    className="checkbox checkbox-xs shrink-0"
                     checked={datasetFilter.length === 0 ? true : datasetFilter.includes(lib)}
                     onChange={(e) => {
                       let next: string[];
@@ -356,7 +355,7 @@ function EnrichmentResults({
                       }
                     }}
                   />
-                  {lib}
+                  <span className="truncate">{filterLabels.get(lib) ?? lib}</span>
                 </label>
               ))}
             </div>
@@ -994,18 +993,20 @@ function EnrichmentResults({
                     const isGeneKO = libs.length > 0 && libs.every(lib => geneLibraryNames.includes(lib));
                     if (isGeneKO && !moas)
                       perturbation = perturbation + " KO";
-                    // Get drug info for CID display (only for non-KO perturbations)
-                    const consensusDrugInfo = !isGeneKO && !moas && drugLookupLoaded ? getDrugInfo(perturbation || '') : null;
+                    const consensusDrugInfo = !isGeneKO && !moas ? getSignatureCompound({
+                      label: perturbation || '', cid,
+                      libraryId: libs.length === 1 ? findCatalogLibrary(libs[0])?.id : undefined,
+                    }, drugLookupLoaded) : null;
                     return (
                       <tr key={genesetIndex}>
                         <td>
                         {moas ? <span style={{textTransform: 'capitalize'}}>{perturbation}</span> : !isGeneKO ? (
                             <div>
                               <div>
-                                {perturbation}
+                                {consensusDrugInfo?.name || perturbation}
                                 <a
                                   className="underline cursor-pointer mx-2"
-                                  href={`https://pubchem.ncbi.nlm.nih.gov/#query=${perturbation}`}
+                                  href={consensusDrugInfo?.url}
                                   target="_blank"
                                 >
                                   <Image
@@ -1236,10 +1237,11 @@ function EnrichmentResults({
               ) : null}
               {enrichmentResults?.currentBackground?.pairedEnrich?.nodes?.flatMap(
                 (enrichmentResult) => {
-                  const term = enrichmentResult?.geneSet?.nodes[0]?.term;
                   const geneSetUp = enrichmentResult?.geneSet?.nodes.find((x) => x.id === enrichmentResult.geneSetIdUp)
                   const geneSetDown = enrichmentResult?.geneSet?.nodes.find((x) => x.id === enrichmentResult.geneSetIdDown)
-                  const libraryName = geneSetUp?.library?.name || geneSetDown?.library?.name || '';
+                  const signature = geneSetUp ?? geneSetDown;
+                  const term = signature?.term;
+                  const libraryName = signature?.library?.name || '';
 
                   const parsed = term ? parseTerm(term) : parseTerm('');
 
@@ -1250,23 +1252,19 @@ function EnrichmentResults({
 
                   // Check if this is a gene or drug perturbation library
                   const isGenePert = isGenePerturbationLibrary(libraryName);
-                  // Display string with perturbation type appended for gene libraries (e.g. "PRSS36 KO");
-                  // `perturbation` stays raw for the NCBI/PubChem URL and drug lookups.
-                  const perturbationDisplay = formatPerturbationWithType(perturbation, parsed.perturbationType, isGenePert);
+                  const drugInfo = isGenePert ? null : getSignatureCompound({
+                    label: perturbation, cid: signature?.cid, libraryId: signature?.libraryId, legacyLabel: parsed.extras[0],
+                  }, drugLookupLoaded);
+                  const perturbationDisplay = drugInfo?.name ?? formatPerturbationWithType(perturbation, parsed.perturbationType, true);
                   const typeSuffix = isGenePert && !perturbation.includes('|') ? perturbationDisplay.slice(perturbation.length) : '';
 
                   // Get FDA data from database
-                  const fdaData = enrichmentResult?.geneSet?.nodes[0].geneSetFdaCountsById?.nodes[0];
+                  const fdaData = signature?.geneSetFdaCountsById?.nodes[0];
                   const count = fdaData?.count ?? 0;
                   const approved = fdaData?.approved || false;
                   const dbMoa = fdaData?.moa || '';
 
-                  // Get additional drug info from JSON lookup (only for drug perturbations)
-                  const drugInfo = !isGenePert && drugLookupLoaded
-                    ? (getDrugInfo(perturbation) || getDrugInfo(parsed.extras[0] || ''))
-                    : null;
-                  const perturbationUrl = getPerturbationUrl(perturbation, libraryName);
-                  const perturbationLinkTitle = getPerturbationLinkTitle(libraryName);
+                  const perturbationUrl = drugInfo?.url ?? getGenePerturbationUrl(perturbation);
                   // Use database MOA first, fallback to JSON lookup (only for drugs)
                   const moa = isGenePert ? '' : (dbMoa || drugInfo?.moa || '');
 

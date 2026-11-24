@@ -28,3 +28,8 @@ services:
     build:
       platforms:
         - linux/arm64
+  library-setup:
+    platform: linux/arm64
+    build:
+      platforms:
+        - linux/arm64

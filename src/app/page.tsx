@@ -5,12 +5,9 @@ import Image from "next/image";
 import InputForm from "./inputForm";
 import InputFormUpDown from "./inputFormUpDown";
 import LibraryFilter from "@/components/libraryFilter";
-import DatasetIcons, { resourceCount, libraryCount, drugLibraryCount, geneLibraryCount } from "@/components/datasetIcons";
+import DatasetIcons from "@/components/datasetIcons";
 import Stats from "@/components/stats";
-import libraryConfig from '@/config/libraries.json';
-
-// Get all library display names for default selection
-const allLibraries = Object.values(libraryConfig.libraries).map((l: any) => l.displayName as string);
+import useLibraryCatalog, { useLibrarySelection } from '@/utils/useLibraryCatalog';
 
 /**
  * Home page component - Gene set input with library filter
@@ -20,6 +17,7 @@ const allLibraries = Object.values(libraryConfig.libraries).map((l: any) => l.di
  * Output: Renders input card, library filter, and dataset icons side by side
  */
 function HomeContent() {
+  const { resourceCount, libraryCount, drugLibraryCount, geneLibraryCount } = useLibraryCatalog()
   const searchParams = useSearchParams()
   const datasetIds = searchParams?.getAll('dataset') ?? []
   const librariesParam = searchParams?.get('libraries') ?? null
@@ -27,13 +25,8 @@ function HomeContent() {
   const [inputSingle, setInputSingle] = React.useState(datasetIds.length === 1)
   // State for selected libraries - passed to enrich page via URL params
   // Default to all libraries selected, or restore from URL params when returning from results
-  const [selectedLibraries, setSelectedLibraries] = React.useState<string[]>(() => {
-    if (librariesParam) {
-      const libs = librariesParam.split(',').filter(Boolean)
-      return libs.length > 0 ? libs : allLibraries
-    }
-    return allLibraries
-  })
+  const [selectedLibraries, setSelectedLibraries] = useLibrarySelection(
+    librariesParam === '__none__' ? [] : librariesParam ? librariesParam.split(',').filter(Boolean) : null)
 
   return (
     <div className="flex flex-col items-center">

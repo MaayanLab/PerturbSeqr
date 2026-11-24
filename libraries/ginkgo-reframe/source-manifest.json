@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "slug": "ginkgo-reframe",
+  "displayName": "Ginkgo reFRAME",
+  "category": "drug",
+  "resource": { "key": "ginkgo", "name": "Ginkgo Datapoints" },
+  "version": "deseq2-v1",
+  "description": "DESeq2 drug perturbation signatures in human THP-1 cells (24 h, 10 µM).",
+  "input": {
+    "gmt": "../../data/upstream/ginkgo-reframe/ginkgo-reframe-short-drugs.gmt",
+    "sha256": "1ee457c3c933a8c6f3495bdf2fd26510632f5a7f7c9a69706ab9bfe7f6b90f7c",
+    "organism": "human",
+    "geneIdentifiers": "symbol",
+    "compoundLabels": "names-and-pubchem-cids",
+    "compoundMetadata": {
+      "path": "../../data/upstream/ginkgo-reframe/compound_label_map.csv",
+      "sha256": "c2ede07c0c6a9447111167e0099a23d4f47fe83bf2d8827e2b9ba71f01981bba",
+      "labelColumn": "label",
+      "cidColumn": "pubchem_cid",
+      "nameColumn": "common_name"
+    },
+    "preparation": {
+      "fields": ["perturbation", "cell_line", "cell_type", "concentration"],
+      "defaults": { "timepoint": "24H" },
+      "provenance": {
+        "timepoint": "All 12,377 contrasts are 24 h in the case/control map and AnnData observation names."
+      }
+    }
+  },
+  "sources": [
+    { "label": "Ginkgo reFRAME release", "url": "https://datapoints.ginkgo.bio/updates/vcpi-releases-drug-seq-profiles-for-the-reframe-library" },
+    { "label": "Original expression counts (registered access)", "url": "https://thevirtualcell.com/" }
+  ],
+  "license": { "id": "CC-BY-4.0", "url": "https://creativecommons.org/licenses/by/4.0/", "attribution": "Ginkgo Datapoints / Virtual Cell Pharmacology Initiative; ReFRAME collection from Calibr-Skaggs at Scripps Research." },
+  "presentation": { "logo": { "src": "/images/ginkgo-logo.png" } },
+  "distribution": { "gmt": "public", "metadata": "public" },
+  "artifacts": [
+    { "kind": "full_signatures", "label": "DESeq2 full statistics (AnnData, zipped)", "status": "available", "path": "../../data/upstream/ginkgo-reframe/ginkgo-reframe-deseq2.h5ad.zip", "format": "h5ad.zip", "sha256": "0b3be1a88484ae16ab5cfbeefe583ff0ea81da24f043f13cb01860914b0e9b8c" }
+  ]
+}

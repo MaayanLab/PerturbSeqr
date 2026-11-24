@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1, "registration": "existing", "slug": "perturb-atlas-mouse", "displayName": "Perturb Atlas Mouse", "category": "gene", "resource": { "key": "perturb-atlas" }, "version": "legacy",
+  "description": "Mouse gene perturbation signatures reprocessed from Harmonizome; GMT members mapped to human symbols.",
+  "license": null,
+  "input": { "gmt": "s3://perturbseqr/perturb-atlas-mouse.gmt.gz", "organism": "human", "geneIdentifiers": "symbol" },
+  "sources": [{ "label": "Harmonizome", "url": "https://maayanlab.cloud/Harmonizome/dataset/PerturbAtlas+Signatures+of+Differentially+Expressed+Genes+for+Mouse+Gene+Perturbations" }],
+  "publications": [{ "url": "https://pubmed.ncbi.nlm.nih.gov/39351872/" }],
+  "presentation": { "downloadTitle": "PerturbAtlas Mouse Gene Perturbations", "downloadSummary": "", "shortLabel": "PA Mouse", "logo": { "src": "/images/perturbatlas-logo.png" }, "termExample": { "term": "Adar1::::Anti-CD40 and anti-IgM activated B cells::::::KO::::SRP360154::1001 up", "extraFields": ["SRA ID", "Atlas ID"] } },
+  "artifacts": [
+    { "kind": "gmt", "s3": "s3://perturbseqr/perturb-atlas-mouse.gmt.gz", "format": "gmt.gz", "bytes": 2072568 },
+    { "kind": "full_signatures", "label": "CD Coefficients", "s3": "s3://perturbseqr/perturb-atlas-mouse-full.txt.gz", "bytes": 8894168 },
+    { "kind": "cell_line_metadata", "label": "Cell Line", "s3": "s3://perturbseqr/perturb-atlas-mouse-cell_line_metadata.parquet", "bytes": 10927 },
+    { "kind": "gene_target_metadata", "label": "Gene Targets", "s3": "s3://perturbseqr/perturb-atlas-mouse-gene_target_metadata.parquet", "bytes": 197562 }
+  ]
+}

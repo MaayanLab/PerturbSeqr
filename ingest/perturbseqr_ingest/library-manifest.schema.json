@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PerturbSeqr library manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "slug", "displayName", "category", "resource", "version", "description", "input", "license"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "registration": { "enum": ["import", "existing"] },
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "displayName": { "description": "Canonical library name used by the API and as the fallback for UI labels. No character limit; commas are not allowed.", "type": "string", "minLength": 1, "pattern": "^[^,]+$" },
+    "category": { "enum": ["drug", "gene"] },
+    "resource": { "type": "object", "required": ["key"], "additionalProperties": false, "properties": { "key": { "type": "string", "minLength": 1 }, "name": { "type": "string" } } },
+    "version": { "type": "string", "minLength": 1 },
+    "description": { "type": "string", "minLength": 1 },
+    "input": {
+      "type": "object", "additionalProperties": false,
+      "required": ["gmt", "organism", "geneIdentifiers"],
+      "properties": {
+        "gmt": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "organism": { "const": "human" },
+        "geneIdentifiers": { "const": "symbol" },
+        "compoundLabels": { "enum": ["names", "names-and-pubchem-cids"] },
+        "compoundAnnotations": {
+          "type": "object", "additionalProperties": false, "required": ["s3", "sha256"],
+          "properties": {
+            "s3": { "type": "string", "pattern": "^s3://" },
+            "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          }
+        },
+        "compoundMetadata": {
+          "type": "object", "additionalProperties": false,
+          "required": ["path", "labelColumn", "cidColumn"],
+          "properties": {
+            "path": { "type": "string", "minLength": 1 },
+            "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "labelColumn": { "type": "string", "minLength": 1 },
+            "cidColumn": { "type": "string", "minLength": 1 },
+            "nameColumn": { "type": "string", "minLength": 1 }
+          }
+        },
+        "preparation": {
+          "type": ["object", "null"], "additionalProperties": false, "required": ["fields", "defaults"],
+          "properties": {
+            "fields": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+            "defaults": { "type": "object", "additionalProperties": { "type": "string" } },
+            "provenance": { "type": "object", "additionalProperties": { "type": "string", "minLength": 1 } }
+          }
+        }
+      }
+    },
+    "sources": { "type": "array", "items": { "$ref": "#/$defs/link" } },
+    "publications": { "type": "array", "items": { "$ref": "#/$defs/link" } },
+    "license": {
+      "description": "Verified dataset license, or null if no library-wide license has been verified.",
+      "type": ["object", "null"], "required": ["id"], "additionalProperties": false,
+      "properties": { "id": { "type": "string", "minLength": 1 }, "url": { "type": "string", "pattern": "^https?://" }, "attribution": { "type": "string" } }
+    },
+    "presentation": { "type": "object", "additionalProperties": false, "properties": {
+      "shortLabel": { "description": "Home grid caption below the logo. At most 16 characters; omit the brand when the logo already identifies it.", "type": "string", "minLength": 1, "maxLength": 16 },
+      "filterLabel": { "description": "Checkbox label in the library filter, beside the signature count. At most 24 characters; use the canonical name if it fits.", "type": "string", "minLength": 1, "maxLength": 24 },
+      "downloadTitle": { "description": "Full title of the Downloads card. No character limit; it can wrap across lines.", "type": "string", "minLength": 1 },
+      "downloadSummary": { "type": "string" },
+      "downloadSummaryLink": { "$ref": "#/$defs/link" },
+      "relatedLinks": { "type": "array", "items": { "$ref": "#/$defs/link" } },
+      "termExample": { "type": "object", "required": ["term"], "additionalProperties": false, "properties": {
+        "term": { "type": "string" }, "extraFields": { "type": "array", "items": { "type": "string" } }, "caption": { "type": "string" }
+      } },
+      "logo": { "type": "object", "additionalProperties": false, "required": ["src"], "properties": {
+        "src": { "type": "string", "pattern": "^/images/" }, "darkSrc": { "type": "string", "pattern": "^/images/" },
+        "invertInDarkMode": { "type": "boolean" }, "width": { "type": "integer", "minimum": 1, "maximum": 500 }
+      } }
+    } },
+    "processing": { "type": "object" },
+    "pairing": { "enum": ["allow-unpaired", "require-complete"] },
+    "distribution": { "type": "object", "additionalProperties": false, "properties": { "gmt": { "enum": ["public", "restricted"] }, "metadata": { "enum": ["public", "restricted"] } } },
+    "artifacts": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["kind"], "properties": {
+      "kind": { "enum": ["gmt", "signature_metadata", "drug_metadata", "cell_line_metadata", "gene_target_metadata", "full_signatures", "expression_counts", "sample_metadata", "compound_metadata", "processing_notes", "validation"] },
+      "label": { "type": "string" }, "status": { "enum": ["available", "template", "awaiting-source", "restricted"] },
+      "path": { "type": ["string", "null"] }, "url": { "type": ["string", "null"] },
+      "s3": { "type": "string", "pattern": "^s3://" }, "bytes": { "type": "integer", "minimum": 1 },
+      "format": { "type": ["string", "null"] }, "distribution": { "enum": ["public", "restricted"] },
+      "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    } } }
+  },
+  "$defs": {
+    "link": { "type": "object", "required": ["url"], "additionalProperties": false, "properties": { "label": { "type": "string" }, "url": { "type": "string", "pattern": "^https?://" } } }
+  }
+}

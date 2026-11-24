@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1, "registration": "existing", "slug": "microarrays-cmap", "displayName": "Microarrays CMAP", "category": "drug", "resource": { "key": "cmap" }, "version": "legacy",
+  "description": "Connectivity Map Build 02, reprocessed from Harmonizome with experimental metadata.",
+  "license": null,
+  "input": { "gmt": "s3://perturbseqr/microarrays-cmap.gmt.gz", "organism": "human", "geneIdentifiers": "symbol" },
+  "sources": [{ "label": "Harmonizome", "url": "https://maayanlab.cloud/Harmonizome/dataset/CMAP+Signatures+of+Differentially+Expressed+Genes+for+Small+Molecules" }],
+  "publications": [{ "url": "https://pubmed.ncbi.nlm.nih.gov/17008526/" }],
+  "presentation": { "downloadTitle": "CMAP Build 02", "downloadSummary": "", "shortLabel": "CMAP Arrays", "logo": { "src": "/images/broad-logo.png", "width": 100 }, "termExample": { "term": "(+)-chelidonine::HL60::::6h::11uM::batch641 up", "extraFields": ["Batch"] } },
+  "artifacts": [
+    { "kind": "gmt", "s3": "s3://perturbseqr/microarrays-cmap.gmt.gz", "format": "gmt.gz", "bytes": 3105652 },
+    { "kind": "full_signatures", "label": "Discretized Matrix", "s3": "s3://perturbseqr/microarrays-cmap-full.txt.gz", "bytes": 4018903 },
+    { "kind": "full_signatures", "label": "Fold Change Ratios", "s3": "s3://perturbseqr/cmap-ratio-matrix.txt.gz", "bytes": 132030375 },
+    { "kind": "full_signatures", "label": "Limma log2FC", "s3": "s3://perturbseqr/cmap-lfc.h5", "bytes": 370791280 },
+    { "kind": "cell_line_metadata", "label": "Cell Line", "s3": "s3://perturbseqr/microarrays-cmap-cell_line_metadata.parquet", "bytes": 4602 },
+    { "kind": "drug_metadata", "label": "Drug", "s3": "s3://perturbseqr/microarrays-cmap-drug_metadata.parquet", "bytes": 102922 }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1, "registration": "existing", "slug": "creeds-chem", "displayName": "CREEDS Chem", "category": "drug", "resource": { "key": "creeds" }, "version": "legacy",
+  "description": "CREEDS + Harmonizome GEO microarray",
+  "license": null,
+  "input": { "gmt": "s3://perturbseqr/creeds-chem.gmt.gz", "organism": "human", "geneIdentifiers": "symbol" },
+  "sources": [{ "label": "CREEDS", "url": "https://maayanlab.cloud/CREEDS/" }, { "label": "Harmonizome", "url": "https://maayanlab.cloud/Harmonizome/dataset/GEO+Signatures+of+Differentially+Expressed+Genes+for+Small+Molecules" }],
+  "publications": [{ "url": "https://pubmed.ncbi.nlm.nih.gov/27667448/" }],
+  "presentation": { "downloadTitle": "CREEDS Drug Perturbations", "logo": { "src": "/images/creeds-logo.png" }, "termExample": { "term": "Fluorouracil::::Bone marrow cells::::::mus musculus::GSE1559.3639 up", "extraFields": ["Organism", "GEO ID"] } },
+  "artifacts": [
+    { "kind": "gmt", "s3": "s3://perturbseqr/creeds-chem.gmt.gz", "format": "gmt.gz", "bytes": 1214385 },
+    { "kind": "full_signatures", "label": "Fold Changes (JSON)", "s3": "s3://perturbseqr/creeds-chem-full.json", "bytes": 17836091 },
+    { "kind": "drug_metadata", "label": "Drug", "s3": "s3://perturbseqr/creeds-chem-drug_metadata.parquet", "bytes": 31891 }
+  ]
+}

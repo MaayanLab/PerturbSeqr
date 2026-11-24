@@ -29,6 +29,18 @@ def update_background(conn):
     # Trigger index creation in enrich API
     assert requests.get(f"{ENRICH_URL}/{new_background['id']}").ok
 
+    # New catalog-aware enrich no longer activates an index just by loading it.
+    with conn.cursor() as cur:
+        cur.execute("SELECT to_regclass('app_private.library_publication')")
+        if cur.fetchone()[0]:
+            cur.execute("""INSERT INTO app_private.library_publication(singleton,background_id) VALUES(true,%s)
+                        ON CONFLICT(singleton) DO UPDATE SET background_id=EXCLUDED.background_id""", [new_background['id']])
+            # Retain all manifest-managed generations and rollback candidates.
+            cur.execute("SELECT id FROM app_public.library_generation")
+            retained = {row[0] for row in cur.fetchall()}
+            current_backgrounds = [bg for bg in current_backgrounds if bg not in retained]
+    conn.commit()
+
     # Remove old backgrounds
     if current_backgrounds:
         with conn.cursor() as cur:

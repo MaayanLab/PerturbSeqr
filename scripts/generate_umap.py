@@ -61,6 +61,7 @@ LIBRARIES = {
     "drugseqr": ("drug", "nibr-drug-seq"),
     "deepcovermoa": ("drug", "deepcover-moa"),
     "ginkgo": ("drug", "ginkgo-bioworks"),
+    "ginkgo-reframe": ("drug", "ginkgo-reframe"),
     "lincs-l1000-cp": ("drug", "lincs-l1000-cp"),
     "creeds-chem": ("drug", "creeds-chem"),
     "tahoe-100m": ("drug", "tahoe-100m"),
@@ -329,7 +330,9 @@ def process_library(
     library_name: str,
     n_neighbors: int = 30,
     min_dist: float = 0.1,
-    save_html: bool = True
+    save_html: bool = True,
+    gmt_path: Path | None = None,
+    title: str | None = None,
 ) -> pd.DataFrame:
     """
     Process a single library (combined up+down) and save outputs.
@@ -339,6 +342,8 @@ def process_library(
         n_neighbors: UMAP parameter
         min_dist: UMAP parameter
         save_html: Whether to save Bokeh HTML visualization
+        gmt_path: Optional override for the library's GMT path
+        title: Optional title for the HTML visualization
 
     Returns:
         DataFrame with UMAP coordinates
@@ -348,7 +353,7 @@ def process_library(
     print(f"{'='*60}")
 
     # Load library (combined up+down)
-    lib_dict = get_scatter_library(library_name)
+    lib_dict = load_gmt_file(gmt_path) if gmt_path else get_scatter_library(library_name)
 
     # Adjust parameters for very large libraries
     if len(lib_dict) > 100000:
@@ -374,8 +379,9 @@ def process_library(
     # Save HTML visualization
     if save_html:
         html_path = FIGURE_DIR / f"{library_name}_UMAP.html"
-        plot = create_scatterplot(scatter_df, title=f"{library_name} UMAP")
-        output_file(filename=str(html_path), title=f"{library_name} UMAP")
+        title = title or f"{library_name} UMAP"
+        plot = create_scatterplot(scatter_df, title=title)
+        output_file(filename=str(html_path), title=title)
         save(plot)
         print(f"\tSaved HTML: {html_path}")
 
@@ -439,9 +445,11 @@ Examples:
 
     parser.add_argument(
         "--library", "-l",
-        type=str,
+        choices=LIBRARIES,
         help="Process a specific library (e.g., sciplex, replogle)"
     )
+    parser.add_argument("--gmt", type=Path, help="Override the input GMT for --library")
+    parser.add_argument("--title", help="Override the HTML plot title for --library")
     parser.add_argument(
         "--n-neighbors",
         type=int,
@@ -471,6 +479,8 @@ Examples:
     )
 
     args = parser.parse_args()
+    if (args.gmt or args.title) and not args.library:
+        parser.error("--gmt and --title require --library")
 
     if args.list:
         list_libraries()
@@ -482,10 +492,12 @@ Examples:
                 args.library,
                 n_neighbors=args.n_neighbors,
                 min_dist=args.min_dist,
-                save_html=not args.no_html
+                save_html=not args.no_html,
+                gmt_path=args.gmt,
+                title=args.title,
             )
         except FileNotFoundError as e:
-            print(f"Error: {e}")
+            parser.exit(1, f"Error: {e}\n")
     else:
         process_all_libraries(
             skip_large=args.skip_large,

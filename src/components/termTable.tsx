@@ -5,18 +5,17 @@ import useQsState from '@/utils/useQsState';
 import Pagination from '@/components/pagination';
 import TermDownloadButton from '@/components/termDownloadButton';
 import { parseTerm, getCellDisplay, formatPerturbationWithType } from '@/utils/parseTerm';
-import { preloadDrugLookup, getDrugInfo, getPerturbationUrl, getPerturbationLinkTitle, isGenePerturbationLibrary } from '@/utils/metadataLookup';
+import { preloadDrugLookup, getSignatureCompound, getGenePerturbationUrl, isGenePerturbationLibrary } from '@/utils/metadataLookup';
+import { matchesCompoundQuery } from '@/utils/drugAnnotations';
 import { DatasetCell } from '@/components/DatasetCell';
 import SingleGenePerturbationResourceLinks from '@/components/SingleGenePerturbationResourceLinks';
 import Image from 'next/image';
 import { FaFilter } from 'react-icons/fa';
-import libraryConfig from '@/config/libraries.json';
 import type { SignaturePair, SignatureSummary } from '@/utils/signaturePairs';
 import { PerturbseqrPairedGeneSetSubmissionButton } from '@/components/perturbseqrGeneSetSubmissionButtons';
+import useLibraryCatalog from '@/utils/useLibraryCatalog';
 
 const pageSize = 10
-const drugLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'drug').map((l: any) => l.displayName as string)
-const geneLibraryNames = Object.values(libraryConfig.libraries).filter((l: any) => l.category === 'gene').map((l: any) => l.displayName as string)
 const FILTER_SEP = '|'
 
 function parseFilter(value: string | null | undefined): string[] {
@@ -24,13 +23,14 @@ function parseFilter(value: string | null | undefined): string[] {
   return value.split(FILTER_SEP)
 }
 
-function FilterDropdown({ label, allValues, filterValues, queryKey, setQs, hasSearch = true }: {
+function FilterDropdown({ label, allValues, filterValues, queryKey, setQs, hasSearch = true, valueLabels }: {
   label: string
   allValues: string[]
   filterValues: string[]
   queryKey: string
   setQs: (updates: Record<string, string>) => void
   hasSearch?: boolean
+  valueLabels?: ReadonlyMap<string, string>
 }) {
   const [open, setOpen] = React.useState(false)
   const [search, setSearch] = React.useState('')
@@ -48,7 +48,7 @@ function FilterDropdown({ label, allValues, filterValues, queryKey, setQs, hasSe
   }, [])
 
   const displayed = hasSearch && search
-    ? allValues.filter(v => v.toLowerCase().includes(search.toLowerCase()))
+    ? allValues.filter(v => [v, valueLabels?.get(v)].some(s => s?.toLowerCase().includes(search.toLowerCase())))
     : allValues
 
   return (
@@ -78,10 +78,10 @@ function FilterDropdown({ label, allValues, filterValues, queryKey, setQs, hasSe
           </div>
           <div className="max-h-[260px] overflow-y-auto">
             {displayed.map(val => (
-              <label key={val} className="flex items-center gap-1 cursor-pointer py-0.5 text-xs">
+              <label key={val} className="flex min-w-0 items-center gap-1 cursor-pointer py-0.5 text-xs" title={valueLabels?.get(val) ?? val}>
                 <input
                   type="checkbox"
-                  className="checkbox checkbox-xs"
+                  className="checkbox checkbox-xs shrink-0"
                   checked={filterValues.length === 0 ? true : filterValues.includes(val)}
                   onChange={(e) => {
                     let next: string[]
@@ -101,7 +101,7 @@ function FilterDropdown({ label, allValues, filterValues, queryKey, setQs, hasSe
                     }
                   }}
                 />
-                {val}
+                <span className={valueLabels ? 'truncate' : undefined}>{valueLabels?.get(val) ?? val}</span>
               </label>
             ))}
           </div>
@@ -113,6 +113,7 @@ function FilterDropdown({ label, allValues, filterValues, queryKey, setQs, hasSe
 
 export default function TermTable({ terms, pairs, enrichmentParams }: { terms: SignatureSummary[]; pairs?: SignaturePair[]; enrichmentParams?: Record<string, string> }) {
   const paired = !!pairs
+  const { drugNames: drugLibraryNames, geneNames: geneLibraryNames, catalog, filterLabels } = useLibraryCatalog()
   const [queryString, setQueryString] = useQsState({ page: '1', search: '', dataset: '', cellLine: '', moa: '', timepoint: '', concentration: '', direction: '' })
   const { page, searchTerm, tableSearch } = React.useMemo(() => ({ page: queryString.page ? +queryString.page : 1, searchTerm: queryString.q ?? '', tableSearch: queryString.search || '' }), [queryString])
 
@@ -143,11 +144,12 @@ export default function TermTable({ terms, pairs, enrichmentParams }: { terms: S
       const term = el.term || ''
       const libraryName = el.library?.name || ''
       const parsed = parseTerm(term)
-      const isGenePert = isGenePerturbationLibrary(libraryName)
+      const registered = catalog?.libraries.find(l => l.name === libraryName)
+      const isGenePert = registered ? registered.category === 'gene' : isGenePerturbationLibrary(libraryName)
       const perturbation = parsed.perturbation || parsed.raw || ''
-      const drugInfo = !isGenePert && drugLookupLoaded
-        ? (getDrugInfo(perturbation) || getDrugInfo(parsed.extras[0] || ''))
-        : null
+      const drugInfo = isGenePert ? null : getSignatureCompound({
+        label: perturbation, cid: el.cid, libraryId: el.libraryId, legacyLabel: parsed.extras[0],
+      }, drugLookupLoaded)
       const dir = parsed.direction || ''
       const dirDisplay = dir === 'up' ? 'Up' : (dir === 'down' || dir === 'dn') ? 'Down' : 'N/A'
       return {
@@ -162,15 +164,15 @@ export default function TermTable({ terms, pairs, enrichmentParams }: { terms: S
         _perturbation: perturbation,
         // Display string with perturbation type appended for gene libraries (e.g. "PRSS36 KO");
         // _perturbation stays raw for the NCBI/PubChem URL and drug lookups.
-        _perturbationDisplay: formatPerturbationWithType(perturbation, parsed.perturbationType, isGenePert),
+        _perturbationDisplay: drugInfo?.name ?? formatPerturbationWithType(perturbation, parsed.perturbationType, true),
         _isGenePert: isGenePert,
         _drugInfo: drugInfo,
         _parsed: parsed,
-        _perturbationUrl: getPerturbationUrl(perturbation, libraryName),
-        _perturbationLinkTitle: getPerturbationLinkTitle(libraryName),
+        _perturbationUrl: drugInfo?.url ?? getGenePerturbationUrl(perturbation),
+        _perturbationLinkTitle: isGenePert ? 'View on NCBI Gene' : 'View on PubChem',
       }
     })
-  }, [tableTerms, drugLookupLoaded])
+  }, [tableTerms, drugLookupLoaded, catalog])
 
   // Extract unique sorted values for each filter dimension
   const allDatasets = React.useMemo(() => Array.from(new Set(parsedTerms.map(t => t._dataset))).sort((a, b) => a.localeCompare(b)), [parsedTerms])
@@ -182,7 +184,8 @@ export default function TermTable({ terms, pairs, enrichmentParams }: { terms: S
   // Apply all filters
   const dataFiltered = React.useMemo(() =>
     parsedTerms.filter(el => {
-      if (!el.term?.toLowerCase().includes(tableSearch.toLowerCase())) return false
+      if (tableSearch && !el.term?.toLowerCase().includes(tableSearch.toLowerCase()) &&
+          !(el._drugInfo && matchesCompoundQuery(el._drugInfo, tableSearch))) return false
       if (datasetFilter.length > 0) { if (datasetFilter.includes('__none__')) return false; if (!datasetFilter.includes(el._dataset)) return false }
       if (cellLineFilter.length > 0) { if (cellLineFilter.includes('__none__')) return false; if (!cellLineFilter.includes(el._cellLine)) return false }
       if (moaFilter.length > 0) { if (moaFilter.includes('__none__')) return false; if (!moaFilter.includes(el._moa)) return false }
@@ -222,7 +225,7 @@ export default function TermTable({ terms, pairs, enrichmentParams }: { terms: S
       {/* Filter bar — above the table, matching enrich page layout */}
       <div className="flex flex-col gap-2 mx-5">
         <div className="flex flex-row flex-wrap items-center gap-2">
-          <FilterDropdown label="Dataset" allValues={allDatasets} filterValues={datasetFilter} queryKey="dataset" setQs={setQueryString} />
+          <FilterDropdown label="Dataset" allValues={allDatasets} filterValues={datasetFilter} queryKey="dataset" setQs={setQueryString} valueLabels={filterLabels} />
           {!paired && <>
           <div
             id="ptype-select"

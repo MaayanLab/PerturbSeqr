@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1, "registration": "existing", "slug": "rummageo-chem", "displayName": "RummaGEO Chem", "category": "drug", "resource": { "key": "rummageo" }, "version": "legacy",
+  "description": "Drug perturbation signatures mined from GEO RNA-seq.",
+  "license": null,
+  "input": { "gmt": "s3://perturbseqr/rummageo-chem.gmt.gz", "organism": "human", "geneIdentifiers": "symbol" },
+  "sources": [{ "label": "Harmonizome", "url": "https://maayanlab.cloud/Harmonizome/dataset/RummaGEO+Drug+Perturbation+Signatures" }],
+  "publications": [{ "url": "https://pubmed.ncbi.nlm.nih.gov/39569206/" }],
+  "presentation": { "downloadTitle": "RummaGEO Drug Perturbations", "downloadSummary": "", "logo": { "src": "/images/rummageo-logo.png", "width": 60 }, "relatedLinks": [{ "label": "RummaGEO", "url": "https://rummageo.com" }], "termExample": { "term": "temozolomide::LNZ308::glioblastoma cell line::36h::::human::GSE111247::0::1 up", "extraFields": ["Organism", "GEO ID", "Group 1", "Group 2"], "caption": "When the GEO ID has two accessions, they are a SubSeries and its parent SuperSeries in ascending accession-number order." } },
+  "artifacts": [
+    { "kind": "gmt", "s3": "s3://perturbseqr/rummageo-chem.gmt.gz", "format": "gmt.gz", "bytes": 9618136 },
+    { "kind": "full_signatures", "label": "Discretized Matrix", "s3": "s3://perturbseqr/rummageo-chem-full.txt.gz", "bytes": 4563495 },
+    { "kind": "full_signatures", "label": "Human Limma-Voom logFC", "s3": "s3://perturbseqr/rummageo-human-de-aligned.txt.gz", "bytes": 1074456404 },
+    { "kind": "full_signatures", "label": "Mouse Limma-Voom logFC", "s3": "s3://perturbseqr/rummageo-mouse-de-aligned.txt.gz", "bytes": 1024249445 },
+    { "kind": "full_signatures", "label": "Human DE h5ad (logFC + t + adj.P.Val)", "s3": "s3://perturbseqr/rummageo-human-de-aligned.h5ad", "bytes": 8684625112 },
+    { "kind": "full_signatures", "label": "Mouse DE h5ad (logFC + t + adj.P.Val)", "s3": "s3://perturbseqr/rummageo-mouse-de-aligned.h5ad", "bytes": 8253939904 },
+    { "kind": "drug_metadata", "label": "Drug", "s3": "s3://perturbseqr/rummageo-chem-drug_metadata.parquet", "bytes": 35040 }
+  ]
+}

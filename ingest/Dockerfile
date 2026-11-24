@@ -1,15 +1,7 @@
 # Ingest container for PerturbSeek
 #
-# This container handles two jobs:
-#   1. upload-gmts: Upload GMT files from mounted volume to MinIO
-#   2. ingest: Run migrations and ingest data from MinIO to Postgres
-#
-# Usage:
-#   docker compose run upload-gmts   # Upload GMT files to MinIO
-#   docker compose run ingest        # Run migrations + ingest data
-#
-# For k8s with bundled GMT files:
-#   ./scripts/build_ingest_image.sh 0.0.1 --push
+# The ingest service uses the default entrypoint. The library-setup service uses
+# the same image with `python -m perturbseqr_ingest.library_setup` as entrypoint.
 
 FROM python:3.14-slim
 
@@ -20,9 +12,9 @@ RUN apt-get update && apt-get install -y \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-RUN set -x \
-    && echo "Installing dbmate..." \
-    && curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64 \
+ARG DBMATE_VERSION=2.29.3
+RUN curl -fsSL -o /usr/local/bin/dbmate \
+      "https://github.com/amacneil/dbmate/releases/download/v${DBMATE_VERSION}/dbmate-linux-$(dpkg --print-architecture)" \
     && chmod +x /usr/local/bin/dbmate
 
 # Install the lean ingest runtime package (deps + the perturbseqr_ingest package)
@@ -30,7 +22,7 @@ COPY ingest/pyproject.toml ./ingest_src/pyproject.toml
 COPY ingest/perturbseqr_ingest ./ingest_src/perturbseqr_ingest
 RUN pip install --no-cache-dir ./ingest_src
 
-COPY src/config/libraries.json ./config/libraries.json
+COPY libraries ./libraries
 COPY public/metadata/drug_lookup.json ./metadata/drug_lookup.json
 
 # Copy migrations for dbmate
@@ -39,7 +31,7 @@ COPY db/migrations ./migrations/
 # Copy wipe_libraries.sql (used when INGEST_CLEAN=true)
 COPY db/sql/wipe_libraries.sql ./sql/wipe_libraries.sql
 
-ENV INGEST_CONFIG_DIR=/app/config
+ENV INGEST_MANIFEST_DIR=/app/libraries
 ENV INGEST_METADATA_DIR=/app/metadata
 ENV INGEST_DATA_DIR=/app/data
 

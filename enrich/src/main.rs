@@ -265,7 +265,6 @@ struct BackgroundQueryPair {
 struct PersistentState {
     fisher: RwLock<FastFisher>,
     bitmaps: RwLockHashMap<Uuid, Bitmap>,
-    latest: RwLock<Option<Uuid>>,
     cache: Cache<Arc<BackgroundQuery>, Arc<Vec<PartialQueryResult>>>,
     cachepair: Cache<Arc<BackgroundQueryPair>, Arc<Vec<PartialPairResult>>>,
     s3_bucket: Box<::s3::Bucket>,
@@ -446,7 +445,6 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
                 fisher.extend_to(bitmap.columns.len() * 4);
             }
             state.bitmaps.insert(background_id, bitmap).await;
-            *state.latest.write().await = Some(background_id);
             let duration = start.elapsed();
             println!("[{}] loaded from S3 in {:?}", background_id, duration);
             return Ok(());
@@ -460,7 +458,8 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
     {
         // this lets us write a new bitmap by only blocking the whole hashmap for a short period to register the new bitmap
         // after which we block the new empty bitmap for writing
-        let mut bitmap = state.bitmaps.insert_write(background_id, Bitmap::new()).await;
+        // A failed build must never leave a partially populated, queryable in-memory index.
+        let mut bitmap = Bitmap::new();
 
         let background_info = sqlx::query("select id, (select jsonb_object_agg(g.id, g.symbol) from jsonb_each(gene_ids) bg(gene_id, nil) inner join app_public.gene g on bg.gene_id::uuid = g.id) as genes from app_public.background b where id = $1::uuid;")
             .bind(background_id.to_string())
@@ -482,7 +481,8 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
 
         // compute the index in memory (now includes library name and CID)
         let progress_counter = std::sync::atomic::AtomicUsize::new(0);
-        sqlx::query("select gs.id, gs.term, coalesce(gs.description, '') as description, gs.hash, gs.gene_ids, fda.approved as fda_approved, fda.count as count, fda.perturbation as pert, fda.moa as moa, coalesce(gs.cid, '') as cid, coalesce(gsl.name, '') as library_name from app_public.gene_set gs left join app_public.gene_set_fda_counts fda on gs.id = fda.id left join app_public.gene_set_library gsl on gs.library_id = gsl.id;")
+        sqlx::query("select * from app_private.library_index_rows($1::uuid)")
+            .bind(background_id)
             .fetch(&mut **db)
             .for_each(|row| {
                 let count = progress_counter.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
@@ -495,7 +495,7 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
                 let description: String = row.try_get("description").unwrap();
                 let gene_set_hash: Result<uuid::Uuid, _> = row.try_get("hash");
                 let fda_approved: bool = row.try_get::<bool, &str>("fda_approved").unwrap_or(false);
-                let count: i32 = row.try_get("count").unwrap_or(0);
+                let count: i32 = row.try_get::<i64, _>("count").unwrap_or(0).try_into().unwrap_or(i32::MAX);
                 let pert: String = row.try_get("pert").unwrap_or("").to_string();
                 let moa: String = row.try_get("moa").unwrap_or("").to_string();
                 let cid: String = row.try_get("cid").unwrap_or("").to_string();
@@ -563,18 +563,28 @@ async fn ensure_index(db: &mut Connection<Postgres>, state: &State<PersistentSta
         bitmap.library_pair_counts = bitmap.get_library_pair_counts();
 
         // Save to S3 for faster subsequent startups
-        if let Err(e) = save_index(&state.s3_bucket, &background_id, &bitmap).await {
-            println!("[{}] warning: failed to save index to S3: {}", background_id, e);
-        }
+        save_index(&state.s3_bucket, &background_id, &bitmap).await?;
+        state.bitmaps.insert(background_id, bitmap).await;
     }
 
     let duration = start.elapsed();
     println!("[{}] initialized from database in {:?}", background_id, duration);
-    {
-        let mut latest = state.latest.write().await;
-        latest.replace(background_id);
-    }
     Ok(())
+}
+
+// Publication is durable and shared across replicas. Preparing/loading a candidate never activates it.
+async fn active_background(db: &mut Connection<Postgres>) -> Result<Uuid, Custom<String>> {
+    sqlx::query_scalar("select id from app_public.current_background()")
+        .fetch_one(&mut **db).await
+        .map_err(|e| Custom(Status::ServiceUnavailable, e.to_string()))
+}
+
+#[get("/library-setup/status")]
+async fn library_setup_status(mut db: Connection<Postgres>) -> Result<Value, Custom<String>> {
+    let active: Option<Uuid> = sqlx::query_scalar("select id from app_public.current_background()")
+        .fetch_one(&mut *db).await
+        .map_err(|e| Custom(Status::ServiceUnavailable, e.to_string()))?;
+    Ok(json!({"protocol": 1, "activeBackground": active}))
 }
 
 #[get("/<background_id>")]
@@ -589,6 +599,8 @@ async fn ensure(
     Ok(json!({
         "columns": bitmap.columns.len(),
         "index": bitmap.values.len(),
+        "pairs": bitmap.signature_pairs.pairs.len(),
+        "persisted": true,
     }))
 }
 
@@ -604,8 +616,7 @@ async fn get_gmt(
 ) -> Result<TextStream![String + '_], Custom<String>> {
     let background_id = {
         if background_id == "latest" {
-            let latest = state.latest.read().await;
-            latest.clone().ok_or(Custom(Status::NotFound, String::from("Nothing loaded")))?
+            active_background(&mut db).await?
         } else {
             Uuid::parse_str(&background_id).map_err(|e| Custom(Status::BadRequest, e.to_string()))?
         }
@@ -634,17 +645,20 @@ async fn get_gmt(
 
 #[delete("/<background_id>")]
 async fn delete(
+    mut db: Connection<Postgres>,
     state: &State<PersistentState>,
     background_id: &str,
 ) -> Result<(), Custom<String>> {
     let background_id = {
         if background_id == "latest" {
-            let latest = state.latest.read().await;
-            latest.clone().ok_or(Custom(Status::NotFound, String::from("Nothing loaded")))?
+            active_background(&mut db).await?
         } else {
             Uuid::parse_str(&background_id).map_err(|e| Custom(Status::BadRequest, e.to_string()))?
         }
     };
+    if active_background(&mut db).await? == background_id {
+        return Err(Custom(Status::Conflict, String::from("Cannot delete the published index")));
+    }
     if state.bitmaps.remove(&background_id).await {
         println!("[{}] deleted from memory", background_id);
     }
@@ -677,8 +691,7 @@ async fn query(
 ) -> Result<QueryResponse, Custom<String>> {
     let background_id = {
         if background_id == "latest" {
-            let latest = state.latest.read().await;
-            latest.clone().ok_or(Custom(Status::NotFound, String::from("Nothing loaded")))?
+            active_background(&mut db).await?
         } else {
             Uuid::parse_str(&background_id).map_err(|e| Custom(Status::BadRequest, e.to_string()))?
         }
@@ -1437,8 +1450,7 @@ async fn query_pairs(
 
     let background_id = {
         if background_id == "latest" {
-            let latest = state.latest.read().await;
-            latest.clone().ok_or(Custom(Status::NotFound, String::from("Nothing loaded")))?
+            active_background(&mut db).await?
         } else {
             Uuid::parse_str(&background_id).map_err(|e| Custom(Status::BadRequest, e.to_string()))?
         }
@@ -2226,11 +2238,10 @@ fn rocket() -> _ {
         .manage(PersistentState {
             fisher: RwLock::new(FastFisher::new()),
             bitmaps: RwLockHashMap::new(),
-            latest: RwLock::new(None),
             cache: Cache::new(),
             cachepair: Cache::new(),
             s3_bucket: s3::create_bucket(),
         })
         .attach(Postgres::init())
-        .mount("/", routes![ensure, get_gmt, query, query_pairs, delete])
+        .mount("/", routes![ensure, get_gmt, query, query_pairs, delete, library_setup_status])
 }

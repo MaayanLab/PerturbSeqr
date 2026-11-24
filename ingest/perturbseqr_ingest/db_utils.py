@@ -9,6 +9,9 @@ import tempfile
 from pathlib import Path
 from urllib.parse import urlsplit
 
+from .library_manifest import s3_location
+from .library_registration import downloadable_artifacts, existing_manifests, register_artifacts
+
 # Optional: only needed by scripts that connect to the database (not build_drug_lookup.py)
 try:
     import psycopg2
@@ -30,7 +33,7 @@ except ImportError:
     pass
 
 # Paths - can be overridden via environment variables for container deployment
-# INGEST_CONFIG_DIR: path to config directory (default: project_root/src/config)
+# INGEST_MANIFEST_DIR: path to manifests (default: project_root/libraries)
 # INGEST_METADATA_DIR: path to metadata directory (default: project_root/public/metadata)
 # INGEST_DATA_DIR: path to GMT data directory (default: db/data)
 def _find_repo_root(start: Path) -> Path:
@@ -44,10 +47,7 @@ DB_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = _find_repo_root(DB_DIR)
 
 # Support configurable paths for container deployment
-if config_dir := os.environ.get('INGEST_CONFIG_DIR'):
-    LIBRARY_CONFIG_PATH = Path(config_dir) / 'libraries.json'
-else:
-    LIBRARY_CONFIG_PATH = PROJECT_ROOT / 'src' / 'config' / 'libraries.json'
+MANIFEST_DIR = Path(os.environ.get('INGEST_MANIFEST_DIR') or PROJECT_ROOT / 'libraries')
 
 if metadata_dir := os.environ.get('INGEST_METADATA_DIR'):
     DRUG_LOOKUP_PATH = Path(metadata_dir) / 'drug_lookup.json'
@@ -63,16 +63,14 @@ DRUG_DIR = DATA_DIR / 'drug_perturbation'
 GENE_DIR = DATA_DIR / 'gene_perturbation'
 METADATA_DIR = DATA_DIR / 'metadata'
 
-# Load configs
-assert LIBRARY_CONFIG_PATH.exists(), f"Missing {LIBRARY_CONFIG_PATH}"
-LIBRARY_CONFIG = json.load(open(LIBRARY_CONFIG_PATH))
+LEGACY_MANIFESTS = {m['slug']: m for m in existing_manifests(MANIFEST_DIR)}
 
 # Drug lookup (optional - may not exist when build_drug_lookup.py runs first)
 _drug_lookup = json.load(open(DRUG_LOOKUP_PATH)) if DRUG_LOOKUP_PATH.exists() else {}
 _drug_lookup_lower = {k.lower(): v for k, v in _drug_lookup.items()}
 
 # Helpers
-get_lib_config = lambda name: LIBRARY_CONFIG.get("libraries", {}).get(name, {})
+get_lib_config = lambda name: LEGACY_MANIFESTS.get(name, {})
 get_display_name = lambda name: get_lib_config(name).get("displayName", name)
 get_conn = lambda: psycopg2.connect(os.environ['DATABASE_URL'])
 get_cid = lambda name: _drug_lookup_lower.get(name.lower(), {}).get("cid") if name else None
@@ -94,7 +92,31 @@ def get_or_create_library(conn, library_name: str) -> str:
             'ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name RETURNING id',
             [display_name, f'{display_name} gene set library']
         )
-        return str(cur.fetchone()[0])
+        library_id = str(cur.fetchone()[0])
+        # Bootstrap legacy batch imports after the catalog migration. Manifest imports
+        # stage their own revision and do not use this compatibility path.
+        cur.execute("SELECT to_regclass('app_public.library_revision')")
+        if cur.fetchone()[0]:
+            config = get_lib_config(library_name)
+            resource_key = config.get("resource", {}).get("key", library_name)
+            cur.execute("""SELECT l.active_revision_id, r.version
+                           FROM app_public.gene_set_library l
+                           LEFT JOIN app_public.library_revision r ON r.id=l.active_revision_id
+                           WHERE l.id=%s""", [library_id])
+            active, version = cur.fetchone()
+            if active is not None and version != "legacy":
+                raise ValueError(f"Use library-setup to update manifest-managed library: {display_name}")
+            if active is None:
+                manifest = json.dumps({**config, "legacy": True, "slug": library_name, "displayName": display_name,
+                                       "description": f"{display_name} gene set library", "category": config.get("category"),
+                                       "resource": {"key": resource_key}})
+                cur.execute("""INSERT INTO app_public.library_revision(id,library_id,version,checksum,manifest,status,published_at)
+                            VALUES(%s,%s,'legacy',%s,%s::jsonb,'published',now())""",
+                            [library_id, library_id, 'legacy-' + library_id, manifest])
+                register_artifacts(cur, library_id, downloadable_artifacts(config))
+                cur.execute("""UPDATE app_public.gene_set_library SET active_revision_id=%s,slug=%s,category=%s,
+                            resource_key=%s WHERE id=%s""", [library_id, library_name, config.get("category"), resource_key, library_id])
+        return library_id
 
 
 def parse_gmt_filename(filepath: Path) -> str | None:
@@ -121,27 +143,13 @@ def discover_gmt_files(dirs: list[Path] = None) -> list[tuple[Path, str]]:
             for f in sorted(d.glob('*.gmt*')) if (parsed := parse_gmt_filename(f))]
 
 
-# Standardized GMT filename -> library name used in the database.
-GMT_FILE_MAPPING = {
-    # Drug Perturbation
-    "lincs-l1000-cp.gmt.gz": "lincs-l1000-cp",
-    "tahoe-100m.gmt.gz": "tahoe-100m",
-    "nibr-drug-seq.gmt.gz": "nibr-drug-seq",
-    "microarrays-cmap.gmt.gz": "microarrays-cmap",
-    "sciplex.gmt.gz": "sciplex",
-    "deepcover-moa.gmt.gz": "deepcover-moa",
-    "creeds-chem.gmt.gz": "creeds-chem",
-    "rummageo-chem.gmt.gz": "rummageo-chem",
-    "ginkgo-bioworks.gmt.gz": "ginkgo-bioworks",
-    # Gene Perturbation
-    "lincs-l1000-xpr.gmt.gz": "lincs-l1000-xpr",
-    "perturb-atlas-human.gmt.gz": "perturb-atlas-human",
-    "perturb-atlas-mouse.gmt.gz": "perturb-atlas-mouse",
-    "replogle-perturb-seq.gmt.gz": "replogle-perturb-seq",
-    "creeds-gene.gmt.gz": "creeds-gene",
-    "rummageo-gene.gmt.gz": "rummageo-gene",
-    "cm4ai.gmt.gz": "cm4ai",
-}
+def legacy_gmt_key(manifest):
+    gmt = manifest['input']['gmt']
+    return s3_location(gmt)[1] if gmt.startswith('s3://') else gmt
+
+
+# Preserve legacy batch discovery for the local or configured object store.
+GMT_FILE_MAPPING = {legacy_gmt_key(manifest): slug for slug, manifest in LEGACY_MANIFESTS.items()}
 
 
 def get_minio_client():

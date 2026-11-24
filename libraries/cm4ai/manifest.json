@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1, "registration": "existing", "slug": "cm4ai", "displayName": "CM4AI", "category": "gene", "resource": { "key": "cm4ai" }, "version": "legacy",
+  "description": "CRISPRi knockdown in KOLF2.1J hiPSCs (limma-voom)",
+  "license": null,
+  "input": { "gmt": "s3://perturbseqr/cm4ai.gmt.gz", "organism": "human", "geneIdentifiers": "symbol" },
+  "sources": [{ "label": "CM4AI", "url": "https://cm4ai.org" }, { "label": "KOLF2.1J Atlas", "url": "https://y-doctor.github.io/KOLF2.1J_Perturbation_Cell_Atlas/#home" }, { "label": "AnnData (Figshare)", "url": "https://figshare.com/s/ee85bb1880921326249b" }, { "label": "Raw FASTQs (SRA)", "url": "https://www.ncbi.nlm.nih.gov/bioproject/PRJNA1173491" }],
+  "publications": [{ "url": "https://www.nature.com/articles/s41587-026-03199-w" }],
+  "presentation": { "logo": { "src": "/images/cm4ai-logo.png", "darkSrc": "/images/cm4ai-logo-dark.png" }, "termExample": { "term": "A1BG::KOLF2.1J::hiPSCs::144H::::KD::CRISPRi up" } },
+  "artifacts": [
+    { "kind": "gmt", "s3": "s3://perturbseqr/cm4ai.gmt.gz", "format": "gmt.gz", "bytes": 45605170 },
+    { "kind": "full_signatures", "label": "Limma-voom DE (logFC, P.Value, adj.P.Val)", "s3": "s3://perturbseqr/cm4ai-limma-voom-de.h5ad", "bytes": 5339271720 },
+    { "kind": "cell_line_metadata", "label": "Cell Line", "s3": "s3://perturbseqr/cm4ai-cell_line_metadata.parquet", "bytes": 4349 },
+    { "kind": "gene_target_metadata", "label": "Gene Targets", "s3": "s3://perturbseqr/cm4ai-gene_target_metadata.parquet", "bytes": 1035173 },
+    { "kind": "signature_metadata", "label": "Signatures", "s3": "s3://perturbseqr/cm4ai-signature_metadata.parquet", "bytes": 319804 }
+  ]
+}
