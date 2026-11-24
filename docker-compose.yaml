@@ -21,7 +21,7 @@ services:
 
   perturbseqr-enrich:
     build: enrich
-    image: johnkgardner/perturbseqr-enrich:0.2.54
+    image: johnkgardner/perturbseqr-enrich:0.2.55
     pull_policy: if_not_present
     platform: linux/amd64
     restart: unless-stopped
@@ -50,7 +50,7 @@ services:
       context: .
       args:
         - NEXT_PUBLIC_MINIO_URL=${PUBLIC_S3_URL:-https://perturbseqr.s3.amazonaws.com}
-    image: johnkgardner/perturbseqr-app:0.2.53
+    image: johnkgardner/perturbseqr-app:0.2.55
     pull_policy: if_not_present
     platform: linux/amd64
     restart: unless-stopped
@@ -111,7 +111,7 @@ services:
     build:
       context: .
       dockerfile: ingest/Dockerfile
-    image: johnkgardner/perturbseqr-ingest:0.2.54
+    image: johnkgardner/perturbseqr-ingest:0.2.55
     pull_policy: if_not_present
     platform: linux/amd64
     restart: "no"

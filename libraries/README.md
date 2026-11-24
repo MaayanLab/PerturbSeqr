@@ -139,8 +139,8 @@ LIBRARY_RELEASE=ginkgo-reframe envsubst '${LIBRARY_SETUP_IMAGE} ${LIBRARY_RELEAS
   < k8s/library-setup-job.yaml | kubectl -n "$NAMESPACE" create -f -
 ```
 
-Follow the logs for the generated Job name. The job selects only manifests in the
-release mount and logs each publication. Rerunning an active release skips its index
+Follow the logs for the generated Job name. The job selects the bundled manifest
+by slug and logs each publication. Rerunning an active release skips its index
 and publication. A failed candidate stays unpublished, so the same job can be rerun
 after resolving the error. Keep previous index objects for rollback.
 
